@@ -376,7 +376,8 @@ void start_new_cycle ( account_name username, account_name host){
 
         auto dprop = dprops.find(0);
         auto pool = pools.find( dprop-> current_pool_id );
-        eosio_assert(pool->remain_lepts <= pool->total_lepts, "System Error, not possible to deposit in this branch");
+        eosio_assert(pool -> released_lepts <= pool->total_lepts && pool -> remain_lepts <= pool->total_lepts, "Prevented withdraw. Only BP can restore this balance");
+        
         eosio_assert ( pool -> pool_expired_at > eosio::time_point_sec(now()), "Rejected. Pool is Expired. Need manual refresh.");
         
         auto rate = rates.find( pool-> pool_num - 1 );
@@ -706,9 +707,11 @@ void start_new_cycle ( account_name username, account_name host){
         auto last_pool = pools.find(cycle -> finish_at_global_pool_id );
         auto rate = rates.find(last_pool -> pool_num - 1 );
         
-        eosio_assert(last_pool -> lepts_precision == LEPTS_PRECISION, "Prevent withdraw. Only BP can restore this balance");
+        eosio_assert(last_pool -> released_lepts <= pool->total_lepts && last_pool -> remain_lepts <= pool->total_lepts, "Prevented withdraw. Only BP can restore this balance");
         
         uint64_t pools_in_cycle = cycle -> finish_at_global_pool_id - cycle -> start_at_global_pool_id + 1;
+        
+        eosio_assert((pools_in_cycle >= 3 ) || (pools_in_cycle < 3 && has_new_cycle), "Deposits from First and Second Rounds can be withdrawed only after close Second Round or after close Cycle");
 
         if (((dprop -> current_pool_num == pool -> pool_num ) && (dprop -> current_cycle_num == pool -> cycle_num)) || \
             ((pool -> pool_num < 3) && (pools_in_cycle < 3)) || (has_new_cycle && (pool->pool_num == last_pool -> pool_num)))
@@ -721,11 +724,25 @@ void start_new_cycle ( account_name username, account_name host){
                 std::make_tuple( _self, username, bal -> purchase_amount, std::string("Withdraw")) 
             ).send();
 
-            pools.modify(last_pool, username, [&](auto &p){
-                p.released_lepts = last_pool -> released_lepts - bal -> lept_for_sale;;
-                p.remain_lepts = last_pool-> remain_lepts + bal -> lept_for_sale;;
-                p.total_in_box = last_pool -> total_in_box - bal -> purchase_amount;
-            }); 
+
+            if (pool -> pool_num < 3){
+                
+                pools.modify(pool, username, [&](auto &p){
+
+                    p.released_lepts = last_pool -> released_lepts - bal -> lept_for_sale;
+                    p.remain_lepts = last_pool-> remain_lepts + bal -> lept_for_sale;
+                    p.total_in_box = last_pool -> total_in_box - bal -> purchase_amount;
+                }); 
+
+            } else {
+
+                pools.modify(last_pool, username, [&](auto &p){
+                    p.released_lepts = last_pool -> released_lepts - bal -> lept_for_sale;
+                    p.remain_lepts = last_pool-> remain_lepts + bal -> lept_for_sale;
+                    p.total_in_box = last_pool -> total_in_box - bal -> purchase_amount;
+                });
+
+            }
 
             balance.modify(bal, username, [&](auto &b){
                 b.sold_amount = bal -> purchase_amount;
@@ -750,7 +767,6 @@ void start_new_cycle ( account_name username, account_name host){
                 std::make_tuple( _self, username, amount, std::string("Withdraw")) 
             ).send();
 
-            print("withdrawed:", bal->lept_for_sale);
             balance.modify(bal, username, [&](auto &b){
                 b.sold_amount = bal -> available;
                 b.date_of_sale = eosio::time_point_sec(now());
