@@ -726,7 +726,7 @@ void start_new_cycle ( account_name username, account_name host){
                 p.remain_lepts = last_pool-> remain_lepts + bal -> lept_for_sale;;
                 p.total_in_box = last_pool -> total_in_box - bal -> purchase_amount;
             }); 
-            
+
             balance.modify(bal, username, [&](auto &b){
                 b.sold_amount = bal -> purchase_amount;
                 b.date_of_sale = eosio::time_point_sec(now());
@@ -845,8 +845,10 @@ void start_new_cycle ( account_name username, account_name host){
 
             if (op.from != _self){
                 eosio_assert(op.memo != "", "Rejected. Require HOST in memo field");
-                host = eosio::string_to_name(op.memo.c_str());
-                deposit(op.from, host, op.quantity);
+                if (op.memo.c_str() != "null"){
+                    host = eosio::string_to_name(op.memo.c_str());
+                    deposit(op.from, host, op.quantity);
+                }
             }
         } else {
             eosio_assert(false, "Rejected. Only native tokens can be used on DACom Protocol");
