@@ -22,7 +22,7 @@ The rules are simple. Game objective are the money themselves. You can get in wi
 Figuratively, the Protocol can be represented as a rotating Spiral. There is a game fund in the middle of the Spiral, which always has its color - black or white. Completing the turn, the Spiral switches the color of the fund. When the new color of the fund matches with yours - you win, when not - lose. Money can be collected at any time.
 
 <p align="center">
-  <img src="https://github.com/dacom-core/protocol.v1/blob/master/spiral2.gif"/>
+  <img src="https://github.com/dacom-core/protocol/blob/master/spiral2.gif"/>
 </p>
 
 
@@ -31,7 +31,7 @@ The twisting movement of the Spiral is given by players, the power of spin and t
 When the rotation stop, all participants receive winnings and losses according to the current selling rates for the winners, and a fixed number of decrease for the loses. Each new tern of the Spiral is called a Round.
 
 <p align="center">
-  <img src="https://github.com/dacom-core/protocol.v1/blob/master/pools.gif"/>
+  <img src="https://github.com/dacom-core/protocol/blob/master/pools.gif"/>
 </p>
 
 # How to play
