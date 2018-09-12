@@ -721,7 +721,12 @@ void start_new_cycle ( account_name username, account_name host){
                 std::make_tuple( _self, username, bal -> purchase_amount, std::string("Withdraw")) 
             ).send();
 
-            print("withdrawed:", bal->lept_for_sale);
+            pools.modify(last_pool, username, [&](auto &p){
+                p.released_lepts = last_pool -> released_lepts - bal -> lept_for_sale;;
+                p.remain_lepts = last_pool-> remain_lepts + bal -> lept_for_sale;;
+                p.total_in_box = last_pool -> total_in_box - bal -> purchase_amount;
+            }); 
+            
             balance.modify(bal, username, [&](auto &b){
                 b.sold_amount = bal -> purchase_amount;
                 b.date_of_sale = eosio::time_point_sec(now());
@@ -731,11 +736,7 @@ void start_new_cycle ( account_name username, account_name host){
                 b.forecasts = forecasts;
             });
 
-            pools.modify(last_pool, username, [&](auto &p){
-                p.released_lepts = last_pool -> released_lepts - bal -> lept_for_sale;;
-                p.remain_lepts = last_pool-> remain_lepts + bal -> lept_for_sale;;
-                p.total_in_box = last_pool -> total_in_box - bal -> purchase_amount;
-            });
+            
             
         } else  { 
             
