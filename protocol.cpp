@@ -845,7 +845,7 @@ void start_new_cycle ( account_name username, account_name host){
 
             if (op.from != _self){
                 eosio_assert(op.memo != "", "Rejected. Require HOST in memo field");
-                if (op.memo.c_str() != "null"){
+                if (op.memo != "null"){
                     host = eosio::string_to_name(op.memo.c_str());
                     deposit(op.from, host, op.quantity);
                 }
