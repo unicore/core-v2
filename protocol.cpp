@@ -53,17 +53,13 @@ void start_new_cycle ( account_name username, account_name host){
         pools.emplace(username, [&](auto &p){
             p.total_lepts = sp->size_of_pool * LEPTS_PRECISION;
             p.id = pools.available_primary_key();
-            p.total_reserved_lepts = 0;
+            p.creserved_lepts = 0;
             p.remain_lepts = sp -> size_of_pool * LEPTS_PRECISION;
             p.lept_cost = asset(rate->buy_rate, _SYM);
-            p.released_lepts = 0;
             p.cycle_num = pool->cycle_num + 1;
-            p.next_pool = p.remain_lepts * p.lept_cost / LEPTS_PRECISION;
             p.pool_num = 1;
             p.color = p.id % 2 == 0 ? "black" : "white"; 
-            p.pool_start_at = eosio::time_point_sec(now());
             p.pool_expired_at = eosio::time_point_sec (now() + sp->pool_timeout);
-            p.total_in_box = asset(0, _SYM);
             p.total_win_withdraw = asset(0, _SYM);
             p.total_loss_withdraw = asset(0, _SYM);
         });
@@ -105,11 +101,11 @@ void start_new_cycle ( account_name username, account_name host){
            dp.current_pool_id  = pool -> id + 1;
         });
 
+        auto prev_prev_pool = pools.find(dprop -> current_pool_id - 2);
+            
         if (dprop -> current_pool_num > 2) {
             
-            auto prev_prev_pool = pools.find(dprop -> current_pool_id - 2);
-            
-            dreserved_lepts = (prev_prev_pool -> released_lepts + prev_prev_pool -> total_reserved_lepts) / LEPTS_PRECISION  * rate -> sell_rate / rate -> buy_rate  \
+            dreserved_lepts = (prev_prev_pool -> total_lepts - prev_prev_pool -> remain_lepts ) / LEPTS_PRECISION  * rate -> sell_rate / rate -> buy_rate  \
               * LEPTS_PRECISION;
 
             reserved_lepts = uint64_t(dreserved_lepts);
@@ -129,16 +125,12 @@ void start_new_cycle ( account_name username, account_name host){
         pools.emplace(username, [&](auto &p){
             p.id = pools.available_primary_key();
             p.total_lepts = sp->size_of_pool * LEPTS_PRECISION;
-            p.total_reserved_lepts = reserved_lepts;
+            p.creserved_lepts = dprop -> current_pool_num > 2 ? prev_prev_pool -> creserved_lepts : 0;
             p.remain_lepts = p.total_lepts - reserved_lepts;
             p.lept_cost = asset(rate->buy_rate, _SYM);
-            p.released_lepts = 0;
             p.color = p.id % 2 == 0 ? "black" : "white"; 
             p.cycle_num = pool -> cycle_num;
             p.pool_num = pool -> pool_num + 1;
-            p.next_pool = pool -> total_in_box + p.remain_lepts * p.lept_cost / LEPTS_PRECISION;
-            p.total_in_box = pool-> total_in_box;
-            p.pool_start_at = eosio::time_point_sec(now());
             p.pool_expired_at = eosio::time_point_sec (now() + sp->pool_timeout);
             p.total_win_withdraw = asset(0, _SYM);
             p.total_loss_withdraw = asset(0, _SYM);
@@ -174,17 +166,13 @@ void start_new_cycle ( account_name username, account_name host){
         pools.emplace(op.host, [&](auto &p){
             p.id = 0;
             p.total_lepts = sp->size_of_pool * LEPTS_PRECISION;
-            p.total_reserved_lepts = 0;
+            p.creserved_lepts = 0;
             p.remain_lepts = p.total_lepts;
             p.lept_cost = asset(rate->buy_rate, _SYM);
-            p.total_in_box = asset(0, _SYM);
             p.total_win_withdraw = asset(0, _SYM);
             p.total_loss_withdraw = asset(0, _SYM);
-            p.released_lepts = 0;
-            p.next_pool = p.remain_lepts * p.lept_cost / LEPTS_PRECISION;
             p.pool_num = 1;
             p.cycle_num = 1;
-            p.pool_start_at = eosio::time_point_sec(now());
             p.pool_expired_at = eosio::time_point_sec (now() + sp->pool_timeout);
             p.color = "black";
         });
@@ -376,7 +364,7 @@ void start_new_cycle ( account_name username, account_name host){
 
         auto dprop = dprops.find(0);
         auto pool = pools.find( dprop-> current_pool_id );
-        eosio_assert(pool -> released_lepts <= pool->total_lepts && pool -> remain_lepts <= pool->total_lepts, "Prevented withdraw. Only BP can restore this balance");
+        //eosio_assert(pool -> remain_lepts <= pool->total_lepts, "Prevented Deposit. System error");
         
         eosio_assert ( pool -> pool_expired_at > eosio::time_point_sec(now()), "Rejected. Pool is Expired. Need manual refresh.");
         
@@ -432,14 +420,11 @@ void start_new_cycle ( account_name username, account_name host){
         auto pool = pools.find(dprop->current_pool_id);
         
         uint64_t remain_lepts = pool -> remain_lepts - lepts;
-        uint64_t released_lepts = pool -> released_lepts + lepts;
      
         forecasts = calculate_forecast(username, host, lepts, pool -> pool_num - 1);
 
         pools.modify(pool, username, [&](auto &p){
             p.remain_lepts = remain_lepts;
-            p.released_lepts = released_lepts;
-            p.total_in_box = pool-> total_in_box + amount;
         });
 
         balance.emplace(username, [&](auto &b){
@@ -707,7 +692,7 @@ void start_new_cycle ( account_name username, account_name host){
         auto last_pool = pools.find(cycle -> finish_at_global_pool_id );
         auto rate = rates.find(last_pool -> pool_num - 1 );
         
-        eosio_assert(last_pool -> released_lepts <= pool->total_lepts && last_pool -> remain_lepts <= pool->total_lepts, "Prevented withdraw. Only BP can restore this balance");
+        eosio_assert(last_pool -> remain_lepts <= pool->total_lepts, "Prevented withdraw. Only BP can restore this balance");
         
         uint64_t pools_in_cycle = cycle -> finish_at_global_pool_id - cycle -> start_at_global_pool_id + 1;
         
@@ -726,20 +711,15 @@ void start_new_cycle ( account_name username, account_name host){
 
 
             if (pool -> pool_num < 3){
-                
-                pools.modify(pool, username, [&](auto &p){
 
-                    p.released_lepts = last_pool -> released_lepts - bal -> lept_for_sale;
-                    p.remain_lepts = last_pool-> remain_lepts + bal -> lept_for_sale;
-                    p.total_in_box = last_pool -> total_in_box - bal -> purchase_amount;
+                pools.modify(pool, username, [&](auto &p){
+                    p.remain_lepts = std::min(pool-> remain_lepts + bal -> lept_for_sale, pool->total_lepts);
                 }); 
 
             } else {
 
                 pools.modify(last_pool, username, [&](auto &p){
-                    p.released_lepts = last_pool -> released_lepts - bal -> lept_for_sale;
-                    p.remain_lepts = last_pool-> remain_lepts + bal -> lept_for_sale;
-                    p.total_in_box = last_pool -> total_in_box - bal -> purchase_amount;
+                    p.remain_lepts = std::min(last_pool-> remain_lepts + bal -> lept_for_sale, last_pool->total_lepts);
                 });
 
             }
@@ -753,7 +733,7 @@ void start_new_cycle ( account_name username, account_name host){
                 b.forecasts = forecasts;
             });
 
-            
+            balance.erase(bal);
             
         } else  { 
             
@@ -767,6 +747,28 @@ void start_new_cycle ( account_name username, account_name host){
                 std::make_tuple( _self, username, amount, std::string("Withdraw")) 
             ).send();
 
+            
+            uint64_t lepts_from_reserved;
+            if (bal -> win == true){
+
+                pools.modify(last_pool, username, [&](auto &p){
+                    auto converted_lepts = bal->lept_for_sale * rate -> sell_rate / rate -> buy_rate;
+                    
+                    p.creserved_lepts = (last_pool->creserved_lepts + converted_lepts) % LEPTS_PRECISION;
+                    p.total_win_withdraw = last_pool -> total_win_withdraw + amount;
+                    p.remain_lepts = std::min(last_pool -> remain_lepts + (last_pool->creserved_lepts + converted_lepts) / LEPTS_PRECISION * LEPTS_PRECISION, last_pool->total_lepts);
+                   
+                });
+            }
+            else {
+                pools.modify(last_pool, username, [&](auto &p){
+                     p.total_loss_withdraw = last_pool -> total_loss_withdraw + amount;
+                });
+                
+                
+            }
+                
+
             balance.modify(bal, username, [&](auto &b){
                 b.sold_amount = bal -> available;
                 b.date_of_sale = eosio::time_point_sec(now());
@@ -776,16 +778,7 @@ void start_new_cycle ( account_name username, account_name host){
                 b.forecasts = forecasts;
             });
 
-            if (bal -> win == true)
-                pools.modify(last_pool, username, [&](auto &p){
-                    p.total_win_withdraw = last_pool -> total_win_withdraw + amount;
-                });
-            
-            else
-                pools.modify(last_pool, username, [&](auto &p){
-                    p.total_loss_withdraw = last_pool -> total_loss_withdraw + amount;
-                });
-        
+            balance.erase(bal);
         }
     };
 

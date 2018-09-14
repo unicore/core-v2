@@ -11,11 +11,11 @@
 
 
 namespace eosio {
-    static const account_name _self = N(v1.protocol);
-    static const account_name _dacomfee = N(core);
+    static const account_name _self = N(tt.tc);
+    static const account_name _dacomfee = N(dacomfee.tc);
     
     static const eosio::symbol_name _SYM = S(4, FLO);
-    static const uint64_t _MAX_SUPPLY = 100000000000000;
+    static const uint64_t _MAX_SUPPLY = 1000000000000000;
 
     // @abi table account
     struct account{
@@ -127,22 +127,17 @@ namespace eosio {
         uint64_t pool_num;
         std::string color;
         uint64_t total_lepts; 
-        uint64_t lepts_precision = LEPTS_PRECISION; 
-        uint64_t total_reserved_lepts; 
-        uint64_t released_lepts;
+        uint64_t creserved_lepts; 
         uint64_t remain_lepts;
         eosio::asset lept_cost;
-        eosio::asset total_in_box;
-        eosio::asset next_pool;
         eosio::asset total_win_withdraw;
         eosio::asset total_loss_withdraw;
-        eosio::time_point_sec pool_start_at;
         eosio::time_point_sec pool_expired_at;
         
         uint64_t primary_key() const {return id;}
         uint64_t by_cycle() const {return cycle_num;}
         
-        EOSLIB_SERIALIZE(pool,(id)(cycle_num)(pool_num)(color)(total_lepts)(lepts_precision)(total_reserved_lepts)(released_lepts)(remain_lepts)(lept_cost)(total_in_box)(next_pool)(total_win_withdraw)(total_loss_withdraw)(pool_start_at)(pool_expired_at))
+        EOSLIB_SERIALIZE(pool,(id)(cycle_num)(pool_num)(color)(total_lepts)(creserved_lepts)(remain_lepts)(lept_cost)(total_win_withdraw)(total_loss_withdraw)(pool_expired_at))
     };
 
     typedef eosio::multi_index<N(pool), pool> pool_index;
