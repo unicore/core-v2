@@ -13,7 +13,7 @@
 namespace eosio {
     static const account_name _self = N(tt.tc);
     static const account_name _dacomfee = N(dacomfee.tc);
-    static const eosio::symbol_name _SYM = S(8, DBTC);
+    static const eosio::symbol_name _SYM = S(4, FLO);
     static const uint64_t _MAX_SUPPLY = 1000000000000000;
 
     // @abi table account

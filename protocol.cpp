@@ -239,7 +239,7 @@ void start_new_cycle ( account_name username, account_name host){
         eosio_assert((base_rate >= 10) && (base_rate < 1000000000), "Base Rate must be greater or equal 10 and less then 1e9");
         eosio_assert((size_of_pool >= 10) && (size_of_pool < 1000000000), "Size of Pool must be greater or equal 10 and less then 1e9");
         eosio_assert((pool_limit >= 4) && (pool_limit < 1000), "Pool Count must be greater or equal 4 and less or equal 1000");
-        eosio_assert((pool_timeout >= 60) && (pool_timeout < 7884000),"Pool Timeout must be greater or equal then 60 sec and less then 7884000 sec");
+        //eosio_assert((pool_timeout >= 60) && (pool_timeout < 7884000),"Pool Timeout must be greater or equal then 60 sec and less then 7884000 sec");
         
         auto sp = spiral.find(0);
         auto rate = rates.find(0);
@@ -662,28 +662,25 @@ void start_new_cycle ( account_name username, account_name host){
 
         refresh_state(username, host);
         
-        refreshbal rbalop;
-        rbalop.username = op.username;
-        rbalop.balance_id = op.balance_id;
-        refresh_balance_action(rbalop);
-
         rate_index rates(_self, host);
         pool_index pools(_self, host);
         dprop_index dprops(_self, host);
         cycle_index cycles(_self, host);
         balance_index balance (_self, username);
         spiral_index spiral(_self, host);
-
         std::vector<eosio::asset> forecasts;
         
+
         auto sp = spiral.find(0);
         auto bal = balance.find(balance_id);
+        auto pool = pools.find(bal->global_pool_id);
+        auto cycle = cycles.find(pool -> cycle_num - 1);
+        
+        eosio_assert(bal->last_recalculated_win_pool_id == cycle->finish_at_global_pool_id, "Cannot withdraw not refreshed balance. Refresh Balance first and try again.");
         
         eosio_assert(! bal -> withdrawed, "Balance is already withdrawed");
 
         auto dprop = dprops.find(0);
-        auto pool = pools.find(bal->global_pool_id);
-        auto cycle = cycles.find(pool -> cycle_num - 1);
         auto next_cycle = cycles.find(pool -> cycle_num);
         auto has_new_cycle = false;
         if (next_cycle != cycles.end())
@@ -732,14 +729,12 @@ void start_new_cycle ( account_name username, account_name host){
                 b.forecasts = forecasts;
             });
 
-            balance.erase(bal);
+            //balance.erase(bal);
             
         } else  { 
             
             auto amount = bal -> available;
-            print(bal->available, " ");
-            //eosio_assert((amount.amount != 0), "Not possible to withdraw zero amount");
-        
+            
             action(
                 permission_level{ _self, N(active) },
                 N(eosio.token), N(transfer),
@@ -777,7 +772,7 @@ void start_new_cycle ( account_name username, account_name host){
                 b.forecasts = forecasts;
             });
 
-            balance.erase(bal);
+            //balance.erase(bal);
         }
     };
 
