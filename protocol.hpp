@@ -40,10 +40,9 @@ namespace eosio {
         uint64_t loss_percent;
         uint64_t pool_limit;
         uint64_t pool_timeout;
-        uint64_t priority_seconds;
         uint64_t primary_key() const {return id;}
 
-        EOSLIB_SERIALIZE(spiral, (id)(size_of_pool)(overlap)(profit_growth)(base_rate)(loss_percent)(pool_limit)(pool_timeout)(priority_seconds))
+        EOSLIB_SERIALIZE(spiral, (id)(size_of_pool)(overlap)(profit_growth)(base_rate)(loss_percent)(pool_limit)(pool_timeout))
     };
 
     typedef eosio::multi_index<N(spiral), spiral> spiral_index;
@@ -96,11 +95,11 @@ namespace eosio {
         uint64_t current_pool_id = 0;
         uint64_t current_cycle_num = 1;
         uint64_t current_pool_num = 1;
-        bool priority_flag = false;
+        
         
         uint64_t primary_key() const {return id;}
 
-        EOSLIB_SERIALIZE(dprop, (id)(cycle_start_at_id)(current_pool_id)(current_cycle_num)(current_pool_num)(priority_flag))
+        EOSLIB_SERIALIZE(dprop, (id)(cycle_start_at_id)(current_pool_id)(current_cycle_num)(current_pool_num))
     };
 
     typedef eosio::multi_index<N(dprop), dprop> dprop_index;
@@ -132,14 +131,12 @@ namespace eosio {
         eosio::asset lept_cost;
         eosio::asset total_win_withdraw;
         eosio::asset total_loss_withdraw;
-        eosio::time_point_sec pool_started_at;
-        eosio::time_point_sec priority_until;
         eosio::time_point_sec pool_expired_at;
         
         uint64_t primary_key() const {return id;}
         uint64_t by_cycle() const {return cycle_num;}
         
-        EOSLIB_SERIALIZE(pool,(id)(cycle_num)(pool_num)(color)(total_lepts)(creserved_lepts)(remain_lepts)(lept_cost)(total_win_withdraw)(total_loss_withdraw)(pool_started_at)(priority_until)(pool_expired_at))
+        EOSLIB_SERIALIZE(pool,(id)(cycle_num)(pool_num)(color)(total_lepts)(creserved_lepts)(remain_lepts)(lept_cost)(total_win_withdraw)(total_loss_withdraw)(pool_expired_at))
     };
 
     typedef eosio::multi_index<N(pool), pool> pool_index;
@@ -213,8 +210,7 @@ namespace eosio {
         uint64_t loss_percent;
         uint64_t pool_limit;
         uint64_t pool_timeout;
-        uint64_t priority_seconds;
-        EOSLIB_SERIALIZE( setparams, (host)(size_of_pool)(overlap)(profit_growth)(base_rate)(loss_percent)(pool_limit)(pool_timeout)(priority_seconds))
+        EOSLIB_SERIALIZE( setparams, (host)(size_of_pool)(overlap)(profit_growth)(base_rate)(loss_percent)(pool_limit)(pool_timeout))
 
     };
 
@@ -234,18 +230,6 @@ namespace eosio {
 
         
         EOSLIB_SERIALIZE( withdraw, (username)(host)(balance_id))
-
-
-    };
-
-    // @abi action
-    struct priorenter{
-        account_name username; 
-        account_name host;
-        uint64_t balance_id;
-
-        
-        EOSLIB_SERIALIZE( priorenter, (username)(host)(balance_id))
 
 
     };
