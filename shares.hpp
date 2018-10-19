@@ -3,13 +3,29 @@ namespace eosio {
 	//@abi table power
 	struct power{
 		account_name host;
-		eosio::asset power;
+		uint64_t power;
+		uint64_t staked;
+		uint64_t delegated;
 
-		uint64_t primary_key() const {return host;}
-		EOSLIB_SERIALIZE(struct power, (host)(power))
+		account_name primary_key() const {return host;}
+
+		EOSLIB_SERIALIZE(struct power, (host)(power)(staked)(delegated))
 	};
 
 	typedef eosio::multi_index<N(power), power> power_index;
+
+
+	//@abi table delegations
+	struct delegations{
+		account_name reciever;
+		uint64_t shares;
+
+		account_name primary_key() const {return reciever;}
+
+		EOSLIB_SERIALIZE(delegations, (reciever)(shares))
+	};
+
+	typedef eosio::multi_index<N(delegations), delegations> delegation_index;
 
 
     //@abi table vesting i64 
@@ -55,10 +71,23 @@ namespace eosio {
 	};
 
 	// @abi action
-	struct bancreate{
+	struct delshares{
+		account_name from;
+		account_name reciever;
 		account_name host;
-		EOSLIB_SERIALIZE(bancreate, (host))
+		uint64_t shares;
 
+		EOSLIB_SERIALIZE(delshares, (from)(reciever)(host)(shares))
+	};
+
+	// @abi action
+	struct undelshares{
+		account_name from;
+		account_name reciever;
+		account_name host;
+		uint64_t shares;
+
+		EOSLIB_SERIALIZE(undelshares, (from)(reciever)(host)(shares))
 	};
 
 }

@@ -3,11 +3,14 @@
 #include <eosiolib/time.hpp>
 #include <eosiolib/print.hpp>
 #include "protocol.hpp"
-
-#include "hosts.cpp"
 #include "shares.cpp"
+#include "hosts.cpp"
+
 #include "core.cpp"
 #include "goals.cpp"
+#include "core_goal.cpp"
+
+#include "voting.cpp"
 
 using namespace eosio;
 
@@ -29,6 +32,8 @@ extern "C" {
                 //100 - deposit
                 //110 - pay for host
                 //200 - buyshares
+                //300 - goal activate action
+
                 switch (intcode){
                     case 100: {
                         auto host = eosio::string_to_name(parameter.c_str());
@@ -47,7 +52,7 @@ extern "C" {
                     }
                     case 300: {
                         uint64_t goal_id = atoi(parameter.c_str());                    
-                        goal().activate_action(op.from, goal_id, op.quantity);
+                        goal().donate_action(op.from, goal_id, op.quantity);
                         break;
                     }
                     //default:
@@ -61,28 +66,42 @@ extern "C" {
                 //GOALS
                  case N(setgoal): {
                     goal().set_goal_action(eosio::unpack_action_data<setgoal>());
+                    break;
                  }
                  case N(editgoal): {
                     goal().edit_goal_action(eosio::unpack_action_data<editgoal>());
+                    break;
                  }
                  case N(delgoal): {
                     goal().del_goal_action(eosio::unpack_action_data<delgoal>());
+                    break;
                  }
                  case N(report): {
                     goal().report_action(eosio::unpack_action_data<report>());
+                    break;
                  }
                  case N(next): { 
-                    goal().next();
+                    core().next_goals();
+                    break;
+                 }
+                //VOTING
+                 case N(vote): { 
+                    voting().vote_action(eosio::unpack_action_data<vote>());
+                    break;
                  }
                 //MARKETS
                 
                 //SHARES
-                case N(bancreate): {
-                    shares().create_bancor_market(eosio::unpack_action_data<bancreate>());
-                    break;
-                };
                 case N(sellshares): {
                     shares().sellshares_action(eosio::unpack_action_data<sellshares>());
+                    break;
+                };
+                case N(delshares): {
+                    shares().delegate_shares_action(eosio::unpack_action_data<delshares>());
+                    break;
+                };
+                case N(undelshares): {
+                    shares().undelegate_shares_action(eosio::unpack_action_data<undelshares>());
                     break;
                 };
                 case N(refreshsh): {
@@ -96,6 +115,10 @@ extern "C" {
                 //HOSTS
                 case N(upgrade): {
                     hosts().upgrade_action(eosio::unpack_action_data<upgrade>());
+                    break;
+                };
+                case N(cchildhost): {
+                    hosts().create_child_host_action(eosio::unpack_action_data<cchildhost>());
                     break;
                 };
 
@@ -137,6 +160,10 @@ extern "C" {
                     core().priority_goal_enter(eosio::unpack_action_data<gpriorenter>());
                     break;
                 };
+                case N(gwithdraw):{
+                    goal().gwithdraw_action(eosio::unpack_action_data<gwithdraw>());
+                    break;
+                }
             }
             
         }
