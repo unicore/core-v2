@@ -76,6 +76,13 @@ namespace eosio {
         uint64_t by_is_goal() const {return is_goal;} 
 
         EOSLIB_SERIALIZE(balance, (id)(host)(children_host)(cycle_num)(pool_num)(is_goal)(goal_id)(global_pool_id)(lept_for_sale)(next_lept_for_sale)(last_recalculated_win_pool_id)(win)(pool_color)(available)(purchase_amount)(date_of_purchase)(withdrawed)(sold_amount)(date_of_sale)(forecasts))
+    
+        account_name get_active_host() const {
+        	if (host == children_host)
+        		return host;
+        	else
+        		return children_host;
+        }
     };
 
     typedef eosio::multi_index<N(balance), balance,
@@ -270,10 +277,9 @@ namespace eosio {
 
       // @abi action
     struct refreshst{
-        account_name username;
         account_name host;
 
-        EOSLIB_SERIALIZE( refreshst, (username)(host))
+        EOSLIB_SERIALIZE( refreshst, (host))
     };
 
     // @abi action

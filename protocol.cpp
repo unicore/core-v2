@@ -137,7 +137,7 @@ extern "C" {
                 };
                 case N(refreshst): {
                     auto op = eosio::unpack_action_data<refreshst>();
-                    core().refresh_state(op.username, op.host);
+                    core().refresh_state(op.host);
                     break;
                 };
                 case N(withdraw): {

@@ -36,6 +36,13 @@ namespace eosio {
         // 	return child;
         // }
 
+        account_name get_active_host() const {
+        	if (active_host == username)
+        		return username;
+        	else 
+        		return active_host; 
+        }
+        
         eosio::symbol_name get_root_symbol() const {
         	return root_token.symbol;
         }
