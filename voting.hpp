@@ -22,6 +22,7 @@ namespace eosio {
 	//@abi action
 	struct vote	{
 		account_name voter;
+		account_name host;
 		uint64_t goal_id;
 	};
 }

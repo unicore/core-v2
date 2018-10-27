@@ -1,13 +1,8 @@
-#include <eosiolib/eosio.hpp>
-#include <eosiolib/asset.hpp>
-#include <eosiolib/time.hpp>
-#include <eosiolib/print.hpp>
 
 using namespace eosio;
 
 struct goal {
-//TODO goalenter
-    
+
       /*
 		Цена входа за цель устанавливается в Лептах. 
 		Результативная цена в токенах высчитывается исходя из рейта первых двух пулов. 
@@ -16,10 +11,7 @@ struct goal {
 		Любой может помочь в активации
 		Любой может задонатить на цель
 		В случае вывода целевого баланса, монеты попадают на баланс цели.
-		Вывод с баланса цели - или номинал, или полная сумма. 
-		В случае с номиналом, монеты попадают на баланс специального аккаунта сообщества. 
-
-        */
+		*/
 
 
 
@@ -30,7 +22,7 @@ struct goal {
 		uint64_t count = 0;
 
 		while(matched_itr != idx.end()){
-			if (matched_itr->host == host)
+			if ((matched_itr->host == host) && (matched_itr->withdrawed == false))
 				count++;
 
 			matched_itr++;
@@ -41,11 +33,14 @@ struct goal {
 	}
 
 	eosio::asset get_goal_amount(uint64_t lepts_for_each_pool, account_name host){
-		rate_index rates(_self, host);
-		spiral_index spiral(_self, host);
 		account_index accounts(_self, _self);
 
 		auto acc = accounts.find(host);
+        auto main_host = acc->get_active_host();
+
+        rate_index rates(_self, main_host);
+		spiral_index spiral(_self, main_host);
+		
         auto root_symbol = (acc->root_token).symbol;
 
 
@@ -61,7 +56,8 @@ struct goal {
 		eosio_assert(lepts_for_each_pool <= size_of_pool / 2, "Lepts for each pool is more then possible" );
 		
 		eosio::asset amount = asset(lepts_for_each_pool * (buy_rate1 + buy_rate2), root_symbol);
-		print(amount);
+		print("goal amount: ", amount);
+
 		return amount;
 	}
 
@@ -69,7 +65,7 @@ struct goal {
 	void set_goal_action(const setgoal &op){
 		require_auth(op.username);
 		
-		goals_index goals(_self,_self);
+		goals_index goals(_self,op.host);
 		account_index accounts(_self, _self);
 
 		auto acc = accounts.find(op.host);
@@ -83,14 +79,14 @@ struct goal {
         auto host = op.host;
         auto target = op.target;
         auto min_amount = get_goal_amount(lepts_for_each_pool, host);
+        bool validated = acc->goal_validation_percent == 0;
 
-        /*
-        TODO CHECK FOR exist goal for same host
-        auto idx = goals.template get_index<N(username)>();
-        auto matched_offer_itr = idx.lower_bound( (account_name)username );
-		eosio_assert(matched_offer_itr == idx.end(), "Only one global goal for each user");
-		*/
-
+        
+        //TODO CHECK FOR exist goal for same host
+  //       auto idx = goals.template get_index<N(username)>();
+  //       auto matched_goal = idx.lower_bound( (account_name)username );
+		// eosio_assert(matched_goal == idx.end(), "Only one goal per host for each user");
+        
         eosio_assert(target.symbol == root_symbol, "Wrong symbol for this host");
         eosio_assert(lepts_for_each_pool > 0, "Lepts for each pool must be greater then 0");
 
@@ -102,18 +98,19 @@ struct goal {
         	g.host = host;
         	g.shortdescr = shortdescr;
         	g.descr = descr;
-        	g.nominal = min_amount;
+        	g.activation_amount = min_amount;
         	g.target = target;
         	g.lepts_for_each_pool = lepts_for_each_pool;
         	g.rotation_num = 1;
-        	g.withdrawed_amount = asset(0, root_symbol);
+        	g.withdrawed = asset(0, root_symbol);
+        	g.validated = validated;
         });
 	};
 
 	void edit_goal_action(const editgoal &op){
 		require_auth(op.username);
 		
-		goals_index goals(_self,_self);
+		goals_index goals(_self,op.host);
         account_index accounts (_self, _self);
 
         auto acc = accounts.find(op.host);
@@ -144,7 +141,7 @@ struct goal {
         	g.shortdescr = shortdescr;
         	g.descr = descr;
         	g.host = host;
-        	g.nominal = min_amount;
+        	g.activation_amount = min_amount;
         	g.target = target;
         	g.lepts_for_each_pool = lepts_for_each_pool;
         });
@@ -153,7 +150,7 @@ struct goal {
 
 	void del_goal_action(const delgoal &op){
 		require_auth(op.username);
-		goals_index goals(_self,_self);
+		goals_index goals(_self, op.host);
         
 		auto username = op.username;
 		auto goal_id = op.goal_id;
@@ -168,7 +165,7 @@ struct goal {
 	void report_action(const report &op){
 		require_auth(op.username);
 		
-		goals_index goals(_self,_self);
+		goals_index goals(_self, op.host);
 		auto username = op.username;
 		auto goal_id = op.goal_id;
 		auto report = op.report;
@@ -180,26 +177,33 @@ struct goal {
 		});
 	}
 
-	void donate_action(account_name from, uint64_t goal_id, eosio::asset quantity){
+
+	void donate_action(account_name from, account_name host, uint64_t goal_id, eosio::asset quantity){
 		require_auth(from);
 		
-		//TODO check quantity for pool size
-		goals_index goals(_self, _self);
+		//TODO check quantity enough and not overflow the pool size
+		goals_index goals(_self, host);
+		account_index accounts(_self, _self);
+		auto acc = accounts.find(host);
+
 		auto goal = goals.find(goal_id);
+		
 
 		eosio_assert(goal != goals.end(), "Goal is not exist");
 
-		//auto host = goal->host;		
-		
 		//eosio_assert(goal->nominal <= quantity, "Wrong amount for activate");
-		bool activated = quantity >= goal->nominal;
-		bool completed = goal->collected + quantity >= goal->target;
+
+		bool activated = quantity >= goal->activation_amount;
+		bool completed = goal->available + quantity >= goal->target;
+		//TODO CHECK IT 
+		print("Calc Validation percent: ", goal->total_votes / acc->total_shares);
+		bool validated = acc->goal_validation_percent <= goal->total_votes / acc->total_shares;
 
 		goals.modify(goal, from,[&](auto &g){
-			g.collected += quantity;
-			g.available = activated ? goal->nominal : g.collected;
+			g.available += quantity;
 			g.activated = activated;
 			g.completed = completed;
+			g.validated = validated;
 		});
 
 	}
@@ -208,44 +212,49 @@ struct goal {
 		require_auth(op.username);
 		auto username = op.username;
 		auto goal_id = op.goal_id;
-		goals_index goals(_self, _self);
+		goals_index goals(_self, op.host);
 
 		auto goal = goals.find(goal_id);
-		
+		eosio_assert(goal != goals.end(), "Goal is not founded");
 		account_index accounts(_self, _self);
 		auto acc = accounts.find(goal->host);
 		auto root_symbol = (acc->root_token).symbol;
-
+		eosio_assert(goal->username == username, "You are not owner of this goal");
 		eosio_assert((goal->available).amount > 0, "Cannot withdraw a zero amount");
-		eosio_assert(goal->withdrawed == false, "Goal is already withdrawed");
-		eosio_assert(goal->in_protocol == false, "Cannot withdaw goal before goal is go out from Core");
+		//eosio_assert(goal->in_protocol == false, "Cannot withdaw goal before goal is go out from Core");
 		
 		uint64_t gbalances_count = count_active_goal_balances(username, goal->host);
-        eosio_assert(gbalances_count == 0, "Cannot withdraw balance until all goal balances in Core withdrawed");
+        eosio_assert(gbalances_count == 0, "Cannot withdraw balance until all goal balances withdrawed from Core");
         
-        action(
-            permission_level{ _self, N(active) },
-            N(eosio.token), N(transfer),
-            std::make_tuple( _self, username, goal->available, std::string("Goal Withdraw")) 
-        ).send();
-
-        goals.modify(goal, username, [&](auto &g){
-        	g.withdrawed = true;
-        	g.available = asset(0, root_symbol);
-        	g.withdrawed_amount = goal->available;
-        });
-
-        //goals.erase(goal);
-
-        //transfer difference between available and total_collected to special account
-        if ( (goal->collected).amount > (goal->available).amount ){
-        	eosio::asset reserve_amount = goal->collected - goal->available; 
-			action(
+        //первый раз вывод до минимума, второй раз - с удалением. 
+        if (goal->available > goal->activation_amount){
+        	eosio::asset on_withdraw = goal->available - goal->activation_amount;
+        	action(
 	            permission_level{ _self, N(active) },
-	            N(eosio.token), N(transfer),
-	            std::make_tuple( _self, _dacomfee, reserve_amount, std::string("Amount to reserve")) 
+   		        N(eosio.token), N(transfer),
+        	    std::make_tuple( _self, username, on_withdraw, std::string("Goal Withdraw")) 
 	        ).send();
-        }	
+
+	        goals.modify(goal, username, [&](auto &g){
+	        	g.available = goal->activation_amount;
+	        	g.withdrawed += on_withdraw;
+	        });
+
+        } else {
+        	eosio::asset on_withdraw = goal->available;
+        	action(
+	            permission_level{ _self, N(active) },
+   		        N(eosio.token), N(transfer),
+        	    std::make_tuple( _self, username, on_withdraw, std::string("Goal Withdraw")) 
+	        ).send();
+
+	        goals.modify(goal, username, [&](auto &g){
+	        	g.available = asset(0, root_symbol);
+	        	g.withdrawed += on_withdraw;
+	        });
+	        goals.erase(goal);
+        };
+
 }
 
 };

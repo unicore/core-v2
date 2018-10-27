@@ -16,16 +16,14 @@ namespace eosio {
         std::string shortdescr;
         std::string descr;
         eosio::asset target;
-        eosio::asset nominal;
-        eosio::asset collected;
+        eosio::asset activation_amount;
         eosio::asset available;
         std::string report;
         uint64_t rotation_num;
         uint64_t total_votes;
         std::vector<account_name> voters;
-        bool withdrawed = false;
         std::vector<uint64_t> balance_ids;
-        eosio::asset withdrawed_amount;
+        eosio::asset withdrawed;
         uint64_t primary_key()const { return id; }
         uint64_t by_votes() const { return total_votes; }
         uint64_t by_activated() const {return activated; }
@@ -35,8 +33,8 @@ namespace eosio {
         account_name by_host() const {return host;}
         uint64_t by_rotation_num() const {return rotation_num;}
         EOSLIB_SERIALIZE( goals, (id)(username)(activated)(in_protocol)(completed)(reported)
-            (validated)(host)(lepts_for_each_pool)(shortdescr)(descr)(target)(nominal)(collected)
-            (available)(report)(rotation_num)(total_votes)(voters)(withdrawed)(balance_ids)(withdrawed_amount))
+            (validated)(host)(lepts_for_each_pool)(shortdescr)(descr)(target)(activation_amount)
+            (available)(report)(rotation_num)(total_votes)(voters)(balance_ids)(withdrawed))
     };
 
     typedef eosio::multi_index <N(goals), goals,
@@ -81,23 +79,26 @@ namespace eosio {
     // @abi action
     struct delgoal{
         account_name username;
+        account_name host;
         uint64_t goal_id;
-        EOSLIB_SERIALIZE( delgoal, (username)(goal_id))
+        EOSLIB_SERIALIZE( delgoal, (username)(host)(goal_id))
     };
 
     // @abi action
     struct report{
         account_name username;
+        account_name host;
         uint64_t goal_id;
         std::string report;
-        EOSLIB_SERIALIZE( struct report, (username)(goal_id)(report))
+        EOSLIB_SERIALIZE( struct report, (username)(host)(goal_id)(report))
     };
 
     // @abi action
     struct gwithdraw{
         account_name username;
+        account_name host;
         uint64_t goal_id;
-        EOSLIB_SERIALIZE( gwithdraw, (username)(goal_id))
+        EOSLIB_SERIALIZE( gwithdraw, (username)(host)(goal_id))
     };    
 };
 

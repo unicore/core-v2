@@ -16,7 +16,7 @@ namespace eosio {
     *  side effects associated with using this API.
     */
 
-   // @abi table rammarket i64
+   // @abi table powermarket i64
    struct exchange_state {
       asset    supply;
 
@@ -39,6 +39,6 @@ namespace eosio {
       EOSLIB_SERIALIZE( exchange_state, (supply)(base)(quote) )
    };
 
-   typedef eosio::multi_index<N(rammarket), exchange_state> rammarket;
+   typedef eosio::multi_index<N(powermarket), exchange_state> powermarket;
 
 } /// namespace eosiosystem

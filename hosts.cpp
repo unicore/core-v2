@@ -13,9 +13,12 @@ struct hosts {
         eosio_assert(op.title.length() < 100, "Title is a maximum 100 symbols");
         eosio_assert(op.purpose.find("&#") , "Symbols '&#' is prohibited in purpose");
 
-        eosio_assert(op.quote_amount.amount > 0, "Start quote amount must be greater then zero");
+        eosio_assert(op.quote_amount.amount > 0, "Quote amount must be greater then zero");
         eosio_assert(op.quote_amount.symbol == CORE_SYMBOL, "Quote symbol for market is only CORE");
         
+        eosio_assert(op.goal_validation_percent <= 100 * PERCENT_PRECISION, "goal_validation_percent should be between 0 and 100 * PERCENT_PRECISION (1000000)");
+
+
         account_index accounts(_self, _self);
         
         auto itr = accounts.find(op.username);
@@ -23,7 +26,7 @@ struct hosts {
 
         //check and set shares quantity
        
-       	eosio_assert(op.total_shares > 100, "Total shares must be greater then 100");
+       	eosio_assert(op.total_shares >= 100, "Total shares must be greater or equal 100");
         //check for exist quote and root tokens
         auto failure_if_root_not_exist = eosio::token(N(eosio.token)).get_supply(eosio::symbol_type(op.root_token.symbol).name()).amount;
         auto failure_if_quote_not_exist = eosio::token(N(eosio.token)).get_supply(eosio::symbol_type(op.quote_amount.symbol).name()).amount;
@@ -46,6 +49,8 @@ struct hosts {
             a.payed = false;
             a.to_pay = to_pay;
             a.active_host = op.username;
+            a.goal_validation_percent = op.goal_validation_percent;
+            a.is_whitelisted = op.is_whitelisted;
         });
 
     }
@@ -115,6 +120,7 @@ struct hosts {
     		h.childrens = childs;
     		h.payed = false;
     		h.to_pay = to_pay;
+    		h.non_active_child = true;
     	});
 
 
@@ -140,7 +146,7 @@ struct hosts {
 			h.to_pay = asset(0, CORE_SYMBOL);
 		});    	
 
-        if (childs.begin() != childs.end())
+        if (childs.begin() == childs.end())
     	{
     		shares().create_bancor_market(username, host->total_shares, host->quote_amount);
 		};

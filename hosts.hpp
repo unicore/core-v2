@@ -13,7 +13,13 @@ namespace eosio {
         account_name hoperator;
         std::vector<account_name> childrens;
         account_name active_host;
+        bool non_active_child = false;
+        bool parameters_setted = false;
         bool need_switch = false;
+        bool is_whitelisted = false;
+        vector <account_name> whitelist;
+        uint64_t consensus_percent;
+        uint64_t goal_validation_percent;
         std::string title;
         std::string purpose;
         uint64_t total_shares;
@@ -26,29 +32,29 @@ namespace eosio {
         std::string meta;
         
         account_name primary_key()const { return username; }
-        
-        // account_name find_children_host( account_name children) const {
-        // 	auto last_children_host = childrens.rbegin();
-        // 	auto child =  std::find(childrens.rbegin(), childrens.rend(), children);
-        	
-        // 	eosio_assert(child != childrens.end(), "Child host not founded");
-
-        // 	return child;
-        // }
-
+      
         account_name get_active_host() const {
         	if (active_host == username)
         		return username;
         	else 
         		return active_host; 
         }
-        
+
         eosio::symbol_name get_root_symbol() const {
         	return root_token.symbol;
         }
 
+        bool is_account_in_whitelist(account_name username) const {
+        	auto it = std::find(whitelist.begin(), whitelist.end(), username);
+        	
+        	if (it == whitelist.end())
+        		return false;
+        	else 
+        		return true;
+        }
 
-        EOSLIB_SERIALIZE( account, (username)(hoperator)(childrens)(active_host)(need_switch)(title)(purpose)(total_shares)(quote_amount)(root_token)(registered_at)(activated)(payed)(to_pay)(meta))
+
+        EOSLIB_SERIALIZE( account, (username)(hoperator)(childrens)(active_host)(non_active_child)(parameters_setted)(need_switch)(is_whitelisted)(whitelist)(consensus_percent)(goal_validation_percent)(title)(purpose)(total_shares)(quote_amount)(root_token)(registered_at)(activated)(payed)(to_pay)(meta))
     };
 
     typedef eosio::multi_index <N(account), account> account_index;
@@ -57,15 +63,17 @@ namespace eosio {
     // @abi action
     struct upgrade{
         account_name username;
-        account_name child_host;
         account_name hoperator;
         std::string title;
         std::string purpose;
         uint64_t total_shares;
         eosio::asset quote_amount;
         eosio::asset root_token;
+        bool is_whitelisted = false;
+       	uint64_t goal_validation_percent; 
         std::string meta;
-        EOSLIB_SERIALIZE( upgrade, (username)(child_host)(hoperator)(title)(purpose)(total_shares)(quote_amount)(root_token)(meta))
+
+        EOSLIB_SERIALIZE( upgrade, (username)(hoperator)(title)(purpose)(total_shares)(quote_amount)(root_token)(is_whitelisted)(goal_validation_percent)(meta))
     };
 
     // @abi action
@@ -88,22 +96,5 @@ namespace eosio {
 	  vector<wait_weight> waits;
 	};
 
-	// eosiosystem::native::newaccount Doesn't seem to want to take authorities.
-	struct call {
-	  struct eosio {
-	    void newaccount(account_name creator, account_name name,
-	                    authority owner, authority active);
-	  };
-	};
-
-	asset buyrambytes(uint32_t bytes) {
-	  rammarket market(N(eosio), N(eosio));
-	  auto itr = market.find(S(4,RAMCORE));
-	  eosio_assert(itr != market.end(), "RAMCORE market not found");
-	  
-	  auto tmp = *itr;
-
-	  return tmp.convert(asset(bytes, S(0, RAM)), CORE_SYMBOL);
-}
 
 }

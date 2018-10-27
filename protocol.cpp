@@ -8,7 +8,6 @@
 
 #include "core.cpp"
 #include "goals.cpp"
-#include "core_goal.cpp"
 
 #include "voting.cpp"
 
@@ -51,8 +50,14 @@ extern "C" {
                         break;
                     }
                     case 300: {
+                        auto delimeter2 = parameter.find('-');
+                        std::string parameter2 = parameter.substr(delimeter2+1, parameter.length());
+                        
+                        print("del2: ", delimeter2);
+                        print("param2: ", parameter2);
+                        auto host = eosio::string_to_name(parameter2.c_str());
                         uint64_t goal_id = atoi(parameter.c_str());                    
-                        goal().donate_action(op.from, goal_id, op.quantity);
+                        goal().donate_action(op.from, host, goal_id, op.quantity);
                         break;
                     }
                     //default:
@@ -81,7 +86,7 @@ extern "C" {
                     break;
                  }
                  case N(next): { 
-                    core().next_goals();
+                    core().next_goals(N(alice.tc));
                     break;
                  }
                 //VOTING
@@ -89,6 +94,11 @@ extern "C" {
                     voting().vote_action(eosio::unpack_action_data<vote>());
                     break;
                  }
+                 // //ASSETS
+                 // case N(makeasset): { 
+                 //    assets().make_asset_action(eosio::unpack_action_data<makeasset>());
+                 //    break;
+                 // };
                 //MARKETS
                 
                 //SHARES

@@ -27,7 +27,7 @@ namespace eosio {
     static const uint64_t _REGISTRATOR_SUFFIX_LENGHT = 6;
     static const char _REGISTRATOR_STRING_SUFFIX[_REGISTRATOR_SUFFIX_LENGHT+1] = ".goals";
     static const uint64_t _MAX_SUPPLY = 1000000000000000;
-    static const uint64_t _SHARES_VESTING_DURATION = 2592000;
+    static const uint64_t _SHARES_VESTING_DURATION = 604800;
     static const uint64_t _TOTAL_VOTES = 7;
 
     // @abi table spiral i64
@@ -298,6 +298,12 @@ namespace eosio {
         EOSLIB_SERIALIZE( setfee, (createhost)(systemfee))
     };
 
+    // @abi action
+    struct next{
+    	account_name host;
+    
+    	EOSLIB_SERIALIZE( next, (host))
+    };
     
     
 };
