@@ -3,14 +3,10 @@ struct core {
 
 
     void next_goals(account_name host){
-        //TODO move goals to each host;
-
-        //FIND all goals with activated status sorted by votes 
-        //and fill priority enter list until half size of pool will be full filled.
-
-        //auto temp_payer = N(bob.tc);
         
-        // require_auth(_self);
+        //FIND all goals with activated status sorted by votes 
+        //and fill priority enter list until half size of pool will full filled.
+
         goals_index goals(_self, host);
         
         auto idx_bp = goals.template get_index<N(in_protocol)>();
@@ -113,25 +109,23 @@ struct core {
         account_index accounts(_self, _self);
         auto acc = accounts.find(host);
         auto main_host = acc->get_active_host();
-        dprop_index dprops(_self, host);
          
-        pool_index pools(_self, main_host);
+        pool_index pools(_self, host);
         balance_index balances(_self, username);
 
-        cycle_index cycles(_self, main_host);
+        cycle_index cycles(_self, host);
          
         rate_index rates(_self, main_host);
 
         auto root_symbol = acc->get_root_symbol();
-        auto dprop = dprops.find(0);
          
         auto first_pool_rate = rates.find(0);
         auto second_pool_rate = rates.find(1);
 
-        auto cycle = cycles.find(dprop-> current_cycle_num - 2);
+        auto cycle = cycles.find(acc-> current_cycle_num - 2);
          
-        eosio_assert(dprop->current_pool_num < 2, "Priority Enter is available only for first 2 rounds in cycle");
-        eosio_assert(dprop->priority_flag == true, "Priority Enter is available only when priority_flag is enabled");
+        eosio_assert(acc->current_pool_num < 2, "Priority Enter is available only for first 2 rounds in cycle");
+        eosio_assert(acc->priority_flag == true, "Priority Enter is available only when priority_flag is enabled");
         
         auto first_pool = pools.find(cycle->finish_at_global_pool_id + 1);
         auto second_pool = pools.find(cycle->finish_at_global_pool_id + 2);
@@ -141,12 +135,16 @@ struct core {
         eosio::asset amount_for_back = first_pool_amount + second_pool_amount;
         print("first_pool_amount: ", first_pool_amount, " ");
         print("second_pool_amount: ", second_pool_amount, " ");
+        print("acc-> current_pool_id ", acc-> current_pool_id, " ");
 
-        uint64_t bal_id1 = fill_pool(username, host, lepts, first_pool_amount, dprop-> current_pool_id, true, goal_id);
-        uint64_t bal_id2 = fill_pool(username, host, lepts, second_pool_amount, dprop-> current_pool_id + 1, true, goal_id);
-
+        uint64_t bal_id1 = fill_pool(username, host, lepts, first_pool_amount, acc-> current_pool_id, true, goal_id);
+        uint64_t bal_id2 = fill_pool(username, host, lepts, second_pool_amount, acc-> current_pool_id + 1, true, goal_id);
+        print("balid1: ", bal_id1);
+        print("balid2: ", bal_id2);
+        
         add_balance_id_to_goal(host, goal_id, bal_id1);
         add_balance_id_to_goal(host, goal_id, bal_id2);
+        print("im on finish");
     }
 
 
@@ -175,7 +173,7 @@ void adjust_goal_balance(account_name host, uint64_t goal_id, eosio::asset amoun
     print(" total collected is: ", available);
     print(" is_complete: ", is_complete);
 
-    goals.modify(goal, 0, [&](auto &g){
+    goals.modify(goal, _self, [&](auto &g){
         g.completed = is_complete;
         g.activated = !disable; 
         g.available = available;
@@ -193,7 +191,7 @@ void add_balance_id_to_goal(account_name host, uint64_t goal_id, uint64_t balanc
     std::vector <uint64_t> balance_ids = goal->balance_ids;
     balance_ids.push_back(balance_id);
 
-    goals.modify(goal, 0, [&](auto &g){
+    goals.modify(goal, _self, [&](auto &g){
         g.balance_ids = balance_ids;
         print("added: ", balance_ids[0]);
     });
@@ -210,7 +208,7 @@ void delete_balance_id_from_goal(account_name host, uint64_t goal_id, uint64_t b
     if (itr != balance_ids.end()){
         balance_ids.erase(itr);
         print("im on erase");
-        goals.modify(goal, 0, [&](auto &g){
+        goals.modify(goal, _self, [&](auto &g){
             g.balance_ids = balance_ids;
         });
     };
@@ -226,28 +224,26 @@ void priority_enter(const priorenter &op){
 
      pool_index pools(_self, host);
      balance_index balances(_self, username);
-     dprop_index dprops(_self, host);
      cycle_index cycles(_self, host);
      rate_index rates(_self, host);
      account_index accounts(_self, _self);
 
      auto acc = accounts.find(host);
+     auto main_host = acc->get_active_host();
      auto root_symbol = acc->get_root_symbol();
 
 
-     auto dprop = dprops.find(0);
-     
      auto first_pool_rate = rates.find(0);
      auto second_pool_rate = rates.find(1);
 
-     auto cycle = cycles.find(dprop-> current_cycle_num - 2);
+     auto cycle = cycles.find(acc-> current_cycle_num - 2);
      
-     eosio_assert(dprop->current_pool_num < 2, "Priority Enter is available only for first 2 rounds in cycle");
-     eosio_assert(dprop->priority_flag == true, "Priority Enter is available only when priority_flag is enabled");
+     eosio_assert(acc->current_pool_num < 2, "Priority Enter is available only for first 2 rounds in cycle");
+     eosio_assert(acc->priority_flag == true, "Priority Enter is available only when priority_flag is enabled");
     
      auto bal = balances.find(balance_id);
      eosio_assert(bal != balances.end(), "Balance not exist");
-     eosio_assert(bal->cycle_num == dprop->current_cycle_num - 1, "Only participants from previous cycle can priority enter");
+     eosio_assert(bal->cycle_num == acc->current_cycle_num - 1, "Only participants from previous cycle can priority enter");
      eosio_assert(bal->last_recalculated_win_pool_id == cycle->finish_at_global_pool_id, "Impossible priority enter with not refreshed balance");
      eosio_assert(bal->win == 0, "Only lose balances can enter by priority");
      eosio_assert(bal->withdrawed == 0, "Balances withdrawed and cant enter on priority");
@@ -282,7 +278,7 @@ void priority_enter(const priorenter &op){
         if (bal->is_goal == false){
              action(
                     permission_level{ _self, N(active) },
-                    N(eosio.token), N(transfer),
+                    acc->root_token_contract, N(transfer),
                     std::make_tuple( _self, username, amount_for_back, std::string("Sediment amount")) 
             ).send();
         } else {
@@ -307,7 +303,7 @@ void priority_enter(const priorenter &op){
         
         action(
             permission_level{ _self, N(active) },
-            N(eosio.token), N(transfer),
+            acc->root_token_contract, N(transfer),
             std::make_tuple( _self, username, amount_for_back, std::string("Sediment amount")) 
         ).send();
     
@@ -317,8 +313,8 @@ void priority_enter(const priorenter &op){
      print("second_pool_amount: ", second_pool_amount, " ");
 
 
-     uint64_t bal_id1 = fill_pool(username, host, first_pool_lepts, first_pool_amount, dprop-> current_pool_id, bal->is_goal, bal->goal_id);
-     uint64_t bal_id2 = fill_pool(username, host, second_pool_lepts, second_pool_amount, dprop-> current_pool_id + 1, bal->is_goal, bal->goal_id);
+     uint64_t bal_id1 = fill_pool(username, host, first_pool_lepts, first_pool_amount, acc-> current_pool_id, bal->is_goal, bal->goal_id);
+     uint64_t bal_id2 = fill_pool(username, host, second_pool_lepts, second_pool_amount, acc-> current_pool_id + 1, bal->is_goal, bal->goal_id);
      
      if (bal->is_goal == true){
             add_balance_id_to_goal(host, bal->goal_id, bal_id1);
@@ -344,121 +340,173 @@ void priority_enter(const priorenter &op){
 
 }
 
-void start_new_cycle ( account_name host){
+
+void adjust_clan_income (account_name parent_host, account_name last_active_host){
+    account_index accounts(_self, _self);
+    auto acc = accounts.find(parent_host);   
+    sincome_index sincomes(_self, parent_host);
+
+    pool_index pools(_self, parent_host);
+    spiral_index spiral(_self, last_active_host);
+    rate_index rates(_self, last_active_host);
+
+    auto sp = spiral.find(0);
+    auto pool = pools.find(acc -> current_pool_id);
+    
+    //Добавляем бизнес-доход предыдущего цикла в таблицу без учета последнего пула.
+    if ((pool-> pool_num > 2) && (pool->pool_num < sp->pool_limit - 1)){
+        auto prev_rate = rates.find(pool->pool_num - 1);
+        auto sinc = sincomes.find(acc->current_cycle_num - 1);
+
+        sincomes.modify(sinc, _self, [&](auto &s){
+            s.pool_num = pool -> pool_num;
+            s.available = prev_rate -> system_income;
+        });
+    }    
+
+}
+
+void improve_params_of_new_cycle (account_name host, account_name main_host){
         account_index accounts(_self, _self);
         auto acc = accounts.find(host);
+        auto root_symbol = acc->get_root_symbol();
+        
+        sincome_index sincomes(_self, host);
+        cycle_index cycles(_self, host);
+        
 
+            cycles.emplace(_self, [&](auto &c){
+                c.id = cycles.available_primary_key();
+                c.active_host = main_host;
+                c.start_at_global_pool_id = acc->current_pool_id + 1; 
+                c.finish_at_global_pool_id = acc->current_pool_id + 2;    
+            });
+
+            accounts.modify(acc, _self, [&](auto &dp){
+                dp.current_pool_id  = acc->current_pool_id + 1;
+                dp.cycle_start_at_id = dp.current_pool_id;
+                dp.current_cycle_num = acc->current_cycle_num + 1;
+                dp.current_pool_num  = 1;
+                dp.priority_flag = true;       
+            });
+            
+
+            sincomes.emplace(_self, [&](auto &sinc){
+                sinc.active_host = main_host;
+                sinc.id = sincomes.available_primary_key();
+                sinc.pool_num = 0;
+                sinc.available = asset(0, root_symbol);
+            });
+}
+ 
+
+    void emplace_first_pools(account_name parent_host, account_name main_host, eosio::symbol_name root_symbol){
+        print("im in emplace_first_pools");
+        
+        spiral_index spiral(_self, main_host);
+        auto sp = spiral.find(0);
+        eosio_assert(sp != spiral.end(), "Protocol is not found. Set parameters at first");
+        sincome_index sincomes(_self, parent_host);
+        
+        account_index accounts(_self, _self);
+        auto acc = accounts.find(parent_host);
+        cycle_index cycles(_self, parent_host);
+        pool_index pools(_self, parent_host);
+
+        rate_index rates(_self, main_host);
+        
+        auto rate = rates.find(0);
+        auto next_rate = rates.find(1);
+        auto available_id = pools.available_primary_key();
+        print("new id: ", available_id);
+        print("acc->current_cycle_num: ", acc->current_cycle_num);
+        pools.emplace(_self, [&](auto &p){
+            p.id = available_id;
+            p.active_host = main_host;
+            p.total_lepts = sp->size_of_pool * LEPTS_PRECISION;
+            p.creserved_lepts = 0;
+            p.remain_lepts = p.total_lepts;
+            p.lept_cost = asset(rate->buy_rate, root_symbol);
+            p.total_win_withdraw = asset(0, root_symbol);
+            p.total_loss_withdraw = asset(0, root_symbol);
+            p.pool_num = 1;
+            p.cycle_num = acc->current_cycle_num;
+            p.pool_started_at = eosio::time_point_sec(now());
+            p.priority_until = acc->current_cycle_num == 1 ? eosio::time_point_sec(0) : eosio::time_point_sec(now()+ sp->priority_seconds);;
+            p.pool_expired_at = acc->current_cycle_num == 1 ? eosio::time_point_sec (now() + sp->pool_timeout) : eosio::time_point_sec (now() + sp->pool_timeout + sp->priority_seconds);
+            p.color = "black";
+        });
+
+          pools.emplace(_self, [&](auto &p){
+                p.id = available_id + 1;
+                p.active_host = main_host;
+                p.total_lepts = sp->size_of_pool * LEPTS_PRECISION;
+                p.creserved_lepts = 0;
+                p.remain_lepts = p.total_lepts;
+                p.lept_cost = asset(next_rate->buy_rate, root_symbol);
+                p.color = p.id % 2 == 0 ? "black" : "white"; 
+                p.cycle_num = acc->current_cycle_num;
+                p.pool_num = 2;
+                p.pool_started_at = eosio::time_point_sec(now());
+                p.priority_until = acc->current_cycle_num == 1 ? eosio::time_point_sec(0) : eosio::time_point_sec(now()+ sp->priority_seconds);;
+                p.pool_expired_at = acc->current_cycle_num == 1 ? eosio::time_point_sec (now() + sp->pool_timeout) : eosio::time_point_sec (now() + sp->pool_timeout + sp->priority_seconds);
+                p.total_win_withdraw = asset(0, root_symbol);
+                p.total_loss_withdraw = asset(0, root_symbol);
+            }); 
+        print("Success emplace !!!");
+    }
+
+
+void start_new_cycle ( account_name host ) {
+        account_index accounts(_self, _self);
+        sincome_index sincomes(_self, host);
+        cycle_index cycles(_self, host);
+                
+        auto acc = accounts.find(host);
+        account_name main_host = acc->get_active_host();
+        account_name last_active_host = acc->active_host;
+                
+        auto root_symbol = acc->get_root_symbol();
+            
         if (acc->need_switch) {
 
-            account_name main_host = (acc->childrens).back();
+            main_host = (acc->childrens).back();
             
             accounts.modify(acc, _self, [&](auto &a){
                 a.need_switch = false;
                 a.active_host = main_host;
             });
-            auto root_symbol = acc->get_root_symbol();
+
+            adjust_clan_income(host, last_active_host);
+            improve_params_of_new_cycle(host, main_host);
+            print("I NEED SWITCH!");
+            print("host:", host);
+            print("main host: ", main_host);
             emplace_first_pools(host, main_host, root_symbol);
 
         } else {
-            auto main_host = acc->get_active_host();
-            dprop_index dprops(_self, host);
-            sincome_index sincomes(_self, host);
-
-            cycle_index cycles(_self, main_host);
-            pool_index pools(_self, main_host);
             rate_index rates(_self, main_host);
             spiral_index spiral(_self, main_host);
-
-            auto root_symbol = acc->get_root_symbol();
-            auto dprop = dprops.find(0);
-            auto pool = pools.find(dprop -> current_pool_id);
-            auto cycle = cycles.find(dprop-> current_cycle_num - 1);
+            
+            auto cycle = cycles.find(acc-> current_cycle_num - 1);
             auto rate = rates.find(0);
             auto next_rate = rates.find(1);
-
             auto sp = spiral.find(0);
-
-            //Добавляем бизнес-доход предыдущего цикла в таблицу без учета последнего пула.
-            if ((pool-> pool_num > 2) && (pool->pool_num < sp->pool_limit - 1)){
-                auto prev_rate = rates.find(pool->pool_num - 1);
-                auto sinc = sincomes.find(dprop->current_cycle_num - 1);
-
-                sincomes.modify(sinc, _self, [&](auto &s){
-                    s.pool_num = pool -> pool_num;
-                    s.available = prev_rate -> system_income;
-                });
-            }
-
-            cycles.emplace(_self, [&](auto &c){
-                c.id = cycles.available_primary_key();
-                c.start_at_global_pool_id = dprop->current_pool_id + 1; 
-                c.finish_at_global_pool_id = dprop->current_pool_id + 2;    
-            });
-
-            dprops.modify(dprop, _self, [&](auto &dp){
-                dp.current_pool_id  = dprop->current_pool_id + 1;
-                dp.cycle_start_at_id = dp.current_pool_id;
-                dp.current_cycle_num = dprop->current_cycle_num + 1;
-                dp.current_pool_num  = 1;
-                dp.priority_flag = true;
-                      
-            });
             
+            adjust_clan_income(host, last_active_host);
+            
+            pool_index pools(_self, host);
             uint64_t available_id = pools.available_primary_key();
-
-            pools.emplace(_self, [&](auto &p){
-                p.total_lepts = sp->size_of_pool * LEPTS_PRECISION;
-                p.id = available_id;
-                p.creserved_lepts = 0;
-                p.remain_lepts = sp -> size_of_pool * LEPTS_PRECISION;
-                p.lept_cost = asset(rate->buy_rate, root_symbol);
-                p.cycle_num = pool->cycle_num + 1;
-                p.pool_num = 1;
-                p.color = p.id % 2 == 0 ? "black" : "white"; 
-                p.pool_started_at = eosio::time_point_sec(now());
-                p.priority_until = eosio::time_point_sec(now()+ sp->priority_seconds);
-                p.pool_expired_at = eosio::time_point_sec (now() + sp->pool_timeout + sp->priority_seconds);
-                p.total_win_withdraw = asset(0, root_symbol);
-                p.total_loss_withdraw = asset(0, root_symbol);
-            });
-
-
-            pools.emplace(_self, [&](auto &p){
-                p.total_lepts = sp->size_of_pool * LEPTS_PRECISION;
-                p.id = available_id + 1;
-                p.creserved_lepts = 0;
-                p.remain_lepts = sp -> size_of_pool * LEPTS_PRECISION;
-                p.lept_cost = asset(next_rate->buy_rate, root_symbol);
-                p.cycle_num = pool->cycle_num + 1;
-                p.pool_num = 2;
-                p.color = p.id % 2 == 0 ? "black" : "white"; 
-                p.pool_started_at = eosio::time_point_sec(now());
-                p.priority_until = eosio::time_point_sec(now()+ sp->priority_seconds);
-                p.pool_expired_at = eosio::time_point_sec (now() + sp->pool_timeout + sp->priority_seconds);
-                p.total_win_withdraw = asset(0, root_symbol);
-                p.total_loss_withdraw = asset(0, root_symbol);
-            });
-
-
+            improve_params_of_new_cycle(host, main_host);
             
-            sincomes.emplace(_self, [&](auto &sinc){
-                sinc.id = sincomes.available_primary_key();
-                sinc.pool_num = 0;
-                sinc.available = asset(0, root_symbol);
-            });
-            
-            next_goals(host);
-
-            // MAKE LOCAL PRIORITY ENTER BY GOAL
-            // action(
-            //     permission_level{ _self, N(active) },
-            //     N(goals), N(next),
-            //     std::make_tuple() 
-            // ).send();
-
-            refresh_state(host);  
+            emplace_first_pools(host, main_host, root_symbol);
 
         }
+
+            next_goals(host);
+            
+            refresh_state(host);  
+            
     };
 
     void next_pool( account_name host){
@@ -467,11 +515,10 @@ void start_new_cycle ( account_name host){
         auto acc = accounts.find(host);
         auto main_host = acc->get_active_host();
         
-        dprop_index dprops(_self, host);
         sincome_index sincomes(_self, host);
+        cycle_index cycles(_self, host);
+        pool_index pools(_self, host);
 
-        cycle_index cycles(_self, main_host);
-        pool_index pools(_self, main_host);
         rate_index rates(_self, main_host);
         spiral_index spiral(_self, main_host);
         
@@ -479,9 +526,8 @@ void start_new_cycle ( account_name host){
         auto root_symbol = acc->get_root_symbol();
         print("SYMBOLS: ", _SYM , " : ");
         print(root_symbol);
-        auto dprop = dprops.find(0);
-        auto pool = pools.find(dprop -> current_pool_id);
-        auto cycle = cycles.find(dprop -> current_cycle_num - 1);
+        auto pool = pools.find(acc -> current_pool_id);
+        auto cycle = cycles.find(acc -> current_cycle_num - 1);
         
         auto sp = spiral.find(0);
         
@@ -489,39 +535,34 @@ void start_new_cycle ( account_name host){
         uint64_t reserved_lepts = 0;
 
         
-            
         //Если первые два пула не до конца закрыты, это значит, 
         //не все реинвестировали, и пул добавлять не нужно. 
-        print("dprop-> current_pool_num", dprop-> current_pool_num, " ");
+        print("acc-> current_pool_num", acc-> current_pool_num, " ");
             
-        if (dprop -> current_pool_num > 1) {
-            auto rate = rates.find(dprop-> current_pool_num);
-            print("dprop-> current_pool_num", dprop-> current_pool_num, " ");
+        if (acc -> current_pool_num > 1) {
+            auto rate = rates.find(acc-> current_pool_num);
+            print("acc-> current_pool_num", acc-> current_pool_num, " ");
             //Если это обычный пул, то добавляем по 1\
 
-             cycles.modify(cycle, 0, [&](auto &c ){
+             cycles.modify(cycle, _self, [&](auto &c ){
                 c.finish_at_global_pool_id = cycle -> finish_at_global_pool_id + 1;
             });
 
-            dprops.modify(dprop, 0, [&](auto &dp){
+            accounts.modify(acc, _self, [&](auto &dp){
                dp.current_pool_num = pool -> pool_num + 1;
                dp.current_pool_id  = pool -> id + 1;
             });
-            print("dprop-> current_pool_num_after_modify", dprop-> current_pool_num, " ");
+            print("acc-> current_pool_num_after_modify", acc-> current_pool_num, " ");
             
-            auto prev_prev_pool = pools.find(dprop -> current_pool_id - 2);
+            auto prev_prev_pool = pools.find(acc -> current_pool_id - 2);
             
             dreserved_lepts = (prev_prev_pool -> total_lepts - prev_prev_pool -> remain_lepts ) / LEPTS_PRECISION  * rate -> sell_rate / rate -> buy_rate  \
                   * LEPTS_PRECISION;
 
             reserved_lepts = uint64_t(dreserved_lepts);
 
-
-            
-            
-            
             if ((pool-> pool_num > 1) && (pool->pool_num < sp->pool_limit )){
-                auto sinc = sincomes.find(dprop->current_cycle_num - 1);
+                auto sinc = sincomes.find(acc->current_cycle_num - 1);
             
                 sincomes.modify(sinc, _self, [&](auto &s){
                     s.pool_num = pool -> pool_num;
@@ -531,6 +572,7 @@ void start_new_cycle ( account_name host){
                 
             pools.emplace(_self, [&](auto &p){
                 p.id = pools.available_primary_key();
+                p.active_host = main_host;
                 p.total_lepts = sp->size_of_pool * LEPTS_PRECISION;
                 p.creserved_lepts = prev_prev_pool -> creserved_lepts;
                 p.remain_lepts = p.total_lepts - reserved_lepts;
@@ -548,17 +590,15 @@ void start_new_cycle ( account_name host){
              
         
         } else {
-                auto rate = rates.find(dprop-> current_pool_num);
+                auto rate = rates.find(acc-> current_pool_num);
                 print("buyrate:", rate->buy_rate);
                 
-                dprops.modify(dprop, _self, [&](auto &dp){
-                   dp.current_pool_num = pool -> pool_num + 1;
-                   dp.current_pool_id  = pool -> id + 1;
-                   dp.priority_flag = false;
-                });  
-
-
-
+                accounts.modify(acc, _self, [&](auto &a){
+                   a.current_pool_num = pool -> pool_num + 1;
+                   a.current_pool_id  = pool -> id + 1;
+                   a.priority_flag = false;     
+                });
+                
         }
 
         
@@ -567,7 +607,7 @@ void start_new_cycle ( account_name host){
         
     };
 
-
+   
 
     void start_action (const start &op){
         if (op.host == op.child_host)
@@ -578,6 +618,9 @@ void start_new_cycle ( account_name host){
         account_index accounts(_self, _self);
         auto main_host = op.host;
         
+        sincome_index sincomes (_self, main_host);
+        cycle_index cycles (_self, op.host);
+
         auto account = accounts.find(main_host);
         auto root_symbol = account -> get_root_symbol();
         eosio_assert(account != accounts.end(), "Account is not upgraded to Host. Please update your account and try again.");
@@ -589,90 +632,42 @@ void start_new_cycle ( account_name host){
 
             eosio_assert(account->activated == false, "Protocol is already active and cannot be changed now.");
             
-            accounts.modify(account, 0, [&](auto &a){
+            accounts.modify(account, _self, [&](auto &a){
                 a.activated = true;
             });
-            emplace_first_pools(main_host, main_host, root_symbol);
-       
+                 // auto first_cycle = cycles.find(0);
+
+            cycles.emplace(_self, [&](auto &c){
+                c.active_host = main_host;
+                c.id = cycles.available_primary_key();
+                c.start_at_global_pool_id = 0;
+                c.finish_at_global_pool_id = 1;
+            });
+
+            sincomes.emplace(_self, [&](auto &sinc){
+                sinc.active_host = main_host;
+                sinc.id = 0;
+                sinc.pool_num = 0;
+                sinc.available = asset(0, root_symbol);
+            });
+
+            emplace_first_pools(op.host, main_host, root_symbol);
+        
         } else {
+            print("account->parameters_setted: ", account->parameters_setted);
+            
+            eosio_assert(account->parameters_setted == true, "Cant start branch without setted parameters");
             main_host = child_hosts.back();
             eosio_assert(account->active_host != main_host, "Protocol is already active and cannot be changed now.");
             eosio_assert(main_host == op.child_host, "Wrong last non-active child host");
             
-            accounts.modify(account, 0, [&](auto &a){
+            accounts.modify(account, _self, [&](auto &a){
                 a.need_switch = true;
                 a.non_active_child = false;
             });
         };
     }
 
-    void emplace_first_pools(account_name parent_host, account_name main_host, eosio::symbol_name root_symbol){
-        print("im in emplace_first_pools");
-        
-        spiral_index spiral(_self, main_host);
-        auto sp = spiral.find(0);
-        eosio_assert(sp != spiral.end(), "Protocol is not found. Set parameters at first");
-        dprop_index dprops(_self, parent_host);
-        auto dprop = dprops.find(0);
-        sincome_index sincomes(_self, parent_host);
-        auto sinc = sincomes.find(0);
-
-        cycle_index cycles(_self, main_host);
-        pool_index pools(_self, main_host);
-        rate_index rates(_self, main_host);
-        
-        if (dprop == dprops.end())
-            dprops.emplace(_self, [&](auto &dp){}); 
-
-        auto rate = rates.find(0);
-        auto next_rate = rates.find(1);
-                
-        pools.emplace(_self, [&](auto &p){
-            p.id = 0;
-            p.total_lepts = sp->size_of_pool * LEPTS_PRECISION;
-            p.creserved_lepts = 0;
-            p.remain_lepts = p.total_lepts;
-            p.lept_cost = asset(rate->buy_rate, root_symbol);
-            p.total_win_withdraw = asset(0, root_symbol);
-            p.total_loss_withdraw = asset(0, root_symbol);
-            p.pool_num = 1;
-            p.cycle_num = 1;
-            p.pool_started_at = eosio::time_point_sec(now());
-            p.priority_until = eosio::time_point_sec(0);
-            p.pool_expired_at = eosio::time_point_sec (now() + sp->pool_timeout);
-            p.color = "black";
-        });
-
-          pools.emplace(_self, [&](auto &p){
-                p.id = 1;
-                p.total_lepts = sp->size_of_pool * LEPTS_PRECISION;
-                p.creserved_lepts = 0;
-                p.remain_lepts = p.total_lepts;
-                p.lept_cost = asset(next_rate->buy_rate, root_symbol);
-                p.color = p.id % 2 == 0 ? "black" : "white"; 
-                p.cycle_num = 1;
-                p.pool_num = 2;
-                p.pool_started_at = eosio::time_point_sec(now());
-                p.priority_until = eosio::time_point_sec(0);
-                p.pool_expired_at = eosio::time_point_sec (now() + sp->pool_timeout);
-                p.total_win_withdraw = asset(0, root_symbol);
-                p.total_loss_withdraw = asset(0, root_symbol);
-            }); 
-
-        
-        cycles.emplace(_self, [&](auto &c){
-            c.id = cycles.available_primary_key();
-            c.start_at_global_pool_id = 0;
-            c.finish_at_global_pool_id = 1;
-        });
-
-        if (sinc == sincomes.end())
-        sincomes.emplace(_self, [&](auto &sinc){
-            sinc.id = 0;
-            sinc.pool_num = 0;
-            sinc.available = asset(0, root_symbol);
-        }); 
-    }
 
     void setfee_action(const setfee &op){
         require_auth(_dacomfee);
@@ -687,7 +682,7 @@ void start_new_cycle ( account_name host){
             });
         } else {
      
-           fee.modify(fe, 0, [&](auto &f){
+           fee.modify(fe, _dacomfee, [&](auto &f){
                 f.createhost = op.createhost;
                 f.systemfee = op.systemfee;
             });
@@ -709,10 +704,13 @@ void start_new_cycle ( account_name host){
 
         if (account->non_active_child == true) {
             main_host = child_hosts.back();
-            eosio_assert(account->active_host != main_host, "111Protocol is already active and cannot be changed now.");
+            eosio_assert(account->active_host != main_host, "Protocol is already active and cannot be changed now.");
             eosio_assert(main_host == op.child_host, "Wrong last non-active child host");
+            spiral_index last_params (_self, account->active_host);
+            auto lp = last_params.find(0);
+            eosio_assert(lp->size_of_pool <= op.size_of_pool, "Size of pool cannot be decreased in child host");
         } else {
-            eosio_assert(account->activated == false, "222Protocol is already active and cannot be changed now.");
+            eosio_assert(account->activated == false, "Protocol is already active and cannot be changed now.");
         }
 
         
@@ -848,13 +846,15 @@ void start_new_cycle ( account_name host){
 
 
     
-    void deposit ( account_name username, account_name host, eosio::asset amount ){
+    void deposit ( account_name username, account_name host, eosio::asset amount, account_name code ){
         require_auth(username);
         eosio_assert( amount.is_valid(), "Rejected. Invalid quantity" );
 
         refresh_state(host);
         account_index accounts(_self, _self);
         auto acc = accounts.find(host);
+        eosio_assert(acc->root_token_contract == code, "Wrong token contract for this host");
+
         account_name main_host = acc->get_active_host();
         print("main_host: ", main_host);
         print("host: ", host);
@@ -865,8 +865,7 @@ void start_new_cycle ( account_name host){
         }
 
         rate_index rates(_self, main_host);
-        pool_index pools(_self, main_host);
-        dprop_index dprops(_self, host);
+        pool_index pools(_self, host);
         
         auto root_symbol = acc->get_root_symbol();
 
@@ -877,11 +876,10 @@ void start_new_cycle ( account_name host){
         eosio_assert(acc != accounts.end(), "Rejected. Host is not founded.");
         eosio_assert(acc -> activated == true, "Rejected. Protocol is not active");
 
-        auto dprop = dprops.find(0);
-        auto pool = pools.find( dprop-> current_pool_id );
+        auto pool = pools.find( acc -> current_pool_id );
         //eosio_assert(pool -> remain_lepts <= pool->total_lepts, "Prevented Deposit. System error");
 
-        eosio_assert( dprop-> priority_flag == false, "This is a Priority Time");
+        eosio_assert( acc-> priority_flag == false, "This is a Priority Time");
 
         eosio_assert ( pool -> pool_expired_at > eosio::time_point_sec(now()), "Rejected. Pool is Expired. Need manual refresh.");
         
@@ -893,7 +891,7 @@ void start_new_cycle ( account_name host){
         print("lepts: ", lepts);
         eosio_assert(pool -> remain_lepts >= lepts, "Not enought LEPT in target pool");
         
-        fill_pool(username, host, lepts, amount, dprop-> current_pool_id);
+        fill_pool(username, host, lepts, amount, acc -> current_pool_id);
     
         refresh_state(host);
         print("Successful deposit in the DACom protocol");
@@ -907,46 +905,58 @@ void start_new_cycle ( account_name host){
         auto acc = accounts.find(host);
         account_name main_host = acc->get_active_host();
 
-        pool_index pools(_self, main_host);
-        dprop_index dprops(_self, host);
+        pool_index pools(_self, host);
         spiral_index spiral(_self, main_host);
 
         auto sp = spiral.find(0);
-        auto dprop = dprops.find(0);
-        auto pool = pools.find(dprop -> current_pool_id);
+        auto pool = pools.find(acc -> current_pool_id);
         print("im on refersh");
-        if (dprop -> priority_flag == true){
+        if (acc -> priority_flag == true){
             if (pool->pool_started_at + sp->priority_seconds < eosio::time_point_sec(now()) ||
                 (pool -> remain_lepts < LEPTS_PRECISION)){
 
                 print("im in condationn");
-                dprops.modify(dprop, _self, [&](auto &dp){
+                accounts.modify(acc, _self, [&](auto &dp){
                     dp.priority_flag = false;
                 });
+                print("beside");
+                print("remain_lepts: ", pool -> remain_lepts);
 
                 pools.modify(pool, _self, [&](auto &p){
                     p.remain_lepts = pool->remain_lepts / LEPTS_PRECISION * LEPTS_PRECISION;
                 });
 
-                auto next_pool = pools.find(dprop->current_pool_id + 1);
+                print("im after condationn");
+                
+                auto next_pool = pools.find(acc->current_pool_id + 1);
                 pools.modify(next_pool, _self, [&](auto &p ){
                     p.remain_lepts = next_pool->remain_lepts / LEPTS_PRECISION * LEPTS_PRECISION; 
                 });
+
                 refresh_state(host);
 
             }
         } else {
+            print("im in else");
             //Если пул истек, или доступных пулов больше нет, или оставшихся лепт больше нет, то новый цикл
             if ((pool -> pool_expired_at < eosio::time_point_sec(now()) || \
                 ((pool -> pool_num + 1 == sp->pool_limit) && (pool -> remain_lepts == 0)))){
-                    
+                print("im in first if");
                 start_new_cycle(host);
           
             } else if ((pool -> remain_lepts < LEPTS_PRECISION)){
             //Если просто нет лепт - новый пул. 
             //На случай, если приоритетные пулы полностью заполнены с остатком менее 1 LEPT, повторный рефреш. 
+                print("im in second if");
                 next_pool(host);
                 refresh_state(host);
+
+            } else if (acc->current_pool_num < 3) {
+                //Отдельно округляем остатки в случае, если приоритетным входом или целями 
+                //воспользовались только частично
+                pools.modify(pool, _self, [&](auto &p ){
+                    p.remain_lepts = pool->remain_lepts / LEPTS_PRECISION * LEPTS_PRECISION; 
+                });
             }
         }
         
@@ -960,18 +970,17 @@ void start_new_cycle ( account_name host){
         auto acc = accounts.find(host);
         auto main_host = acc -> get_active_host();
 
-        cycle_index cycles(_self, main_host);
-        pool_index pools(_self, main_host);
-        dprop_index dprops(_self, host);
-        balance_index balance(_self, username);
+        cycle_index cycles(_self, host);
+        pool_index pools(_self, host);
         rate_index rates(_self, main_host);
         
-        auto root_symbol = acc->get_root_symbol();
+        balance_index balance(_self, username);
         
-
-        auto dprop = dprops.find(0);
+        auto root_symbol = acc->get_root_symbol();
+        print("I WANT TO FIND: ", filled_pool_id);
         auto pool = pools.find(filled_pool_id);
-        auto rate = rates.find(dprop->current_pool_num + 1);
+        eosio_assert(pool != pools.end(), "Cant FIND");
+        auto rate = rates.find(acc->current_pool_num + 1);
         uint64_t next_lept_for_sale;
         uint64_t remain_lepts;
 
@@ -981,6 +990,10 @@ void start_new_cycle ( account_name host){
             next_lept_for_sale = lepts * rate->sell_rate / rate->buy_rate;
         
         if (lepts > pool -> remain_lepts){
+            print("lepts: ", lepts);
+            print("pool -> remain_lepts", pool->remain_lepts);
+            print("pool->cycle_num", pool -> cycle_num);
+
             uint64_t floor_remain_lepts = LEPTS_PRECISION * pool->remain_lepts / LEPTS_PRECISION + LEPTS_PRECISION;
             eosio_assert(lepts <= floor_remain_lepts, "Oops, something wrong.");
             remain_lepts = floor_remain_lepts - lepts;
@@ -990,7 +1003,7 @@ void start_new_cycle ( account_name host){
         
         forecasts = calculate_forecast(username, host, lepts, pool -> pool_num - 1);
 
-        pools.modify(pool, 0, [&](auto &p){
+        pools.modify(pool, _self, [&](auto &p){
             p.remain_lepts = remain_lepts;
 //          p.remain_lepts = LEPTS_PRECISION * remain_lepts / LEPTS_PRECISION;
         });
@@ -1035,18 +1048,15 @@ void start_new_cycle ( account_name host){
         
         auto child_host = bal -> get_active_host();
         auto parent_host = bal -> host;
-        auto account = accounts.find(parent_host);
+        auto acc = accounts.find(parent_host);
 
-        auto root_symbol = account->get_root_symbol();
-        
-        
+        auto root_symbol = acc->get_root_symbol();
         
         refresh_state(parent_host);
-        dprop_index dprops(_self, parent_host);
-
-        cycle_index cycles(_self, child_host);
+        
+        cycle_index cycles(_self, parent_host);
         rate_index rates(_self, child_host);
-        pool_index pools(_self, child_host);
+        pool_index pools(_self, parent_host);
         
         
         auto pool_start = pools.find(bal -> global_pool_id);
@@ -1054,8 +1064,6 @@ void start_new_cycle ( account_name host){
         auto next_cycle = cycles.find(pool_start -> cycle_num);
         auto pools_in_cycle = cycle -> finish_at_global_pool_id - cycle -> start_at_global_pool_id + 1;
         
-        
-        auto dprop = dprops.find(0);
         auto last_pool = pools.find(cycle -> finish_at_global_pool_id );
         auto has_new_cycle = false;
 
@@ -1076,11 +1084,11 @@ void start_new_cycle ( account_name host){
                 auto look_pool = pools.find(i);
                 auto purchase_amount = bal-> purchase_amount;
                 
-                if (((dprop -> current_pool_num == pool_start -> pool_num ) && (dprop -> current_cycle_num == pool_start -> cycle_num)) || \
+                if (((acc -> current_pool_num == pool_start -> pool_num ) && (acc -> current_cycle_num == pool_start -> cycle_num)) || \
                     ((pool_start -> pool_num < 3) && (pools_in_cycle < 3)) || (has_new_cycle && (pool_start->pool_num == last_pool -> pool_num)))
 
                 {
-                    balance.modify(bal, 0, [&](auto &b){
+                    balance.modify(bal, username, [&](auto &b){
                           b.last_recalculated_win_pool_id = i;
                           b.available = purchase_amount;
                     });
@@ -1119,7 +1127,7 @@ void start_new_cycle ( account_name host){
                         
                         }
                        
-                        balance.modify(bal, 0, [&](auto &b){
+                        balance.modify(bal, username, [&](auto &b){
                             b.last_recalculated_win_pool_id = i;
                             b.lept_for_sale = new_lept_for_sale;
                             b.next_lept_for_sale = new_reduced_lepts;
@@ -1132,7 +1140,7 @@ void start_new_cycle ( account_name host){
 
                         spiral_index spiral(_self, parent_host);
                         auto sp = spiral.find(0);
-                        balance.modify(bal, 0, [&](auto &b){
+                        balance.modify(bal, username, [&](auto &b){
                             b.last_recalculated_win_pool_id = i;
                             b.win = false;
                             b.available = asset(purchase_amount.amount * (PERCENT_PRECISION - sp -> loss_percent) / PERCENT_PRECISION, root_symbol) ;
@@ -1216,20 +1224,17 @@ void start_new_cycle ( account_name host){
         auto sys_balance_id = op.sbalanceid;
         auto username = op.username;
 
-        dprop_index dprops(_self, host);
-        
         sincome_index sincomes(_self, host);
         
         fee_index fee(_self,_self);
         auto f = fee.find(0);
         auto system_fee = f->systemfee;
-        auto dprop = dprops.find(0);
         auto hoperator = acc -> hoperator;
 
         auto sinc = sincomes.find(sys_balance_id);
         eosio_assert(sinc -> withdrawed == false, "System balance is already withdrawed");
         
-        eosio_assert(sinc -> id < dprop -> current_cycle_num - 1, "Only closed cycles can be withdrawed");
+        eosio_assert(sinc -> id < acc -> current_cycle_num - 1, "Only closed cycles can be withdrawed");
         
         eosio::asset total_available = sinc -> available;
         eosio::asset system_amount = asset(system_fee * total_available.amount / PERCENT_PRECISION, _SYM);
@@ -1238,7 +1243,7 @@ void start_new_cycle ( account_name host){
 
         action(
             permission_level{ _self, N(active) },
-            N(eosio.token), N(transfer),
+            acc->root_token_contract, N(transfer),
             std::make_tuple( _self, host, host_amount, std::string("System Withdraw")) 
         ).send();
 
@@ -1247,13 +1252,13 @@ void start_new_cycle ( account_name host){
             if (hoperator != 0 ){
                 action(
                     permission_level{ _self, N(active) },
-                    N(eosio.token), N(transfer),
+                    acc->root_token_contract, N(transfer),
                     std::make_tuple( _self, hoperator, operator_amount, std::string("System Withdraw")) 
                 ).send();
 
                 action(
                     permission_level{ _self, N(active) },
-                    N(eosio.token), N(transfer),
+                    acc->root_token_contract, N(transfer),
                     std::make_tuple( _self, _dacomfee, host_amount, std::string("System Withdraw")) 
                 ).send();
 
@@ -1263,7 +1268,7 @@ void start_new_cycle ( account_name host){
 
                 action(
                     permission_level{ _self, N(active) },
-                    N(eosio.token), N(transfer),
+                    acc->root_token_contract, N(transfer),
                     std::make_tuple( _self, _dacomfee, total_sys_amount, std::string("System Withdraw")) 
                 ).send();
 
@@ -1292,10 +1297,9 @@ void start_new_cycle ( account_name host){
 
         refresh_state(host);
         
-        dprop_index dprops(_self, host);
         rate_index rates(_self, main_host);
-        pool_index pools(_self, main_host);
-        cycle_index cycles(_self, main_host);
+        pool_index pools(_self, host);
+        cycle_index cycles(_self, host);
 
         balance_index balance (_self, username);
         spiral_index spiral(_self, main_host);
@@ -1311,7 +1315,6 @@ void start_new_cycle ( account_name host){
         
         eosio_assert(! bal -> withdrawed, "Balance is already withdrawed");
 
-        auto dprop = dprops.find(0);
         auto next_cycle = cycles.find(pool -> cycle_num);
         auto has_new_cycle = false;
         if (next_cycle != cycles.end())
@@ -1325,7 +1328,7 @@ void start_new_cycle ( account_name host){
         uint64_t pools_in_cycle = cycle -> finish_at_global_pool_id - cycle -> start_at_global_pool_id + 1;
         
         
-        if (((dprop -> current_pool_num == pool -> pool_num ) && (dprop -> current_cycle_num == pool -> cycle_num)) || \
+        if (((acc -> current_pool_num == pool -> pool_num ) && (acc -> current_cycle_num == pool -> cycle_num)) || \
             ((pool -> pool_num < 3) && (pools_in_cycle < 3)) || (has_new_cycle && (pool->pool_num == last_pool -> pool_num)))
 
         {
@@ -1333,7 +1336,7 @@ void start_new_cycle ( account_name host){
             if (bal->is_goal == false){
                 action(
                     permission_level{ _self, N(active) },
-                    N(eosio.token), N(transfer),
+                    acc->root_token_contract, N(transfer),
                     std::make_tuple( _self, username, bal -> purchase_amount, std::string("Withdraw")) 
                 ).send();
             } else {
@@ -1345,19 +1348,19 @@ void start_new_cycle ( account_name host){
 
             if (pool -> pool_num < 3){
 
-                pools.modify(pool, 0, [&](auto &p){
+                pools.modify(pool, _self, [&](auto &p){
                     p.remain_lepts = std::min(pool-> remain_lepts + bal -> lept_for_sale, pool->total_lepts);
                 }); 
 
             } else {
 
-                pools.modify(last_pool, 0, [&](auto &p){
+                pools.modify(last_pool, _self, [&](auto &p){
                     p.remain_lepts = std::min(last_pool-> remain_lepts + bal -> lept_for_sale, last_pool->total_lepts);
                 });
 
             }
 
-            balance.modify(bal, 0, [&](auto &b){
+            balance.modify(bal, username, [&](auto &b){
                 b.sold_amount = bal -> purchase_amount;
                 b.date_of_sale = eosio::time_point_sec(now());
                 b.lept_for_sale = 0; 
@@ -1374,7 +1377,7 @@ void start_new_cycle ( account_name host){
             if (bal->is_goal == false){
                 action(
                     permission_level{ _self, N(active) },
-                    N(eosio.token), N(transfer),
+                    acc->root_token_contract, N(transfer),
                     std::make_tuple( _self, username, amount, std::string("Withdraw")) 
                 ).send();
             } else {
@@ -1385,7 +1388,7 @@ void start_new_cycle ( account_name host){
             uint64_t lepts_from_reserved;
             if (bal -> win == true){
 
-                pools.modify(last_pool, 0, [&](auto &p){
+                pools.modify(last_pool, _self, [&](auto &p){
                     auto converted_lepts = bal->lept_for_sale * rate -> sell_rate / rate -> buy_rate;
                     
                     p.creserved_lepts = (last_pool->creserved_lepts + converted_lepts) % LEPTS_PRECISION;
@@ -1395,7 +1398,7 @@ void start_new_cycle ( account_name host){
                 });
             }
             else {
-                pools.modify(last_pool, 0, [&](auto &p){
+                pools.modify(last_pool, _self, [&](auto &p){
                      p.total_loss_withdraw = last_pool -> total_loss_withdraw + amount;
                 });
                 
@@ -1403,7 +1406,7 @@ void start_new_cycle ( account_name host){
             }
                 
 
-            balance.modify(bal, 0, [&](auto &b){
+            balance.modify(bal, username, [&](auto &b){
                 b.sold_amount = bal -> available;
                 b.date_of_sale = eosio::time_point_sec(now());
                 b.lept_for_sale = 0;  

@@ -17,47 +17,66 @@ using namespace eosio;
 extern "C" {
    
    void apply( uint64_t receiver, uint64_t code, uint64_t action ) {
-    if (code == N(eosio.token)){
         if (action == N(transfer)){
             auto op = eosio::unpack_action_data<eosio::currency::transfer>();
             if (op.from != _self){
-                auto code = op.memo.substr(0,3);
+                auto subcode = op.memo.substr(0,3);
                 auto delimeter = op.memo[3];
                 eosio_assert(delimeter == '-', "Wrong subcode format. Right format: code[3]-parameter");
                 auto parameter = op.memo.substr(4, op.memo.length());
-                uint64_t intcode = atoi(code.c_str());
+                uint64_t subintcode = atoi(subcode.c_str());
 
                 //codes:
                 //100 - deposit
                 //110 - pay for host
                 //200 - buyshares
                 //300 - goal activate action
+                
+                //TODO CHECK FOR CODE!!! if (code == N(eosio.token)){
 
-                switch (intcode){
+                switch (subintcode){
                     case 100: {
+                        //check for code inside
+                        //auto cd = eosio::string_to_name(code.c_str());
+                        
                         auto host = eosio::string_to_name(parameter.c_str());
-                        core().deposit(op.from, host, op.quantity);
+                        core().deposit(op.from, host, op.quantity, code);
                         break;
                     }
                     case 110: {
+                        //check for code outside
+                        //auto cd = eosio::string_to_name(code.c_str());
+                        print("code: ", code);
+                        //print("cd: " , cd);
+                        print("native: ", N(eosio.token));
+                        eosio_assert(code == N(eosio.token), "Only eosio.token contract can be used for upgrade");
                         auto host = eosio::string_to_name(parameter.c_str());
                         hosts().pay_for_upgrade(host, op.quantity);
                         break;
                     }
                     case 200: {
+                        //check for code outside
+                        //auto cd = eosio::string_to_name(code.c_str());
+                        
+                        eosio_assert(code == N(eosio.token), "Only eosio.token contract can be used for buy power");
                         auto host = eosio::string_to_name(parameter.c_str());
                         shares().buyshares_action(op.from, host, op.quantity);
                         break;
                     }
                     case 300: {
+                        //check for code inside
+
                         auto delimeter2 = parameter.find('-');
                         std::string parameter2 = parameter.substr(delimeter2+1, parameter.length());
                         
                         print("del2: ", delimeter2);
                         print("param2: ", parameter2);
                         auto host = eosio::string_to_name(parameter2.c_str());
-                        uint64_t goal_id = atoi(parameter.c_str());                    
-                        goal().donate_action(op.from, host, goal_id, op.quantity);
+                        uint64_t goal_id = atoi(parameter.c_str());    
+
+                        //auto cd = eosio::string_to_name(code.c_str());
+                                        
+                        goal().donate_action(op.from, host, goal_id, op.quantity, code);
                         break;
                     }
                     //default:
@@ -65,8 +84,7 @@ extern "C" {
                 }
 
             }
-        } 
-   }  else if (code == _self){
+        } else if (code == _self){
             switch (action){
                 //GOALS
                  case N(setgoal): {

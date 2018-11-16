@@ -103,6 +103,7 @@ struct goal {
         	g.lepts_for_each_pool = lepts_for_each_pool;
         	g.rotation_num = 1;
         	g.withdrawed = asset(0, root_symbol);
+        	g.available = asset(0, root_symbol);
         	g.validated = validated;
         });
 	};
@@ -178,14 +179,15 @@ struct goal {
 	}
 
 
-	void donate_action(account_name from, account_name host, uint64_t goal_id, eosio::asset quantity){
+	void donate_action(account_name from, account_name host, uint64_t goal_id, eosio::asset quantity, account_name code){
 		require_auth(from);
 		
 		//TODO check quantity enough and not overflow the pool size
 		goals_index goals(_self, host);
 		account_index accounts(_self, _self);
 		auto acc = accounts.find(host);
-
+		eosio_assert(acc->root_token_contract == code, "Wrong root token contract for this host");
+		eosio_assert((acc->root_token).symbol == quantity.symbol, "Wrong root symbol for this host");
 		auto goal = goals.find(goal_id);
 		
 
@@ -231,7 +233,7 @@ struct goal {
         	eosio::asset on_withdraw = goal->available - goal->activation_amount;
         	action(
 	            permission_level{ _self, N(active) },
-   		        N(eosio.token), N(transfer),
+   		        acc->root_token_contract, N(transfer),
         	    std::make_tuple( _self, username, on_withdraw, std::string("Goal Withdraw")) 
 	        ).send();
 
@@ -244,7 +246,7 @@ struct goal {
         	eosio::asset on_withdraw = goal->available;
         	action(
 	            permission_level{ _self, N(active) },
-   		        N(eosio.token), N(transfer),
+   		        acc->root_token_contract, N(transfer),
         	    std::make_tuple( _self, username, on_withdraw, std::string("Goal Withdraw")) 
 	        ).send();
 
