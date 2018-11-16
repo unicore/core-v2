@@ -27,8 +27,7 @@ struct goal {
 
 			matched_itr++;
 		}	
-		print("goal_balances_count: ", count);
-
+	
 		return count;
 	}
 
@@ -56,8 +55,7 @@ struct goal {
 		eosio_assert(lepts_for_each_pool <= size_of_pool / 2, "Lepts for each pool is more then possible" );
 		
 		eosio::asset amount = asset(lepts_for_each_pool * (buy_rate1 + buy_rate2), root_symbol);
-		print("goal amount: ", amount);
-
+	
 		return amount;
 	}
 
@@ -198,7 +196,6 @@ struct goal {
 		bool activated = quantity >= goal->activation_amount;
 		bool completed = goal->available + quantity >= goal->target;
 		//TODO CHECK IT 
-		print("Calc Validation percent: ", goal->total_votes / acc->total_shares);
 		bool validated = acc->goal_validation_percent <= goal->total_votes / acc->total_shares;
 
 		goals.modify(goal, from,[&](auto &g){

@@ -20,9 +20,7 @@ struct voting
 		for (auto i : list_for_delete){
 			auto vote_for_delete = votes.find(i);
 			votes.erase(vote_for_delete);
-			print("clear votes: ", idx->goal_id, " ,");
 		}
-		print(";");
 	}
 
 	uint64_t count_votes(account_name voter, account_name host){
@@ -35,7 +33,6 @@ struct voting
 			count++;
 			idx++;
 		}
-		print("vote count: ", count);
 		return count;
 	}
 
@@ -62,7 +59,6 @@ struct voting
 		auto goal_id = op.goal_id;
 		auto host = op.host;
 		auto voter = op.voter;
-		print("im in voting");
 		clear_old_votes_action(voter, host);
 		uint64_t vote_count = count_votes(voter, host);
 

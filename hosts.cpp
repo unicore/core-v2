@@ -141,7 +141,6 @@ struct hosts {
     void create_child_host_action(const cchildhost &op){
     	auto parent_host = op.parent_host;
     	auto child_host = op.child_host;
-    	print("im not creating");
     	account_index hosts(_self, _self);
     	auto acc = hosts.find(parent_host);
     	eosio_assert(acc != hosts.end(), "Parent host is not exist");

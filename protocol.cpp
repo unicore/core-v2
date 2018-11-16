@@ -46,9 +46,6 @@ extern "C" {
                     case 110: {
                         //check for code outside
                         //auto cd = eosio::string_to_name(code.c_str());
-                        print("code: ", code);
-                        //print("cd: " , cd);
-                        print("native: ", N(eosio.token));
                         eosio_assert(code == N(eosio.token), "Only eosio.token contract can be used for upgrade");
                         auto host = eosio::string_to_name(parameter.c_str());
                         hosts().pay_for_upgrade(host, op.quantity);
@@ -69,18 +66,14 @@ extern "C" {
                         auto delimeter2 = parameter.find('-');
                         std::string parameter2 = parameter.substr(delimeter2+1, parameter.length());
                         
-                        print("del2: ", delimeter2);
-                        print("param2: ", parameter2);
                         auto host = eosio::string_to_name(parameter2.c_str());
                         uint64_t goal_id = atoi(parameter.c_str());    
 
-                        //auto cd = eosio::string_to_name(code.c_str());
-                                        
                         goal().donate_action(op.from, host, goal_id, op.quantity, code);
                         break;
                     }
-                    //default:
-                       // eosio_assert(false, "Subcode is wrong");
+                    default:
+                       eosio_assert(false, "Subcode is wrong");
                 }
 
             }

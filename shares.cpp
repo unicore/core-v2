@@ -86,10 +86,8 @@ struct shares {
 		auto itr = market.find(S(4, BANCORE));
 		auto tmp = *itr;
 		uint64_t shares_out;
-		print("im in shares");
 		market.modify( itr, 0, [&]( auto &es ) {
-			print("im on first modify");
-        	shares_out = (es.convert( amount, S(0, CORE))).amount;
+	    	shares_out = (es.convert( amount, S(0, CORE))).amount;
 	    });
 
         eosio_assert( shares_out > 0, "Amount is not enought for buy 1 share" );
@@ -104,7 +102,6 @@ struct shares {
 	        	p.staked = shares_out;	
 	        });
 		} else {
-			print("i try modify");
 			power.modify(pexist, buyer, [&](auto &p){
 				p.power += shares_out;
 				p.staked += shares_out;
@@ -194,11 +191,7 @@ struct shares {
 			auto goal = goals.find(matched_itr -> goal_id);
 				
 			goals.modify(goal, _self, [&](auto &g){
-				print(" old_power: ", old_power);
-				print(" new_power: ", new_power);
 				g.total_votes = goal->total_votes - old_power + new_power;
-				print(" total_votes after: ", g.total_votes);
-				
 			});
 
 
@@ -291,7 +284,6 @@ struct shares {
 
 	void create_bancor_market(account_name host, uint64_t total_shares, eosio::asset quote_amount){
 		powermarket market(_self, host);
-		print("im on market creation");
 		auto itr = market.find(S(4,BANCORE));
 		if (itr == market.end()){
 				itr = market.emplace( host, [&]( auto& m ) {

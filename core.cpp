@@ -11,11 +11,9 @@ struct core {
         
         auto idx_bp = goals.template get_index<N(in_protocol)>();
         auto i_bp = idx_bp.lower_bound(1);
-        print("founded goals to disable: ");
         std::vector<uint64_t> list_for_disable;
 
         while(i_bp != idx_bp.end()) {
-            print (i_bp->id, ", ");
             list_for_disable.push_back(i_bp->id);
             i_bp++;
         };
@@ -36,8 +34,7 @@ struct core {
         auto i_bv = idx_bv.rbegin();
         bool filled = false;
         
-        print("founded goals, sorted by votes and activaed: ");
-
+      
         account_index accounts(_self, _self);
         auto acc = accounts.find(host);
         account_name active_host = acc->get_active_host();
@@ -56,7 +53,6 @@ struct core {
                     lepts_filled += i_bv -> lepts_for_each_pool;
                     if (lepts_filled <= half_of_pool){
                         list_for_enable.emplace_back(i_bv->id);
-                        print (i_bv->id, ", ");
                     };
                 
                     filled = lepts_filled >= half_of_pool;
@@ -133,18 +129,12 @@ struct core {
         eosio::asset first_pool_amount = asset(lepts * first_pool_rate->buy_rate / LEPTS_PRECISION, root_symbol);
         eosio::asset second_pool_amount = asset(lepts * second_pool_rate->buy_rate / LEPTS_PRECISION, root_symbol);
         eosio::asset amount_for_back = first_pool_amount + second_pool_amount;
-        print("first_pool_amount: ", first_pool_amount, " ");
-        print("second_pool_amount: ", second_pool_amount, " ");
-        print("acc-> current_pool_id ", acc-> current_pool_id, " ");
-
+       
         uint64_t bal_id1 = fill_pool(username, host, lepts, first_pool_amount, acc-> current_pool_id, true, goal_id);
         uint64_t bal_id2 = fill_pool(username, host, lepts, second_pool_amount, acc-> current_pool_id + 1, true, goal_id);
-        print("balid1: ", bal_id1);
-        print("balid2: ", bal_id2);
         
         add_balance_id_to_goal(host, goal_id, bal_id1);
         add_balance_id_to_goal(host, goal_id, bal_id2);
-        print("im on finish");
     }
 
 
@@ -154,7 +144,6 @@ void adjust_goal_balance(account_name host, uint64_t goal_id, eosio::asset amoun
     
     //Check for amount < nominal - diactivate
 
-    print("im on adjust_balance");
     bool disable = false;
     bool is_complete = false;
     auto goal = goals.find(goal_id);
@@ -170,9 +159,6 @@ void adjust_goal_balance(account_name host, uint64_t goal_id, eosio::asset amoun
     }
 
 
-    print(" total collected is: ", available);
-    print(" is_complete: ", is_complete);
-
     goals.modify(goal, _self, [&](auto &g){
         g.completed = is_complete;
         g.activated = !disable; 
@@ -184,8 +170,6 @@ void adjust_goal_balance(account_name host, uint64_t goal_id, eosio::asset amoun
 
 
 void add_balance_id_to_goal(account_name host, uint64_t goal_id, uint64_t balance_id){
-    print("add_balance_id_to_goal");
-    print("balance.id: ", balance_id);
     goals_index goals(_self, host);
     auto goal = goals.find(goal_id);
     std::vector <uint64_t> balance_ids = goal->balance_ids;
@@ -193,7 +177,6 @@ void add_balance_id_to_goal(account_name host, uint64_t goal_id, uint64_t balanc
 
     goals.modify(goal, _self, [&](auto &g){
         g.balance_ids = balance_ids;
-        print("added: ", balance_ids[0]);
     });
 
 }
@@ -201,13 +184,11 @@ void add_balance_id_to_goal(account_name host, uint64_t goal_id, uint64_t balanc
 void delete_balance_id_from_goal(account_name host, uint64_t goal_id, uint64_t balance_id){
     goals_index goals(_self, host);
     auto goal = goals.find(goal_id);
-    print("im on deletion_balance_id");
     std::vector <uint64_t> balance_ids = goal->balance_ids;
     auto itr = std::find(balance_ids.begin(), balance_ids.end(), balance_id);
     
     if (itr != balance_ids.end()){
         balance_ids.erase(itr);
-        print("im on erase");
         goals.modify(goal, _self, [&](auto &g){
             g.balance_ids = balance_ids;
         });
@@ -269,13 +250,8 @@ void priority_enter(const priorenter &op){
      //it will happen only on small distance from enter to exit pool
 
      if (bal->available >= total_enter){
-        print("IS POSITIVE");
         eosio::asset amount_for_back = asset(bal->available - total_enter);
-
-        print("Amount for back: ", amount_for_back);
-        print(" bal->available: ", bal->available);
-        print(" Total on enter: ", total_enter);
-        if (bal->is_goal == false){
+     if (bal->is_goal == false){
              action(
                     permission_level{ _self, N(active) },
                     acc->root_token_contract, N(transfer),
@@ -285,7 +261,6 @@ void priority_enter(const priorenter &op){
             adjust_goal_balance(bal->host, bal->goal_id, amount_for_back);
         };
     } else {
-        print("NEGATIVE!!!");
         //У пользователя есть доступная сумма баланса в токенах, которая меньше чем та, с которой участник 
         //может зайти в приоритете в лептах. Надо найти минимальную сумму в лептах, которая удовлетворяет
         //условиям баланса. Для этого берем курс покупки второго раунда, и высчитаем количество лепт по нему. 
@@ -294,12 +269,9 @@ void priority_enter(const priorenter &op){
     
         first_pool_lepts = second_pool_lepts;
         first_pool_amount = asset(first_pool_lepts * first_pool_rate->buy_rate / LEPTS_PRECISION, root_symbol);
-        print("first_pool_lepts: ", first_pool_lepts);
-        print("second_pool_lepts: ", second_pool_lepts);
-
+    
         second_pool_amount = asset(second_pool_lepts * second_pool_rate->sell_rate / LEPTS_PRECISION, root_symbol);
         eosio::asset amount_for_back = bal->available - (first_pool_amount + second_pool_amount);
-        print("amount_for_back", amount_for_back);
         
         action(
             permission_level{ _self, N(active) },
@@ -309,10 +281,7 @@ void priority_enter(const priorenter &op){
     
     }
      
-     print("first_pool_amount: ", first_pool_amount, " ");
-     print("second_pool_amount: ", second_pool_amount, " ");
-
-
+    
      uint64_t bal_id1 = fill_pool(username, host, first_pool_lepts, first_pool_amount, acc-> current_pool_id, bal->is_goal, bal->goal_id);
      uint64_t bal_id2 = fill_pool(username, host, second_pool_lepts, second_pool_amount, acc-> current_pool_id + 1, bal->is_goal, bal->goal_id);
      
@@ -401,7 +370,6 @@ void improve_params_of_new_cycle (account_name host, account_name main_host){
  
 
     void emplace_first_pools(account_name parent_host, account_name main_host, eosio::symbol_name root_symbol){
-        print("im in emplace_first_pools");
         
         spiral_index spiral(_self, main_host);
         auto sp = spiral.find(0);
@@ -418,8 +386,6 @@ void improve_params_of_new_cycle (account_name host, account_name main_host){
         auto rate = rates.find(0);
         auto next_rate = rates.find(1);
         auto available_id = pools.available_primary_key();
-        print("new id: ", available_id);
-        print("acc->current_cycle_num: ", acc->current_cycle_num);
         pools.emplace(_self, [&](auto &p){
             p.id = available_id;
             p.active_host = main_host;
@@ -453,7 +419,6 @@ void improve_params_of_new_cycle (account_name host, account_name main_host){
                 p.total_win_withdraw = asset(0, root_symbol);
                 p.total_loss_withdraw = asset(0, root_symbol);
             }); 
-        print("Success emplace !!!");
     }
 
 
@@ -479,10 +444,7 @@ void start_new_cycle ( account_name host ) {
 
             adjust_clan_income(host, last_active_host);
             improve_params_of_new_cycle(host, main_host);
-            print("I NEED SWITCH!");
-            print("host:", host);
-            print("main host: ", main_host);
-            emplace_first_pools(host, main_host, root_symbol);
+           emplace_first_pools(host, main_host, root_symbol);
 
         } else {
             rate_index rates(_self, main_host);
@@ -524,8 +486,6 @@ void start_new_cycle ( account_name host ) {
         
 
         auto root_symbol = acc->get_root_symbol();
-        print("SYMBOLS: ", _SYM , " : ");
-        print(root_symbol);
         auto pool = pools.find(acc -> current_pool_id);
         auto cycle = cycles.find(acc -> current_cycle_num - 1);
         
@@ -537,11 +497,9 @@ void start_new_cycle ( account_name host ) {
         
         //Если первые два пула не до конца закрыты, это значит, 
         //не все реинвестировали, и пул добавлять не нужно. 
-        print("acc-> current_pool_num", acc-> current_pool_num, " ");
             
         if (acc -> current_pool_num > 1) {
             auto rate = rates.find(acc-> current_pool_num);
-            print("acc-> current_pool_num", acc-> current_pool_num, " ");
             //Если это обычный пул, то добавляем по 1\
 
              cycles.modify(cycle, _self, [&](auto &c ){
@@ -552,7 +510,6 @@ void start_new_cycle ( account_name host ) {
                dp.current_pool_num = pool -> pool_num + 1;
                dp.current_pool_id  = pool -> id + 1;
             });
-            print("acc-> current_pool_num_after_modify", acc-> current_pool_num, " ");
             
             auto prev_prev_pool = pools.find(acc -> current_pool_id - 2);
             
@@ -591,7 +548,6 @@ void start_new_cycle ( account_name host ) {
         
         } else {
                 auto rate = rates.find(acc-> current_pool_num);
-                print("buyrate:", rate->buy_rate);
                 
                 accounts.modify(acc, _self, [&](auto &a){
                    a.current_pool_num = pool -> pool_num + 1;
@@ -654,7 +610,6 @@ void start_new_cycle ( account_name host ) {
             emplace_first_pools(op.host, main_host, root_symbol);
         
         } else {
-            print("account->parameters_setted: ", account->parameters_setted);
             
             eosio_assert(account->parameters_setted == true, "Cant start branch without setted parameters");
             main_host = child_hosts.back();
@@ -735,8 +690,9 @@ void start_new_cycle ( account_name host ) {
         eosio_assert((loss_percent > 0 ) && ( loss_percent <= 10000), "Loss Percent must be greater then 0 (0%) and less or equal 10000 (100%)");
         eosio_assert((base_rate >= 10) && (base_rate < 1000000000), "Base Rate must be greater or equal 10 and less then 1e9");
         eosio_assert((size_of_pool >= 10) && (size_of_pool < 1000000000), "Size of Pool must be greater or equal 10 and less then 1e9");
-        //eosio_assert((pool_limit >= 3) && (pool_limit < 1000), "Pool Count must be greater or equal 4 and less or equal 1000");
-        //eosio_assert((pool_timeout >= 60) && (pool_timeout < 7884000),"Pool Timeout must be greater or equal then 60 sec and less then 7884000 sec");
+        eosio_assert((pool_limit >= 3) && (pool_limit < 1000), "Pool Count must be greater or equal 4 and less or equal 1000");
+        eosio_assert((pool_timeout >= 60) && (pool_timeout < 7884000),"Pool Timeout must be greater or equal then 60 sec and less then 7884000 sec");
+        
         //s.priority_seconds 
         auto sp = spiral.find(0);
         auto rate = rates.find(0);
@@ -856,8 +812,6 @@ void start_new_cycle ( account_name host ) {
         eosio_assert(acc->root_token_contract == code, "Wrong token contract for this host");
 
         account_name main_host = acc->get_active_host();
-        print("main_host: ", main_host);
-        print("host: ", host);
         
         if (acc->is_whitelisted){
             auto user_is_whitelisted = acc->is_account_in_whitelist(username);
@@ -869,8 +823,6 @@ void start_new_cycle ( account_name host ) {
         
         auto root_symbol = acc->get_root_symbol();
 
-        print("ROOT SYMBOL: ", root_symbol);
-        print(" _SYM: ", _SYM);
         
         eosio_assert ( amount.symbol == root_symbol, "Rejected. Invalid symbol for this contract.");
         eosio_assert(acc != accounts.end(), "Rejected. Host is not founded.");
@@ -887,14 +839,11 @@ void start_new_cycle ( account_name host ) {
         eosio_assert(amount.amount % rate -> buy_rate == 0, "You can purchase only whole pieces of LEPT. Specify the amount of the multiple purchase rate.");
 
         uint64_t lepts = LEPTS_PRECISION * amount.amount / rate -> buy_rate;
-        print("remain_lepts: ", pool->remain_lepts);
-        print("lepts: ", lepts);
         eosio_assert(pool -> remain_lepts >= lepts, "Not enought LEPT in target pool");
         
         fill_pool(username, host, lepts, amount, acc -> current_pool_id);
     
         refresh_state(host);
-        print("Successful deposit in the DACom protocol");
     };
 
 
@@ -910,23 +859,18 @@ void start_new_cycle ( account_name host ) {
 
         auto sp = spiral.find(0);
         auto pool = pools.find(acc -> current_pool_id);
-        print("im on refersh");
         if (acc -> priority_flag == true){
             if (pool->pool_started_at + sp->priority_seconds < eosio::time_point_sec(now()) ||
                 (pool -> remain_lepts < LEPTS_PRECISION)){
 
-                print("im in condationn");
                 accounts.modify(acc, _self, [&](auto &dp){
                     dp.priority_flag = false;
                 });
-                print("beside");
-                print("remain_lepts: ", pool -> remain_lepts);
-
+        
                 pools.modify(pool, _self, [&](auto &p){
                     p.remain_lepts = pool->remain_lepts / LEPTS_PRECISION * LEPTS_PRECISION;
                 });
 
-                print("im after condationn");
                 
                 auto next_pool = pools.find(acc->current_pool_id + 1);
                 pools.modify(next_pool, _self, [&](auto &p ){
@@ -937,17 +881,14 @@ void start_new_cycle ( account_name host ) {
 
             }
         } else {
-            print("im in else");
             //Если пул истек, или доступных пулов больше нет, или оставшихся лепт больше нет, то новый цикл
             if ((pool -> pool_expired_at < eosio::time_point_sec(now()) || \
                 ((pool -> pool_num + 1 == sp->pool_limit) && (pool -> remain_lepts == 0)))){
-                print("im in first if");
                 start_new_cycle(host);
           
             } else if ((pool -> remain_lepts < LEPTS_PRECISION)){
             //Если просто нет лепт - новый пул. 
             //На случай, если приоритетные пулы полностью заполнены с остатком менее 1 LEPT, повторный рефреш. 
-                print("im in second if");
                 next_pool(host);
                 refresh_state(host);
 
@@ -977,7 +918,6 @@ void start_new_cycle ( account_name host ) {
         balance_index balance(_self, username);
         
         auto root_symbol = acc->get_root_symbol();
-        print("I WANT TO FIND: ", filled_pool_id);
         auto pool = pools.find(filled_pool_id);
         eosio_assert(pool != pools.end(), "Cant FIND");
         auto rate = rates.find(acc->current_pool_num + 1);
@@ -990,10 +930,7 @@ void start_new_cycle ( account_name host ) {
             next_lept_for_sale = lepts * rate->sell_rate / rate->buy_rate;
         
         if (lepts > pool -> remain_lepts){
-            print("lepts: ", lepts);
-            print("pool -> remain_lepts", pool->remain_lepts);
-            print("pool->cycle_num", pool -> cycle_num);
-
+       
             uint64_t floor_remain_lepts = LEPTS_PRECISION * pool->remain_lepts / LEPTS_PRECISION + LEPTS_PRECISION;
             eosio_assert(lepts <= floor_remain_lepts, "Oops, something wrong.");
             remain_lepts = floor_remain_lepts - lepts;
