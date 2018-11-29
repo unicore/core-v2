@@ -6,6 +6,8 @@ namespace eosio {
     struct goals{
         uint64_t id;
         account_name username;
+        eosio::time_point_sec created;
+
         bool activated = false;
         bool in_protocol = false;
         bool completed = false;
@@ -32,7 +34,7 @@ namespace eosio {
         account_name by_username() const {return username; }
         account_name by_host() const {return host;}
         uint64_t by_rotation_num() const {return rotation_num;}
-        EOSLIB_SERIALIZE( goals, (id)(username)(activated)(in_protocol)(completed)(reported)
+        EOSLIB_SERIALIZE( goals, (id)(username)(created)(activated)(in_protocol)(completed)(reported)
             (validated)(host)(lepts_for_each_pool)(shortdescr)(descr)(target)(activation_amount)
             (available)(report)(rotation_num)(total_votes)(voters)(balance_ids)(withdrawed))
     };

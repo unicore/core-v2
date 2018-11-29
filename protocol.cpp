@@ -38,7 +38,7 @@ extern "C" {
                     case 100: {
                         //check for code inside
                         //auto cd = eosio::string_to_name(code.c_str());
-                        
+                        //Deposit in the Core
                         auto host = eosio::string_to_name(parameter.c_str());
                         core().deposit(op.from, host, op.quantity, code);
                         break;
@@ -46,6 +46,7 @@ extern "C" {
                     case 110: {
                         //check for code outside
                         //auto cd = eosio::string_to_name(code.c_str());
+                        //Pay for upgration
                         eosio_assert(code == N(eosio.token), "Only eosio.token contract can be used for upgrade");
                         auto host = eosio::string_to_name(parameter.c_str());
                         hosts().pay_for_upgrade(host, op.quantity);
@@ -54,7 +55,7 @@ extern "C" {
                     case 200: {
                         //check for code outside
                         //auto cd = eosio::string_to_name(code.c_str());
-                        
+                        //Buy Shares
                         eosio_assert(code == N(eosio.token), "Only eosio.token contract can be used for buy power");
                         auto host = eosio::string_to_name(parameter.c_str());
                         shares().buyshares_action(op.from, host, op.quantity);
@@ -62,7 +63,7 @@ extern "C" {
                     }
                     case 300: {
                         //check for code inside
-
+                        //Donation for goal
                         auto delimeter2 = parameter.find('-');
                         std::string parameter2 = parameter.substr(delimeter2+1, parameter.length());
                         
@@ -96,22 +97,11 @@ extern "C" {
                     goal().report_action(eosio::unpack_action_data<report>());
                     break;
                  }
-                 case N(next): { 
-                    core().next_goals(N(alice.tc));
-                    break;
-                 }
                 //VOTING
                  case N(vote): { 
                     voting().vote_action(eosio::unpack_action_data<vote>());
                     break;
                  }
-                 // //ASSETS
-                 // case N(makeasset): { 
-                 //    assets().make_asset_action(eosio::unpack_action_data<makeasset>());
-                 //    break;
-                 // };
-                //MARKETS
-                
                 //SHARES
                 case N(sellshares): {
                     shares().sellshares_action(eosio::unpack_action_data<sellshares>());
@@ -175,10 +165,6 @@ extern "C" {
                 };
                 case N(priorenter): {
                     core().priority_enter(eosio::unpack_action_data<priorenter>());   
-                    break;
-                };
-                case N(gpriorenter): {
-                    core().priority_goal_enter(eosio::unpack_action_data<gpriorenter>());
                     break;
                 };
                 case N(gwithdraw):{

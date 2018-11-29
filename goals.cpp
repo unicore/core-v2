@@ -93,6 +93,7 @@ struct goal {
         goals.emplace(username, [&](auto &g){
         	g.id = goals.available_primary_key();
         	g.username = username;
+        	g.created = eosio::time_point_sec(now());
         	g.host = host;
         	g.shortdescr = shortdescr;
         	g.descr = descr;
@@ -184,6 +185,7 @@ struct goal {
 		goals_index goals(_self, host);
 		account_index accounts(_self, _self);
 		auto acc = accounts.find(host);
+
 		eosio_assert(acc->root_token_contract == code, "Wrong root token contract for this host");
 		eosio_assert((acc->root_token).symbol == quantity.symbol, "Wrong root symbol for this host");
 		auto goal = goals.find(goal_id);
@@ -251,7 +253,7 @@ struct goal {
 	        	g.available = asset(0, root_symbol);
 	        	g.withdrawed += on_withdraw;
 	        });
-	        goals.erase(goal);
+	        //goals.erase(goal);
         };
 
 }

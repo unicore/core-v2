@@ -343,16 +343,17 @@ void improve_params_of_new_cycle (account_name host, account_name main_host){
         sincome_index sincomes(_self, host);
         cycle_index cycles(_self, host);
         
+        auto last_cycle = cycles.find(acc->current_cycle_num - 1);
 
             cycles.emplace(_self, [&](auto &c){
                 c.id = cycles.available_primary_key();
                 c.active_host = main_host;
-                c.start_at_global_pool_id = acc->current_pool_id + 1; 
-                c.finish_at_global_pool_id = acc->current_pool_id + 2;    
+                c.start_at_global_pool_id = last_cycle->finish_at_global_pool_id + 1; 
+                c.finish_at_global_pool_id = last_cycle->finish_at_global_pool_id + 2;    
             });
 
             accounts.modify(acc, _self, [&](auto &dp){
-                dp.current_pool_id  = acc->current_pool_id + 1;
+                dp.current_pool_id  = last_cycle->finish_at_global_pool_id + 1;
                 dp.cycle_start_at_id = dp.current_pool_id;
                 dp.current_cycle_num = acc->current_cycle_num + 1;
                 dp.current_pool_num  = 1;
@@ -400,7 +401,7 @@ void improve_params_of_new_cycle (account_name host, account_name main_host){
             p.pool_started_at = eosio::time_point_sec(now());
             p.priority_until = acc->current_cycle_num == 1 ? eosio::time_point_sec(0) : eosio::time_point_sec(now()+ sp->priority_seconds);;
             p.pool_expired_at = acc->current_cycle_num == 1 ? eosio::time_point_sec (now() + sp->pool_timeout) : eosio::time_point_sec (now() + sp->pool_timeout + sp->priority_seconds);
-            p.color = "black";
+            p.color = p.id % 2 == 0 ? "black" : "white";
         });
 
           pools.emplace(_self, [&](auto &p){
@@ -465,9 +466,10 @@ void start_new_cycle ( account_name host ) {
 
         }
 
+            refresh_state(host);  
+            
             next_goals(host);
             
-            refresh_state(host);  
             
     };
 
@@ -806,7 +808,7 @@ void start_new_cycle ( account_name host ) {
         require_auth(username);
         eosio_assert( amount.is_valid(), "Rejected. Invalid quantity" );
 
-        refresh_state(host);
+        
         account_index accounts(_self, _self);
         auto acc = accounts.find(host);
         eosio_assert(acc->root_token_contract == code, "Wrong token contract for this host");
@@ -931,9 +933,9 @@ void start_new_cycle ( account_name host ) {
         
         if (lepts > pool -> remain_lepts){
        
-            uint64_t floor_remain_lepts = LEPTS_PRECISION * pool->remain_lepts / LEPTS_PRECISION + LEPTS_PRECISION;
-            eosio_assert(lepts <= floor_remain_lepts, "Oops, something wrong.");
-            remain_lepts = floor_remain_lepts - lepts;
+            //uint64_t floor_remain_lepts = LEPTS_PRECISION * pool->remain_lepts / LEPTS_PRECISION + LEPTS_PRECISION;
+            //eosio_assert(lepts <= floor_remain_lepts, "Oops, something wrong.");
+            remain_lepts = 0;
         } else {
             remain_lepts = pool -> remain_lepts - lepts;
         }
@@ -1247,9 +1249,12 @@ void start_new_cycle ( account_name host ) {
         auto bal = balance.find(balance_id);
         auto pool = pools.find(bal->global_pool_id);
         auto cycle = cycles.find(pool -> cycle_num - 1);
+        print("bal->last_recalculated_win_pool_id: ", bal->last_recalculated_win_pool_id);
+        print("cycle -> id", cycle -> id, " ");
+        print(" cycle->finish_at_global_pool_id: ",cycle->finish_at_global_pool_id);
         
         eosio_assert(bal->last_recalculated_win_pool_id == cycle->finish_at_global_pool_id, "Cannot withdraw not refreshed balance. Refresh Balance first and try again.");
-        
+
         eosio_assert(! bal -> withdrawed, "Balance is already withdrawed");
 
         auto next_cycle = cycles.find(pool -> cycle_num);

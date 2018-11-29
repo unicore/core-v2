@@ -1,0 +1,341 @@
+[0m2018-11-24T05:32:26.465 thread-0   chain_plugin.cpp:271          plugin_initialize    ] initializing chain plugin[0m
+[0m2018-11-24T05:32:26.465 thread-0   chain_plugin.cpp:408          plugin_initialize    ] Deleting state database and blocks[0m
+[33m2018-11-24T05:32:26.466 thread-0   chain_plugin.cpp:508          plugin_initialize    ] Starting up fresh blockchain with default genesis state.[0m
+[0m2018-11-24T05:32:27.034 thread-0   wallet_plugin.cpp:42          plugin_initialize    ] initializing wallet plugin[0m
+[0m2018-11-24T05:32:27.038 thread-0   http_plugin.cpp:344           plugin_initialize    ] configured http to listen on 127.0.0.1:8888[0m
+[0m2018-11-24T05:32:27.038 thread-0   net_plugin.cpp:2941           plugin_initialize    ] Initialize net plugin[0m
+[0m2018-11-24T05:32:27.038 thread-0   net_plugin.cpp:2966           plugin_initialize    ] host: 0.0.0.0 port: 9876 [0m
+[0m2018-11-24T05:32:27.038 thread-0   net_plugin.cpp:3036           plugin_initialize    ] my node_id is 68d1fb5a56ad11b775366b1b414cd2aac9e7966dd65124a4fd15ada896e12676[0m
+[0m2018-11-24T05:32:27.038 thread-0   http_plugin.cpp:299           operator()           ] configured http with Access-Control-Allow-Origin: *[0m
+[0m2018-11-24T05:32:27.038 thread-0   main.cpp:105                  main                 ] nodeos version f91491d6[0m
+[0m2018-11-24T05:32:27.038 thread-0   main.cpp:106                  main                 ] eosio root is /Users/darksun/Library/Application Support[0m
+[31m2018-11-24T05:32:27.038 thread-0   controller.cpp:1252           startup              ] No head block in fork db, perhaps we need to replay[0m
+[33m2018-11-24T05:32:27.038 thread-0   controller.cpp:319            initialize_fork_db   ]  Initializing new blockchain with genesis state                  [0m
+[0m2018-11-24T05:32:27.066 thread-0   chain_plugin.cpp:596          plugin_startup       ] starting chain in read/write mode[0m
+[0m2018-11-24T05:32:27.066 thread-0   chain_plugin.cpp:600          plugin_startup       ] Blockchain started; head block is #1, genesis timestamp is 2018-06-01T12:00:00.000[0m
+[0m2018-11-24T05:32:27.066 thread-0   producer_plugin.cpp:640       plugin_startup       ] producer plugin:  plugin_startup() begin[0m
+[0m2018-11-24T05:32:27.066 thread-0   producer_plugin.cpp:658       plugin_startup       ] Launching block production for 31 producers at 2018-11-24T05:32:27.066.[0m
+[0m2018-11-24T05:32:27.067 thread-0   producer_plugin.cpp:670       plugin_startup       ] producer plugin:  plugin_startup() end[0m
+[0m2018-11-24T05:32:27.067 thread-0   http_plugin.cpp:401           plugin_startup       ] start listening for http requests[0m
+[0m2018-11-24T05:32:27.067 thread-0   chain_api_plugin.cpp:75       plugin_startup       ] starting chain_api_plugin[0m
+[0m2018-11-24T05:32:27.067 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/chain/abi_bin_to_json[0m
+[0m2018-11-24T05:32:27.067 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/chain/abi_json_to_bin[0m
+[0m2018-11-24T05:32:27.067 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/chain/get_abi[0m
+[0m2018-11-24T05:32:27.067 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/chain/get_account[0m
+[0m2018-11-24T05:32:27.067 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/chain/get_block[0m
+[0m2018-11-24T05:32:27.067 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/chain/get_block_header_state[0m
+[0m2018-11-24T05:32:27.067 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/chain/get_code[0m
+[0m2018-11-24T05:32:27.067 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/chain/get_currency_balance[0m
+[0m2018-11-24T05:32:27.067 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/chain/get_currency_stats[0m
+[0m2018-11-24T05:32:27.067 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/chain/get_info[0m
+[0m2018-11-24T05:32:27.067 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/chain/get_producer_schedule[0m
+[0m2018-11-24T05:32:27.067 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/chain/get_producers[0m
+[0m2018-11-24T05:32:27.067 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/chain/get_raw_code_and_abi[0m
+[0m2018-11-24T05:32:27.067 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/chain/get_required_keys[0m
+[0m2018-11-24T05:32:27.067 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/chain/get_scheduled_transactions[0m
+[0m2018-11-24T05:32:27.067 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/chain/get_table_rows[0m
+[0m2018-11-24T05:32:27.067 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/chain/push_block[0m
+[0m2018-11-24T05:32:27.067 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/chain/push_transaction[0m
+[0m2018-11-24T05:32:27.067 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/chain/push_transactions[0m
+[0m2018-11-24T05:32:27.068 thread-0   history_api_plugin.cpp:38     plugin_startup       ] starting history_api_plugin[0m
+[0m2018-11-24T05:32:27.068 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/history/get_actions[0m
+[0m2018-11-24T05:32:27.068 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/history/get_controlled_accounts[0m
+[0m2018-11-24T05:32:27.068 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/history/get_key_accounts[0m
+[0m2018-11-24T05:32:27.068 thread-0   http_plugin.cpp:447           add_handler          ] add api url: /v1/history/get_transaction[0m
+[0m2018-11-24T05:32:27.068 thread-0   net_plugin.cpp:3049           plugin_startup       ] starting listener, max clients is 25[0m
+[0m2018-11-24T05:32:27.503 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 00000002b57c3a29... #2 @ 2018-11-24T05:32:27.500 signed by eosio [trxs: 0, lib: 0, confirmed: 0][0m
+[0m2018-11-24T05:32:28.002 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 0000000385af673b... #3 @ 2018-11-24T05:32:28.000 signed by eosio [trxs: 0, lib: 2, confirmed: 0][0m
+[0m2018-11-24T05:32:28.502 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 00000004f2087aa8... #4 @ 2018-11-24T05:32:28.500 signed by eosio [trxs: 0, lib: 3, confirmed: 0][0m
+[0m2018-11-24T05:32:29.005 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 00000005b755bd07... #5 @ 2018-11-24T05:32:29.000 signed by eosio [trxs: 0, lib: 4, confirmed: 0][0m
+[31m2018-11-24T05:32:29.470 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.abi_json_to_bin[0m
+[32m2018-11-24T05:32:29.470 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060004 contract_query_exception: Contract Query Exception
+Contract can't be found faketoken
+    {"contract":"faketoken"}
+    thread-0  chain_plugin.cpp:1558 abi_json_to_bin
+code: faketoken, action: create, args: ["faketoken","2100000000.00000000 FAKE"]
+    {"code":"faketoken","action":"create","args":["faketoken","2100000000.00000000 FAKE"]}
+    thread-0  chain_plugin.cpp:1575 abi_json_to_bin[0m
+[31m2018-11-24T05:32:29.490 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.abi_json_to_bin[0m
+[32m2018-11-24T05:32:29.490 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060004 contract_query_exception: Contract Query Exception
+Contract can't be found faketoken
+    {"contract":"faketoken"}
+    thread-0  chain_plugin.cpp:1558 abi_json_to_bin
+code: faketoken, action: issue, args: ["tc.core","2000000000.00000000 FAKE","genesis"]
+    {"code":"faketoken","action":"issue","args":["tc.core","2000000000.00000000 FAKE","genesis"]}
+    thread-0  chain_plugin.cpp:1575 abi_json_to_bin[0m
+[0m2018-11-24T05:32:29.501 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 0000000619419fd6... #6 @ 2018-11-24T05:32:29.500 signed by eosio [trxs: 0, lib: 5, confirmed: 0][0m
+[31m2018-11-24T05:32:29.530 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.abi_json_to_bin[0m
+[32m2018-11-24T05:32:29.530 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060004 contract_query_exception: Contract Query Exception
+Contract can't be found eosio.token
+    {"contract":"eosio.token"}
+    thread-0  chain_plugin.cpp:1558 abi_json_to_bin
+code: eosio.token, action: create, args: ["eosio","2100000000.0000 FLO"]
+    {"code":"eosio.token","action":"create","args":["eosio","2100000000.0000 FLO"]}
+    thread-0  chain_plugin.cpp:1575 abi_json_to_bin[0m
+[31m2018-11-24T05:32:29.549 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.abi_json_to_bin[0m
+[32m2018-11-24T05:32:29.549 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060004 contract_query_exception: Contract Query Exception
+Contract can't be found eosio.token
+    {"contract":"eosio.token"}
+    thread-0  chain_plugin.cpp:1558 abi_json_to_bin
+code: eosio.token, action: issue, args: ["tc.core","2000000000.0000 FLO","genesis"]
+    {"code":"eosio.token","action":"issue","args":["tc.core","2000000000.0000 FLO","genesis"]}
+    thread-0  chain_plugin.cpp:1575 abi_json_to_bin[0m
+[31m2018-11-24T05:32:29.668 thread-0   wasm_interface.cpp:929        eosio_assert         ] message: unable to find key [0m
+[31m2018-11-24T05:32:29.668 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.push_transaction[0m
+[32m2018-11-24T05:32:29.668 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3050003 eosio_assert_message_exception: eosio_assert_message assertion failure
+assertion failure with message: unable to find key
+    {"s":"unable to find key"}
+    thread-0  wasm_interface.cpp:930 eosio_assert
+pending console output: 
+    {"console":""}
+    thread-0  apply_context.cpp:61 exec_one[0m
+[31m2018-11-24T05:32:29.768 thread-0   wasm_interface.cpp:929        eosio_assert         ] message: unable to find key [0m
+[31m2018-11-24T05:32:29.768 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.push_transaction[0m
+[32m2018-11-24T05:32:29.768 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3050003 eosio_assert_message_exception: eosio_assert_message assertion failure
+assertion failure with message: unable to find key
+    {"s":"unable to find key"}
+    thread-0  wasm_interface.cpp:930 eosio_assert
+pending console output: 
+    {"console":""}
+    thread-0  apply_context.cpp:61 exec_one[0m
+[31m2018-11-24T05:32:29.788 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.abi_json_to_bin[0m
+[32m2018-11-24T05:32:29.788 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3050000 action_validate_exception: Action validate exception
+Unknown action setpriv in contract eosio
+    {"action":"setpriv","contract":"eosio"}
+    thread-0  chain_plugin.cpp:1564 abi_json_to_bin
+code: eosio, action: setpriv, args: ["eosio.msig",1]
+    {"code":"eosio","action":"setpriv","args":["eosio.msig",1]}
+    thread-0  chain_plugin.cpp:1575 abi_json_to_bin[0m
+[31m2018-11-24T05:32:29.884 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.get_currency_stats[0m
+[32m2018-11-24T05:32:29.884 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060002 account_query_exception: Account Query Exception
+Fail to retrieve account for eosio.token
+    {"account":"eosio.token"}
+    thread-0  chain_plugin.cpp:970 get_abi[0m
+[0m2018-11-24T05:32:30.002 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 00000007a50f7aae... #7 @ 2018-11-24T05:32:30.000 signed by eosio [trxs: 0, lib: 6, confirmed: 0][0m
+[0m2018-11-24T05:32:30.502 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 0000000833534622... #8 @ 2018-11-24T05:32:30.500 signed by eosio [trxs: 0, lib: 7, confirmed: 0][0m
+[31m2018-11-24T05:32:30.904 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.get_currency_stats[0m
+[32m2018-11-24T05:32:30.904 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060002 account_query_exception: Account Query Exception
+Fail to retrieve account for eosio.token
+    {"account":"eosio.token"}
+    thread-0  chain_plugin.cpp:970 get_abi[0m
+[31m2018-11-24T05:32:30.922 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.get_currency_stats[0m
+[32m2018-11-24T05:32:30.922 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060002 account_query_exception: Account Query Exception
+Fail to retrieve account for eosio.token
+    {"account":"eosio.token"}
+    thread-0  chain_plugin.cpp:970 get_abi[0m
+[31m2018-11-24T05:32:30.941 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.get_currency_stats[0m
+[32m2018-11-24T05:32:30.941 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060002 account_query_exception: Account Query Exception
+Fail to retrieve account for eosio.token
+    {"account":"eosio.token"}
+    thread-0  chain_plugin.cpp:970 get_abi[0m
+[31m2018-11-24T05:32:30.957 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.get_currency_stats[0m
+[32m2018-11-24T05:32:30.957 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060002 account_query_exception: Account Query Exception
+Fail to retrieve account for eosio.token
+    {"account":"eosio.token"}
+    thread-0  chain_plugin.cpp:970 get_abi[0m
+[31m2018-11-24T05:32:30.973 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.get_currency_stats[0m
+[32m2018-11-24T05:32:30.974 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060002 account_query_exception: Account Query Exception
+Fail to retrieve account for eosio.token
+    {"account":"eosio.token"}
+    thread-0  chain_plugin.cpp:970 get_abi[0m
+[31m2018-11-24T05:32:30.994 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.get_currency_stats[0m
+[32m2018-11-24T05:32:30.994 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060002 account_query_exception: Account Query Exception
+Fail to retrieve account for eosio.token
+    {"account":"eosio.token"}
+    thread-0  chain_plugin.cpp:970 get_abi[0m
+[0m2018-11-24T05:32:31.000 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 000000093b3f297f... #9 @ 2018-11-24T05:32:31.000 signed by eosio [trxs: 0, lib: 8, confirmed: 0][0m
+[31m2018-11-24T05:32:31.012 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.get_currency_stats[0m
+[32m2018-11-24T05:32:31.012 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060002 account_query_exception: Account Query Exception
+Fail to retrieve account for eosio.token
+    {"account":"eosio.token"}
+    thread-0  chain_plugin.cpp:970 get_abi[0m
+[31m2018-11-24T05:32:31.032 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.get_currency_stats[0m
+[32m2018-11-24T05:32:31.032 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060002 account_query_exception: Account Query Exception
+Fail to retrieve account for eosio.token
+    {"account":"eosio.token"}
+    thread-0  chain_plugin.cpp:970 get_abi[0m
+[31m2018-11-24T05:32:31.050 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.get_currency_stats[0m
+[32m2018-11-24T05:32:31.050 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060002 account_query_exception: Account Query Exception
+Fail to retrieve account for eosio.token
+    {"account":"eosio.token"}
+    thread-0  chain_plugin.cpp:970 get_abi[0m
+[31m2018-11-24T05:32:31.065 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.get_currency_stats[0m
+[32m2018-11-24T05:32:31.065 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060002 account_query_exception: Account Query Exception
+Fail to retrieve account for eosio.token
+    {"account":"eosio.token"}
+    thread-0  chain_plugin.cpp:970 get_abi[0m
+[31m2018-11-24T05:32:31.082 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.get_currency_stats[0m
+[32m2018-11-24T05:32:31.083 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060002 account_query_exception: Account Query Exception
+Fail to retrieve account for eosio.token
+    {"account":"eosio.token"}
+    thread-0  chain_plugin.cpp:970 get_abi[0m
+[31m2018-11-24T05:32:31.101 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.get_currency_stats[0m
+[32m2018-11-24T05:32:31.101 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060002 account_query_exception: Account Query Exception
+Fail to retrieve account for eosio.token
+    {"account":"eosio.token"}
+    thread-0  chain_plugin.cpp:970 get_abi[0m
+[31m2018-11-24T05:32:31.117 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.get_currency_stats[0m
+[32m2018-11-24T05:32:31.117 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060002 account_query_exception: Account Query Exception
+Fail to retrieve account for eosio.token
+    {"account":"eosio.token"}
+    thread-0  chain_plugin.cpp:970 get_abi[0m
+[31m2018-11-24T05:32:31.134 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.get_currency_stats[0m
+[32m2018-11-24T05:32:31.134 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060002 account_query_exception: Account Query Exception
+Fail to retrieve account for eosio.token
+    {"account":"eosio.token"}
+    thread-0  chain_plugin.cpp:970 get_abi[0m
+[31m2018-11-24T05:32:31.153 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.get_currency_stats[0m
+[32m2018-11-24T05:32:31.153 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060002 account_query_exception: Account Query Exception
+Fail to retrieve account for eosio.token
+    {"account":"eosio.token"}
+    thread-0  chain_plugin.cpp:970 get_abi[0m
+[31m2018-11-24T05:32:31.169 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.get_currency_stats[0m
+[32m2018-11-24T05:32:31.169 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060002 account_query_exception: Account Query Exception
+Fail to retrieve account for eosio.token
+    {"account":"eosio.token"}
+    thread-0  chain_plugin.cpp:970 get_abi[0m
+[31m2018-11-24T05:32:31.185 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.get_currency_stats[0m
+[32m2018-11-24T05:32:31.186 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060002 account_query_exception: Account Query Exception
+Fail to retrieve account for eosio.token
+    {"account":"eosio.token"}
+    thread-0  chain_plugin.cpp:970 get_abi[0m
+[31m2018-11-24T05:32:31.205 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.get_currency_stats[0m
+[32m2018-11-24T05:32:31.205 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060002 account_query_exception: Account Query Exception
+Fail to retrieve account for eosio.token
+    {"account":"eosio.token"}
+    thread-0  chain_plugin.cpp:970 get_abi[0m
+[31m2018-11-24T05:32:31.220 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.abi_json_to_bin[0m
+[32m2018-11-24T05:32:31.221 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060004 contract_query_exception: Contract Query Exception
+Contract can't be found eosio.token
+    {"contract":"eosio.token"}
+    thread-0  chain_plugin.cpp:1558 abi_json_to_bin
+code: eosio.token, action: create, args: ["alice.tc","100000.0000 MSHARES"]
+    {"code":"eosio.token","action":"create","args":["alice.tc","100000.0000 MSHARES"]}
+    thread-0  chain_plugin.cpp:1575 abi_json_to_bin[0m
+[0m2018-11-24T05:32:31.503 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 0000000ae00df09b... #10 @ 2018-11-24T05:32:31.500 signed by eosio [trxs: 0, lib: 9, confirmed: 0][0m
+[0m2018-11-24T05:32:32.014 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 0000000b40b70e5a... #11 @ 2018-11-24T05:32:32.000 signed by eosio [trxs: 0, lib: 10, confirmed: 0][0m
+[31m2018-11-24T05:32:32.241 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.abi_json_to_bin[0m
+[32m2018-11-24T05:32:32.241 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060004 contract_query_exception: Contract Query Exception
+Contract can't be found eosio.token
+    {"contract":"eosio.token"}
+    thread-0  chain_plugin.cpp:1558 abi_json_to_bin
+code: eosio.token, action: issue, args: ["bob.tc","0.0002 MSHARES","genesis"]
+    {"code":"eosio.token","action":"issue","args":["bob.tc","0.0002 MSHARES","genesis"]}
+    thread-0  chain_plugin.cpp:1575 abi_json_to_bin[0m
+[31m2018-11-24T05:32:32.259 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.abi_json_to_bin[0m
+[32m2018-11-24T05:32:32.259 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060004 contract_query_exception: Contract Query Exception
+Contract can't be found eosio.token
+    {"contract":"eosio.token"}
+    thread-0  chain_plugin.cpp:1558 abi_json_to_bin
+code: eosio.token, action: issue, args: ["alice.tc","0.0001 MSHARES","genesis"]
+    {"code":"eosio.token","action":"issue","args":["alice.tc","0.0001 MSHARES","genesis"]}
+    thread-0  chain_plugin.cpp:1575 abi_json_to_bin[0m
+[31m2018-11-24T05:32:32.278 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.abi_json_to_bin[0m
+[32m2018-11-24T05:32:32.278 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060004 contract_query_exception: Contract Query Exception
+Contract can't be found faketoken
+    {"contract":"faketoken"}
+    thread-0  chain_plugin.cpp:1558 abi_json_to_bin
+code: faketoken, action: transfer, args: ["tc.core","bob.tc","100000000.00000000 FAKE",""]
+    {"code":"faketoken","action":"transfer","args":["tc.core","bob.tc","100000000.00000000 FAKE",""]}
+    thread-0  chain_plugin.cpp:1575 abi_json_to_bin[0m
+[31m2018-11-24T05:32:32.412 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.abi_json_to_bin[0m
+[32m2018-11-24T05:32:32.412 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060004 contract_query_exception: Contract Query Exception
+Contract can't be found tt.tc
+    {"contract":"tt.tc"}
+    thread-0  chain_plugin.cpp:1558 abi_json_to_bin
+code: tt.tc, action: setfee, args: ["0.0000 FLO","500"]
+    {"code":"tt.tc","action":"setfee","args":["0.0000 FLO","500"]}
+    thread-0  chain_plugin.cpp:1575 abi_json_to_bin[0m
+[31m2018-11-24T05:32:32.431 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.abi_json_to_bin[0m
+[32m2018-11-24T05:32:32.431 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060004 contract_query_exception: Contract Query Exception
+Contract can't be found tt.tc
+    {"contract":"tt.tc"}
+    thread-0  chain_plugin.cpp:1558 abi_json_to_bin
+code: tt.tc, action: upgrade, args: ["alice.tc","","Заголовок","тест2","1000000","100.0000 FLO","0.00000000 FAKE","faketoken","0","0","meta"]
+    {"code":"tt.tc","action":"upgrade","args":["alice.tc","","Заголовок","тест2","1000000","100.0000 FLO","0.00000000 FAKE","faketoken","0","0","meta"]}
+    thread-0  chain_plugin.cpp:1575 abi_json_to_bin[0m
+[31m2018-11-24T05:32:32.449 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.get_currency_stats[0m
+[32m2018-11-24T05:32:32.449 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060002 account_query_exception: Account Query Exception
+Fail to retrieve account for eosio.token
+    {"account":"eosio.token"}
+    thread-0  chain_plugin.cpp:970 get_abi[0m
+[31m2018-11-24T05:32:32.473 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.abi_json_to_bin[0m
+[32m2018-11-24T05:32:32.473 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060004 contract_query_exception: Contract Query Exception
+Contract can't be found tt.tc
+    {"contract":"tt.tc"}
+    thread-0  chain_plugin.cpp:1558 abi_json_to_bin
+code: tt.tc, action: setparams, args: ["alice.tc","alice.tc","10000","10500","5000","1000","3000","15","600","20"]
+    {"code":"tt.tc","action":"setparams","args":["alice.tc","alice.tc","10000","10500","5000","1000","3000","15","600","20"]}
+    thread-0  chain_plugin.cpp:1575 abi_json_to_bin[0m
+[31m2018-11-24T05:32:32.493 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.abi_json_to_bin[0m
+[32m2018-11-24T05:32:32.493 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060004 contract_query_exception: Contract Query Exception
+Contract can't be found tt.tc
+    {"contract":"tt.tc"}
+    thread-0  chain_plugin.cpp:1558 abi_json_to_bin
+code: tt.tc, action: start, args: ["alice.tc","alice.tc"]
+    {"code":"tt.tc","action":"start","args":["alice.tc","alice.tc"]}
+    thread-0  chain_plugin.cpp:1575 abi_json_to_bin[0m
+[0m2018-11-24T05:32:32.501 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 0000000ce7c6671e... #12 @ 2018-11-24T05:32:32.500 signed by eosio [trxs: 0, lib: 11, confirmed: 0][0m
+[31m2018-11-24T05:32:32.509 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.abi_json_to_bin[0m
+[32m2018-11-24T05:32:32.509 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060004 contract_query_exception: Contract Query Exception
+Contract can't be found tt.tc
+    {"contract":"tt.tc"}
+    thread-0  chain_plugin.cpp:1558 abi_json_to_bin
+code: tt.tc, action: setgoal, args: ["bob.tc","alice.tc","short descr","long descr","5000","10000.00000000 FAKE"]
+    {"code":"tt.tc","action":"setgoal","args":["bob.tc","alice.tc","short descr","long descr","5000","10000.00000000 FAKE"]}
+    thread-0  chain_plugin.cpp:1575 abi_json_to_bin[0m
+[31m2018-11-24T05:32:32.526 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.abi_json_to_bin[0m
+[32m2018-11-24T05:32:32.526 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060004 contract_query_exception: Contract Query Exception
+Contract can't be found faketoken
+    {"contract":"faketoken"}
+    thread-0  chain_plugin.cpp:1558 abi_json_to_bin
+code: faketoken, action: transfer, args: ["bob.tc","tt.tc","1050.00000000 FAKE","300-0-alice.tc"]
+    {"code":"faketoken","action":"transfer","args":["bob.tc","tt.tc","1050.00000000 FAKE","300-0-alice.tc"]}
+    thread-0  chain_plugin.cpp:1575 abi_json_to_bin[0m
+[31m2018-11-24T05:32:32.546 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.abi_json_to_bin[0m
+[32m2018-11-24T05:32:32.546 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060004 contract_query_exception: Contract Query Exception
+Contract can't be found tt.tc
+    {"contract":"tt.tc"}
+    thread-0  chain_plugin.cpp:1558 abi_json_to_bin
+code: tt.tc, action: setgoal, args: ["bob.tc","alice.tc","short descr","long descr","2500","10000.00000000 FAKE"]
+    {"code":"tt.tc","action":"setgoal","args":["bob.tc","alice.tc","short descr","long descr","2500","10000.00000000 FAKE"]}
+    thread-0  chain_plugin.cpp:1575 abi_json_to_bin[0m
+[31m2018-11-24T05:32:32.562 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.abi_json_to_bin[0m
+[32m2018-11-24T05:32:32.562 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060004 contract_query_exception: Contract Query Exception
+Contract can't be found faketoken
+    {"contract":"faketoken"}
+    thread-0  chain_plugin.cpp:1558 abi_json_to_bin
+code: faketoken, action: transfer, args: ["bob.tc","tt.tc","1050.00000000 FAKE","300-1-alice.tc"]
+    {"code":"faketoken","action":"transfer","args":["bob.tc","tt.tc","1050.00000000 FAKE","300-1-alice.tc"]}
+    thread-0  chain_plugin.cpp:1575 abi_json_to_bin[0m
+[31m2018-11-24T05:32:32.580 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.abi_json_to_bin[0m
+[32m2018-11-24T05:32:32.580 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060004 contract_query_exception: Contract Query Exception
+Contract can't be found tt.tc
+    {"contract":"tt.tc"}
+    thread-0  chain_plugin.cpp:1558 abi_json_to_bin
+code: tt.tc, action: setgoal, args: ["bob.tc","alice.tc","short descr","long descr","1000","10000.00000000 FAKE"]
+    {"code":"tt.tc","action":"setgoal","args":["bob.tc","alice.tc","short descr","long descr","1000","10000.00000000 FAKE"]}
+    thread-0  chain_plugin.cpp:1575 abi_json_to_bin[0m
+[31m2018-11-24T05:32:32.599 thread-0   http_plugin.cpp:475           handle_exception     ] FC Exception encountered while processing chain.abi_json_to_bin[0m
+[32m2018-11-24T05:32:32.599 thread-0   http_plugin.cpp:476           handle_exception     ] Exception Details: 3060004 contract_query_exception: Contract Query Exception
+Contract can't be found faketoken
+    {"contract":"faketoken"}
+    thread-0  chain_plugin.cpp:1558 abi_json_to_bin
+code: faketoken, action: transfer, args: ["bob.tc","tt.tc","1050.00000000 FAKE","300-2-alice.tc"]
+    {"code":"faketoken","action":"transfer","args":["bob.tc","tt.tc","1050.00000000 FAKE","300-2-alice.tc"]}
+    thread-0  chain_plugin.cpp:1575 abi_json_to_bin[0m
+[0m2018-11-24T05:32:33.005 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 0000000d5534ed48... #13 @ 2018-11-24T05:32:33.000 signed by eosio [trxs: 0, lib: 12, confirmed: 0][0m
+[0m2018-11-24T05:32:33.502 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 0000000e84c9199d... #14 @ 2018-11-24T05:32:33.500 signed by eosio [trxs: 0, lib: 13, confirmed: 0][0m
+[0m2018-11-24T05:32:34.002 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 0000000f4380a96d... #15 @ 2018-11-24T05:32:34.000 signed by eosio [trxs: 0, lib: 14, confirmed: 0][0m
+[0m2018-11-24T05:32:34.502 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 00000010acb49afc... #16 @ 2018-11-24T05:32:34.500 signed by eosio [trxs: 0, lib: 15, confirmed: 0][0m
+[0m2018-11-24T05:32:35.003 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 00000011b7d8d2f0... #17 @ 2018-11-24T05:32:35.000 signed by eosio [trxs: 0, lib: 16, confirmed: 0][0m
+[0m2018-11-24T05:32:35.503 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 0000001218dbd890... #18 @ 2018-11-24T05:32:35.500 signed by eosio [trxs: 0, lib: 17, confirmed: 0][0m
+[0m2018-11-24T05:32:36.002 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 000000134fae001a... #19 @ 2018-11-24T05:32:36.000 signed by eosio [trxs: 0, lib: 18, confirmed: 0][0m
+[0m2018-11-24T05:32:36.501 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 00000014116fb0c6... #20 @ 2018-11-24T05:32:36.500 signed by eosio [trxs: 0, lib: 19, confirmed: 0][0m
+[0m2018-11-24T05:32:37.002 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 000000154a00e609... #21 @ 2018-11-24T05:32:37.000 signed by eosio [trxs: 0, lib: 20, confirmed: 0][0m
+[0m2018-11-24T05:32:37.500 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 000000166ffe335e... #22 @ 2018-11-24T05:32:37.500 signed by eosio [trxs: 0, lib: 21, confirmed: 0][0m
+[0m2018-11-24T05:32:38.000 thread-0   producer_plugin.cpp:1194      produce_block        ] Produced block 0000001769bde65f... #23 @ 2018-11-24T05:32:38.000 signed by eosio [trxs: 0, lib: 22, confirmed: 0][0m
+[0m2018-11-24T05:32:38.000 thread-0   net_plugin.cpp:3076           plugin_shutdown      ] shutdown..[0m
+[0m2018-11-24T05:32:38.000 thread-0   net_plugin.cpp:3079           plugin_shutdown      ] close acceptor[0m
+[0m2018-11-24T05:32:38.000 thread-0   net_plugin.cpp:3082           plugin_shutdown      ] close 0 connections[0m
+[0m2018-11-24T05:32:38.000 thread-0   net_plugin.cpp:3090           plugin_shutdown      ] exit shutdown[0m
