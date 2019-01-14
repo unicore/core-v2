@@ -3,7 +3,7 @@ namespace eosio{
 struct voting
 {
 
-	void clear_old_votes_action (eosio::name voter, eosio::name host){
+	void clear_old_votes_action (account_name voter, account_name host){
 		votes_index votes(_self, voter);
 		goals_index goals (_self, host);
 
@@ -23,7 +23,7 @@ struct voting
 		}
 	}
 
-	uint64_t count_votes(eosio::name voter, eosio::name host){
+	uint64_t count_votes(account_name voter, account_name host){
 		votes_index votes(_self, voter);
 		goals_index goals (_self, _self);
 		auto idx = votes.begin();

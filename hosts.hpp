@@ -1,20 +1,23 @@
 
 #include <eosiolib/transaction.hpp> 
+#include <eosio.system/native.hpp>
+#include <exchange_state.hpp>
+#include <exchange_state.cpp>
 #include <eosiolib/crypto.h>
 
 namespace eosio {
 	
     // @abi table account
     struct account{
-        eosio::name username;
-        eosio::name hoperator;
-        std::vector<eosio::name> childrens;
-        eosio::name active_host;
+        account_name username;
+        account_name hoperator;
+        std::vector<account_name> childrens;
+        account_name active_host;
         bool non_active_child = false;
         bool parameters_setted = false;
         bool need_switch = false;
         bool is_whitelisted = false;
-        std::vector <eosio::name> whitelist;
+        vector <account_name> whitelist;
         uint64_t consensus_percent;
         uint64_t goal_validation_percent;
         std::string title;
@@ -22,7 +25,7 @@ namespace eosio {
         uint64_t total_shares;
         eosio::asset quote_amount;
         eosio::asset root_token;
-        eosio::name root_token_contract;
+        account_name root_token_contract;
         eosio::time_point_sec registered_at;
         uint64_t referral_percent;
         bool activated = false;
@@ -36,20 +39,20 @@ namespace eosio {
         uint64_t current_pool_num = 1;
         bool priority_flag = false;
 
-        eosio::name primary_key()const { return username; }
+        account_name primary_key()const { return username; }
       
-        eosio::name get_active_host() const {
+        account_name get_active_host() const {
         	if (active_host == username)
         		return username;
         	else 
         		return active_host; 
         }
 
-        eosio::symbol get_root_symbol() const {
+        eosio::symbol_name get_root_symbol() const {
         	return root_token.symbol;
         }
 
-        bool is_account_in_whitelist(eosio::name username) const {
+        bool is_account_in_whitelist(account_name username) const {
         	auto it = std::find(whitelist.begin(), whitelist.end(), username);
         	
         	if (it == whitelist.end())
@@ -66,19 +69,19 @@ namespace eosio {
         	(current_cycle_num)(current_pool_num)(priority_flag))
     };
 
-    typedef eosio::multi_index <"account"_n, account> account_index;
+    typedef eosio::multi_index <N(account), account> account_index;
     
 
     // @abi action
     struct upgrade{
-        eosio::name username;
-        eosio::name hoperator;
+        account_name username;
+        account_name hoperator;
         std::string title;
         std::string purpose;
         uint64_t total_shares;
         eosio::asset quote_amount;
         eosio::asset root_token;
-        eosio::name root_token_contract;
+        account_name root_token_contract;
         bool is_whitelisted = false;
        	uint64_t goal_validation_percent; 
         uint64_t referral_percent;
@@ -90,11 +93,23 @@ namespace eosio {
 
     // @abi action
     struct cchildhost{
-    	eosio::name parent_host;
-    	eosio::name child_host;
+    	account_name parent_host;
+    	account_name child_host;
 
     	EOSLIB_SERIALIZE(cchildhost, (parent_host)(child_host))
     };
+
+    struct wait_weight {
+	  uint32_t wait_sec;
+	  weight_type weight;
+	};
+
+	struct authority {
+	  uint32_t threshold;
+	  vector<eosiosystem::key_weight> keys;
+	  vector<eosiosystem::permission_level_weight> accounts;
+	  vector<wait_weight> waits;
+	};
 
 
 }

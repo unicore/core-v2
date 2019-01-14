@@ -15,7 +15,7 @@ struct goal {
 
 
 
-	uint64_t count_active_goal_balances(eosio::name username, eosio::name host){
+	uint64_t count_active_goal_balances(account_name username, account_name host){
 		balance_index balances(_self, username);
 		auto idx = balances.template get_index<N(is_goal)>();
         auto matched_itr = idx.lower_bound(1);
@@ -31,7 +31,7 @@ struct goal {
 		return count;
 	}
 
-	eosio::asset get_goal_amount(uint64_t lepts_for_each_pool, eosio::name host){
+	eosio::asset get_goal_amount(uint64_t lepts_for_each_pool, account_name host){
 		account_index accounts(_self, _self);
 
 		auto acc = accounts.find(host);
@@ -82,7 +82,7 @@ struct goal {
         
         //TODO CHECK FOR exist goal for same host
   //       auto idx = goals.template get_index<N(username)>();
-  //       auto matched_goal = idx.lower_bound( (eosio::name)username );
+  //       auto matched_goal = idx.lower_bound( (account_name)username );
 		// eosio_assert(matched_goal == idx.end(), "Only one goal per host for each user");
         
         eosio_assert(target.symbol == root_symbol, "Wrong symbol for this host");
@@ -178,7 +178,7 @@ struct goal {
 	}
 
 
-	void donate_action(eosio::name from, eosio::name host, uint64_t goal_id, eosio::asset quantity, eosio::name code){
+	void donate_action(account_name from, account_name host, uint64_t goal_id, eosio::asset quantity, account_name code){
 		require_auth(from);
 		
 		//TODO check quantity enough and not overflow the pool size

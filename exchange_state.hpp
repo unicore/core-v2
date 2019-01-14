@@ -30,15 +30,15 @@ namespace eosio {
       connector base;
       connector quote;
 
-      eosio::symbol primary_key()const { return supply.symbol; }
+      uint64_t primary_key()const { return supply.symbol; }
 
       asset convert_to_exchange( connector& c, asset in ); 
       asset convert_from_exchange( connector& c, asset in );
-      asset convert( asset from, symbol to );
+      asset convert( asset from, symbol_type to );
 
       EOSLIB_SERIALIZE( exchange_state, (supply)(base)(quote) )
    };
 
-   typedef eosio::multi_index<"powermarket"_n, exchange_state> powermarket;
+   typedef eosio::multi_index<N(powermarket), exchange_state> powermarket;
 
 } /// namespace eosiosystem

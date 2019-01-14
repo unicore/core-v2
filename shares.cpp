@@ -2,12 +2,12 @@ using namespace eosio;
 
 struct shares {
 
-	void make_vesting_action(eosio::name owner, eosio::asset amount){
+	void make_vesting_action(account_name owner, eosio::asset amount){
 	    eosio_assert(amount.is_valid(), "Amount not valid");
 	    eosio_assert(amount.symbol == _SYM, "Not valid symbol for this vesting contract");
 	    eosio_assert(is_account(owner), "Owner account does not exist");
 	    
-	    vesting_index vests (_self, owner.value);
+	    vesting_index vests (_self, owner);
 	    
 	    vests.emplace(_self, [&](auto &v){
 	      v.id = vests.available_primary_key();
@@ -21,7 +21,7 @@ struct shares {
 
   void refresh_action(const refreshsh &op){
     require_auth(op.owner);
-    vesting_index vests(_self, op.owner.value);
+    vesting_index vests(_self, op.owner);
     auto v = vests.find(op.id);
     eosio_assert(v != vests.end(), "Vesting object does not exist");
     
@@ -46,7 +46,7 @@ struct shares {
 
   void withdraw_action(const withdrawsh &op){
     require_auth(op.owner);
-    vesting_index vests(_self, op.owner.value);
+    vesting_index vests(_self, op.owner);
     auto v = vests.find(op.id);
     eosio_assert(v != vests.end(), "Vesting object does not exist");
     eosio_assert((v->available).amount > 0, "Only positive amount can be withdrawed");
@@ -69,11 +69,11 @@ struct shares {
   };
 
 
-	void buyshares_action ( eosio::name buyer, eosio::name host, eosio::asset amount ){
+	void buyshares_action ( account_name buyer, account_name host, eosio::asset amount ){
 		eosio_assert(amount.symbol == _SYM, "Wrong symbol for buy shares");
 		
 		account_index accounts(_self, _self);
-		auto exist = accounts.find(host.value);
+		auto exist = accounts.find(host);
 		eosio_assert(exist != accounts.end(), "Host is not founded");
 		//Check for whitelisted
 
@@ -82,7 +82,7 @@ struct shares {
             eosio_assert(user_is_whitelisted, "Username not founded in the host whitelist"); 
         };
 
-		powermarket market(_self, host.value);
+		powermarket market(_self, host);
 		auto itr = market.find(S(4, BANCORE));
 		auto tmp = *itr;
 		uint64_t shares_out;
@@ -92,9 +92,9 @@ struct shares {
 
         eosio_assert( shares_out > 0, "Amount is not enought for buy 1 share" );
 
-        power_index power(_self, buyer.value);
+        power_index power(_self, buyer);
 
-        auto pexist = power.find(host.value);
+        auto pexist = power.find(host);
         if (pexist == power.end()){
 	        power.emplace(buyer, [&](auto &p){
 	        	p.host = host;
@@ -113,13 +113,13 @@ struct shares {
 
 	void delegate_shares_action (const delshares &op){
 		require_auth(op.from);
-		power_index power_from_idx (_self, op.from.value);
-		power_index power_to_idx (_self, op.reciever.value);
+		power_index power_from_idx (_self, op.from);
+		power_index power_to_idx (_self, op.reciever);
 
-		delegation_index delegations(_self, op.from.value);
+		delegation_index delegations(_self, op.from);
 		
-		account_index accounts(_self, _self.value);
-		auto acc = accounts.find(op.host.value);
+		account_index accounts(_self, _self);
+		auto acc = accounts.find(op.host);
 
 		//TODO - CHECK - ONLY HOST CAN DELEGATE or EVERYBODY?
 		if (acc -> is_whitelisted){
@@ -127,14 +127,14 @@ struct shares {
             eosio_assert(user_is_whitelisted, "Username not founded in the host whitelist"); 
         };
 
-		auto power_from = power_from_idx.find(op.host.value);
+		auto power_from = power_from_idx.find(op.host);
 		eosio_assert(power_from != power_from_idx.end(),"Nothing to delegate");
 		eosio_assert(power_from -> power > 0, "Nothing to delegate");
 		eosio_assert(op.shares > 0, "Delegate amount must be greater then zero");
 		eosio_assert(op.shares <= power_from->staked, "Not enough staked power for delegate");
 		
-		auto dlgtns = delegations.find(op.reciever.value);
-		auto power_to = power_to_idx.find(op.host.value);
+		auto dlgtns = delegations.find(op.reciever);
+		auto power_to = power_to_idx.find(op.host);
 
 		if (dlgtns == delegations.end()){
 
@@ -178,13 +178,13 @@ struct shares {
 		}		
 	}
 
-	void propagate_votes_changes(eosio::name host, eosio::name voter, uint64_t old_power, uint64_t new_power){
-		votes_index votes(_self, voter.value);
-		goals_index goals(_self, host.value);
+	void propagate_votes_changes(account_name host, account_name voter, uint64_t old_power, uint64_t new_power){
+		votes_index votes(_self, voter);
+		goals_index goals(_self, host);
 
 		//by host;
 
-		auto idx = votes.template get_index<"host"_n>();
+		auto idx = votes.template get_index<N(host)>();
         auto matched_itr = idx.lower_bound(host);
        
         while(matched_itr != idx.end() && matched_itr->host == host){
@@ -206,18 +206,18 @@ struct shares {
 	void undelegate_shares_action (const undelshares &op){
 		require_auth(op.reciever);
 
-		power_index power_from_idx (_self, op.from.value);
-		power_index power_to_idx (_self, op.reciever.value);
+		power_index power_from_idx (_self, op.from);
+		power_index power_to_idx (_self, op.reciever);
 
-		delegation_index delegations(_self, op.reciever.value);
-		auto dlgtns = delegations.find(op.from.value);
+		delegation_index delegations(_self, op.reciever);
+		auto dlgtns = delegations.find(op.from);
 
 		eosio_assert(dlgtns != delegations.end(), "Nothing to undelegate");
 		eosio_assert(dlgtns -> shares >= op.shares, "Not enought shares for undelegate");
 		eosio_assert(op.shares > 0, "Undelegate amount must be greater then zero");
 		
-		auto power_from = power_from_idx.find(op.host.value);
-		auto power_to = power_to_idx.find(op.host.value);
+		auto power_from = power_from_idx.find(op.host);
+		auto power_to = power_to_idx.find(op.host);
 
 		if (dlgtns->shares - op.shares == 0){
 			delegations.erase(dlgtns);
@@ -258,12 +258,12 @@ struct shares {
 		uint64_t shares = op.shares;
 		//ADD is delegated check. If true - assert;
 
-		power_index power(_self, username.value);
-		auto userpower = power.find(host.value);
+		power_index power(_self, username);
+		auto userpower = power.find(host);
 		auto upower = (userpower->staked);
 		eosio_assert(upower >= shares, "Not enought power available for sell");
 
-		powermarket market(_self, host.value);
+		powermarket market(_self, host);
 		auto itr = market.find(S(4, BANCORE));
 		auto tmp = *itr;
 		eosio::asset tokens_out;
@@ -282,8 +282,8 @@ struct shares {
 	};
 
 
-	void create_bancor_market(eosio::name host, uint64_t total_shares, eosio::asset quote_amount){
-		powermarket market(_self, host.value);
+	void create_bancor_market(account_name host, uint64_t total_shares, eosio::asset quote_amount){
+		powermarket market(_self, host);
 		auto itr = market.find(S(4,BANCORE));
 		if (itr == market.end()){
 				itr = market.emplace( host, [&]( auto& m ) {
