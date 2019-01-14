@@ -71,10 +71,26 @@ struct hosts {
         eosio_assert(op.purpose.find("&#") , "Symbols '&#' is prohibited in purpose");
 
         eosio_assert(op.quote_amount.amount > 0, "Quote amount must be greater then zero");
-        eosio_assert(op.quote_amount.symbol == CORE_SYMBOL, "Quote symbol for market is only CORE");
+        eosio_assert(op.quote_amount.symbol == _SYM, "Quote symbol for market is only CORE");
         
         eosio_assert(op.goal_validation_percent <= 100 * PERCENT_PRECISION, "goal_validation_percent should be between 0 and 100 * PERCENT_PRECISION (1000000)");
+        eosio_assert(op.referral_percent <= 100 * PERCENT_PRECISION, "referral_percent should be between 0 and 100 * PERCENT_PRECISION (1000000)");
 
+        //CHECK for referal levels;
+        uint64_t level_count = 0;
+        uint64_t percent_count = 0;
+        uint64_t prev_level = 100 * PERCENT_PRECISION;
+
+        for (auto level : op.levels){
+            level_count++;
+            eosio_assert(level <= prev_level, "Percentage on each referal level should decrease or not change");
+            eosio_assert(level != 0, "Zero-level is prohibited.");
+            percent_count += level;
+        };
+
+        eosio_assert(percent_count == 100 * PERCENT_PRECISION, "Error. Summ of all levels should be 100 * PERCENT_PRECISION (1000000)");
+        eosio_assert(level_count <= _MAX_LEVELS, "Exceed the maximum number of levels");
+        //END CHECK
 
         account_index accounts(_self, _self);
         
@@ -93,9 +109,13 @@ struct hosts {
         auto fee = fees.find(0);
         auto to_pay = fee->createhost + op.quote_amount;
 
+        referal_index refs(_self, _self);
+        auto ref = refs.find(op.username);
+        account_name referer = ref->referer;
+
         accounts.emplace(_self, [&](auto &a){
             a.username = op.username;
-            a.hoperator = op.hoperator;
+            a.hoperator = referer;
             a.activated = false;
             a.title = op.title;
             a.purpose = op.purpose;
@@ -110,6 +130,8 @@ struct hosts {
             a.active_host = op.username;
             a.goal_validation_percent = op.goal_validation_percent;
             a.is_whitelisted = op.is_whitelisted;
+            a.referral_percent = op.referral_percent;
+            a.levels= op.levels;
         });
 
     }
@@ -167,7 +189,7 @@ struct hosts {
         auto fee = fees.find(0);
         
         if ((fee->createhost).amount == 0){
-        	to_pay = asset(1, CORE_SYMBOL);
+        	to_pay = asset(1, _SYM);
 
         } else {
 
@@ -191,7 +213,7 @@ struct hosts {
     	auto host = hosts.find(username);
     	
    		//PAY for upgrade only in CORE!.
-    	eosio_assert(amount.symbol == CORE_SYMBOL, "Wrong asset. Only CORE token can be used for upgrade");
+    	eosio_assert(amount.symbol == _SYM, "Wrong asset. Only CORE token can be used for upgrade");
     	
 	   	//Check for enough upgrade amount for quote asset
     	eosio_assert(amount == host->to_pay, "Amount is not equal amount for upgrade");
@@ -202,7 +224,7 @@ struct hosts {
 	
     	hosts.modify(host, _self, [&](auto &h){
 			h.payed = true;
-			h.to_pay = asset(0, CORE_SYMBOL);
+			h.to_pay = asset(0, _SYM);
 		});    	
 
         if (childs.begin() == childs.end())

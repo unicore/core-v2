@@ -4,7 +4,6 @@
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/asset.hpp>
 #include <eosiolib/time.hpp>
-#include <eosiolib/currency.hpp>
 #include <eosiolib/multi_index.hpp>
 #include <eosiolib/contract.hpp>
 #include <eosiolib/action.hpp>
@@ -23,12 +22,14 @@ namespace eosio {
     static const account_name _self = N(tt.tc);
     static const account_name _dacomfee = N(dacomfee.tc);
     static const eosio::symbol_name _SYM = S(4, FLO);
+
     static const eosio::symbol_name _SHARES = S(4, MSHARES);
     static const uint64_t _REGISTRATOR_SUFFIX_LENGHT = 12;
     static const char _REGISTRATOR_STRING_SUFFIX[_REGISTRATOR_SUFFIX_LENGHT+1] = ".goals";
-    static const uint64_t _MAX_SUPPLY = 1000000000000000;
+    static const uint64_t _MAX_SUPPLY = 1000000000000000000;
     static const uint64_t _SHARES_VESTING_DURATION = 604800;
     static const uint64_t _TOTAL_VOTES = 7;
+    static const uint64_t _MAX_LEVELS = 7;
 
     // @abi table spiral i64
     struct spiral{
@@ -71,11 +72,13 @@ namespace eosio {
         eosio::asset sold_amount;
         eosio::time_point_sec date_of_sale;
         std::vector<eosio::asset> forecasts;
-        
+        eosio::asset ref_amount; 
+        eosio::asset sys_amount;
+
         uint64_t primary_key() const {return id;}
         uint64_t by_is_goal() const {return is_goal;} 
 
-        EOSLIB_SERIALIZE(balance, (id)(host)(children_host)(cycle_num)(pool_num)(is_goal)(goal_id)(global_pool_id)(lept_for_sale)(next_lept_for_sale)(last_recalculated_win_pool_id)(win)(pool_color)(available)(purchase_amount)(date_of_purchase)(withdrawed)(sold_amount)(date_of_sale)(forecasts))
+        EOSLIB_SERIALIZE(balance, (id)(host)(children_host)(cycle_num)(pool_num)(is_goal)(goal_id)(global_pool_id)(lept_for_sale)(next_lept_for_sale)(last_recalculated_win_pool_id)(win)(pool_color)(available)(purchase_amount)(date_of_purchase)(withdrawed)(sold_amount)(date_of_sale)(forecasts)(ref_amount)(sys_amount))
     
         account_name get_active_host() const {
             if (host == children_host)
@@ -174,25 +177,41 @@ namespace eosio {
         account_name active_host;
         uint64_t pool_num;
         eosio::asset available;
-        bool withdrawed = false;
+        eosio::asset paid_to_refs;
+        eosio::asset paid_to_host;
         uint64_t primary_key() const {return id;}
         bool is_empty()const { return !( available.amount ); }
         
-        EOSLIB_SERIALIZE(sincome, (id)(active_host)(pool_num)(available)(withdrawed))
+        EOSLIB_SERIALIZE(sincome, (id)(active_host)(pool_num)(available)(paid_to_refs)(paid_to_host))
 
     };
     typedef eosio::multi_index<N(sincome), sincome> sincome_index;
     
 
+    // @abi table referals i64
+    struct referals{
+        account_name referal;
+        account_name referer;
+        
+        account_name primary_key() const{return referal;}
+        account_name by_secondary_key() const{return referer;}
+
+        EOSLIB_SERIALIZE(referals, (referal)(referer))
+    };
+
+    typedef eosio::multi_index<N(referals), referals,
+    indexed_by<N(referer), const_mem_fun<referals, account_name, &referals::by_secondary_key>>
+    > referal_index;
 
 
     /* ACTIONS */
 
     // @abi action
-    struct tests {
-        account_name owner;
-        uint64_t c;
-        EOSLIB_SERIALIZE( tests, (owner)(c))
+    struct setref {
+        account_name referal;
+        account_name referer;
+        
+        EOSLIB_SERIALIZE( setref, (referal)(referer))
     };
 
     

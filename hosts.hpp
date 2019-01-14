@@ -27,9 +27,11 @@ namespace eosio {
         eosio::asset root_token;
         account_name root_token_contract;
         eosio::time_point_sec registered_at;
+        uint64_t referral_percent;
         bool activated = false;
         bool payed = false;
         eosio::asset to_pay;
+        std::vector<uint64_t> levels;
         std::string meta;
         uint64_t cycle_start_at_id = 0;
         uint64_t current_pool_id = 0;
@@ -63,7 +65,7 @@ namespace eosio {
         EOSLIB_SERIALIZE( account, (username)(hoperator)(childrens)(active_host)(non_active_child)
         	(parameters_setted)(need_switch)(is_whitelisted)(whitelist)(consensus_percent)
         	(goal_validation_percent)(title)(purpose)(total_shares)(quote_amount)(root_token)(root_token_contract)
-        	(registered_at)(activated)(payed)(to_pay)(meta)(cycle_start_at_id)(current_pool_id)
+        	(registered_at)(referral_percent)(activated)(payed)(to_pay)(levels)(meta)(cycle_start_at_id)(current_pool_id)
         	(current_cycle_num)(current_pool_num)(priority_flag))
     };
 
@@ -82,9 +84,11 @@ namespace eosio {
         account_name root_token_contract;
         bool is_whitelisted = false;
        	uint64_t goal_validation_percent; 
+        uint64_t referral_percent;
+        std::vector<uint64_t> levels;
         std::string meta;
 
-        EOSLIB_SERIALIZE( upgrade, (username)(hoperator)(title)(purpose)(total_shares)(quote_amount)(root_token)(root_token_contract)(is_whitelisted)(goal_validation_percent)(meta))
+        EOSLIB_SERIALIZE( upgrade, (username)(hoperator)(title)(purpose)(total_shares)(quote_amount)(root_token)(root_token_contract)(is_whitelisted)(goal_validation_percent)(referral_percent)(levels)(meta))
     };
 
     // @abi action

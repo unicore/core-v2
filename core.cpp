@@ -233,13 +233,16 @@ void priority_enter(const priorenter &op){
      auto first_pool = pools.find(cycle->finish_at_global_pool_id + 1);
      auto second_pool = pools.find(cycle->finish_at_global_pool_id + 2);
      
-     eosio_assert(first_pool->remain_lepts == second_pool->remain_lepts, "Oops, something going wrong. Priority enter is closed.");
+     //eosio_assert(first_pool->remain_lepts == second_pool->remain_lepts, "Oops, something going wrong. Priority enter is closed.");
      
      uint64_t first_pool_lepts = bal->next_lept_for_sale / 2;
      uint64_t second_pool_lepts = first_pool_lepts;
      
      eosio::asset first_pool_amount = asset(first_pool_lepts * first_pool_rate->buy_rate / LEPTS_PRECISION, root_symbol);
      eosio::asset second_pool_amount = asset(second_pool_lepts * second_pool_rate->buy_rate / LEPTS_PRECISION, root_symbol);
+     eosio_assert(first_pool_amount.amount != 0, "Too small amount in Lept for priority enter. Priority enter is not possible for this balance in this Core version.");
+     eosio_assert(second_pool_amount.amount != 0, "Too small amount in Lept for priority enter. Priority enter is not possible for this balance in this Core version.");
+     
      eosio::asset total_enter = first_pool_amount + second_pool_amount;
      
 
@@ -273,6 +276,9 @@ void priority_enter(const priorenter &op){
         second_pool_amount = asset(second_pool_lepts * second_pool_rate->sell_rate / LEPTS_PRECISION, root_symbol);
         eosio::asset amount_for_back = bal->available - (first_pool_amount + second_pool_amount);
         
+        eosio_assert(first_pool_amount.amount != 0, "Too small amount in Lept for priority enter. Priority enter is not possible for this balance in this Core version.");
+        eosio_assert(second_pool_amount.amount != 0, "Too small amount in Lept for priority enter. Priority enter is not possible for this balance in this Core version.");
+     
         action(
             permission_level{ _self, N(active) },
             acc->root_token_contract, N(transfer),
@@ -366,6 +372,9 @@ void improve_params_of_new_cycle (account_name host, account_name main_host){
                 sinc.id = sincomes.available_primary_key();
                 sinc.pool_num = 0;
                 sinc.available = asset(0, root_symbol);
+                sinc.paid_to_refs = asset(0, root_symbol);
+                sinc.paid_to_host = asset(0, root_symbol);
+
             });
 }
  
@@ -499,7 +508,6 @@ void start_new_cycle ( account_name host ) {
         
         //Если первые два пула не до конца закрыты, это значит, 
         //не все реинвестировали, и пул добавлять не нужно. 
-            
         if (acc -> current_pool_num > 1) {
             auto rate = rates.find(acc-> current_pool_num);
             //Если это обычный пул, то добавляем по 1\
@@ -526,6 +534,7 @@ void start_new_cycle ( account_name host ) {
                 sincomes.modify(sinc, _self, [&](auto &s){
                     s.pool_num = pool -> pool_num;
                     s.available = rate -> system_income;
+                    s.paid_to_refs = asset(0, root_symbol);
                 });
             }
                 
@@ -607,6 +616,8 @@ void start_new_cycle ( account_name host ) {
                 sinc.id = 0;
                 sinc.pool_num = 0;
                 sinc.available = asset(0, root_symbol);
+                sinc.paid_to_host = asset(0, root_symbol);
+                sinc.paid_to_refs = asset(0, root_symbol);
             });
 
             emplace_first_pools(op.host, main_host, root_symbol);
@@ -625,6 +636,21 @@ void start_new_cycle ( account_name host ) {
         };
     }
 
+    void setref_action(const setref &op){
+        require_auth(op.referal);
+        referal_index refs(_self, _self);
+
+        auto ref = refs.find(op.referal);
+        eosio_assert(op.referal != op.referer, "You cant set the referer yourself");
+        eosio_assert(ref == refs.end(), "Referer is already setted");
+
+        //TODO check account registration;
+        refs.emplace(op.referal, [&](auto &r){
+            r.referal = op.referal;
+            r.referer = op.referer;
+        });
+
+    };
 
     void setfee_action(const setfee &op){
         require_auth(_dacomfee);
@@ -693,7 +719,7 @@ void start_new_cycle ( account_name host ) {
         eosio_assert((base_rate >= 10) && (base_rate < 1000000000), "Base Rate must be greater or equal 10 and less then 1e9");
         eosio_assert((size_of_pool >= 10) && (size_of_pool < 1000000000), "Size of Pool must be greater or equal 10 and less then 1e9");
         eosio_assert((pool_limit >= 3) && (pool_limit < 1000), "Pool Count must be greater or equal 4 and less or equal 1000");
-        eosio_assert((pool_timeout >= 60) && (pool_timeout < 7884000),"Pool Timeout must be greater or equal then 60 sec and less then 7884000 sec");
+       // eosio_assert((pool_timeout >= 60) && (pool_timeout < 7884000),"Pool Timeout must be greater or equal then 60 sec and less then 7884000 sec");
         
         //s.priority_seconds 
         auto sp = spiral.find(0);
@@ -840,11 +866,13 @@ void start_new_cycle ( account_name host ) {
         auto rate = rates.find( pool-> pool_num - 1 );
         eosio_assert(amount.amount % rate -> buy_rate == 0, "You can purchase only whole pieces of LEPT. Specify the amount of the multiple purchase rate.");
 
-        uint64_t lepts = LEPTS_PRECISION * amount.amount / rate -> buy_rate;
+        uint128_t dlepts = uint128_t(LEPTS_PRECISION * (uint128_t)amount.amount / (uint128_t)rate -> buy_rate);
+        uint64_t lepts = dlepts;
+       
         eosio_assert(pool -> remain_lepts >= lepts, "Not enought LEPT in target pool");
         
         fill_pool(username, host, lepts, amount, acc -> current_pool_id);
-    
+        
         refresh_state(host);
     };
 
@@ -858,10 +886,10 @@ void start_new_cycle ( account_name host ) {
 
         pool_index pools(_self, host);
         spiral_index spiral(_self, main_host);
-
         auto sp = spiral.find(0);
         auto pool = pools.find(acc -> current_pool_id);
         if (acc -> priority_flag == true){
+      
             if (pool->pool_started_at + sp->priority_seconds < eosio::time_point_sec(now()) ||
                 (pool -> remain_lepts < LEPTS_PRECISION)){
 
@@ -931,45 +959,53 @@ void start_new_cycle ( account_name host ) {
         else 
             next_lept_for_sale = lepts * rate->sell_rate / rate->buy_rate;
         
+        uint64_t b_id = 0;
+
         if (lepts > pool -> remain_lepts){
-       
+            
+            eosio_assert(false, "Not enought lepts in target pool. Deposit is prevented for core safety.");
+            
             //uint64_t floor_remain_lepts = LEPTS_PRECISION * pool->remain_lepts / LEPTS_PRECISION + LEPTS_PRECISION;
             //eosio_assert(lepts <= floor_remain_lepts, "Oops, something wrong.");
-            remain_lepts = 0;
+            //remain_lepts = 0;
         } else {
+
             remain_lepts = pool -> remain_lepts - lepts;
-        }
         
-        forecasts = calculate_forecast(username, host, lepts, pool -> pool_num - 1);
+            forecasts = calculate_forecast(username, host, lepts, pool -> pool_num - 1);
 
-        pools.modify(pool, _self, [&](auto &p){
-            p.remain_lepts = remain_lepts;
-//          p.remain_lepts = LEPTS_PRECISION * remain_lepts / LEPTS_PRECISION;
-        });
+            pools.modify(pool, _self, [&](auto &p){
+                p.remain_lepts = remain_lepts;
+    //          p.remain_lepts = LEPTS_PRECISION * remain_lepts / LEPTS_PRECISION;
+            });
 
-        auto b_id = balance.available_primary_key();
-        balance.emplace(_self, [&](auto &b){
-            b.id = b_id;
-            b.cycle_num = pool->cycle_num;
-            b.pool_num = pool->pool_num;
-            b.host = host;
-            b.children_host = main_host;
-            b.global_pool_id = filled_pool_id; 
-            b.pool_color = pool -> color;
-            b.lept_for_sale = lepts;
-            b.next_lept_for_sale = next_lept_for_sale;
-            b.purchase_amount = amount;
-            b.available = amount;
-            b.date_of_purchase = eosio::time_point_sec(now());
-            b.last_recalculated_win_pool_id = pool -> id;
-            b.forecasts = forecasts;
-            b.sold_amount = asset(0, root_symbol);
-            b.is_goal = is_goal;
-            b.goal_id = goal_id;
-        });
+            auto b_id = balance.available_primary_key();
+            balance.emplace(_self, [&](auto &b){
+                b.id = b_id;
+                b.cycle_num = pool->cycle_num;
+                b.pool_num = pool->pool_num;
+                b.host = host;
+                b.children_host = main_host;
+                b.global_pool_id = filled_pool_id; 
+                b.pool_color = pool -> color;
+                b.lept_for_sale = lepts;
+                b.next_lept_for_sale = next_lept_for_sale;
+                b.purchase_amount = amount;
+                b.available = amount;
+                b.date_of_purchase = eosio::time_point_sec(now());
+                b.last_recalculated_win_pool_id = pool -> id;
+                b.forecasts = forecasts;
+                b.sold_amount = asset(0, root_symbol);
+                b.is_goal = is_goal;
+                b.goal_id = goal_id;
+                b.ref_amount = asset(0, root_symbol);
+                b.sys_amount = asset(0, root_symbol);
+            });
+
+        };
 
         return b_id;
-    };
+    }
 
 
 
@@ -996,7 +1032,9 @@ void start_new_cycle ( account_name host ) {
         cycle_index cycles(_self, parent_host);
         rate_index rates(_self, child_host);
         pool_index pools(_self, parent_host);
-        
+        spiral_index spiral(_self, child_host);
+
+        auto sp = spiral.find(0);
         
         auto pool_start = pools.find(bal -> global_pool_id);
         auto cycle = cycles.find(pool_start -> cycle_num - 1);
@@ -1037,10 +1075,13 @@ void start_new_cycle ( account_name host ) {
                     eosio::asset available;
                     uint64_t new_reduced_lepts;
                     uint64_t new_lept_for_sale;
+                    eosio::asset ref_amount = asset(0, root_symbol);
+                    auto rate = rates.find(look_pool -> pool_num - 1);
+                    auto prev_win_rate = rates.find(look_pool -> pool_num - 3);
+                    auto middle_rate = rates.find(look_pool -> pool_num - 2);
 
                     if (pool_start -> color == look_pool -> color){
-                        auto rate = rates.find(look_pool -> pool_num - 1);
-
+                        
                         if (look_pool -> pool_num - pool_start -> pool_num <= 2){
                             
                             new_reduced_lepts = bal -> lept_for_sale * rate -> sell_rate / rate -> buy_rate;
@@ -1054,7 +1095,6 @@ void start_new_cycle ( account_name host ) {
                         
                         } else {
 
-                            auto prev_win_rate = rates.find(look_pool -> pool_num - 3);
                             new_lept_for_sale = bal -> lept_for_sale * prev_win_rate -> sell_rate / prev_win_rate -> buy_rate;
                             new_reduced_lepts = new_lept_for_sale * rate -> sell_rate / rate -> buy_rate;
                             
@@ -1063,9 +1103,65 @@ void start_new_cycle ( account_name host ) {
                             
                             forecasts = calculate_forecast(username, parent_host, new_reduced_lepts, look_pool -> pool_num - 1);
                             available = asset(new_lept_for_sale * rate -> sell_rate / LEPTS_PRECISION, root_symbol);                        
-                        
+                           
                         }
+
+                     //REFERRAL PAYMENTS
+                    /*
+                    Для расчетов выплат реферальных вознаграждений необходимо решить дифференциальное уравнение. 
+                    */
+                        auto start_rate = prev_win_rate;
+                        auto finish_rate = rate;
+                        print("start_rate: ", start_rate->system_income, " ");
+                        print("finish_rate: ", finish_rate->system_income, " ");
+                        
+                        uint64_t ref_lepts;
+
+                        if (bal->pool_num == start_rate -> pool_id + 1){
+                            ref_lepts = bal->lept_for_sale / LEPTS_PRECISION * LEPTS_PRECISION;
+                        
+                        } else {
+                            ref_lepts = new_lept_for_sale / LEPTS_PRECISION * LEPTS_PRECISION;
+                        }
+                        
+                        //eosio::asset incr_amount = finish_rate -> system_income - start_rate -> system_income;
+                        
+                        // double dref_amount = incr_amount.amount * ref_lepts / sp->size_of_pool * ((double)(acc->referral_percent) / (double)(100 * PERCENT_PRECISION));
+                        // uint64_t ref_amount = (uint64_t)dref_amount / LEPTS_PRECISION;
+                        // double dsys_amount = incr_amount.amount * ref_lepts / sp->size_of_pool * (double)(((100 * PERCENT_PRECISION - acc->referral_percent)) / (double)(100 * PERCENT_PRECISION));   
+                        // uint64_t sys_amount = (uint64_t)dsys_amount / LEPTS_PRECISION;
+                 
+                        eosio::asset incr_amount1 = middle_rate -> system_income - start_rate -> system_income;
+                        eosio::asset incr_amount2 = finish_rate -> system_income - middle_rate -> system_income;
+                        // uint64_t ref_lepts;
+
+                        double ref_amount1 = incr_amount1.amount * ref_lepts / sp->size_of_pool * ((double)(acc->referral_percent) / (double)(100 * PERCENT_PRECISION)) / LEPTS_PRECISION;
+                        double sys_amount1 = incr_amount1.amount * ref_lepts / sp->size_of_pool * (double)(((100 * PERCENT_PRECISION - acc->referral_percent)) / (double)(100 * PERCENT_PRECISION)) / LEPTS_PRECISION;   
+                        
+                        double ref_amount2 = incr_amount2.amount * ref_lepts / sp->size_of_pool * ((double)(acc->referral_percent) / (double)(100 * PERCENT_PRECISION)) / LEPTS_PRECISION;
+                        double sys_amount2 = incr_amount2.amount * ref_lepts / sp->size_of_pool * (double)(((100 * PERCENT_PRECISION - acc->referral_percent)) / (double)(100 * PERCENT_PRECISION)) / LEPTS_PRECISION;   
+                        
+                        uint64_t r_amount = (uint64_t)ref_amount1 + (uint64_t)ref_amount2;
+                        uint64_t s_amount = (uint64_t)sys_amount1 + (uint64_t)sys_amount2;
+
+                        auto asset_ref_amount = asset(r_amount, root_symbol);
+                        auto asset_sys_amount = asset(s_amount, root_symbol);
+
+                        print("asset_sys_amount:", asset_sys_amount, " ; ");
+                        print("asset_ref_amount:", asset_ref_amount, " !!! ");
                        
+
+
+
+
+                        // auto asset_ref_amount = asset(ref_amount, root_symbol);
+                        // auto asset_sys_amount = asset(sys_amount, root_symbol);
+
+                        //print("asset_sys_amount:", asset_sys_amount, " ; ");
+                        // print("asset_ref_amount:", asset_ref_amount, " !!! ");
+                       
+
+                        //print("bal->ref_amount: ", bal->ref_amount, " ;");
                         balance.modify(bal, username, [&](auto &b){
                             b.last_recalculated_win_pool_id = i;
                             b.lept_for_sale = new_lept_for_sale;
@@ -1073,6 +1169,8 @@ void start_new_cycle ( account_name host ) {
                             b.available = available;
                             b.win = true;
                             b.forecasts = forecasts;
+                            b.ref_amount = bal->ref_amount + asset_ref_amount;
+                            b.sys_amount = bal->sys_amount + asset_sys_amount;
                         });
 
                     } else {
@@ -1152,73 +1250,73 @@ void start_new_cycle ( account_name host ) {
     };
 
 
-    void syswithdraw_action ( const syswithdraw &op){
-        require_auth(op.host);
-        auto host = op.host;
+    // void syswithdraw_action ( const syswithdraw &op){
+    //     require_auth(op.host);
+    //     auto host = op.host;
         
-        account_index accounts(_self, _self);
-        auto acc = accounts.find(host);
-        auto main_host = acc->get_active_host();
+    //     account_index accounts(_self, _self);
+    //     auto acc = accounts.find(host);
+    //     auto main_host = acc->get_active_host();
 
-        auto sys_balance_id = op.sbalanceid;
-        auto username = op.username;
+    //     auto sys_balance_id = op.sbalanceid;
+    //     auto username = op.username;
 
-        sincome_index sincomes(_self, host);
+    //     sincome_index sincomes(_self, host);
         
-        fee_index fee(_self,_self);
-        auto f = fee.find(0);
-        auto system_fee = f->systemfee;
-        auto hoperator = acc -> hoperator;
+    //     fee_index fee(_self,_self);
+    //     auto f = fee.find(0);
+    //     auto system_fee = f->systemfee;
+    //     auto hoperator = acc -> hoperator;
 
-        auto sinc = sincomes.find(sys_balance_id);
-        eosio_assert(sinc -> withdrawed == false, "System balance is already withdrawed");
+    //     auto sinc = sincomes.find(sys_balance_id);
+    //     eosio_assert(sinc -> withdrawed_flag == false, "System balance is already withdrawed");
         
-        eosio_assert(sinc -> id < acc -> current_cycle_num - 1, "Only closed cycles can be withdrawed");
+    //     eosio_assert(sinc -> id < acc -> current_cycle_num - 1, "Only closed cycles can be withdrawed");
         
-        eosio::asset total_available = sinc -> available;
-        eosio::asset system_amount = asset(system_fee * total_available.amount / PERCENT_PRECISION, _SYM);
-        eosio::asset host_amount = total_available - system_amount / 2;
-        eosio::asset operator_amount = host_amount;
+    //     eosio::asset total_available = sinc -> available;
+    //     eosio::asset system_amount = asset(system_fee * total_available.amount / PERCENT_PRECISION, _SYM);
+    //     eosio::asset host_amount = total_available - system_amount / 2;
+    //     eosio::asset operator_amount = host_amount;
 
-        action(
-            permission_level{ _self, N(active) },
-            acc->root_token_contract, N(transfer),
-            std::make_tuple( _self, host, host_amount, std::string("System Withdraw")) 
-        ).send();
+    //     action(
+    //         permission_level{ _self, N(active) },
+    //         acc->root_token_contract, N(transfer),
+    //         std::make_tuple( _self, host, host_amount, std::string("System Withdraw")) 
+    //     ).send();
 
 
-        if (system_amount.amount > 1){
-            if (hoperator != 0 ){
-                action(
-                    permission_level{ _self, N(active) },
-                    acc->root_token_contract, N(transfer),
-                    std::make_tuple( _self, hoperator, operator_amount, std::string("System Withdraw")) 
-                ).send();
+    //     if (system_amount.amount > 1){
+    //         if (hoperator != 0 ){
+    //             action(
+    //                 permission_level{ _self, N(active) },
+    //                 acc->root_token_contract, N(transfer),
+    //                 std::make_tuple( _self, hoperator, operator_amount, std::string("System Withdraw")) 
+    //             ).send();
 
-                action(
-                    permission_level{ _self, N(active) },
-                    acc->root_token_contract, N(transfer),
-                    std::make_tuple( _self, _dacomfee, host_amount, std::string("System Withdraw")) 
-                ).send();
+    //             action(
+    //                 permission_level{ _self, N(active) },
+    //                 acc->root_token_contract, N(transfer),
+    //                 std::make_tuple( _self, _dacomfee, host_amount, std::string("System Withdraw")) 
+    //             ).send();
 
-            } else {
+    //         } else {
 
-                eosio::asset total_sys_amount = operator_amount + host_amount;
+    //             eosio::asset total_sys_amount = operator_amount + host_amount;
 
-                action(
-                    permission_level{ _self, N(active) },
-                    acc->root_token_contract, N(transfer),
-                    std::make_tuple( _self, _dacomfee, total_sys_amount, std::string("System Withdraw")) 
-                ).send();
+    //             action(
+    //                 permission_level{ _self, N(active) },
+    //                 acc->root_token_contract, N(transfer),
+    //                 std::make_tuple( _self, _dacomfee, total_sys_amount, std::string("System Withdraw")) 
+    //             ).send();
 
-            }
-        }
+    //         }
+    //     }
 
-        sincomes.modify(sinc, _self,[&](auto &s){
-            s.withdrawed = true;
-        });
+    //     sincomes.modify(sinc, _self,[&](auto &s){
+    //         s.withdrawed_flag = true;
+    //     });
 
-    }    
+    // }    
 
 
 
@@ -1242,6 +1340,7 @@ void start_new_cycle ( account_name host ) {
 
         balance_index balance (_self, username);
         spiral_index spiral(_self, main_host);
+        sincome_index sincome(_self, main_host);
         std::vector<eosio::asset> forecasts;
         
         
@@ -1249,9 +1348,6 @@ void start_new_cycle ( account_name host ) {
         auto bal = balance.find(balance_id);
         auto pool = pools.find(bal->global_pool_id);
         auto cycle = cycles.find(pool -> cycle_num - 1);
-        print("bal->last_recalculated_win_pool_id: ", bal->last_recalculated_win_pool_id);
-        print("cycle -> id", cycle -> id, " ");
-        print(" cycle->finish_at_global_pool_id: ",cycle->finish_at_global_pool_id);
         
         eosio_assert(bal->last_recalculated_win_pool_id == cycle->finish_at_global_pool_id, "Cannot withdraw not refreshed balance. Refresh Balance first and try again.");
 
@@ -1264,12 +1360,13 @@ void start_new_cycle ( account_name host ) {
 
         auto last_pool = pools.find(cycle -> finish_at_global_pool_id );
         auto rate = rates.find(last_pool -> pool_num - 1 );
-        
+        auto prev_rate = rates.find(last_pool -> pool_num - 2);
+
         eosio_assert(last_pool -> remain_lepts <= pool->total_lepts, "Prevented withdraw. Only BP can restore this balance");
         
         uint64_t pools_in_cycle = cycle -> finish_at_global_pool_id - cycle -> start_at_global_pool_id + 1;
         
-        
+        //NOMINAL
         if (((acc -> current_pool_num == pool -> pool_num ) && (acc -> current_cycle_num == pool -> cycle_num)) || \
             ((pool -> pool_num < 3) && (pools_in_cycle < 3)) || (has_new_cycle && (pool->pool_num == last_pool -> pool_num)))
 
@@ -1279,7 +1376,7 @@ void start_new_cycle ( account_name host ) {
                 action(
                     permission_level{ _self, N(active) },
                     acc->root_token_contract, N(transfer),
-                    std::make_tuple( _self, username, bal -> purchase_amount, std::string("Withdraw")) 
+                    std::make_tuple( _self, username, bal -> purchase_amount, std::string("User Withdraw")) 
                 ).send();
             } else {
                 adjust_goal_balance(bal->host, bal->goal_id, bal -> purchase_amount);
@@ -1314,13 +1411,14 @@ void start_new_cycle ( account_name host ) {
             //balance.erase(bal);
             
         } else  { 
-            
+        //WIN OR LOSE
+
             auto amount = bal -> available;
             if (bal->is_goal == false){
                 action(
                     permission_level{ _self, N(active) },
                     acc->root_token_contract, N(transfer),
-                    std::make_tuple( _self, username, amount, std::string("Withdraw")) 
+                    std::make_tuple( _self, username, amount, std::string("User Withdraw")) 
                 ).send();
             } else {
                 adjust_goal_balance(bal->host, bal->goal_id, amount);
@@ -1329,21 +1427,138 @@ void start_new_cycle ( account_name host ) {
             
             uint64_t lepts_from_reserved;
             if (bal -> win == true){
+                //back 60 sec limit for pool expiration
 
-                pools.modify(last_pool, _self, [&](auto &p){
-                    auto converted_lepts = bal->lept_for_sale * rate -> sell_rate / rate -> buy_rate;
+            
+                auto converted_lepts = bal->lept_for_sale * rate -> sell_rate / rate -> buy_rate;
+                
+                auto sinc = sincome.find(bal->cycle_num - 1);
+               
+                
+                if ((bal->ref_amount).amount > 0){
+                    print("Total Pay to REF:", bal->ref_amount, " ");
                     
-                    p.creserved_lepts = (last_pool->creserved_lepts + converted_lepts) % LEPTS_PRECISION;
+                    referal_index refs(_self, _self);
+                    auto ref = refs.find(username);
+                    account_name referer;
+
+                    if (ref != refs.end()){
+                        referer = ref->referer;
+                        eosio::asset paid = asset(0, root_symbol);
+
+                        for (auto level : acc->levels){
+                            if (ref != refs.end()){
+                                eosio::asset to_ref = asset((bal->ref_amount).amount * level / 100 / PERCENT_PRECISION , root_symbol);
+                                print("pay_to_ref: ", to_ref, " ;");
+                                if (to_ref.amount > 0){
+                                    action(
+                                        permission_level{ _self, N(active) },
+                                        acc->root_token_contract, N(transfer),
+                                        std::make_tuple( _self, referer, to_ref, std::string("Referal payment")) 
+                                    ).send();
+                                };
+
+                                paid += to_ref;
+                                ref = refs.find(referer);
+                                referer = ref->referer;
+                            }
+                        };
+
+                        eosio::asset back_to_host = bal->ref_amount - paid;
+                        if (back_to_host.amount>0){
+                            action(
+                                permission_level{ _self, N(active) },
+                                acc->root_token_contract, N(transfer),
+                                std::make_tuple( _self, host, back_to_host, std::string("Ref payments backed to Host"))
+                            ).send();
+                        };
+
+
+                        
+                    } else {
+                        //If dont have referal, all payments back to host
+                        print("USE HOST");
+                        referer = host;
+                        action(
+                            permission_level{ _self, N(active) },
+                            acc->root_token_contract, N(transfer),
+                            std::make_tuple( _self, referer, bal->ref_amount, std::string("Unused referal payments")) 
+                        ).send();
+
+                    }
+
+
+                    
+                    sincome.modify(sinc, _self, [&](auto &s){
+                        s.paid_to_refs = sinc->paid_to_refs + bal->ref_amount;
+                    });
+
+                }
+
+                if((bal->sys_amount).amount > 0){
+                    print("Pay to HOST:", bal->sys_amount, " ");
+                    fee_index fee(_self,_self);
+                    auto f = fee.find(0);
+                    auto system_fee = f->systemfee;
+                    
+                    eosio::asset operator_amount = asset(system_fee * (bal->sys_amount).amount / PERCENT_PRECISION, root_symbol);
+                    eosio::asset host_amount = bal->sys_amount - operator_amount;
+                    print("operator_amount: ", operator_amount, " ");
+                    print("host_amount: ", host_amount, " ");
+
+
+                    if (operator_amount.amount > 0){
+                        if (acc->hoperator != 0 ){
+                            action(
+                                permission_level{ _self, N(active) },
+                                acc->root_token_contract, N(transfer),
+                                std::make_tuple( _self, acc->hoperator, operator_amount, std::string("Operator payment")) 
+                            ).send();
+
+                        } else {
+                            action(
+                                permission_level{ _self, N(active) },
+                                acc->root_token_contract, N(transfer),
+                                std::make_tuple( _self, _dacomfee, operator_amount, std::string("Operator payment")) 
+                            ).send();
+
+                        }
+                    }
+
+                    if (host_amount.amount > 0){
+                    
+                            action(
+                                permission_level{ _self, N(active) },
+                                acc->root_token_contract, N(transfer),
+                                std::make_tuple( _self, host, host_amount, std::string("Host payment")) 
+                            ).send();
+                    
+                    }
+
+                    sincome.modify(sinc, _self, [&](auto &s){
+                        s.paid_to_host = sinc->paid_to_host + bal->sys_amount;
+                    });
+
+                }
+                
+                // //move ref payments to method
+                
+
+                //BACK LEPTS TO POOL
+                pools.modify(last_pool, _self, [&](auto &p){
+                    //p.creserved_lepts = (last_pool->creserved_lepts + converted_lepts) % LEPTS_PRECISION;
                     p.total_win_withdraw = last_pool -> total_win_withdraw + amount;
-                    p.remain_lepts = std::min(last_pool -> remain_lepts + (last_pool->creserved_lepts + converted_lepts) / LEPTS_PRECISION * LEPTS_PRECISION, last_pool->total_lepts);
-                   
+                    //p.remain_lepts = std::min(last_pool -> remain_lepts + (last_pool->creserved_lepts + converted_lepts) / LEPTS_PRECISION * LEPTS_PRECISION, last_pool->total_lepts);
+                    p.remain_lepts = std::min(last_pool -> remain_lepts + converted_lepts, last_pool->total_lepts);
                 });
+
+
             }
             else {
+
                 pools.modify(last_pool, _self, [&](auto &p){
                      p.total_loss_withdraw = last_pool -> total_loss_withdraw + amount;
                 });
-                
                 
             }
                 
@@ -1354,12 +1569,14 @@ void start_new_cycle ( account_name host ) {
                 b.lept_for_sale = 0;  
                 b.withdrawed = true;
                 b.available = asset(0, root_symbol);
+                b.ref_amount = asset(0, root_symbol);
                 b.forecasts = forecasts;
             });
 
             //balance.erase(bal);
         }
     };
+
 
 };
 

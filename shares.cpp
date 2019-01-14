@@ -4,7 +4,7 @@ struct shares {
 
 	void make_vesting_action(account_name owner, eosio::asset amount){
 	    eosio_assert(amount.is_valid(), "Amount not valid");
-	    eosio_assert(amount.symbol == CORE_SYMBOL, "Not valid symbol for this vesting contract");
+	    eosio_assert(amount.symbol == _SYM, "Not valid symbol for this vesting contract");
 	    eosio_assert(is_account(owner), "Owner account does not exist");
 	    
 	    vesting_index vests (_self, owner);
@@ -59,7 +59,7 @@ struct shares {
 
     vests.modify(v, op.owner, [&](auto &m){
         m.withdrawed = v->withdrawed + v->available;
-        m.available = eosio::asset(0, CORE_SYMBOL);
+        m.available = eosio::asset(0, _SYM);
       });
 
     if (v->withdrawed == v->amount){
@@ -70,7 +70,7 @@ struct shares {
 
 
 	void buyshares_action ( account_name buyer, account_name host, eosio::asset amount ){
-		eosio_assert(amount.symbol == CORE_SYMBOL, "Wrong symbol for buy shares");
+		eosio_assert(amount.symbol == _SYM, "Wrong symbol for buy shares");
 		
 		account_index accounts(_self, _self);
 		auto exist = accounts.find(host);
@@ -268,7 +268,7 @@ struct shares {
 		auto tmp = *itr;
 		eosio::asset tokens_out;
 		market.modify( itr, 0, [&]( auto& es ) {
-        	tokens_out = es.convert( asset(shares,S(0, CORE)), CORE_SYMBOL);
+        	tokens_out = es.convert( asset(shares,S(0, CORE)), _SYM);
 	    });
 		eosio_assert( tokens_out.amount > 1, "token amount received from selling shares is too low" );
 	    

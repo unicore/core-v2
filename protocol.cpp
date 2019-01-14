@@ -155,8 +155,8 @@ extern "C" {
                     core().withdraw_action(eosio::unpack_action_data<withdraw>());
                     break;
                 };
-                case N(syswithdraw): {
-                    core().syswithdraw_action(eosio::unpack_action_data<syswithdraw>());
+                case N(setref): {
+                    core().setref_action(eosio::unpack_action_data<setref>());
                     break;
                 };
                 case N(setfee): {
