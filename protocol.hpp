@@ -7,7 +7,7 @@
 #include <eosiolib/multi_index.hpp>
 #include <eosiolib/contract.hpp>
 #include <eosiolib/action.hpp>
-#include "eosio.token.hpp"
+//#include "eosio.token.hpp"
 #include "hosts.hpp"
 #include "shares.hpp"
 #include "goals.hpp"
@@ -19,11 +19,10 @@
 
 
 namespace eosio {
-    static const account_name _self = N(tt.tc);
-    static const account_name _dacomfee = N(dacomfee.tc);
-    static const eosio::symbol_name _SYM = S(4, FLO);
+    static constexpr eosio::name _self = "tt.tc"_n;
+    static constexpr eosio::name _dacomfee = "dacomfee.tc"_n;
+    static constexpr eosio::symbol _SYM = sym(symbol_code("FLO"), 4);
 
-    static const eosio::symbol_name _SHARES = S(4, MSHARES);
     static const uint64_t _REGISTRATOR_SUFFIX_LENGHT = 12;
     static const char _REGISTRATOR_STRING_SUFFIX[_REGISTRATOR_SUFFIX_LENGHT+1] = ".goals";
     static const uint64_t _MAX_SUPPLY = 1000000000000000000;
@@ -47,14 +46,14 @@ namespace eosio {
         EOSLIB_SERIALIZE(spiral, (id)(size_of_pool)(overlap)(profit_growth)(base_rate)(loss_percent)(pool_limit)(pool_timeout)(priority_seconds))
     };
 
-    typedef eosio::multi_index<N(spiral), spiral> spiral_index;
+    typedef eosio::multi_index<"spiral"_n, spiral> spiral_index;
 
 
     // @abi table balance i64
     struct balance{
         uint64_t id;
-        account_name host;
-        account_name children_host;
+        eosio::name host;
+        eosio::name children_host;
         uint64_t cycle_num;
         uint64_t pool_num;
         bool is_goal = false;
@@ -80,7 +79,7 @@ namespace eosio {
 
         EOSLIB_SERIALIZE(balance, (id)(host)(children_host)(cycle_num)(pool_num)(is_goal)(goal_id)(global_pool_id)(lept_for_sale)(next_lept_for_sale)(last_recalculated_win_pool_id)(win)(pool_color)(available)(purchase_amount)(date_of_purchase)(withdrawed)(sold_amount)(date_of_sale)(forecasts)(ref_amount)(sys_amount))
     
-        account_name get_active_host() const {
+        eosio::name get_active_host() const {
             if (host == children_host)
                 return host;
             else
@@ -88,14 +87,14 @@ namespace eosio {
         }
     };
 
-    typedef eosio::multi_index<N(balance), balance,
-    indexed_by<N(is_goal), const_mem_fun<balance, uint64_t, &balance::by_is_goal>>
+    typedef eosio::multi_index<"balance"_n, balance,
+    indexed_by<"isgoal"_n, const_mem_fun<balance, uint64_t, &balance::by_is_goal>>
     > balance_index;
 
     // @abi table cycle i64
     struct cycle{
         uint64_t id;
-        account_name active_host;
+        eosio::name active_host;
         uint64_t start_at_global_pool_id;
         uint64_t finish_at_global_pool_id;
         
@@ -104,7 +103,7 @@ namespace eosio {
         EOSLIB_SERIALIZE(cycle, (id)(active_host)(start_at_global_pool_id)(finish_at_global_pool_id));
     };
 
-    typedef eosio::multi_index<N(cycle), cycle> cycle_index;
+    typedef eosio::multi_index<"cycle"_n, cycle> cycle_index;
     
    
     // @abi table fee i64
@@ -119,13 +118,13 @@ namespace eosio {
         EOSLIB_SERIALIZE(fee, (id)(createhost)(systemfee))
     };
 
-    typedef eosio::multi_index<N(fee), fee> fee_index;
+    typedef eosio::multi_index<"fee"_n, fee> fee_index;
     
 
     // @abi table pool i64
     struct pool{
         uint64_t id;
-        account_name active_host;
+        eosio::name active_host;
         uint64_t cycle_num;
         uint64_t pool_num;
         std::string color;
@@ -145,7 +144,7 @@ namespace eosio {
         EOSLIB_SERIALIZE(pool,(id)(active_host)(cycle_num)(pool_num)(color)(total_lepts)(creserved_lepts)(remain_lepts)(lept_cost)(total_win_withdraw)(total_loss_withdraw)(pool_started_at)(priority_until)(pool_expired_at))
     };
 
-    typedef eosio::multi_index<N(pool), pool> pool_index;
+    typedef eosio::multi_index<"pool"_n, pool> pool_index;
     
 
     // @abi table rate i64
@@ -168,13 +167,13 @@ namespace eosio {
 
         EOSLIB_SERIALIZE(rate, (pool_id)(total_lepts)(buy_rate)(sell_rate)(client_income)(delta)(pool_cost)(total_in_box)(payment_to_wins)(payment_to_loss)(system_income)(live_balance_for_sale))
     };
-    typedef eosio::multi_index<N(rate), rate> rate_index;
+    typedef eosio::multi_index<"rate"_n, rate> rate_index;
     
 
     // @abi table sincome i64
     struct sincome{
         uint64_t id;
-        account_name active_host;
+        eosio::name active_host;
         uint64_t pool_num;
         eosio::asset available;
         eosio::asset paid_to_refs;
@@ -185,22 +184,22 @@ namespace eosio {
         EOSLIB_SERIALIZE(sincome, (id)(active_host)(pool_num)(available)(paid_to_refs)(paid_to_host))
 
     };
-    typedef eosio::multi_index<N(sincome), sincome> sincome_index;
+    typedef eosio::multi_index<"sincome"_n, sincome> sincome_index;
     
 
     // @abi table referals i64
     struct referals{
-        account_name referal;
-        account_name referer;
+        eosio::name referal;
+        eosio::name referer;
         
-        account_name primary_key() const{return referal;}
-        account_name by_secondary_key() const{return referer;}
+        eosio::name primary_key() const{return referal;}
+        eosio::name by_secondary_key() const{return referer;}
 
         EOSLIB_SERIALIZE(referals, (referal)(referer))
     };
 
-    typedef eosio::multi_index<N(referals), referals,
-    indexed_by<N(referer), const_mem_fun<referals, account_name, &referals::by_secondary_key>>
+    typedef eosio::multi_index<"referals"_n, referals,
+    indexed_by<"referer"_n, const_mem_fun<referals, eosio::name, &referals::by_secondary_key>>
     > referal_index;
 
 
@@ -208,8 +207,8 @@ namespace eosio {
 
     // @abi action
     struct setref {
-        account_name referal;
-        account_name referer;
+        eosio::name referal;
+        eosio::name referer;
         
         EOSLIB_SERIALIZE( setref, (referal)(referer))
     };
@@ -217,8 +216,8 @@ namespace eosio {
     
     // @abi action
     struct setparams{
-        account_name host;
-        account_name child_host;
+        eosio::name host;
+        eosio::name child_host;
         uint64_t size_of_pool;
         uint64_t overlap;
         uint64_t profit_growth;
@@ -233,16 +232,16 @@ namespace eosio {
 
     // @abi action
     struct start{
-        account_name host;
-        account_name child_host;
+        eosio::name host;
+        eosio::name child_host;
         EOSLIB_SERIALIZE( start, (host)(child_host))
 
     };
 
     // @abi action
     struct withdraw{
-        account_name username; 
-        account_name host;
+        eosio::name username; 
+        eosio::name host;
         uint64_t balance_id;
 
         
@@ -253,8 +252,8 @@ namespace eosio {
 
     // @abi action
     struct priorenter{
-        account_name username; 
-        account_name host;
+        eosio::name username; 
+        eosio::name host;
         uint64_t balance_id;
 
         
@@ -265,8 +264,8 @@ namespace eosio {
 
 // @abi action
     struct gpriorenter{
-        account_name username; 
-        account_name host;
+        eosio::name username; 
+        eosio::name host;
         uint64_t lepts_for_each_pool; 
         uint64_t goal_id;
         EOSLIB_SERIALIZE( gpriorenter, (username)(host)(lepts_for_each_pool)(goal_id))
@@ -276,7 +275,7 @@ namespace eosio {
 
     // @abi action
     struct refreshbal{
-        account_name username;
+        eosio::name username;
         uint64_t balance_id;
         bool partrefresh = false;
         EOSLIB_SERIALIZE( refreshbal, (username)(balance_id)(partrefresh))
@@ -284,15 +283,15 @@ namespace eosio {
 
       // @abi action
     struct refreshst{
-        account_name host;
+        eosio::name host;
 
         EOSLIB_SERIALIZE( refreshst, (host))
     };
 
     // @abi action
     struct syswithdraw{
-        account_name username;
-        account_name host;
+        eosio::name username;
+        eosio::name host;
         uint64_t sbalanceid;
         EOSLIB_SERIALIZE( syswithdraw, (username)(host)(sbalanceid))
     };
@@ -307,7 +306,7 @@ namespace eosio {
 
     // @abi action
     struct next{
-        account_name host;
+        eosio::name host;
     
         EOSLIB_SERIALIZE( next, (host))
     };

@@ -2,36 +2,36 @@ namespace eosio {
 	
 	//@abi table power
 	struct power{
-		account_name host;
+		eosio::name host;
 		uint64_t power;
 		uint64_t staked;
 		uint64_t delegated;
 
-		account_name primary_key() const {return host;}
+		eosio::name primary_key() const {return host;}
 
 		EOSLIB_SERIALIZE(struct power, (host)(power)(staked)(delegated))
 	};
 
-	typedef eosio::multi_index<N(power), power> power_index;
+	typedef eosio::multi_index<"power"_n, power> power_index;
 
 
 	//@abi table delegations
 	struct delegations{
-		account_name reciever;
+		eosio::name reciever;
 		uint64_t shares;
 
-		account_name primary_key() const {return reciever;}
+		eosio::name primary_key() const {return reciever;}
 
 		EOSLIB_SERIALIZE(delegations, (reciever)(shares))
 	};
 
-	typedef eosio::multi_index<N(delegations), delegations> delegation_index;
+	typedef eosio::multi_index<"delegations"_n, delegations> delegation_index;
 
 
     //@abi table vesting i64 
     struct vesting{
     	uint64_t id;
-    	account_name owner;
+    	eosio::name owner;
     	eosio::time_point_sec startat;
     	uint64_t duration;
     	eosio::asset amount;
@@ -43,12 +43,12 @@ namespace eosio {
     	EOSLIB_SERIALIZE(vesting, (id)(owner)(startat)(duration)(amount)(available)(withdrawed))
     };
 
-    typedef eosio::multi_index<N(vesting), vesting> vesting_index;
+    typedef eosio::multi_index<"vesting"_n, vesting> vesting_index;
 
 
     //@abi action refreshsh
     struct refreshsh {
-    	account_name owner;
+    	eosio::name owner;
     	uint64_t id;
 
     	EOSLIB_SERIALIZE(refreshsh, (owner)(id))
@@ -57,24 +57,24 @@ namespace eosio {
 
     //@abi action withdrawsh
     struct withdrawsh {
-    	account_name owner;
+    	eosio::name owner;
     	uint64_t id;
      	EOSLIB_SERIALIZE(withdrawsh, (owner)(id))
     };
 
 	// @abi action
 	struct sellshares {
-		account_name username;
-		account_name host;
+		eosio::name username;
+		eosio::name host;
 		uint64_t shares;
 		EOSLIB_SERIALIZE(sellshares, (username)(host)(shares))
 	};
 
 	// @abi action
 	struct delshares{
-		account_name from;
-		account_name reciever;
-		account_name host;
+		eosio::name from;
+		eosio::name reciever;
+		eosio::name host;
 		uint64_t shares;
 
 		EOSLIB_SERIALIZE(delshares, (from)(reciever)(host)(shares))
@@ -82,9 +82,9 @@ namespace eosio {
 
 	// @abi action
 	struct undelshares{
-		account_name from;
-		account_name reciever;
-		account_name host;
+		eosio::name from;
+		eosio::name reciever;
+		eosio::name host;
 		uint64_t shares;
 
 		EOSLIB_SERIALIZE(undelshares, (from)(reciever)(host)(shares))

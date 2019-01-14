@@ -2,7 +2,7 @@ namespace eosio{
 struct core {
 
 
-    void next_goals(account_name host){
+    void next_goals(eosio::name host){
         
         //FIND all goals with activated status sorted by votes 
         //and fill priority enter list until half size of pool will full filled.
@@ -18,7 +18,7 @@ struct core {
             i_bp++;
         };
         
-        std::vector<account_name> zero_voters;
+        std::vector<eosio::name> zero_voters;
 
         for(auto id : list_for_disable){
             auto goal_for_modify = goals.find(id);
@@ -37,7 +37,7 @@ struct core {
       
         account_index accounts(_self, _self);
         auto acc = accounts.find(host);
-        account_name active_host = acc->get_active_host();
+        eosio::name active_host = acc->get_active_host();
 
         spiral_index spiral(_self, active_host);
         auto sp = spiral.find(0);
@@ -138,7 +138,7 @@ struct core {
     }
 
 
-void adjust_goal_balance(account_name host, uint64_t goal_id, eosio::asset amount){
+void adjust_goal_balance(eosio::name host, uint64_t goal_id, eosio::asset amount){
     goals_index goals (_self, host);
     //CHECK FOR SYMBOL
     
@@ -169,7 +169,7 @@ void adjust_goal_balance(account_name host, uint64_t goal_id, eosio::asset amoun
 };
 
 
-void add_balance_id_to_goal(account_name host, uint64_t goal_id, uint64_t balance_id){
+void add_balance_id_to_goal(eosio::name host, uint64_t goal_id, uint64_t balance_id){
     goals_index goals(_self, host);
     auto goal = goals.find(goal_id);
     std::vector <uint64_t> balance_ids = goal->balance_ids;
@@ -181,7 +181,7 @@ void add_balance_id_to_goal(account_name host, uint64_t goal_id, uint64_t balanc
 
 }
 
-void delete_balance_id_from_goal(account_name host, uint64_t goal_id, uint64_t balance_id){
+void delete_balance_id_from_goal(eosio::name host, uint64_t goal_id, uint64_t balance_id){
     goals_index goals(_self, host);
     auto goal = goals.find(goal_id);
     std::vector <uint64_t> balance_ids = goal->balance_ids;
@@ -316,7 +316,7 @@ void priority_enter(const priorenter &op){
 }
 
 
-void adjust_clan_income (account_name parent_host, account_name last_active_host){
+void adjust_clan_income (eosio::name parent_host, eosio::name last_active_host){
     account_index accounts(_self, _self);
     auto acc = accounts.find(parent_host);   
     sincome_index sincomes(_self, parent_host);
@@ -341,7 +341,7 @@ void adjust_clan_income (account_name parent_host, account_name last_active_host
 
 }
 
-void improve_params_of_new_cycle (account_name host, account_name main_host){
+void improve_params_of_new_cycle (eosio::name host, eosio::name main_host){
         account_index accounts(_self, _self);
         auto acc = accounts.find(host);
         auto root_symbol = acc->get_root_symbol();
@@ -379,7 +379,7 @@ void improve_params_of_new_cycle (account_name host, account_name main_host){
 }
  
 
-    void emplace_first_pools(account_name parent_host, account_name main_host, eosio::symbol_name root_symbol){
+    void emplace_first_pools(eosio::name parent_host, eosio::name main_host, eosio::symbol root_symbol){
         
         spiral_index spiral(_self, main_host);
         auto sp = spiral.find(0);
@@ -432,14 +432,14 @@ void improve_params_of_new_cycle (account_name host, account_name main_host){
     }
 
 
-void start_new_cycle ( account_name host ) {
+void start_new_cycle ( eosio::name host ) {
         account_index accounts(_self, _self);
         sincome_index sincomes(_self, host);
         cycle_index cycles(_self, host);
                 
         auto acc = accounts.find(host);
-        account_name main_host = acc->get_active_host();
-        account_name last_active_host = acc->active_host;
+        eosio::name main_host = acc->get_active_host();
+        eosio::name last_active_host = acc->active_host;
                 
         auto root_symbol = acc->get_root_symbol();
             
@@ -482,7 +482,7 @@ void start_new_cycle ( account_name host ) {
             
     };
 
-    void next_pool( account_name host){
+    void next_pool( eosio::name host){
         account_index accounts(_self, _self);
 
         auto acc = accounts.find(host);
@@ -830,7 +830,7 @@ void start_new_cycle ( account_name host ) {
 
 
     
-    void deposit ( account_name username, account_name host, eosio::asset amount, account_name code ){
+    void deposit ( eosio::name username, eosio::name host, eosio::asset amount, eosio::name code ){
         require_auth(username);
         eosio_assert( amount.is_valid(), "Rejected. Invalid quantity" );
 
@@ -839,7 +839,7 @@ void start_new_cycle ( account_name host ) {
         auto acc = accounts.find(host);
         eosio_assert(acc->root_token_contract == code, "Wrong token contract for this host");
 
-        account_name main_host = acc->get_active_host();
+        eosio::name main_host = acc->get_active_host();
         
         if (acc->is_whitelisted){
             auto user_is_whitelisted = acc->is_account_in_whitelist(username);
@@ -878,11 +878,11 @@ void start_new_cycle ( account_name host ) {
 
 
 
-    void refresh_state (account_name host){
+    void refresh_state (eosio::name host){
  
         account_index accounts(_self, _self);
         auto acc = accounts.find(host);
-        account_name main_host = acc->get_active_host();
+        eosio::name main_host = acc->get_active_host();
 
         pool_index pools(_self, host);
         spiral_index spiral(_self, main_host);
@@ -934,7 +934,7 @@ void start_new_cycle ( account_name host ) {
     };
 
 
-    uint64_t fill_pool(account_name username, account_name host, uint64_t lepts, eosio::asset amount, uint64_t filled_pool_id, bool is_goal = false, uint64_t goal_id = 0){
+    uint64_t fill_pool(eosio::name username, eosio::name host, uint64_t lepts, eosio::asset amount, uint64_t filled_pool_id, bool is_goal = false, uint64_t goal_id = 0){
         std::vector<eosio::asset> forecasts;
         account_index accounts(_self, _self);
         
@@ -1012,7 +1012,7 @@ void start_new_cycle ( account_name host ) {
 
     void refresh_balance_action (const refreshbal &op){
         require_auth(op.username);
-        account_name username = op.username;
+        eosio::name username = op.username;
         uint64_t balance_id = op.balance_id;
 
         std::vector<eosio::asset> forecasts;
@@ -1190,7 +1190,7 @@ void start_new_cycle ( account_name host ) {
     }
 
 
-    std::vector <eosio::asset> calculate_forecast(account_name username, account_name host, uint64_t lepts, uint64_t pool_num){
+    std::vector <eosio::asset> calculate_forecast(eosio::name username, eosio::name host, uint64_t lepts, uint64_t pool_num){
         account_index accounts(_self, _self);
         auto acc = accounts.find(host);
         auto main_host = acc->get_active_host();
@@ -1329,7 +1329,7 @@ void start_new_cycle ( account_name host ) {
 
         account_index accounts(_self, _self);
         auto acc = accounts.find(host);
-        account_name main_host = acc->get_active_host();
+        eosio::name main_host = acc->get_active_host();
         auto root_symbol = acc->get_root_symbol();
 
         refresh_state(host);
@@ -1440,7 +1440,7 @@ void start_new_cycle ( account_name host ) {
                     
                     referal_index refs(_self, _self);
                     auto ref = refs.find(username);
-                    account_name referer;
+                    eosio::name referer;
 
                     if (ref != refs.end()){
                         referer = ref->referer;

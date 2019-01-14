@@ -24,7 +24,7 @@ struct hosts {
 
  //    	eosio_assert(ram_amount + cpu + net <= quantity.amount, "Not enough core token amount for pay RAM, NET and CPU");
 
-	//     account_name user = get_random_account_name();
+	//     eosio::name user = get_random_eosio::name();
 
 	//     //TODO CHECK IT (REGISTRATOR ACCOUNT)
 
@@ -111,7 +111,7 @@ struct hosts {
 
         referal_index refs(_self, _self);
         auto ref = refs.find(op.username);
-        account_name referer = ref->referer;
+        eosio::name referer = ref->referer;
 
         accounts.emplace(_self, [&](auto &a){
             a.username = op.username;
@@ -136,7 +136,7 @@ struct hosts {
 
     }
 
-    // account_name get_random_account_name(){
+    // eosio::name get_random_eosio::name(){
     // 	eosio::string allowed = "12345abcdefghijklmnopqrstuvwxyz";
 
 
@@ -170,7 +170,7 @@ struct hosts {
     	eosio_assert(acc->activated == true, "Main host should be activated before set a child host");
     	eosio_assert( is_account( child_host ), "Child account does not exist");
     	
-    	std::vector<account_name> childs = acc->childrens;
+    	std::vector<eosio::name> childs = acc->childrens;
 
     	//check for exist in main hosts;
     	auto is_exist = hosts.find(child_host);
@@ -179,7 +179,7 @@ struct hosts {
     	
     	// //Check for exist not active child
     	if (childs.begin() != childs.end()){
-    		account_name last_child = childs.back() - 1;
+    		eosio::name last_child = childs.back() - 1;
 		}
     	
     	childs.push_back(child_host);
@@ -207,7 +207,7 @@ struct hosts {
 
     }
 
-    void pay_for_upgrade(account_name username, eosio::asset amount){
+    void pay_for_upgrade(eosio::name username, eosio::asset amount){
     	account_index hosts(_self, _self);
 
     	auto host = hosts.find(username);
@@ -220,7 +220,7 @@ struct hosts {
     	eosio_assert(host != hosts.end(), "Host is not founded");
     	eosio_assert(host->payed == 0, "Already payed");
 
-    	std::vector<account_name> childs = host->childrens;
+    	std::vector<eosio::name> childs = host->childrens;
 	
     	hosts.modify(host, _self, [&](auto &h){
 			h.payed = true;
