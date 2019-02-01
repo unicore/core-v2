@@ -42,7 +42,7 @@ struct core {
         spiral_index spiral(_self, active_host);
         auto sp = spiral.find(0);
         auto half_of_pool = sp -> size_of_pool / 2;
-        uint64_t lepts_filled = 0;
+        uint64_t quants_filled = 0;
         std::vector<uint64_t> list_for_enable;
         std::vector<uint64_t> list_for_diactivate;
 
@@ -50,12 +50,12 @@ struct core {
             if (i_bv->activated == true && i_bv -> validated == true){
                 if (i_bv -> available >= i_bv->activation_amount){
                 
-                    lepts_filled += i_bv -> lepts_for_each_pool;
-                    if (lepts_filled <= half_of_pool){
+                    quants_filled += i_bv -> quants_for_each_pool;
+                    if (quants_filled <= half_of_pool){
                         list_for_enable.emplace_back(i_bv->id);
                     };
                 
-                    filled = lepts_filled >= half_of_pool;
+                    filled = quants_filled >= half_of_pool;
                 } else {
                     list_for_diactivate.emplace_back(i_bv->id);
                 }
@@ -81,7 +81,7 @@ struct core {
                 
                 gpriorenter op;
             
-                op.lepts_for_each_pool = goal_for_modify->lepts_for_each_pool * LEPTS_PRECISION;
+                op.quants_for_each_pool = goal_for_modify->quants_for_each_pool * QUANTS_PRECISION;
                 op.username = goal_for_modify->username;
                 op.host = host;
                 op.goal_id = goal_for_modify -> id;
@@ -97,7 +97,7 @@ struct core {
  void priority_goal_enter(const gpriorenter &op){
         auto username = op.username;
         auto host = op.host;
-        auto lepts = op.lepts_for_each_pool;
+        auto quants = op.quants_for_each_pool;
         auto goal_id = op.goal_id;
 
         refresh_state(host);
@@ -126,12 +126,12 @@ struct core {
         auto first_pool = pools.find(cycle->finish_at_global_pool_id + 1);
         auto second_pool = pools.find(cycle->finish_at_global_pool_id + 2);
          
-        eosio::asset first_pool_amount = asset(lepts * first_pool_rate->buy_rate / LEPTS_PRECISION, root_symbol);
-        eosio::asset second_pool_amount = asset(lepts * second_pool_rate->buy_rate / LEPTS_PRECISION, root_symbol);
+        eosio::asset first_pool_amount = asset(quants * first_pool_rate->buy_rate / QUANTS_PRECISION, root_symbol);
+        eosio::asset second_pool_amount = asset(quants * second_pool_rate->buy_rate / QUANTS_PRECISION, root_symbol);
         eosio::asset amount_for_back = first_pool_amount + second_pool_amount;
        
-        uint64_t bal_id1 = fill_pool(username, host, lepts, first_pool_amount, acc-> current_pool_id, true, goal_id);
-        uint64_t bal_id2 = fill_pool(username, host, lepts, second_pool_amount, acc-> current_pool_id + 1, true, goal_id);
+        uint64_t bal_id1 = fill_pool(username, host, quants, first_pool_amount, acc-> current_pool_id, true, goal_id);
+        uint64_t bal_id2 = fill_pool(username, host, quants, second_pool_amount, acc-> current_pool_id + 1, true, goal_id);
         
         add_balance_id_to_goal(host, goal_id, bal_id1);
         add_balance_id_to_goal(host, goal_id, bal_id2);
@@ -233,23 +233,23 @@ void priority_enter(const priorenter &op){
      auto first_pool = pools.find(cycle->finish_at_global_pool_id + 1);
      auto second_pool = pools.find(cycle->finish_at_global_pool_id + 2);
      
-     //eosio_assert(first_pool->remain_lepts == second_pool->remain_lepts, "Oops, something going wrong. Priority enter is closed.");
+     //eosio_assert(first_pool->remain_quants == second_pool->remain_quants, "Oops, something going wrong. Priority enter is closed.");
      
-     uint64_t first_pool_lepts = bal->next_lept_for_sale / 2;
-     uint64_t second_pool_lepts = first_pool_lepts;
+     uint64_t first_pool_quants = bal->next_quants_for_sale / 2;
+     uint64_t second_pool_quants = first_pool_quants;
      
-     eosio::asset first_pool_amount = asset(first_pool_lepts * first_pool_rate->buy_rate / LEPTS_PRECISION, root_symbol);
-     eosio::asset second_pool_amount = asset(second_pool_lepts * second_pool_rate->buy_rate / LEPTS_PRECISION, root_symbol);
-     eosio_assert(first_pool_amount.amount != 0, "Too small amount in Lept for priority enter. Priority enter is not possible for this balance in this Core version.");
-     eosio_assert(second_pool_amount.amount != 0, "Too small amount in Lept for priority enter. Priority enter is not possible for this balance in this Core version.");
+     eosio::asset first_pool_amount = asset(first_pool_quants * first_pool_rate->buy_rate / QUANTS_PRECISION, root_symbol);
+     eosio::asset second_pool_amount = asset(second_pool_quants * second_pool_rate->buy_rate / QUANTS_PRECISION, root_symbol);
+     eosio_assert(first_pool_amount.amount != 0, "Too small amount in Quants for priority enter. Priority enter is not possible for this balance in this Core version.");
+     eosio_assert(second_pool_amount.amount != 0, "Too small amount in Quants for priority enter. Priority enter is not possible for this balance in this Core version.");
      
      eosio::asset total_enter = first_pool_amount + second_pool_amount;
      
 
-     //compare available amount with amount by next_lept_for_sale. 
-     //If calculated amount by next_lept_for_sale is more then available amount,
-     //then recalculate enter amount by available amount through lept rate for first pools
-     //(user will get less lepts, but total balance will be in safety);
+     //compare available amount with amount by next_quants_for_sale. 
+     //If calculated amount by next_quants_for_sale is more then available amount,
+     //then recalculate enter amount by available amount through quant rate for first pools
+     //(user will get less quants, but total balance will be in safety);
      //it will happen only on small distance from enter to exit pool
 
      if (bal->available >= total_enter){
@@ -268,16 +268,16 @@ void priority_enter(const priorenter &op){
         //может зайти в приоритете в лептах. Надо найти минимальную сумму в лептах, которая удовлетворяет
         //условиям баланса. Для этого берем курс покупки второго раунда, и высчитаем количество лепт по нему. 
         //Затем вычисляем суммы для первого и второго раунда, а разницу - возвращаем. 
-        second_pool_lepts = (bal->available).amount / 2 * LEPTS_PRECISION / second_pool_rate->buy_rate;
+        second_pool_quants = (bal->available).amount / 2 * QUANTS_PRECISION / second_pool_rate->buy_rate;
     
-        first_pool_lepts = second_pool_lepts;
-        first_pool_amount = asset(first_pool_lepts * first_pool_rate->buy_rate / LEPTS_PRECISION, root_symbol);
+        first_pool_quants = second_pool_quants;
+        first_pool_amount = asset(first_pool_quants * first_pool_rate->buy_rate / QUANTS_PRECISION, root_symbol);
     
-        second_pool_amount = asset(second_pool_lepts * second_pool_rate->sell_rate / LEPTS_PRECISION, root_symbol);
+        second_pool_amount = asset(second_pool_quants * second_pool_rate->sell_rate / QUANTS_PRECISION, root_symbol);
         eosio::asset amount_for_back = bal->available - (first_pool_amount + second_pool_amount);
         
-        eosio_assert(first_pool_amount.amount != 0, "Too small amount in Lept for priority enter. Priority enter is not possible for this balance in this Core version.");
-        eosio_assert(second_pool_amount.amount != 0, "Too small amount in Lept for priority enter. Priority enter is not possible for this balance in this Core version.");
+        eosio_assert(first_pool_amount.amount != 0, "Too small amount in Quants for priority enter. Priority enter is not possible for this balance in this Core version.");
+        eosio_assert(second_pool_amount.amount != 0, "Too small amount in Quants for priority enter. Priority enter is not possible for this balance in this Core version.");
      
         action(
             permission_level{ _self, N(active) },
@@ -288,8 +288,8 @@ void priority_enter(const priorenter &op){
     }
      
     
-     uint64_t bal_id1 = fill_pool(username, host, first_pool_lepts, first_pool_amount, acc-> current_pool_id, bal->is_goal, bal->goal_id);
-     uint64_t bal_id2 = fill_pool(username, host, second_pool_lepts, second_pool_amount, acc-> current_pool_id + 1, bal->is_goal, bal->goal_id);
+     uint64_t bal_id1 = fill_pool(username, host, first_pool_quants, first_pool_amount, acc-> current_pool_id, bal->is_goal, bal->goal_id);
+     uint64_t bal_id2 = fill_pool(username, host, second_pool_quants, second_pool_amount, acc-> current_pool_id + 1, bal->is_goal, bal->goal_id);
      
      if (bal->is_goal == true){
             add_balance_id_to_goal(host, bal->goal_id, bal_id1);
@@ -307,7 +307,7 @@ void priority_enter(const priorenter &op){
         balances.modify(bal, username, [&](auto &b){
             b.sold_amount = bal -> available;
             b.date_of_sale = eosio::time_point_sec(now());
-            b.lept_for_sale = 0; 
+            b.quants_for_sale = 0; 
             b.withdrawed = true;
             b.available = asset(0, root_symbol);
             b.forecasts = forecasts;
@@ -399,10 +399,10 @@ void improve_params_of_new_cycle (account_name host, account_name main_host){
         pools.emplace(_self, [&](auto &p){
             p.id = available_id;
             p.active_host = main_host;
-            p.total_lepts = sp->size_of_pool * LEPTS_PRECISION;
-            p.creserved_lepts = 0;
-            p.remain_lepts = p.total_lepts;
-            p.lept_cost = asset(rate->buy_rate, root_symbol);
+            p.total_quants = sp->size_of_pool * QUANTS_PRECISION;
+            p.creserved_quants = 0;
+            p.remain_quants = p.total_quants;
+            p.quant_cost = asset(rate->buy_rate, root_symbol);
             p.total_win_withdraw = asset(0, root_symbol);
             p.total_loss_withdraw = asset(0, root_symbol);
             p.pool_num = 1;
@@ -416,10 +416,10 @@ void improve_params_of_new_cycle (account_name host, account_name main_host){
           pools.emplace(_self, [&](auto &p){
                 p.id = available_id + 1;
                 p.active_host = main_host;
-                p.total_lepts = sp->size_of_pool * LEPTS_PRECISION;
-                p.creserved_lepts = 0;
-                p.remain_lepts = p.total_lepts;
-                p.lept_cost = asset(next_rate->buy_rate, root_symbol);
+                p.total_quants = sp->size_of_pool * QUANTS_PRECISION;
+                p.creserved_quants = 0;
+                p.remain_quants = p.total_quants;
+                p.quant_cost = asset(next_rate->buy_rate, root_symbol);
                 p.color = p.id % 2 == 0 ? "black" : "white"; 
                 p.cycle_num = acc->current_cycle_num;
                 p.pool_num = 2;
@@ -502,8 +502,8 @@ void start_new_cycle ( account_name host ) {
         
         auto sp = spiral.find(0);
         
-        uint128_t dreserved_lepts = 0;
-        uint64_t reserved_lepts = 0;
+        uint128_t dreserved_quants = 0;
+        uint64_t reserved_quants = 0;
 
         
         //Если первые два пула не до конца закрыты, это значит, 
@@ -523,10 +523,10 @@ void start_new_cycle ( account_name host ) {
             
             auto prev_prev_pool = pools.find(acc -> current_pool_id - 2);
             
-            dreserved_lepts = (prev_prev_pool -> total_lepts - prev_prev_pool -> remain_lepts ) / LEPTS_PRECISION  * rate -> sell_rate / rate -> buy_rate  \
-                  * LEPTS_PRECISION;
+            dreserved_quants = (prev_prev_pool -> total_quants - prev_prev_pool -> remain_quants ) / QUANTS_PRECISION  * rate -> sell_rate / rate -> buy_rate  \
+                  * QUANTS_PRECISION;
 
-            reserved_lepts = uint64_t(dreserved_lepts);
+            reserved_quants = uint64_t(dreserved_quants);
 
             if ((pool-> pool_num > 1) && (pool->pool_num < sp->pool_limit )){
                 auto sinc = sincomes.find(acc->current_cycle_num - 1);
@@ -541,10 +541,10 @@ void start_new_cycle ( account_name host ) {
             pools.emplace(_self, [&](auto &p){
                 p.id = pools.available_primary_key();
                 p.active_host = main_host;
-                p.total_lepts = sp->size_of_pool * LEPTS_PRECISION;
-                p.creserved_lepts = prev_prev_pool -> creserved_lepts;
-                p.remain_lepts = p.total_lepts - reserved_lepts;
-                p.lept_cost = asset(rate->buy_rate, root_symbol);
+                p.total_quants = sp->size_of_pool * QUANTS_PRECISION;
+                p.creserved_quants = prev_prev_pool -> creserved_quants;
+                p.remain_quants = p.total_quants - reserved_quants;
+                p.quant_cost = asset(rate->buy_rate, root_symbol);
                 p.color = p.id % 2 == 0 ? "black" : "white"; 
                 p.cycle_num = pool -> cycle_num;
                 p.pool_num = pool -> pool_num + 1;
@@ -636,18 +636,21 @@ void start_new_cycle ( account_name host ) {
         };
     }
 
-    void setref_action(const setref &op){
-        require_auth(op.referal);
-        referal_index refs(_self, _self);
+    void reg_action(const reg &op){
+        require_auth(op.username);
+        user_index refs(_self, _self);
 
-        auto ref = refs.find(op.referal);
-        eosio_assert(op.referal != op.referer, "You cant set the referer yourself");
+        auto ref = refs.find(op.username);
+        eosio_assert(op.username != op.referer, "You cant set the referer yourself");
         eosio_assert(ref == refs.end(), "Referer is already setted");
 
         //TODO check account registration;
-        refs.emplace(op.referal, [&](auto &r){
-            r.referal = op.referal;
+        refs.emplace(op.username, [&](auto &r){
+            r.username = op.username;
             r.referer = op.referer;
+            r.meta = op.meta;
+            r.time = now();
+            r.registered_at = eosio::time_point_sec(now());
         });
 
     };
@@ -813,7 +816,7 @@ void start_new_cycle ( account_name host ) {
                     r.sell_rate = sell_rate[i];
                     r.client_income = asset(client_income[i], root_symbol);
                     r.delta = asset(delta[i], root_symbol);
-                    r.total_lepts = size_of_pool;
+                    r.total_quants = size_of_pool;
                     r.pool_cost = asset(pool_cost[i], root_symbol);
                     r.payment_to_wins = asset(payment_to_wins[i], root_symbol);
                     r.payment_to_loss = asset(payment_to_loss[i], root_symbol);
@@ -834,7 +837,10 @@ void start_new_cycle ( account_name host ) {
         require_auth(username);
         eosio_assert( amount.is_valid(), "Rejected. Invalid quantity" );
 
-        
+        user_index users(_self,_self);
+        auto user = users.find(username);
+        eosio_assert(user != users.end(), "User is not registered");
+
         account_index accounts(_self, _self);
         auto acc = accounts.find(host);
         eosio_assert(acc->root_token_contract == code, "Wrong token contract for this host");
@@ -857,21 +863,21 @@ void start_new_cycle ( account_name host ) {
         eosio_assert(acc -> activated == true, "Rejected. Protocol is not active");
 
         auto pool = pools.find( acc -> current_pool_id );
-        //eosio_assert(pool -> remain_lepts <= pool->total_lepts, "Prevented Deposit. System error");
+        //eosio_assert(pool -> remain_quants <= pool->total_quants, "Prevented Deposit. System error");
 
         eosio_assert( acc-> priority_flag == false, "This is a Priority Time");
 
         eosio_assert ( pool -> pool_expired_at > eosio::time_point_sec(now()), "Rejected. Pool is Expired. Need manual refresh.");
         
         auto rate = rates.find( pool-> pool_num - 1 );
-        eosio_assert(amount.amount % rate -> buy_rate == 0, "You can purchase only whole pieces of LEPT. Specify the amount of the multiple purchase rate.");
+        eosio_assert(amount.amount % rate -> buy_rate == 0, "You can purchase only whole pieces of Quant. Specify the amount of the multiple purchase rate.");
 
-        uint128_t dlepts = uint128_t(LEPTS_PRECISION * (uint128_t)amount.amount / (uint128_t)rate -> buy_rate);
-        uint64_t lepts = dlepts;
+        uint128_t dquants = uint128_t(QUANTS_PRECISION * (uint128_t)amount.amount / (uint128_t)rate -> buy_rate);
+        uint64_t quants = dquants;
        
-        eosio_assert(pool -> remain_lepts >= lepts, "Not enought LEPT in target pool");
+        eosio_assert(pool -> remain_quants >= quants, "Not enought Quants in target pool");
         
-        fill_pool(username, host, lepts, amount, acc -> current_pool_id);
+        fill_pool(username, host, quants, amount, acc -> current_pool_id);
         
         refresh_state(host);
     };
@@ -891,20 +897,20 @@ void start_new_cycle ( account_name host ) {
         if (acc -> priority_flag == true){
       
             if (pool->pool_started_at + sp->priority_seconds < eosio::time_point_sec(now()) ||
-                (pool -> remain_lepts < LEPTS_PRECISION)){
+                (pool -> remain_quants < QUANTS_PRECISION)){
 
                 accounts.modify(acc, _self, [&](auto &dp){
                     dp.priority_flag = false;
                 });
         
                 pools.modify(pool, _self, [&](auto &p){
-                    p.remain_lepts = pool->remain_lepts / LEPTS_PRECISION * LEPTS_PRECISION;
+                    p.remain_quants = pool->remain_quants / QUANTS_PRECISION * QUANTS_PRECISION;
                 });
 
                 
                 auto next_pool = pools.find(acc->current_pool_id + 1);
                 pools.modify(next_pool, _self, [&](auto &p ){
-                    p.remain_lepts = next_pool->remain_lepts / LEPTS_PRECISION * LEPTS_PRECISION; 
+                    p.remain_quants = next_pool->remain_quants / QUANTS_PRECISION * QUANTS_PRECISION; 
                 });
 
                 refresh_state(host);
@@ -913,12 +919,12 @@ void start_new_cycle ( account_name host ) {
         } else {
             //Если пул истек, или доступных пулов больше нет, или оставшихся лепт больше нет, то новый цикл
             if ((pool -> pool_expired_at < eosio::time_point_sec(now()) || \
-                ((pool -> pool_num + 1 == sp->pool_limit) && (pool -> remain_lepts == 0)))){
+                ((pool -> pool_num + 1 == sp->pool_limit) && (pool -> remain_quants == 0)))){
                 start_new_cycle(host);
           
-            } else if ((pool -> remain_lepts < LEPTS_PRECISION)){
+            } else if ((pool -> remain_quants < QUANTS_PRECISION)){
             //Если просто нет лепт - новый пул. 
-            //На случай, если приоритетные пулы полностью заполнены с остатком менее 1 LEPT, повторный рефреш. 
+            //На случай, если приоритетные пулы полностью заполнены с остатком менее 1 Quant, повторный рефреш. 
                 next_pool(host);
                 refresh_state(host);
 
@@ -926,7 +932,7 @@ void start_new_cycle ( account_name host ) {
                 //Отдельно округляем остатки в случае, если приоритетным входом или целями 
                 //воспользовались только частично
                 pools.modify(pool, _self, [&](auto &p ){
-                    p.remain_lepts = pool->remain_lepts / LEPTS_PRECISION * LEPTS_PRECISION; 
+                    p.remain_quants = pool->remain_quants / QUANTS_PRECISION * QUANTS_PRECISION; 
                 });
             }
         }
@@ -934,7 +940,7 @@ void start_new_cycle ( account_name host ) {
     };
 
 
-    uint64_t fill_pool(account_name username, account_name host, uint64_t lepts, eosio::asset amount, uint64_t filled_pool_id, bool is_goal = false, uint64_t goal_id = 0){
+    uint64_t fill_pool(account_name username, account_name host, uint64_t quants, eosio::asset amount, uint64_t filled_pool_id, bool is_goal = false, uint64_t goal_id = 0){
         std::vector<eosio::asset> forecasts;
         account_index accounts(_self, _self);
         
@@ -951,32 +957,32 @@ void start_new_cycle ( account_name host ) {
         auto pool = pools.find(filled_pool_id);
         eosio_assert(pool != pools.end(), "Cant FIND");
         auto rate = rates.find(acc->current_pool_num + 1);
-        uint64_t next_lept_for_sale;
-        uint64_t remain_lepts;
+        uint64_t next_quants_for_sale;
+        uint64_t remain_quants;
 
         if (rate == rates.end())
-            next_lept_for_sale = lepts;
+            next_quants_for_sale = quants;
         else 
-            next_lept_for_sale = lepts * rate->sell_rate / rate->buy_rate;
+            next_quants_for_sale = quants * rate->sell_rate / rate->buy_rate;
         
         uint64_t b_id = 0;
 
-        if (lepts > pool -> remain_lepts){
+        if (quants > pool -> remain_quants){
             
-            eosio_assert(false, "Not enought lepts in target pool. Deposit is prevented for core safety.");
+            eosio_assert(false, "Not enought quants in target pool. Deposit is prevented for core safety.");
             
-            //uint64_t floor_remain_lepts = LEPTS_PRECISION * pool->remain_lepts / LEPTS_PRECISION + LEPTS_PRECISION;
-            //eosio_assert(lepts <= floor_remain_lepts, "Oops, something wrong.");
-            //remain_lepts = 0;
+            //uint64_t floor_remain_quants = QUANTS_PRECISION * pool->remain_quants / QUANTS_PRECISION + QUANTS_PRECISION;
+            //eosio_assert(quants <= floor_remain_quants, "Oops, something wrong.");
+            //remain_quants = 0;
         } else {
 
-            remain_lepts = pool -> remain_lepts - lepts;
+            remain_quants = pool -> remain_quants - quants;
         
-            forecasts = calculate_forecast(username, host, lepts, pool -> pool_num - 1);
+            forecasts = calculate_forecast(username, host, quants, pool -> pool_num - 1);
 
             pools.modify(pool, _self, [&](auto &p){
-                p.remain_lepts = remain_lepts;
-    //          p.remain_lepts = LEPTS_PRECISION * remain_lepts / LEPTS_PRECISION;
+                p.remain_quants = remain_quants;
+    //          p.remain_quants = QUANTS_PRECISION * remain_quants / QUANTS_PRECISION;
             });
 
             auto b_id = balance.available_primary_key();
@@ -988,8 +994,8 @@ void start_new_cycle ( account_name host ) {
                 b.children_host = main_host;
                 b.global_pool_id = filled_pool_id; 
                 b.pool_color = pool -> color;
-                b.lept_for_sale = lepts;
-                b.next_lept_for_sale = next_lept_for_sale;
+                b.quants_for_sale = quants;
+                b.next_quants_for_sale = next_quants_for_sale;
                 b.purchase_amount = amount;
                 b.available = amount;
                 b.date_of_purchase = eosio::time_point_sec(now());
@@ -1073,8 +1079,8 @@ void start_new_cycle ( account_name host ) {
                 } else {
                     
                     eosio::asset available;
-                    uint64_t new_reduced_lepts;
-                    uint64_t new_lept_for_sale;
+                    uint64_t new_reduced_quants;
+                    uint64_t new_quants_for_sale;
                     eosio::asset ref_amount = asset(0, root_symbol);
                     auto rate = rates.find(look_pool -> pool_num - 1);
                     auto prev_win_rate = rates.find(look_pool -> pool_num - 3);
@@ -1084,25 +1090,25 @@ void start_new_cycle ( account_name host ) {
                         
                         if (look_pool -> pool_num - pool_start -> pool_num <= 2){
                             
-                            new_reduced_lepts = bal -> lept_for_sale * rate -> sell_rate / rate -> buy_rate;
-                            new_lept_for_sale = bal->lept_for_sale;
+                            new_reduced_quants = bal -> quants_for_sale * rate -> sell_rate / rate -> buy_rate;
+                            new_quants_for_sale = bal->quants_for_sale;
                             
-                            if (new_reduced_lepts == 0)
-                                new_reduced_lepts = new_lept_for_sale;
+                            if (new_reduced_quants == 0)
+                                new_reduced_quants = new_quants_for_sale;
 
-                            forecasts = calculate_forecast(username, parent_host, new_reduced_lepts, look_pool -> pool_num - 1);
-                            available = asset(bal ->lept_for_sale * rate -> sell_rate / LEPTS_PRECISION, root_symbol);
+                            forecasts = calculate_forecast(username, parent_host, new_reduced_quants, look_pool -> pool_num - 1);
+                            available = asset(bal ->quants_for_sale * rate -> sell_rate / QUANTS_PRECISION, root_symbol);
                         
                         } else {
 
-                            new_lept_for_sale = bal -> lept_for_sale * prev_win_rate -> sell_rate / prev_win_rate -> buy_rate;
-                            new_reduced_lepts = new_lept_for_sale * rate -> sell_rate / rate -> buy_rate;
+                            new_quants_for_sale = bal -> quants_for_sale * prev_win_rate -> sell_rate / prev_win_rate -> buy_rate;
+                            new_reduced_quants = new_quants_for_sale * rate -> sell_rate / rate -> buy_rate;
                             
-                            if (new_reduced_lepts == 0)
-                                new_reduced_lepts = new_lept_for_sale;
+                            if (new_reduced_quants == 0)
+                                new_reduced_quants = new_quants_for_sale;
                             
-                            forecasts = calculate_forecast(username, parent_host, new_reduced_lepts, look_pool -> pool_num - 1);
-                            available = asset(new_lept_for_sale * rate -> sell_rate / LEPTS_PRECISION, root_symbol);                        
+                            forecasts = calculate_forecast(username, parent_host, new_reduced_quants, look_pool -> pool_num - 1);
+                            available = asset(new_quants_for_sale * rate -> sell_rate / QUANTS_PRECISION, root_symbol);                        
                            
                         }
 
@@ -1115,31 +1121,31 @@ void start_new_cycle ( account_name host ) {
                         print("start_rate: ", start_rate->system_income, " ");
                         print("finish_rate: ", finish_rate->system_income, " ");
                         
-                        uint64_t ref_lepts;
+                        uint64_t ref_quants;
 
                         if (bal->pool_num == start_rate -> pool_id + 1){
-                            ref_lepts = bal->lept_for_sale / LEPTS_PRECISION * LEPTS_PRECISION;
+                            ref_quants = bal->quants_for_sale / QUANTS_PRECISION * QUANTS_PRECISION;
                         
                         } else {
-                            ref_lepts = new_lept_for_sale / LEPTS_PRECISION * LEPTS_PRECISION;
+                            ref_quants = new_quants_for_sale / QUANTS_PRECISION * QUANTS_PRECISION;
                         }
                         
                         //eosio::asset incr_amount = finish_rate -> system_income - start_rate -> system_income;
                         
-                        // double dref_amount = incr_amount.amount * ref_lepts / sp->size_of_pool * ((double)(acc->referral_percent) / (double)(100 * PERCENT_PRECISION));
-                        // uint64_t ref_amount = (uint64_t)dref_amount / LEPTS_PRECISION;
-                        // double dsys_amount = incr_amount.amount * ref_lepts / sp->size_of_pool * (double)(((100 * PERCENT_PRECISION - acc->referral_percent)) / (double)(100 * PERCENT_PRECISION));   
-                        // uint64_t sys_amount = (uint64_t)dsys_amount / LEPTS_PRECISION;
+                        // double dref_amount = incr_amount.amount * ref_quants / sp->size_of_pool * ((double)(acc->referral_percent) / (double)(100 * PERCENT_PRECISION));
+                        // uint64_t ref_amount = (uint64_t)dref_amount / QUANTS_PRECISION;
+                        // double dsys_amount = incr_amount.amount * ref_quants / sp->size_of_pool * (double)(((100 * PERCENT_PRECISION - acc->referral_percent)) / (double)(100 * PERCENT_PRECISION));   
+                        // uint64_t sys_amount = (uint64_t)dsys_amount / QUANTS_PRECISION;
                  
                         eosio::asset incr_amount1 = middle_rate -> system_income - start_rate -> system_income;
                         eosio::asset incr_amount2 = finish_rate -> system_income - middle_rate -> system_income;
-                        // uint64_t ref_lepts;
+                        // uint64_t ref_quants;
 
-                        double ref_amount1 = incr_amount1.amount * ref_lepts / sp->size_of_pool * ((double)(acc->referral_percent) / (double)(100 * PERCENT_PRECISION)) / LEPTS_PRECISION;
-                        double sys_amount1 = incr_amount1.amount * ref_lepts / sp->size_of_pool * (double)(((100 * PERCENT_PRECISION - acc->referral_percent)) / (double)(100 * PERCENT_PRECISION)) / LEPTS_PRECISION;   
+                        double ref_amount1 = incr_amount1.amount * ref_quants / sp->size_of_pool * ((double)(acc->referral_percent) / (double)(100 * PERCENT_PRECISION)) / QUANTS_PRECISION;
+                        double sys_amount1 = incr_amount1.amount * ref_quants / sp->size_of_pool * (double)(((100 * PERCENT_PRECISION - acc->referral_percent)) / (double)(100 * PERCENT_PRECISION)) / QUANTS_PRECISION;   
                         
-                        double ref_amount2 = incr_amount2.amount * ref_lepts / sp->size_of_pool * ((double)(acc->referral_percent) / (double)(100 * PERCENT_PRECISION)) / LEPTS_PRECISION;
-                        double sys_amount2 = incr_amount2.amount * ref_lepts / sp->size_of_pool * (double)(((100 * PERCENT_PRECISION - acc->referral_percent)) / (double)(100 * PERCENT_PRECISION)) / LEPTS_PRECISION;   
+                        double ref_amount2 = incr_amount2.amount * ref_quants / sp->size_of_pool * ((double)(acc->referral_percent) / (double)(100 * PERCENT_PRECISION)) / QUANTS_PRECISION;
+                        double sys_amount2 = incr_amount2.amount * ref_quants / sp->size_of_pool * (double)(((100 * PERCENT_PRECISION - acc->referral_percent)) / (double)(100 * PERCENT_PRECISION)) / QUANTS_PRECISION;   
                         
                         uint64_t r_amount = (uint64_t)ref_amount1 + (uint64_t)ref_amount2;
                         uint64_t s_amount = (uint64_t)sys_amount1 + (uint64_t)sys_amount2;
@@ -1164,8 +1170,8 @@ void start_new_cycle ( account_name host ) {
                         //print("bal->ref_amount: ", bal->ref_amount, " ;");
                         balance.modify(bal, username, [&](auto &b){
                             b.last_recalculated_win_pool_id = i;
-                            b.lept_for_sale = new_lept_for_sale;
-                            b.next_lept_for_sale = new_reduced_lepts;
+                            b.quants_for_sale = new_quants_for_sale;
+                            b.next_quants_for_sale = new_reduced_quants;
                             b.available = available;
                             b.win = true;
                             b.forecasts = forecasts;
@@ -1190,7 +1196,7 @@ void start_new_cycle ( account_name host ) {
     }
 
 
-    std::vector <eosio::asset> calculate_forecast(account_name username, account_name host, uint64_t lepts, uint64_t pool_num){
+    std::vector <eosio::asset> calculate_forecast(account_name username, account_name host, uint64_t quants, uint64_t pool_num){
         account_index accounts(_self, _self);
         auto acc = accounts.find(host);
         auto main_host = acc->get_active_host();
@@ -1204,35 +1210,35 @@ void start_new_cycle ( account_name host ) {
         auto sp = spiral.find(0);
 
         std::vector<eosio::asset> forecasts;
-        uint64_t lepts_forecast1;
-        uint64_t lepts_forecast2;
-        uint64_t lepts_forecast3;
-        uint64_t lepts_forecast4;
+        uint64_t quants_forecast1;
+        uint64_t quants_forecast2;
+        uint64_t quants_forecast3;
+        uint64_t quants_forecast4;
 
         
         if (pool_num + 3 < sp->pool_limit){
             
             auto rate1 = rates.find(pool_num + 2);
-            eosio::asset forecast1 = asset(lepts * rate1 -> sell_rate / LEPTS_PRECISION, root_symbol);
+            eosio::asset forecast1 = asset(quants * rate1 -> sell_rate / QUANTS_PRECISION, root_symbol);
             
             forecasts.push_back(forecast1);
-            lepts_forecast1 = lepts * rate1 -> sell_rate / rate1 -> buy_rate;
+            quants_forecast1 = quants * rate1 -> sell_rate / rate1 -> buy_rate;
 
         } 
 
         if (pool_num + 5 < sp->pool_limit){
            
            auto rate2 = rates.find(pool_num + 4);
-           eosio::asset forecast2 = asset(lepts_forecast1 * rate2 -> sell_rate / LEPTS_PRECISION, root_symbol);
-           lepts_forecast2 = lepts_forecast1 * rate2 -> sell_rate / rate2 -> buy_rate;
+           eosio::asset forecast2 = asset(quants_forecast1 * rate2 -> sell_rate / QUANTS_PRECISION, root_symbol);
+           quants_forecast2 = quants_forecast1 * rate2 -> sell_rate / rate2 -> buy_rate;
            forecasts.push_back(forecast2);
         
         } 
 
         if (pool_num + 7 < sp->pool_limit){
             auto rate3 = rates.find(pool_num + 6);
-            eosio::asset forecast3 = asset(lepts_forecast2 * rate3 -> sell_rate / LEPTS_PRECISION, root_symbol);
-            lepts_forecast3 = lepts_forecast2 * rate3 -> sell_rate / rate3 -> buy_rate;
+            eosio::asset forecast3 = asset(quants_forecast2 * rate3 -> sell_rate / QUANTS_PRECISION, root_symbol);
+            quants_forecast3 = quants_forecast2 * rate3 -> sell_rate / rate3 -> buy_rate;
            
             forecasts.push_back(forecast3);
 
@@ -1240,7 +1246,7 @@ void start_new_cycle ( account_name host ) {
         
         if (pool_num + 9 < sp->pool_limit){
             auto rate4 = rates.find(pool_num + 8);
-            eosio::asset forecast4 = asset(lepts_forecast3 * rate4 -> sell_rate / LEPTS_PRECISION, root_symbol);
+            eosio::asset forecast4 = asset(quants_forecast3 * rate4 -> sell_rate / QUANTS_PRECISION, root_symbol);
             forecasts.push_back(forecast4);
         }
         
@@ -1362,7 +1368,7 @@ void start_new_cycle ( account_name host ) {
         auto rate = rates.find(last_pool -> pool_num - 1 );
         auto prev_rate = rates.find(last_pool -> pool_num - 2);
 
-        eosio_assert(last_pool -> remain_lepts <= pool->total_lepts, "Prevented withdraw. Only BP can restore this balance");
+        eosio_assert(last_pool -> remain_quants <= pool->total_quants, "Prevented withdraw. Only BP can restore this balance");
         
         uint64_t pools_in_cycle = cycle -> finish_at_global_pool_id - cycle -> start_at_global_pool_id + 1;
         
@@ -1388,13 +1394,13 @@ void start_new_cycle ( account_name host ) {
             if (pool -> pool_num < 3){
 
                 pools.modify(pool, _self, [&](auto &p){
-                    p.remain_lepts = std::min(pool-> remain_lepts + bal -> lept_for_sale, pool->total_lepts);
+                    p.remain_quants = std::min(pool-> remain_quants + bal -> quants_for_sale, pool->total_quants);
                 }); 
 
             } else {
 
                 pools.modify(last_pool, _self, [&](auto &p){
-                    p.remain_lepts = std::min(last_pool-> remain_lepts + bal -> lept_for_sale, last_pool->total_lepts);
+                    p.remain_quants = std::min(last_pool-> remain_quants + bal -> quants_for_sale, last_pool->total_quants);
                 });
 
             }
@@ -1402,7 +1408,7 @@ void start_new_cycle ( account_name host ) {
             balance.modify(bal, username, [&](auto &b){
                 b.sold_amount = bal -> purchase_amount;
                 b.date_of_sale = eosio::time_point_sec(now());
-                b.lept_for_sale = 0; 
+                b.quants_for_sale = 0; 
                 b.withdrawed = true;
                 b.available = asset(0, root_symbol);
                 b.forecasts = forecasts;
@@ -1425,12 +1431,12 @@ void start_new_cycle ( account_name host ) {
                 delete_balance_id_from_goal(bal->host, bal->goal_id, bal->id);
             }
             
-            uint64_t lepts_from_reserved;
+            uint64_t quants_from_reserved;
             if (bal -> win == true){
                 //back 60 sec limit for pool expiration
 
             
-                auto converted_lepts = bal->lept_for_sale * rate -> sell_rate / rate -> buy_rate;
+                auto converted_quants = bal->quants_for_sale * rate -> sell_rate / rate -> buy_rate;
                 
                 auto sinc = sincome.find(bal->cycle_num - 1);
                
@@ -1438,7 +1444,7 @@ void start_new_cycle ( account_name host ) {
                 if ((bal->ref_amount).amount > 0){
                     print("Total Pay to REF:", bal->ref_amount, " ");
                     
-                    referal_index refs(_self, _self);
+                    user_index refs(_self, _self);
                     auto ref = refs.find(username);
                     account_name referer;
 
@@ -1544,12 +1550,12 @@ void start_new_cycle ( account_name host ) {
                 // //move ref payments to method
                 
 
-                //BACK LEPTS TO POOL
+                //BACK quants TO POOL
                 pools.modify(last_pool, _self, [&](auto &p){
-                    //p.creserved_lepts = (last_pool->creserved_lepts + converted_lepts) % LEPTS_PRECISION;
+                    //p.creserved_quants = (last_pool->creserved_quants + converted_quants) % QUANTS_PRECISION;
                     p.total_win_withdraw = last_pool -> total_win_withdraw + amount;
-                    //p.remain_lepts = std::min(last_pool -> remain_lepts + (last_pool->creserved_lepts + converted_lepts) / LEPTS_PRECISION * LEPTS_PRECISION, last_pool->total_lepts);
-                    p.remain_lepts = std::min(last_pool -> remain_lepts + converted_lepts, last_pool->total_lepts);
+                    //p.remain_quants = std::min(last_pool -> remain_quants + (last_pool->creserved_quants + converted_quants) / QUANTS_PRECISION * QUANTS_PRECISION, last_pool->total_quants);
+                    p.remain_quants = std::min(last_pool -> remain_quants + converted_quants, last_pool->total_quants);
                 });
 
 
@@ -1566,7 +1572,7 @@ void start_new_cycle ( account_name host ) {
             balance.modify(bal, username, [&](auto &b){
                 b.sold_amount = bal -> available;
                 b.date_of_sale = eosio::time_point_sec(now());
-                b.lept_for_sale = 0;  
+                b.quants_for_sale = 0;  
                 b.withdrawed = true;
                 b.available = asset(0, root_symbol);
                 b.ref_amount = asset(0, root_symbol);

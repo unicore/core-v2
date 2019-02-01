@@ -31,7 +31,7 @@ struct goal {
 		return count;
 	}
 
-	eosio::asset get_goal_amount(uint64_t lepts_for_each_pool, account_name host){
+	eosio::asset get_goal_amount(uint64_t quants_for_each_pool, account_name host){
 		account_index accounts(_self, _self);
 
 		auto acc = accounts.find(host);
@@ -52,9 +52,9 @@ struct goal {
 		auto buy_rate2 = rate2->buy_rate;
 		
 		auto size_of_pool = sp->size_of_pool;
-		eosio_assert(lepts_for_each_pool <= size_of_pool / 2, "Lepts for each pool is more then possible" );
+		eosio_assert(quants_for_each_pool <= size_of_pool / 2, "quants for each pool is more then possible" );
 		
-		eosio::asset amount = asset(lepts_for_each_pool * (buy_rate1 + buy_rate2), root_symbol);
+		eosio::asset amount = asset(quants_for_each_pool * (buy_rate1 + buy_rate2), root_symbol);
 	
 		return amount;
 	}
@@ -66,6 +66,10 @@ struct goal {
 		goals_index goals(_self,op.host);
 		account_index accounts(_self, _self);
 
+		user_index users(_self,_self);
+        auto user = users.find(op.username);
+        eosio_assert(user != users.end(), "User is not registered");
+
 		auto acc = accounts.find(op.host);
         auto root_symbol = (acc->root_token).symbol;
 
@@ -73,10 +77,10 @@ struct goal {
 		auto username = op.username;
         auto shortdescr = op.shortdescr;
         auto descr = op.descr;
-        auto lepts_for_each_pool = op.lepts_for_each_pool;
+        auto quants_for_each_pool = op.quants_for_each_pool;
         auto host = op.host;
         auto target = op.target;
-        auto min_amount = get_goal_amount(lepts_for_each_pool, host);
+        auto min_amount = get_goal_amount(quants_for_each_pool, host);
         bool validated = acc->goal_validation_percent == 0;
 
         
@@ -86,7 +90,7 @@ struct goal {
 		// eosio_assert(matched_goal == idx.end(), "Only one goal per host for each user");
         
         eosio_assert(target.symbol == root_symbol, "Wrong symbol for this host");
-        eosio_assert(lepts_for_each_pool > 0, "Lepts for each pool must be greater then 0");
+        eosio_assert(quants_for_each_pool > 0, "quants for each pool must be greater then 0");
 
         eosio_assert(shortdescr.length() <= 100, "Short Description is a maximum 100 symbols. Describe the goal shortly.");
        
@@ -99,7 +103,7 @@ struct goal {
         	g.descr = descr;
         	g.activation_amount = min_amount;
         	g.target = target;
-        	g.lepts_for_each_pool = lepts_for_each_pool;
+        	g.quants_for_each_pool = quants_for_each_pool;
         	g.rotation_num = 1;
         	g.withdrawed = asset(0, root_symbol);
         	g.available = asset(0, root_symbol);
@@ -119,16 +123,16 @@ struct goal {
         auto username = op.username;
         auto shortdescr = op.shortdescr;
         auto descr = op.descr;
-        auto lepts_for_each_pool = op.lepts_for_each_pool;
+        auto quants_for_each_pool = op.quants_for_each_pool;
         auto host = op.host;
         auto goal_id = op.goal_id;
         auto target = op.target;
-        auto min_amount = get_goal_amount(lepts_for_each_pool, host);
+        auto min_amount = get_goal_amount(quants_for_each_pool, host);
 
         //TODO cost < maxcost;
         //TODO CANNOT EDIT AFTER ACTIVATE
         eosio_assert(target.symbol == root_symbol, "Wrong symbol for this host");
-        eosio_assert(lepts_for_each_pool > 0, "Lepts for each pool must be greater then 0");
+        eosio_assert(quants_for_each_pool > 0, "quants for each pool must be greater then 0");
 
         eosio_assert(shortdescr.length() <= 100, "Short Description is a maximum 100 symbols. Describe the goal shortly.");
         
@@ -143,7 +147,7 @@ struct goal {
         	g.host = host;
         	g.activation_amount = min_amount;
         	g.target = target;
-        	g.lepts_for_each_pool = lepts_for_each_pool;
+        	g.quants_for_each_pool = quants_for_each_pool;
         });
 
 	}

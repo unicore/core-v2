@@ -14,7 +14,7 @@ namespace eosio {
         bool reported = false;
         bool validated = false;
         account_name host;
-        uint64_t lepts_for_each_pool;
+        uint64_t quants_for_each_pool;
         std::string shortdescr;
         std::string descr;
         eosio::asset target;
@@ -35,7 +35,7 @@ namespace eosio {
         account_name by_host() const {return host;}
         uint64_t by_rotation_num() const {return rotation_num;}
         EOSLIB_SERIALIZE( goals, (id)(username)(created)(activated)(in_protocol)(completed)(reported)
-            (validated)(host)(lepts_for_each_pool)(shortdescr)(descr)(target)(activation_amount)
+            (validated)(host)(quants_for_each_pool)(shortdescr)(descr)(target)(activation_amount)
             (available)(report)(rotation_num)(total_votes)(voters)(balance_ids)(withdrawed))
     };
 
@@ -58,10 +58,10 @@ namespace eosio {
         account_name host;
         std::string shortdescr;
         std::string descr;
-        uint64_t lepts_for_each_pool;
+        uint64_t quants_for_each_pool;
         eosio::asset target;
 
-        EOSLIB_SERIALIZE( setgoal, (username)(host)(shortdescr)(descr)(lepts_for_each_pool)(target))
+        EOSLIB_SERIALIZE( setgoal, (username)(host)(shortdescr)(descr)(quants_for_each_pool)(target))
     };
 
       // @abi action
@@ -71,10 +71,10 @@ namespace eosio {
         account_name host;
         std::string shortdescr;
         std::string descr;
-        uint64_t lepts_for_each_pool;
+        uint64_t quants_for_each_pool;
         eosio::asset target;
 
-        EOSLIB_SERIALIZE( editgoal, (username)(host)(goal_id)(shortdescr)(descr)(lepts_for_each_pool)(target))
+        EOSLIB_SERIALIZE( editgoal, (username)(host)(goal_id)(shortdescr)(descr)(quants_for_each_pool)(target))
 
     };
 

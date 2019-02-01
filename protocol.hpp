@@ -1,6 +1,6 @@
 #include <algorithm>
 #include <cmath>
-
+#include <eosiolib/currency.hpp>
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/asset.hpp>
 #include <eosiolib/time.hpp>
@@ -13,8 +13,7 @@
 #include "goals.hpp"
 #include "voting.hpp"
 
-
-#define LEPTS_PRECISION 1000000
+#define QUANTS_PRECISION 1000000
 #define PERCENT_PRECISION 10000
 
 
@@ -60,8 +59,8 @@ namespace eosio {
         bool is_goal = false;
         uint64_t goal_id;
         uint64_t global_pool_id;
-        uint64_t lept_for_sale;
-        uint64_t next_lept_for_sale;
+        uint64_t quants_for_sale;
+        uint64_t next_quants_for_sale;
         uint64_t last_recalculated_win_pool_id = 1;
         bool win = false; //true if win, false if lose or nominal
         std::string pool_color;
@@ -78,7 +77,7 @@ namespace eosio {
         uint64_t primary_key() const {return id;}
         uint64_t by_is_goal() const {return is_goal;} 
 
-        EOSLIB_SERIALIZE(balance, (id)(host)(children_host)(cycle_num)(pool_num)(is_goal)(goal_id)(global_pool_id)(lept_for_sale)(next_lept_for_sale)(last_recalculated_win_pool_id)(win)(pool_color)(available)(purchase_amount)(date_of_purchase)(withdrawed)(sold_amount)(date_of_sale)(forecasts)(ref_amount)(sys_amount))
+        EOSLIB_SERIALIZE(balance, (id)(host)(children_host)(cycle_num)(pool_num)(is_goal)(goal_id)(global_pool_id)(quants_for_sale)(next_quants_for_sale)(last_recalculated_win_pool_id)(win)(pool_color)(available)(purchase_amount)(date_of_purchase)(withdrawed)(sold_amount)(date_of_sale)(forecasts)(ref_amount)(sys_amount))
     
         account_name get_active_host() const {
             if (host == children_host)
@@ -129,10 +128,10 @@ namespace eosio {
         uint64_t cycle_num;
         uint64_t pool_num;
         std::string color;
-        uint64_t total_lepts; 
-        uint64_t creserved_lepts; 
-        uint64_t remain_lepts;
-        eosio::asset lept_cost;
+        uint64_t total_quants; 
+        uint64_t creserved_quants; 
+        uint64_t remain_quants;
+        eosio::asset quant_cost;
         eosio::asset total_win_withdraw;
         eosio::asset total_loss_withdraw;
         eosio::time_point_sec pool_started_at;
@@ -142,7 +141,7 @@ namespace eosio {
         uint64_t primary_key() const {return id;}
         uint64_t by_cycle() const {return cycle_num;}
         
-        EOSLIB_SERIALIZE(pool,(id)(active_host)(cycle_num)(pool_num)(color)(total_lepts)(creserved_lepts)(remain_lepts)(lept_cost)(total_win_withdraw)(total_loss_withdraw)(pool_started_at)(priority_until)(pool_expired_at))
+        EOSLIB_SERIALIZE(pool,(id)(active_host)(cycle_num)(pool_num)(color)(total_quants)(creserved_quants)(remain_quants)(quant_cost)(total_win_withdraw)(total_loss_withdraw)(pool_started_at)(priority_until)(pool_expired_at))
     };
 
     typedef eosio::multi_index<N(pool), pool> pool_index;
@@ -151,7 +150,7 @@ namespace eosio {
     // @abi table rate i64
     struct rate {
         uint64_t pool_id;
-        uint64_t total_lepts;
+        uint64_t total_quants;
         uint64_t buy_rate=0;
         uint64_t sell_rate=0;
         eosio::asset client_income;
@@ -166,7 +165,7 @@ namespace eosio {
         
         uint64_t primary_key() const{return pool_id;}
 
-        EOSLIB_SERIALIZE(rate, (pool_id)(total_lepts)(buy_rate)(sell_rate)(client_income)(delta)(pool_cost)(total_in_box)(payment_to_wins)(payment_to_loss)(system_income)(live_balance_for_sale))
+        EOSLIB_SERIALIZE(rate, (pool_id)(total_quants)(buy_rate)(sell_rate)(client_income)(delta)(pool_cost)(total_in_box)(payment_to_wins)(payment_to_loss)(system_income)(live_balance_for_sale))
     };
     typedef eosio::multi_index<N(rate), rate> rate_index;
     
@@ -188,30 +187,37 @@ namespace eosio {
     typedef eosio::multi_index<N(sincome), sincome> sincome_index;
     
 
-    // @abi table referals i64
-    struct referals{
-        account_name referal;
+    // @abi table users i64
+    struct users{
+        account_name username;
         account_name referer;
+        bool rules = true;
+        eosio::time_point_sec registered_at;
+        uint64_t time;
+        std::string meta;
         
-        account_name primary_key() const{return referal;}
+        account_name primary_key() const{return username;}
         account_name by_secondary_key() const{return referer;}
+        uint64_t by_time() const{return -time;}
 
-        EOSLIB_SERIALIZE(referals, (referal)(referer))
+        EOSLIB_SERIALIZE(users, (username)(referer)(rules)(registered_at)(time)(meta))
     };
 
-    typedef eosio::multi_index<N(referals), referals,
-    indexed_by<N(referer), const_mem_fun<referals, account_name, &referals::by_secondary_key>>
-    > referal_index;
+    typedef eosio::multi_index<N(users), users,
+    indexed_by<N(users), const_mem_fun<users, account_name, &users::by_secondary_key>>,
+    indexed_by<N(users), const_mem_fun<users, uint64_t, &users::by_time>>
+    > user_index;
 
 
     /* ACTIONS */
 
     // @abi action
-    struct setref {
-        account_name referal;
+    struct reg {
+        account_name username;
         account_name referer;
+        std::string meta;
         
-        EOSLIB_SERIALIZE( setref, (referal)(referer))
+        EOSLIB_SERIALIZE( reg, (username)(referer)(meta))
     };
 
     
@@ -267,9 +273,9 @@ namespace eosio {
     struct gpriorenter{
         account_name username; 
         account_name host;
-        uint64_t lepts_for_each_pool; 
+        uint64_t quants_for_each_pool; 
         uint64_t goal_id;
-        EOSLIB_SERIALIZE( gpriorenter, (username)(host)(lepts_for_each_pool)(goal_id))
+        EOSLIB_SERIALIZE( gpriorenter, (username)(host)(quants_for_each_pool)(goal_id))
 
 
     };
@@ -303,13 +309,6 @@ namespace eosio {
         uint64_t systemfee;
         
         EOSLIB_SERIALIZE( setfee, (createhost)(systemfee))
-    };
-
-    // @abi action
-    struct next{
-        account_name host;
-    
-        EOSLIB_SERIALIZE( next, (host))
     };
     
     

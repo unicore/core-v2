@@ -59,6 +59,11 @@ struct voting
 		auto goal_id = op.goal_id;
 		auto host = op.host;
 		auto voter = op.voter;
+		
+		user_index users(_self,_self);
+        auto user = users.find(op.voter);
+        eosio_assert(user != users.end(), "User is not registered");
+
 		clear_old_votes_action(voter, host);
 		uint64_t vote_count = count_votes(voter, host);
 

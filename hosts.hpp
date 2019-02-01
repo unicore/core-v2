@@ -7,8 +7,8 @@
 
 namespace eosio {
 	
-    // @abi table account
-    struct account{
+    // @abi table hosts
+    struct hosts{
         account_name username;
         account_name hoperator;
         std::vector<account_name> childrens;
@@ -25,6 +25,8 @@ namespace eosio {
         uint64_t total_shares;
         eosio::asset quote_amount;
         eosio::asset root_token;
+        std::string symbol;
+        uint64_t precision;
         account_name root_token_contract;
         eosio::time_point_sec registered_at;
         uint64_t referral_percent;
@@ -62,14 +64,14 @@ namespace eosio {
         }
 
 
-        EOSLIB_SERIALIZE( account, (username)(hoperator)(childrens)(active_host)(non_active_child)
+        EOSLIB_SERIALIZE( hosts, (username)(hoperator)(childrens)(active_host)(non_active_child)
         	(parameters_setted)(need_switch)(is_whitelisted)(whitelist)(consensus_percent)
-        	(goal_validation_percent)(title)(purpose)(total_shares)(quote_amount)(root_token)(root_token_contract)
+        	(goal_validation_percent)(title)(purpose)(total_shares)(quote_amount)(root_token)(symbol)(precision)(root_token_contract)
         	(registered_at)(referral_percent)(activated)(payed)(to_pay)(levels)(meta)(cycle_start_at_id)(current_pool_id)
         	(current_cycle_num)(current_pool_num)(priority_flag))
     };
 
-    typedef eosio::multi_index <N(account), account> account_index;
+    typedef eosio::multi_index <N(hosts), hosts> account_index;
     
 
     // @abi action

@@ -73,6 +73,10 @@ struct shares {
 		eosio_assert(amount.symbol == _SYM, "Wrong symbol for buy shares");
 		
 		account_index accounts(_self, _self);
+		user_index users(_self,_self);
+        auto user = users.find(buyer);
+        eosio_assert(user != users.end(), "User is not registered");
+
 		auto exist = accounts.find(host);
 		eosio_assert(exist != accounts.end(), "Host is not founded");
 		//Check for whitelisted

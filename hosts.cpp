@@ -2,7 +2,7 @@
 
 using namespace eosio;
 
-struct hosts {
+struct hosts_struct {
 
 	// void create_token_contract(const createtoken &op){
 	// 	auto host = op.host;
@@ -61,11 +61,28 @@ struct hosts {
 
 	// }
 
+    std::string asset_to_string(eosio::asset val){
+        uint64_t v = val.symbol.value;
+        v >>= 8;
+        string result;
+        while (v > 0) {
+                char c = static_cast<char>(v & 0xFF);
+                result += c;
+                v >>= 8;
+        }
+        return result;
+    };
+
     void upgrade_action(const upgrade &op){
         require_auth(op.username);
         
         eosio_assert(op.purpose.length() < 1024, "Purpose is a maximum 1024 symbols. Describe the idea shortly.");
         //check title lenght
+
+        user_index users(_self,_self);
+        auto user = users.find(op.username);
+        eosio_assert(user != users.end(), "User is not registered");
+
 
         eosio_assert(op.title.length() < 100, "Title is a maximum 100 symbols");
         eosio_assert(op.purpose.find("&#") , "Symbols '&#' is prohibited in purpose");
@@ -109,7 +126,7 @@ struct hosts {
         auto fee = fees.find(0);
         auto to_pay = fee->createhost + op.quote_amount;
 
-        referal_index refs(_self, _self);
+        user_index refs(_self, _self);
         auto ref = refs.find(op.username);
         account_name referer = ref->referer;
 
@@ -122,6 +139,8 @@ struct hosts {
             a.total_shares = op.total_shares;
             a.quote_amount = op.quote_amount;
             a.root_token = op.root_token;
+            a.symbol = asset_to_string(op.root_token);
+            a.precision = op.root_token.symbol.precision();
             a.root_token_contract = op.root_token_contract;
             a.meta = op.meta;
             a.registered_at = eosio::time_point_sec(now());
