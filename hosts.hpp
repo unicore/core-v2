@@ -73,6 +73,26 @@ namespace eosio {
 
     typedef eosio::multi_index <N(hosts), hosts> account_index;
     
+    //@abi table emission
+    struct emission{
+        account_name host;
+        account_name from;
+        uint64_t percent;
+        eosio::asset emitted;
+        eosio::asset remain;
+        account_name primary_key() const {return host;}
+        
+        EOSLIB_SERIALIZE(emission, (host)(from)(percent)(emitted)(remain))
+    };
+
+    typedef eosio::multi_index<N(emission), emission> emission_index;
+
+    // @abi action
+    struct setemi{
+        account_name host;
+        account_name from;
+        uint64_t percent;
+    };
 
     // @abi action
     struct upgrade{

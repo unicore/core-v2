@@ -199,8 +199,8 @@ struct goal {
 
 		//eosio_assert(goal->nominal <= quantity, "Wrong amount for activate");
 
-		bool activated = quantity >= goal->activation_amount;
-		bool completed = goal->available + quantity >= goal->target;
+		bool activated = quantity + goal->available >= goal->activation_amount;
+		bool completed = goal->available + goal->withdrawed + quantity >= goal->target;
 		//TODO CHECK IT 
 		bool validated = acc->goal_validation_percent <= goal->total_votes / acc->total_shares;
 

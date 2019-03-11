@@ -73,8 +73,8 @@ extern "C" {
                         goal().donate_action(op.from, host, goal_id, op.quantity, code);
                         break;
                     }
-                    default:
-                       eosio_assert(false, "Subcode is wrong");
+                    // default:
+                       //eosio_assert(false, "Subcode is wrong");
                 }
 
             }
@@ -171,6 +171,10 @@ extern "C" {
                     goal().gwithdraw_action(eosio::unpack_action_data<gwithdraw>());
                     break;
                 };
+                case N(setemi):{
+                    hosts_struct().create_emission_action(eosio::unpack_action_data<setemi>());
+                    break;
+                }
             }
             
         }

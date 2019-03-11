@@ -153,6 +153,7 @@ struct hosts_struct {
             a.levels= op.levels;
         });
 
+
     }
 
     // account_name get_random_account_name(){
@@ -179,6 +180,22 @@ struct hosts_struct {
     // };
 
 
+    void create_emission_action(const setemi &op){
+        require_auth(op.host);
+        
+        if (op.host == _CORE){
+            emission_index emis(_self, _self);
+            eosio_assert(op.percent < 100 * PERCENT_PRECISION, "Emission percent should be less then 100 * PERCENT_PRECISION");
+            
+            emis.emplace(op.host, [&](auto &e){
+                e.host = op.host;
+                e.percent = op.percent;
+                e.remain = asset(0, _SYM);
+                e.emitted = asset(0, _SYM);
+                e.from = _BOX;
+            });
+        }
+    }
     void create_child_host_action(const cchildhost &op){
     	auto parent_host = op.parent_host;
     	auto child_host = op.child_host;
