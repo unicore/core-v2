@@ -15,21 +15,21 @@ struct goal {
 
 
 
-	uint64_t count_active_goal_balances(account_name username, account_name host){
-		balance_index balances(_self, username);
-		auto idx = balances.template get_index<N(is_goal)>();
-        auto matched_itr = idx.lower_bound(1);
-		uint64_t count = 0;
+	// uint64_t count_active_goal_balances(account_name username, account_name host){
+	// 	balance_index balances(_self, username);
+	// 	auto idx = balances.template get_index<N(is_goal)>();
+ //        auto matched_itr = idx.lower_bound(1);
+	// 	uint64_t count = 0;
 
-		while(matched_itr != idx.end()){
-			if ((matched_itr->host == host) && (matched_itr->withdrawed == false))
-				count++;
+	// 	while(matched_itr != idx.end()){
+	// 		if ((matched_itr->host == host) && (matched_itr->withdrawed == false))
+	// 			count++;
 
-			matched_itr++;
-		}	
+	// 		matched_itr++;
+	// 	}	
 	
-		return count;
-	}
+	// 	return count;
+	// }
 
 	eosio::asset get_goal_amount(uint64_t quants_for_each_pool, account_name host){
 		account_index accounts(_self, _self);
@@ -228,8 +228,8 @@ struct goal {
 		eosio_assert((goal->available).amount > 0, "Cannot withdraw a zero amount");
 		//eosio_assert(goal->in_protocol == false, "Cannot withdaw goal before goal is go out from Core");
 		
-		uint64_t gbalances_count = count_active_goal_balances(username, goal->host);
-        eosio_assert(gbalances_count == 0, "Cannot withdraw balance until all goal balances withdrawed from Core");
+		// uint64_t gbalances_count = count_active_goal_balances(username, goal->host);
+  //       eosio_assert(gbalances_count == 0, "Cannot withdraw balance until all goal balances withdrawed from Core");
         
         //первый раз вывод до минимума, второй раз - с удалением. 
         if (goal->available > goal->activation_amount){

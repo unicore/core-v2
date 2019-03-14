@@ -39,12 +39,13 @@ struct core {
         auto acc = accounts.find(host);
         account_name active_host = acc->get_active_host();
 
-        spiral_index spiral(_self, active_host);
-        auto sp = spiral.find(0);
-        auto half_of_pool = sp -> size_of_pool / 2;
-        uint64_t quants_filled = 0;
-        std::vector<uint64_t> list_for_enable;
-        std::vector<uint64_t> list_for_diactivate;
+        // spiral_index spiral(_self, active_host);
+        // auto sp = spiral.find(0);
+        // auto half_of_pool = sp -> size_of_pool / 2;
+        // uint64_t quants_filled = 0;
+        // std::vector<uint64_t> list_for_enable;
+        // std::vector<uint64_t> list_for_diactivate;
+        
         std::vector<uint64_t> list_for_emit;
         
         if (host == _CORE)
@@ -60,30 +61,31 @@ struct core {
             i_bv++;
         }        
 
-        filled = false;
-        while(i_bv != idx_bv.rend() && filled == false) {
-            if (i_bv->activated == true && i_bv -> validated == true){
-                if (i_bv -> available >= i_bv->activation_amount){
+        // filled = false;
+        // while(i_bv != idx_bv.rend() && filled == false) {
+        //     if (i_bv->activated == true && i_bv -> validated == true){
+        //         if (i_bv -> available >= i_bv->activation_amount){
                 
-                    quants_filled += i_bv -> quants_for_each_pool;
-                    if (quants_filled <= half_of_pool){
-                        list_for_enable.emplace_back(i_bv->id);
-                    };
+        //             quants_filled += i_bv -> quants_for_each_pool;
+        //             if (quants_filled <= half_of_pool){
+        //                 list_for_enable.emplace_back(i_bv->id);
+        //             };
                 
-                    filled = quants_filled >= half_of_pool;
-                } else {
-                    list_for_diactivate.emplace_back(i_bv->id);
-                }
-            };for (auto id : list_for_diactivate){
-            auto goal_for_diactivate = goals.find(id);
+        //             filled = quants_filled >= half_of_pool;
+        //         } else {
+        //             list_for_diactivate.emplace_back(i_bv->id);
+        //         }
+        //     };for (auto id : list_for_diactivate){
+        //     auto goal_for_diactivate = goals.find(id);
 
-            goals.modify(goal_for_diactivate, _self, [&](auto &g){
-                    g.activated = false;
-            });
+        //     goals.modify(goal_for_diactivate, _self, [&](auto &g){
+        //             g.activated = false;
+        //     });
 
-        }
-            i_bv++;
-        };
+        // }
+        //     i_bv++;
+        // };
+
         if (host == _CORE){
          action(
                 permission_level{ _BOX, N(active) },
@@ -134,35 +136,35 @@ struct core {
 
     }
 
-        for (auto id : list_for_diactivate){
-            auto goal_for_diactivate = goals.find(id);
+        // for (auto id : list_for_diactivate){
+        //     auto goal_for_diactivate = goals.find(id);
 
-            goals.modify(goal_for_diactivate, _self, [&](auto &g){
-                    g.activated = false;
-            });
+        //     goals.modify(goal_for_diactivate, _self, [&](auto &g){
+        //             g.activated = false;
+        //     });
 
-        }
+        // }
 
-        for (auto id : list_for_enable){
-            auto goal_for_modify = goals.find(id);
+        // for (auto id : list_for_enable){
+        //     auto goal_for_modify = goals.find(id);
 
-                goals.modify(goal_for_modify, _self, [&](auto &g){
-                    g.in_protocol = true;
-                    g.available = goal_for_modify->available - goal_for_modify->activation_amount;
-                });
+        //         goals.modify(goal_for_modify, _self, [&](auto &g){
+        //             g.in_protocol = true;
+        //             g.available = goal_for_modify->available - goal_for_modify->activation_amount;
+        //         });
                 
               
-                gpriorenter op;
+        //         gpriorenter op;
             
-                op.quants_for_each_pool = goal_for_modify->quants_for_each_pool * QUANTS_PRECISION;
-                op.username = goal_for_modify->username;
-                op.host = host;
-                op.goal_id = goal_for_modify -> id;
+        //         op.quants_for_each_pool = goal_for_modify->quants_for_each_pool * QUANTS_PRECISION;
+        //         op.username = goal_for_modify->username;
+        //         op.host = host;
+        //         op.goal_id = goal_for_modify -> id;
                     
-                priority_goal_enter(op);
+        //         priority_goal_enter(op);
                 
 
-        } 
+        // } 
                 
     }
 
@@ -186,108 +188,108 @@ struct core {
     return for_emit;
  };
 
- void priority_goal_enter(const gpriorenter &op){
-        auto username = op.username;
-        auto host = op.host;
-        auto quants = op.quants_for_each_pool;
-        auto goal_id = op.goal_id;
+ // void priority_goal_enter(const gpriorenter &op){
+ //        auto username = op.username;
+ //        auto host = op.host;
+ //        auto quants = op.quants_for_each_pool;
+ //        auto goal_id = op.goal_id;
 
-        refresh_state(host);
+ //        refresh_state(host);
         
-        account_index accounts(_self, _self);
-        auto acc = accounts.find(host);
-        auto main_host = acc->get_active_host();
+ //        account_index accounts(_self, _self);
+ //        auto acc = accounts.find(host);
+ //        auto main_host = acc->get_active_host();
          
-        pool_index pools(_self, host);
-        balance_index balances(_self, username);
+ //        pool_index pools(_self, host);
+ //        balance_index balances(_self, username);
 
-        cycle_index cycles(_self, host);
+ //        cycle_index cycles(_self, host);
          
-        rate_index rates(_self, main_host);
+ //        rate_index rates(_self, main_host);
 
-        auto root_symbol = acc->get_root_symbol();
+ //        auto root_symbol = acc->get_root_symbol();
          
-        auto first_pool_rate = rates.find(0);
-        auto second_pool_rate = rates.find(1);
+ //        auto first_pool_rate = rates.find(0);
+ //        auto second_pool_rate = rates.find(1);
 
-        auto cycle = cycles.find(acc-> current_cycle_num - 2);
+ //        auto cycle = cycles.find(acc-> current_cycle_num - 2);
          
-        eosio_assert(acc->current_pool_num < 2, "Priority Enter is available only for first 2 rounds in cycle");
-        eosio_assert(acc->priority_flag == true, "Priority Enter is available only when priority_flag is enabled");
+ //        eosio_assert(acc->current_pool_num < 2, "Priority Enter is available only for first 2 rounds in cycle");
+ //        eosio_assert(acc->priority_flag == true, "Priority Enter is available only when priority_flag is enabled");
         
-        auto first_pool = pools.find(cycle->finish_at_global_pool_id + 1);
-        auto second_pool = pools.find(cycle->finish_at_global_pool_id + 2);
+ //        auto first_pool = pools.find(cycle->finish_at_global_pool_id + 1);
+ //        auto second_pool = pools.find(cycle->finish_at_global_pool_id + 2);
          
-        eosio::asset first_pool_amount = asset(quants * first_pool_rate->buy_rate / QUANTS_PRECISION, root_symbol);
-        eosio::asset second_pool_amount = asset(quants * second_pool_rate->buy_rate / QUANTS_PRECISION, root_symbol);
-        eosio::asset amount_for_back = first_pool_amount + second_pool_amount;
+ //        eosio::asset first_pool_amount = asset(quants * first_pool_rate->buy_rate / QUANTS_PRECISION, root_symbol);
+ //        eosio::asset second_pool_amount = asset(quants * second_pool_rate->buy_rate / QUANTS_PRECISION, root_symbol);
+ //        eosio::asset amount_for_back = first_pool_amount + second_pool_amount;
        
-        uint64_t bal_id1 = fill_pool(username, host, quants, first_pool_amount, acc-> current_pool_id, true, goal_id);
-        uint64_t bal_id2 = fill_pool(username, host, quants, second_pool_amount, acc-> current_pool_id + 1, true, goal_id);
+ //        uint64_t bal_id1 = fill_pool(username, host, quants, first_pool_amount, acc-> current_pool_id, true, goal_id);
+ //        uint64_t bal_id2 = fill_pool(username, host, quants, second_pool_amount, acc-> current_pool_id + 1, true, goal_id);
         
-        add_balance_id_to_goal(host, goal_id, bal_id1);
-        add_balance_id_to_goal(host, goal_id, bal_id2);
-    }
+ //        add_balance_id_to_goal(host, goal_id, bal_id1);
+ //        add_balance_id_to_goal(host, goal_id, bal_id2);
+ //    }
 
 
-void adjust_goal_balance(account_name host, uint64_t goal_id, eosio::asset amount){
-    goals_index goals (_self, host);
-    //CHECK FOR SYMBOL
+// void adjust_goal_balance(account_name host, uint64_t goal_id, eosio::asset amount){
+//     goals_index goals (_self, host);
+//     //CHECK FOR SYMBOL
     
-    //Check for amount < nominal - diactivate
+//     //Check for amount < nominal - diactivate
 
-    bool disable = false;
-    bool is_complete = false;
-    auto goal = goals.find(goal_id);
+//     bool disable = false;
+//     bool is_complete = false;
+//     auto goal = goals.find(goal_id);
     
-    eosio::asset available = goal -> available + amount;
+//     eosio::asset available = goal -> available + amount;
 
-    if (available < goal->activation_amount)    
-        disable = true;
+//     if (available < goal->activation_amount)    
+//         disable = true;
 
-    if (available >= goal->target) {
-        disable = true;
-        is_complete = true;
-    }
-
-
-    goals.modify(goal, _self, [&](auto &g){
-        g.completed = is_complete;
-        g.activated = !disable; 
-        g.available = available;
-    });
-
-    //Здесь мы принимаем платежи от Протокола и вносим их на баланс цели. 
-};
+//     if (available >= goal->target) {
+//         disable = true;
+//         is_complete = true;
+//     }
 
 
-void add_balance_id_to_goal(account_name host, uint64_t goal_id, uint64_t balance_id){
-    goals_index goals(_self, host);
-    auto goal = goals.find(goal_id);
-    std::vector <uint64_t> balance_ids = goal->balance_ids;
-    balance_ids.push_back(balance_id);
-    print("I ADD BALANCE ID TO GOAL: ", balance_id);
+//     goals.modify(goal, _self, [&](auto &g){
+//         g.completed = is_complete;
+//         g.activated = !disable; 
+//         g.available = available;
+//     });
 
-    goals.modify(goal, _self, [&](auto &g){
-        g.balance_ids = balance_ids;
-    });
+//     //Здесь мы принимаем платежи от Протокола и вносим их на баланс цели. 
+// };
 
-}
 
-void delete_balance_id_from_goal(account_name host, uint64_t goal_id, uint64_t balance_id){
-    goals_index goals(_self, host);
-    auto goal = goals.find(goal_id);
-    std::vector <uint64_t> balance_ids = goal->balance_ids;
-    auto itr = std::find(balance_ids.begin(), balance_ids.end(), balance_id);
+// void add_balance_id_to_goal(account_name host, uint64_t goal_id, uint64_t balance_id){
+//     goals_index goals(_self, host);
+//     auto goal = goals.find(goal_id);
+//     std::vector <uint64_t> balance_ids = goal->balance_ids;
+//     balance_ids.push_back(balance_id);
+//     print("I ADD BALANCE ID TO GOAL: ", balance_id);
+
+//     goals.modify(goal, _self, [&](auto &g){
+//         g.balance_ids = balance_ids;
+//     });
+
+// }
+
+// void delete_balance_id_from_goal(account_name host, uint64_t goal_id, uint64_t balance_id){
+//     goals_index goals(_self, host);
+//     auto goal = goals.find(goal_id);
+//     std::vector <uint64_t> balance_ids = goal->balance_ids;
+//     auto itr = std::find(balance_ids.begin(), balance_ids.end(), balance_id);
     
-    if (itr != balance_ids.end()){
-        balance_ids.erase(itr);
-        goals.modify(goal, _self, [&](auto &g){
-            g.balance_ids = balance_ids;
-        });
-    };
+//     if (itr != balance_ids.end()){
+//         balance_ids.erase(itr);
+//         goals.modify(goal, _self, [&](auto &g){
+//             g.balance_ids = balance_ids;
+//         });
+//     };
 
-}
+// }
 
 void priority_enter(const priorenter &op){
      auto username = op.username;
@@ -347,16 +349,14 @@ void priority_enter(const priorenter &op){
 
      if (bal->available >= total_enter){
         eosio::asset amount_for_back = asset(bal->available - total_enter);
-     if (bal->is_goal == false){
-             action(
-                    permission_level{ _self, N(active) },
-                    acc->root_token_contract, N(transfer),
-                    std::make_tuple( _self, username, amount_for_back, std::string("Sediment amount")) 
-            ).send();
-        } else {
-            adjust_goal_balance(bal->host, bal->goal_id, amount_for_back);
-        };
+         action(
+                permission_level{ _self, N(active) },
+                acc->root_token_contract, N(transfer),
+                std::make_tuple( _self, username, amount_for_back, std::string("Sediment amount")) 
+        ).send();
+
     } else {
+
         //У пользователя есть доступная сумма баланса в токенах, которая меньше чем та, с которой участник 
         //может зайти в приоритете в лептах. Надо найти минимальную сумму в лептах, которая удовлетворяет
         //условиям баланса. Для этого берем курс покупки второго раунда, и высчитаем количество лепт по нему. 
@@ -381,14 +381,8 @@ void priority_enter(const priorenter &op){
     }
      
     
-     uint64_t bal_id1 = fill_pool(username, host, first_pool_quants, first_pool_amount, acc-> current_pool_id, bal->is_goal, bal->goal_id);
-     uint64_t bal_id2 = fill_pool(username, host, second_pool_quants, second_pool_amount, acc-> current_pool_id + 1, bal->is_goal, bal->goal_id);
-     
-     if (bal->is_goal == true){
-            add_balance_id_to_goal(host, bal->goal_id, bal_id1);
-            add_balance_id_to_goal(host, bal->goal_id, bal_id2);
-            delete_balance_id_from_goal(host, bal->goal_id, bal->id);                  
-     };
+     fill_pool(username, host, first_pool_quants, first_pool_amount, acc-> current_pool_id);
+     fill_pool(username, host, second_pool_quants, second_pool_amount, acc-> current_pool_id + 1);
 
         auto last_pool = pools.find(cycle->finish_at_global_pool_id);
 
@@ -764,6 +758,18 @@ void start_new_cycle ( account_name host ) {
 
     };
 
+    void profupdate_action(const profupdate &op){
+        require_auth(op.username);
+        user_index refs(_self, _self);
+
+        auto ref = refs.find(op.username);
+        
+        refs.modify(ref, op.username, [&](auto &r){
+            r.meta = op.meta;
+        });
+
+    };
+
     void setfee_action(const setfee &op){
         require_auth(_dacomfee);
     
@@ -1051,7 +1057,7 @@ void start_new_cycle ( account_name host ) {
     };
 
 
-    uint64_t fill_pool(account_name username, account_name host, uint64_t quants, eosio::asset amount, uint64_t filled_pool_id, bool is_goal = false, uint64_t goal_id = 0){
+    uint64_t fill_pool(account_name username, account_name host, uint64_t quants, eosio::asset amount, uint64_t filled_pool_id){
         std::vector<eosio::asset> forecasts;
         account_index accounts(_self, _self);
         
@@ -1114,8 +1120,6 @@ void start_new_cycle ( account_name host ) {
                 b.last_recalculated_win_pool_id = pool -> id;
                 b.forecasts = forecasts;
                 b.sold_amount = asset(0, root_symbol);
-                b.is_goal = is_goal;
-                b.goal_id = goal_id;
                 b.ref_amount = asset(0, root_symbol);
                 b.sys_amount = asset(0, root_symbol);
             });
@@ -1490,16 +1494,13 @@ void start_new_cycle ( account_name host ) {
 
         {
 
-            if (bal->is_goal == false){
-                action(
-                    permission_level{ _self, N(active) },
-                    acc->root_token_contract, N(transfer),
-                    std::make_tuple( _self, username, bal -> purchase_amount, std::string("User Withdraw")) 
-                ).send();
-            } else {
-                adjust_goal_balance(bal->host, bal->goal_id, bal -> purchase_amount);
-                delete_balance_id_from_goal(bal->host, bal->goal_id, bal->id);
-            }
+
+            action(
+                permission_level{ _self, N(active) },
+                acc->root_token_contract, N(transfer),
+                std::make_tuple( _self, username, bal -> purchase_amount, std::string("User Withdraw")) 
+            ).send();
+        
 
 
 
@@ -1532,17 +1533,13 @@ void start_new_cycle ( account_name host ) {
         //WIN OR LOSE
 
             auto amount = bal -> available;
-            if (bal->is_goal == false){
-                action(
-                    permission_level{ _self, N(active) },
-                    acc->root_token_contract, N(transfer),
-                    std::make_tuple( _self, username, amount, std::string("User Withdraw")) 
-                ).send();
-            } else {
-                adjust_goal_balance(bal->host, bal->goal_id, amount);
-                delete_balance_id_from_goal(bal->host, bal->goal_id, bal->id);
-            }
-            
+        
+            action(
+                permission_level{ _self, N(active) },
+                acc->root_token_contract, N(transfer),
+                std::make_tuple( _self, username, amount, std::string("User Withdraw")) 
+            ).send();
+        
             uint64_t quants_from_reserved;
             if (bal -> win == true){
                 

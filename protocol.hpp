@@ -59,8 +59,6 @@ namespace eosio {
         account_name children_host;
         uint64_t cycle_num;
         uint64_t pool_num;
-        bool is_goal = false;
-        uint64_t goal_id;
         uint64_t global_pool_id;
         uint64_t quants_for_sale;
         uint64_t next_quants_for_sale;
@@ -78,9 +76,8 @@ namespace eosio {
         eosio::asset sys_amount;
 
         uint64_t primary_key() const {return id;}
-        uint64_t by_is_goal() const {return is_goal;} 
-
-        EOSLIB_SERIALIZE(balance, (id)(host)(children_host)(cycle_num)(pool_num)(is_goal)(goal_id)(global_pool_id)(quants_for_sale)(next_quants_for_sale)(last_recalculated_win_pool_id)(win)(pool_color)(available)(purchase_amount)(date_of_purchase)(withdrawed)(sold_amount)(date_of_sale)(forecasts)(ref_amount)(sys_amount))
+        
+        EOSLIB_SERIALIZE(balance, (id)(host)(children_host)(cycle_num)(pool_num)(global_pool_id)(quants_for_sale)(next_quants_for_sale)(last_recalculated_win_pool_id)(win)(pool_color)(available)(purchase_amount)(date_of_purchase)(withdrawed)(sold_amount)(date_of_sale)(forecasts)(ref_amount)(sys_amount))
     
         account_name get_active_host() const {
             if (host == children_host)
@@ -90,9 +87,7 @@ namespace eosio {
         }
     };
 
-    typedef eosio::multi_index<N(balance), balance,
-    indexed_by<N(is_goal), const_mem_fun<balance, uint64_t, &balance::by_is_goal>>
-    > balance_index;
+    typedef eosio::multi_index<N(balance), balance> balance_index;
 
     // @abi table cycle i64
     struct cycle{
@@ -223,7 +218,14 @@ namespace eosio {
         EOSLIB_SERIALIZE( reg, (username)(referer)(meta))
     };
 
-    
+   // @abi action
+    struct profupdate {
+        account_name username;
+        std::string meta;
+        
+        EOSLIB_SERIALIZE( profupdate, (username)(meta))
+    };
+ 
     // @abi action
     struct setparams{
         account_name host;

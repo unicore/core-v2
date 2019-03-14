@@ -159,6 +159,10 @@ extern "C" {
                     core().reg_action(eosio::unpack_action_data<reg>());
                     break;
                 };
+                case N(profupdate): {
+                    core().profupdate_action(eosio::unpack_action_data<profupdate>());
+                    break;
+                };
                 case N(setfee): {
                     core().setfee_action(eosio::unpack_action_data<setfee>());
                     break;
