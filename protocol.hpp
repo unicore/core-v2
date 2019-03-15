@@ -18,10 +18,10 @@
 
 
 namespace eosio {
-    static const account_name _self = N(tt.tc);
-    static const account_name _dacomfee = N(dacomfee.tc);
-    static const account_name _CORE = N(alice.tc);
-    static const account_name _BOX = N(ivan.tc);
+    static const account_name _self = N(test1.core);
+    static const account_name _dacomfee = N(core);
+    static const account_name _CORE = N(core);
+    static const account_name _BOX = N(eosio.token);
     
     static const eosio::symbol_name _SYM = S(4, FLO);
 
