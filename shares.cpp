@@ -300,6 +300,6 @@ struct shares {
 	            });
 
 		} else 
-			eosio_assert(false, "Market already created");
+		eosio_assert(false, "Market already created");
 	};
 };

@@ -3,33 +3,16 @@ using namespace eosio;
 
 struct goal {
 
-      /*
-		Цена входа за цель устанавливается в Лептах. 
-		Результативная цена в токенах высчитывается исходя из рейта первых двух пулов. 
-		Активация происходит ценой входа. 
-		В случае такого проигрыша, что собранная сумма становится меньше активационной - активейтед в фалс.
-		Любой может помочь в активации
-		Любой может задонатить на цель
-		В случае вывода целевого баланса, монеты попадают на баланс цели.
-		*/
+/*
+Цена входа за цель устанавливается в Квантах. 
+Результативная цена в токенах высчитывается исходя из рейта первых двух пулов. 
+Активация происходит ценой входа. 
+В случае такого проигрыша, что собранная сумма становится меньше активационной - активейтед в фалс.
+Любой может помочь в активации
+Любой может задонатить на цель
+В случае вывода целевого баланса, монеты попадают на баланс цели.
+*/
 
-
-
-	// uint64_t count_active_goal_balances(account_name username, account_name host){
-	// 	balance_index balances(_self, username);
-	// 	auto idx = balances.template get_index<N(is_goal)>();
- //        auto matched_itr = idx.lower_bound(1);
-	// 	uint64_t count = 0;
-
-	// 	while(matched_itr != idx.end()){
-	// 		if ((matched_itr->host == host) && (matched_itr->withdrawed == false))
-	// 			count++;
-
-	// 		matched_itr++;
-	// 	}	
-	
-	// 	return count;
-	// }
 
 	eosio::asset get_goal_amount(uint64_t quants_for_each_pool, account_name host){
 		account_index accounts(_self, _self);
@@ -82,12 +65,6 @@ struct goal {
         auto target = op.target;
         auto min_amount = get_goal_amount(quants_for_each_pool, host);
         bool validated = acc->goal_validation_percent == 0;
-
-        
-        //TODO CHECK FOR exist goal for same host
-  //       auto idx = goals.template get_index<N(username)>();
-  //       auto matched_goal = idx.lower_bound( (account_name)username );
-		// eosio_assert(matched_goal == idx.end(), "Only one goal per host for each user");
         
         eosio_assert(target.symbol == root_symbol, "Wrong symbol for this host");
         eosio_assert(quants_for_each_pool > 0, "quants for each pool must be greater then 0");
@@ -226,11 +203,7 @@ struct goal {
 		auto root_symbol = (acc->root_token).symbol;
 		eosio_assert(goal->username == username, "You are not owner of this goal");
 		eosio_assert((goal->available).amount > 0, "Cannot withdraw a zero amount");
-		//eosio_assert(goal->in_protocol == false, "Cannot withdaw goal before goal is go out from Core");
-		
-		// uint64_t gbalances_count = count_active_goal_balances(username, goal->host);
-  //       eosio_assert(gbalances_count == 0, "Cannot withdraw balance until all goal balances withdrawed from Core");
-        
+
         //первый раз вывод до минимума, второй раз - с удалением. 
         if (goal->available > goal->activation_amount){
         	eosio::asset on_withdraw = goal->available - goal->activation_amount;
@@ -257,7 +230,8 @@ struct goal {
 	        	g.available = asset(0, root_symbol);
 	        	g.withdrawed += on_withdraw;
 	        });
-	        //goals.erase(goal);
+	        
+	        goals.erase(goal);
         };
 
 }

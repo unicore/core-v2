@@ -4,6 +4,8 @@ namespace eosio {
 
     // @abi table goals
     struct goals{
+        //TODO refactor
+
         uint64_t id;
         account_name username;
         eosio::time_point_sec created;
@@ -26,6 +28,8 @@ namespace eosio {
         std::vector<account_name> voters;
         std::vector<uint64_t> balance_ids;
         eosio::asset withdrawed;
+
+
         uint64_t primary_key()const { return id; }
         uint64_t by_votes() const { return total_votes; }
         uint64_t by_activated() const {return activated; }
@@ -54,6 +58,7 @@ namespace eosio {
 
     // @abi action
     struct setgoal{
+        //TODO delete quants for each pool
         account_name username;
         account_name host;
         std::string shortdescr;
@@ -66,6 +71,8 @@ namespace eosio {
 
       // @abi action
     struct editgoal{
+        //TODO delete quants for each pool
+        
         uint64_t goal_id;
         account_name username;
         account_name host;

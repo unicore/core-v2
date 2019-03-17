@@ -9,19 +9,29 @@ namespace eosio {
 	
     // @abi table hosts
     struct hosts{
+        //TODO add active_chosts или предусмотреть возможность перераспредлеения финансового потока иначе;
+        //TODO + current_color?
+        //TODO ADD extension
+        //TODO оформить порядок и названия
+
         account_name username;
         account_name hoperator;
         std::vector<account_name> childrens;
         account_name active_host;
+        
         bool non_active_child = false;
         bool parameters_setted = false;
         bool need_switch = false;
         bool is_whitelisted = false;
+        
         vector <account_name> whitelist;
+        
         uint64_t consensus_percent;
         uint64_t goal_validation_percent;
+        
         std::string title;
         std::string purpose;
+        
         uint64_t total_shares;
         eosio::asset quote_amount;
         eosio::asset root_token;
@@ -120,18 +130,6 @@ namespace eosio {
 
     	EOSLIB_SERIALIZE(cchildhost, (parent_host)(child_host))
     };
-
-    struct wait_weight {
-	  uint32_t wait_sec;
-	  weight_type weight;
-	};
-
-	struct authority {
-	  uint32_t threshold;
-	  vector<eosiosystem::key_weight> keys;
-	  vector<eosiosystem::permission_level_weight> accounts;
-	  vector<wait_weight> waits;
-	};
 
 
 }

@@ -17,7 +17,6 @@ namespace eosio {
     typedef eosio::multi_index< N(votes), votes,
     indexed_by<N(host), const_mem_fun<votes, account_name, &votes::by_host>>> votes_index;
 
-//Indexed by host;
 
 	//@abi action
 	struct vote	{
