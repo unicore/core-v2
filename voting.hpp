@@ -5,13 +5,12 @@ namespace eosio {
 	struct votes{
 		uint64_t goal_id;
 		account_name host;
-		uint64_t rotation_num;	
 		uint64_t power;
 
 		uint64_t primary_key()const { return goal_id; }
 		account_name by_host() const {return host;}
 
-	    EOSLIB_SERIALIZE( votes, (goal_id)(host)(rotation_num)(power))
+	    EOSLIB_SERIALIZE( votes, (goal_id)(host)(power))
     };
 
     typedef eosio::multi_index< N(votes), votes,

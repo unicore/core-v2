@@ -44,6 +44,7 @@ struct shares {
     }
   }
 
+
   void withdraw_action(const withdrawsh &op){
     require_auth(op.owner);
     vesting_index vests(_self, op.owner);
@@ -79,13 +80,7 @@ struct shares {
 
 		auto exist = accounts.find(host);
 		eosio_assert(exist != accounts.end(), "Host is not founded");
-		//Check for whitelisted
-
-		if (exist -> is_whitelisted){
-            auto user_is_whitelisted = exist->is_account_in_whitelist(buyer);
-            eosio_assert(user_is_whitelisted, "Username not founded in the host whitelist"); 
-        };
-
+		
 		powermarket market(_self, host);
 		auto itr = market.find(S(4, BANCORE));
 		auto tmp = *itr;
@@ -106,11 +101,17 @@ struct shares {
 	        	p.staked = shares_out;	
 	        });
 		} else {
+			propagate_votes_changes(host, buyer, pexist->power, pexist->power + shares_out);
+		
 			power.modify(pexist, buyer, [&](auto &p){
 				p.power += shares_out;
 				p.staked += shares_out;
 			});
+		
+
 		};
+
+		
 
 	};
 
@@ -124,12 +125,6 @@ struct shares {
 		
 		account_index accounts(_self, _self);
 		auto acc = accounts.find(op.host);
-
-		//TODO - CHECK - ONLY HOST CAN DELEGATE or EVERYBODY?
-		if (acc -> is_whitelisted){
-            auto user_is_whitelisted = acc->is_account_in_whitelist(op.reciever);
-            eosio_assert(user_is_whitelisted, "Username not founded in the host whitelist"); 
-        };
 
 		auto power_from = power_from_idx.find(op.host);
 		eosio_assert(power_from != power_from_idx.end(),"Nothing to delegate");
@@ -207,6 +202,9 @@ struct shares {
 		};	
 	}
 
+
+
+
 	void undelegate_shares_action (const undelshares &op){
 		require_auth(op.reciever);
 
@@ -260,7 +258,6 @@ struct shares {
 		auto host = op.host;
 		auto username = op.username;
 		uint64_t shares = op.shares;
-		//ADD is delegated check. If true - assert;
 
 		power_index power(_self, username);
 		auto userpower = power.find(host);
@@ -270,6 +267,7 @@ struct shares {
 		powermarket market(_self, host);
 		auto itr = market.find(S(4, BANCORE));
 		auto tmp = *itr;
+
 		eosio::asset tokens_out;
 		market.modify( itr, 0, [&]( auto& es ) {
         	tokens_out = es.convert( asset(shares,S(0, CORE)), _SYM);
@@ -285,20 +283,18 @@ struct shares {
 	    
 	};
 
-
 	void create_bancor_market(account_name host, uint64_t total_shares, eosio::asset quote_amount){
 		powermarket market(_self, host);
 		auto itr = market.find(S(4,BANCORE));
 		if (itr == market.end()){
-				itr = market.emplace( host, [&]( auto& m ) {
-	               m.supply.amount = 100000000000000ll;
-	               m.supply.symbol = S(4,BANCORE);
-	               m.base.balance.amount = total_shares;
-	               m.base.balance.symbol = S(0, CORE);
-	               m.quote.balance.amount = quote_amount.amount;
-	               m.quote.balance.symbol = quote_amount.symbol;
-	            });
-
+			itr = market.emplace( host, [&]( auto& m ) {
+               m.supply.amount = 100000000000000ll;
+               m.supply.symbol = S(4,BANCORE);
+               m.base.balance.amount = total_shares;
+               m.base.balance.symbol = S(0, CORE);
+               m.quote.balance.amount = quote_amount.amount;
+               m.quote.balance.symbol = quote_amount.symbol;
+            });
 		} else 
 		eosio_assert(false, "Market already created");
 	};

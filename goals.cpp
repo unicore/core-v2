@@ -4,43 +4,8 @@ using namespace eosio;
 struct goal {
 
 /*
-Цена входа за цель устанавливается в Квантах. 
-Результативная цена в токенах высчитывается исходя из рейта первых двух пулов. 
-Активация происходит ценой входа. 
-В случае такого проигрыша, что собранная сумма становится меньше активационной - активейтед в фалс.
-Любой может помочь в активации
-Любой может задонатить на цель
-В случае вывода целевого баланса, монеты попадают на баланс цели.
+Модуль Целей
 */
-
-
-	eosio::asset get_goal_amount(uint64_t quants_for_each_pool, account_name host){
-		account_index accounts(_self, _self);
-
-		auto acc = accounts.find(host);
-        auto main_host = acc->get_active_host();
-
-        rate_index rates(_self, main_host);
-		spiral_index spiral(_self, main_host);
-		
-        auto root_symbol = (acc->root_token).symbol;
-
-
-		auto sp = spiral.find(0);
-		eosio_assert(sp != spiral.end(), "Host is not exist");
-		
-		auto rate1 = rates.find(0);
-		auto rate2 = rates.find(1);
-		auto buy_rate1 = rate1->buy_rate;
-		auto buy_rate2 = rate2->buy_rate;
-		
-		auto size_of_pool = sp->size_of_pool;
-		eosio_assert(quants_for_each_pool <= size_of_pool / 2, "quants for each pool is more then possible" );
-		
-		eosio::asset amount = asset(quants_for_each_pool * (buy_rate1 + buy_rate2), root_symbol);
-	
-		return amount;
-	}
 
 
 	void set_goal_action(const setgoal &op){
@@ -56,32 +21,25 @@ struct goal {
 		auto acc = accounts.find(op.host);
         auto root_symbol = (acc->root_token).symbol;
 
-        //CHECK for exist username in goals. If exist, reject.
 		auto username = op.username;
-        auto shortdescr = op.shortdescr;
-        auto descr = op.descr;
-        auto quants_for_each_pool = op.quants_for_each_pool;
+        auto title = op.title;
+        auto description = op.description;
         auto host = op.host;
         auto target = op.target;
-        auto min_amount = get_goal_amount(quants_for_each_pool, host);
-        bool validated = acc->goal_validation_percent == 0;
+        bool validated = acc->consensus_percent == 0;
         
         eosio_assert(target.symbol == root_symbol, "Wrong symbol for this host");
-        eosio_assert(quants_for_each_pool > 0, "quants for each pool must be greater then 0");
-
-        eosio_assert(shortdescr.length() <= 100, "Short Description is a maximum 100 symbols. Describe the goal shortly.");
+        
+        eosio_assert(title.length() <= 100, "Short Description is a maximum 100 symbols. Describe the goal shortly.");
        
         goals.emplace(username, [&](auto &g){
         	g.id = goals.available_primary_key();
         	g.username = username;
         	g.created = eosio::time_point_sec(now());
         	g.host = host;
-        	g.shortdescr = shortdescr;
-        	g.descr = descr;
-        	g.activation_amount = min_amount;
+        	g.title = title;
+        	g.description = description;
         	g.target = target;
-        	g.quants_for_each_pool = quants_for_each_pool;
-        	g.rotation_num = 1;
         	g.withdrawed = asset(0, root_symbol);
         	g.available = asset(0, root_symbol);
         	g.validated = validated;
@@ -98,33 +56,26 @@ struct goal {
         auto root_symbol = (acc->root_token).symbol;
 
         auto username = op.username;
-        auto shortdescr = op.shortdescr;
-        auto descr = op.descr;
-        auto quants_for_each_pool = op.quants_for_each_pool;
+        auto title = op.title;
+        auto description = op.description;
         auto host = op.host;
         auto goal_id = op.goal_id;
         auto target = op.target;
-        auto min_amount = get_goal_amount(quants_for_each_pool, host);
-
-        //TODO cost < maxcost;
-        //TODO CANNOT EDIT AFTER ACTIVATE
-        eosio_assert(target.symbol == root_symbol, "Wrong symbol for this host");
-        eosio_assert(quants_for_each_pool > 0, "quants for each pool must be greater then 0");
-
-        eosio_assert(shortdescr.length() <= 100, "Short Description is a maximum 100 symbols. Describe the goal shortly.");
         
-
+        eosio_assert(target.symbol == root_symbol, "Wrong symbol for this host");
+    
+        eosio_assert(title.length() <= 100, "Short Description is a maximum 100 symbols");
+ 
         auto goal = goals.find(goal_id);
         eosio_assert(goal != goals.end(), "Goal is not exist");
-        eosio_assert(goal -> activated == false, "Impossible edit goal after activation");
+
+        eosio_assert(goal -> validated == false, "Impossible edit goal after validation");
 
         goals.modify(goal, username, [&](auto &g){
-        	g.shortdescr = shortdescr;
-        	g.descr = descr;
+        	g.title = title;
+        	g.description = description;
         	g.host = host;
-        	g.activation_amount = min_amount;
         	g.target = target;
-        	g.quants_for_each_pool = quants_for_each_pool;
         });
 
 	}
@@ -142,6 +93,7 @@ struct goal {
 		goals.erase(goal);
 
 	}
+
 
 	void report_action(const report &op){
 		require_auth(op.username);
@@ -162,30 +114,22 @@ struct goal {
 	void donate_action(account_name from, account_name host, uint64_t goal_id, eosio::asset quantity, account_name code){
 		require_auth(from);
 		
-		//TODO check quantity enough and not overflow the pool size
 		goals_index goals(_self, host);
 		account_index accounts(_self, _self);
 		auto acc = accounts.find(host);
 
 		eosio_assert(acc->root_token_contract == code, "Wrong root token contract for this host");
 		eosio_assert((acc->root_token).symbol == quantity.symbol, "Wrong root symbol for this host");
+		
 		auto goal = goals.find(goal_id);
 		
-
 		eosio_assert(goal != goals.end(), "Goal is not exist");
 
-		//eosio_assert(goal->nominal <= quantity, "Wrong amount for activate");
-
-		bool activated = quantity + goal->available >= goal->activation_amount;
-		bool completed = goal->available + goal->withdrawed + quantity >= goal->target;
-		//TODO CHECK IT 
-		bool validated = acc->goal_validation_percent <= goal->total_votes / acc->total_shares;
-
+		bool completed = goal->available + goal->withdrawed + quantity >= goal->target;		
+		
 		goals.modify(goal, from,[&](auto &g){
 			g.available += quantity;
-			g.activated = activated;
 			g.completed = completed;
-			g.validated = validated;
 		});
 
 	}
@@ -194,46 +138,32 @@ struct goal {
 		require_auth(op.username);
 		auto username = op.username;
 		auto goal_id = op.goal_id;
+		
 		goals_index goals(_self, op.host);
-
 		auto goal = goals.find(goal_id);
+		
 		eosio_assert(goal != goals.end(), "Goal is not founded");
+		
 		account_index accounts(_self, _self);
 		auto acc = accounts.find(goal->host);
 		auto root_symbol = (acc->root_token).symbol;
+
 		eosio_assert(goal->username == username, "You are not owner of this goal");
 		eosio_assert((goal->available).amount > 0, "Cannot withdraw a zero amount");
 
-        //первый раз вывод до минимума, второй раз - с удалением. 
-        if (goal->available > goal->activation_amount){
-        	eosio::asset on_withdraw = goal->available - goal->activation_amount;
-        	action(
-	            permission_level{ _self, N(active) },
-   		        acc->root_token_contract, N(transfer),
-        	    std::make_tuple( _self, username, on_withdraw, std::string("Goal Withdraw")) 
-	        ).send();
+        eosio::asset on_withdraw = goal->available;
+    	
+    	action(
+            permission_level{ _self, N(active) },
+		    acc->root_token_contract, N(transfer),
+    	    std::make_tuple( _self, username, on_withdraw, std::string("Goal Withdraw")) 
+        ).send();
 
-	        goals.modify(goal, username, [&](auto &g){
-	        	g.available = goal->activation_amount;
-	        	g.withdrawed += on_withdraw;
-	        });
+        goals.modify(goal, username, [&](auto &g){
+        	g.available = asset(0, root_symbol);
+        	g.withdrawed += on_withdraw;
+        });
 
-        } else {
-        	eosio::asset on_withdraw = goal->available;
-        	action(
-	            permission_level{ _self, N(active) },
-   		        acc->root_token_contract, N(transfer),
-        	    std::make_tuple( _self, username, on_withdraw, std::string("Goal Withdraw")) 
-	        ).send();
-
-	        goals.modify(goal, username, [&](auto &g){
-	        	g.available = asset(0, root_symbol);
-	        	g.withdrawed += on_withdraw;
-	        });
-	        
-	        goals.erase(goal);
-        };
-
-}
+	}
 
 };

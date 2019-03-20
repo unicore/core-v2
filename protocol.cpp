@@ -46,7 +46,7 @@ extern "C" {
                     case 110: {
                         //check for code outside
                         //auto cd = eosio::string_to_name(code.c_str());
-                        //Pay for upgration
+                        //Pay for upgrade
                         eosio_assert(code == N(eosio.token), "Only eosio.token contract can be used for upgrade");
                         auto host = eosio::string_to_name(parameter.c_str());
                         hosts_struct().pay_for_upgrade(host, op.quantity);
@@ -129,7 +129,7 @@ extern "C" {
                     break;
                 };
                 case N(cchildhost): {
-                    hosts_struct().create_child_host_action(eosio::unpack_action_data<cchildhost>());
+                    hosts_struct().create_chost_action(eosio::unpack_action_data<cchildhost>());
                     break;
                 };
 
@@ -163,10 +163,6 @@ extern "C" {
                     core().profupdate_action(eosio::unpack_action_data<profupdate>());
                     break;
                 };
-                case N(setfee): {
-                    core().setfee_action(eosio::unpack_action_data<setfee>());
-                    break;
-                };
                 case N(priorenter): {
                     core().priority_enter(eosio::unpack_action_data<priorenter>());   
                     break;
@@ -176,9 +172,10 @@ extern "C" {
                     break;
                 };
                 case N(setemi):{
-                    hosts_struct().create_emission_action(eosio::unpack_action_data<setemi>());
+                    hosts_struct().set_emission_action(eosio::unpack_action_data<setemi>());
                     break;
-                }
+                };
+                
             }
             
         }

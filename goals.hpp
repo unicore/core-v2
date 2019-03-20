@@ -4,53 +4,44 @@ namespace eosio {
 
     // @abi table goals
     struct goals{
-        //TODO refactor
-
+        
         uint64_t id;
         account_name username;
+        account_name host;
         eosio::time_point_sec created;
 
-        bool activated = false;
-        bool in_protocol = false;
+        std::string title;
+        std::string description;
+        eosio::asset target;
+        eosio::asset available;
+
+        uint64_t total_votes;
+        
+        bool validated = false;
         bool completed = false;
         bool reported = false;
-        bool validated = false;
-        account_name host;
-        uint64_t quants_for_each_pool;
-        std::string shortdescr;
-        std::string descr;
-        eosio::asset target;
-        eosio::asset activation_amount;
-        eosio::asset available;
+        bool checked = false;
         std::string report;
-        uint64_t rotation_num;
-        uint64_t total_votes;
-        std::vector<account_name> voters;
-        std::vector<uint64_t> balance_ids;
         eosio::asset withdrawed;
-
-
+        std::vector<account_name> voters;
+        
         uint64_t primary_key()const { return id; }
         uint64_t by_votes() const { return total_votes; }
-        uint64_t by_activated() const {return activated; }
         uint64_t by_completed() const {return completed; }
-        uint64_t by_in_protocol() const {return in_protocol; }
+        
         account_name by_username() const {return username; }
         account_name by_host() const {return host;}
-        uint64_t by_rotation_num() const {return rotation_num;}
-        EOSLIB_SERIALIZE( goals, (id)(username)(created)(activated)(in_protocol)(completed)(reported)
-            (validated)(host)(quants_for_each_pool)(shortdescr)(descr)(target)(activation_amount)
-            (available)(report)(rotation_num)(total_votes)(voters)(balance_ids)(withdrawed))
+        
+        
+        EOSLIB_SERIALIZE( goals, (id)(username)(host)(created)(title)(description)(target)(available)(total_votes)(validated)(completed)(reported)
+            (checked)(report)(withdrawed)(voters))
     };
 
     typedef eosio::multi_index <N(goals), goals,
         indexed_by<N(total_votes), const_mem_fun<goals, uint64_t, &goals::by_votes>>,
-        indexed_by<N(activated), const_mem_fun<goals, uint64_t, &goals::by_activated>>,
         indexed_by<N(completed), const_mem_fun<goals, uint64_t, &goals::by_completed>>,
         indexed_by<N(username), const_mem_fun<goals, account_name, &goals::by_username>>,
-        indexed_by<N(host), const_mem_fun<goals, account_name, &goals::by_host>>,
-        indexed_by<N(in_protocol), const_mem_fun<goals, uint64_t, &goals::by_in_protocol>>,
-        indexed_by<N(rotation_num), const_mem_fun<goals, uint64_t, &goals::by_rotation_num>>
+        indexed_by<N(host), const_mem_fun<goals, account_name, &goals::by_host>>
     > goals_index;
 
 
@@ -58,30 +49,25 @@ namespace eosio {
 
     // @abi action
     struct setgoal{
-        //TODO delete quants for each pool
         account_name username;
         account_name host;
-        std::string shortdescr;
-        std::string descr;
-        uint64_t quants_for_each_pool;
+        std::string title;
+        std::string description;
         eosio::asset target;
 
-        EOSLIB_SERIALIZE( setgoal, (username)(host)(shortdescr)(descr)(quants_for_each_pool)(target))
+        EOSLIB_SERIALIZE( setgoal, (username)(host)(title)(description)(target))
     };
 
       // @abi action
     struct editgoal{
-        //TODO delete quants for each pool
-        
         uint64_t goal_id;
         account_name username;
         account_name host;
-        std::string shortdescr;
-        std::string descr;
-        uint64_t quants_for_each_pool;
+        std::string title;
+        std::string description;
         eosio::asset target;
 
-        EOSLIB_SERIALIZE( editgoal, (username)(host)(goal_id)(shortdescr)(descr)(quants_for_each_pool)(target))
+        EOSLIB_SERIALIZE( editgoal, (username)(host)(goal_id)(title)(description)(target))
 
     };
 

@@ -12,7 +12,7 @@ struct voting
 
 		while (idx !=votes.end()){
 			auto goal = goals.find(idx->goal_id);
-			if (goal->rotation_num != idx->rotation_num){
+			if (goal->completed){
 				list_for_delete.push_back(idx->goal_id);
 			};
 			idx++;
@@ -27,7 +27,7 @@ struct voting
 		votes_index votes(_self, voter);
 		goals_index goals (_self, _self);
 		auto idx = votes.begin();
-		uint64_t count = 0;
+		uint64_t count = 1;
 
 		while (idx !=votes.end()){
 			count++;
@@ -36,22 +36,6 @@ struct voting
 		return count;
 	}
 
-
-    void suggest_enter_to_host(){
-
-    }
-
-    void suggest_delete_from_host(){
-
-    }
-
-    void approve_suggestion(){
-
-    }
-
-    void disapprove_suggestion(){
-
-    }
 
 
 	void vote_action (const vote &op) {
@@ -67,8 +51,7 @@ struct voting
 		clear_old_votes_action(voter, host);
 		uint64_t vote_count = count_votes(voter, host);
 
-		eosio_assert(vote_count <= _TOTAL_VOTES, "Votes limit is exceeded");
-
+		
 		goals_index goals(_self, host);
 		power_index power(_self, voter);
 		votes_index votes(_self, voter);
@@ -77,8 +60,14 @@ struct voting
 		account_index accounts (_self, _self);
 		auto acc = accounts.find(goal->host);
 
+		powermarket market(_self, host);
+		auto itr = market.find(S(4,BANCORE));
+		auto liquid_shares = acc->total_shares - itr->base.balance.amount;
+
+		print("LIQUIDSHARES ", liquid_shares);
+
+		
 		eosio_assert(goal != goals.end(), "Goal is not founded");
-		eosio_assert(goal->completed == false, "You cant vote for completed goal");
 
 		auto pow = power.find(goal->host);
 		auto vote = votes.find(goal->id);
@@ -86,66 +75,42 @@ struct voting
 		eosio_assert(pow -> power != 0, "You cant vote with zero power");
 		auto voters = goal -> voters;
 
-		bool need_validate = acc -> goal_validation_percent > 0 || goal->validated;
-		bool validated = true;
-		uint64_t total_votes;
-
-		if (need_validate){
-			uint64_t total_votes = goal->total_votes + pow->power;
-			uint64_t total_shares = acc->total_shares;
-			uint64_t votes_percent = total_votes * PERCENT_PRECISION / total_shares;
-			validated = votes_percent >= acc->goal_validation_percent;
-		}
-		
-
 		if (vote == votes.end()){
+			//ADD VOTE
+			eosio_assert(vote_count <= _TOTAL_VOTES, "Votes limit is exceeded");
+
+	        eosio_assert(goal->completed == false, "You cant vote for completed goal");
 	        voters.push_back(voter);
 
-	        goals.modify(goal, voter, [&](auto &c){
-	         	c.total_votes += pow -> power;
-	         	c.voters = voters;
-	         	c.validated = true;
+	        goals.modify(goal, voter, [&](auto &g){
+	         	g.total_votes += pow -> power;
+	         	g.voters = voters;
+	         	uint64_t votes_percent = g.total_votes * 100 * PERCENT_PRECISION / liquid_shares;
+	         	print("VOTESPERCENT", votes_percent);
+				g.validated = votes_percent >= acc->consensus_percent;
 	        });
 
 	        votes.emplace(voter, [&](auto &v){
 	        	v.goal_id = goal->id;
 	        	v.host = goal->host;
-	        	v.rotation_num = goal->rotation_num;
 	        	v.power = pow -> power;
 	        });
 
 		} else {
-			if (vote -> rotation_num == goal -> rotation_num){
-				//DELETE VOTE
-				auto voters = goal -> voters;
-				auto itr = std::find(voters.begin(), voters.end(), voter);
-				voters.erase(itr);
+			auto voters = goal -> voters;
+			auto itr = std::find(voters.begin(), voters.end(), voter);
+			voters.erase(itr);
 
-				goals.modify(goal, voter, [&](auto &g){
-					g.voters = voters;
-					g.total_votes -= vote -> power; 
-					g.validated = validated;
-				});
+			goals.modify(goal, voter, [&](auto &g){
+				g.voters = voters;
+				g.total_votes -= vote -> power; 
+				uint64_t votes_percent = g.total_votes * PERCENT_PRECISION / liquid_shares;
+				print("VOTESPERCENT", votes_percent);
+				g.validated = goal->completed ? true : votes_percent >= acc->consensus_percent / 100;
+				
+			});
 
-				votes.erase(vote);
-
-			} else {
-				//IF exist with different rotation_num - erase and emplace
-				//TODO move to method for clear all old votes
-				votes.erase(vote);
-				votes.emplace(voter, [&](auto &v){
-					v.goal_id = goal -> id;
-					v.host = goal->host;
-					v.rotation_num = goal -> rotation_num;
-					v.power = pow -> power;
-				});
-	
-		        goals.modify(goal, voter, [&](auto &g){
-	         		g.total_votes += pow -> power;
-	         		g.voters = voters;
-	         		g.validated = validated;
-	        	});
-			}
+			votes.erase(vote);
 		}
 		
 		
