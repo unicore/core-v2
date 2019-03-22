@@ -9,14 +9,6 @@ namespace eosio {
 	
     // @abi table hosts
     struct hosts{
-        //TODO add active_chosts или предусмотреть возможность перераспредлеения финансового потока иначе;
-        //TODO ADD extension
-        //TODO add quote_token
-        //TODO consensus_percent? / consensus_percent?
-        //TODO check for title lenght (1 word)
-        //SET root token by symbol and contract
-        //TODO add benefactors and percent
-
         account_name username;
         eosio::time_point_sec registered_at;
         account_name architect;

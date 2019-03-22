@@ -86,7 +86,7 @@ struct shares {
 		auto tmp = *itr;
 		uint64_t shares_out;
 		market.modify( itr, 0, [&]( auto &es ) {
-	    	shares_out = (es.convert( amount, S(0, CORE))).amount;
+	    	shares_out = (es.convert( amount, S(0, POWER))).amount;
 	    });
 
         eosio_assert( shares_out > 0, "Amount is not enought for buy 1 share" );
@@ -270,7 +270,7 @@ struct shares {
 
 		eosio::asset tokens_out;
 		market.modify( itr, 0, [&]( auto& es ) {
-        	tokens_out = es.convert( asset(shares,S(0, CORE)), _SYM);
+        	tokens_out = es.convert( asset(shares,S(0, POWER)), _SYM);
 	    });
 		eosio_assert( tokens_out.amount > 1, "token amount received from selling shares is too low" );
 	    
@@ -291,7 +291,7 @@ struct shares {
                m.supply.amount = 100000000000000ll;
                m.supply.symbol = S(4,BANCORE);
                m.base.balance.amount = total_shares;
-               m.base.balance.symbol = S(0, CORE);
+               m.base.balance.symbol = S(0, POWER);
                m.quote.balance.amount = quote_amount.amount;
                m.quote.balance.symbol = quote_amount.symbol;
             });

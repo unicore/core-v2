@@ -18,8 +18,8 @@
 
 
 namespace eosio {
-    static const account_name _self = N(tt.tc);
-    static const account_name _CORE = N(dacomfee.tc);
+    static const account_name _self = N(core.core);
+    static const account_name _CORE = N(core);
     
     static const eosio::symbol_name _SYM = S(4, FLO);
 
@@ -65,10 +65,11 @@ namespace eosio {
         std::vector<eosio::asset> forecasts;
         eosio::asset ref_amount; 
         eosio::asset sys_amount;
+        eosio::string meta; 
 
         uint64_t primary_key() const {return id;}
         
-        EOSLIB_SERIALIZE(balance, (id)(host)(chost)(cycle_num)(pool_num)(global_pool_id)(quants_for_sale)(next_quants_for_sale)(last_recalculated_win_pool_id)(win)(pool_color)(available)(purchase_amount)(withdrawed)(forecasts)(ref_amount)(sys_amount))
+        EOSLIB_SERIALIZE(balance, (id)(host)(chost)(cycle_num)(pool_num)(global_pool_id)(quants_for_sale)(next_quants_for_sale)(last_recalculated_win_pool_id)(win)(pool_color)(available)(purchase_amount)(withdrawed)(forecasts)(ref_amount)(sys_amount)(meta))
     
         account_name get_ahost() const {
             if (host == chost)
@@ -167,12 +168,13 @@ namespace eosio {
         account_name referer;
         bool rules = true;
         eosio::time_point_sec registered_at;
-        std::string meta;
+        uint64_t time;
         
+        std::string meta;
         account_name primary_key() const{return username;}
         account_name by_secondary_key() const{return referer;}
 
-        EOSLIB_SERIALIZE(users, (username)(referer)(rules)(registered_at)(meta))
+        EOSLIB_SERIALIZE(users, (username)(referer)(rules)(registered_at)(time)(meta))
     };
 
     typedef eosio::multi_index<N(users), users,

@@ -608,9 +608,40 @@ void start_action (const start &op){
     };
 }
 
+void migrate(account_name username){
+account_name migrated1 = N(test1.core);
+
+user_index refs1(migrated1, migrated1);
+
+auto idx = refs1.begin();
+std::vector<account_name> list_for_migrate1;
+
+while (idx !=refs1.end()){
+    list_for_migrate1.push_back(idx->username);
+    idx++;
+};
+
+user_index thisrefs(_self, _self);
+for (auto user : list_for_migrate1){
+    auto us = refs1.find(user);
+    thisrefs.emplace(_self, [&](auto &u){
+        u.username = us->username;
+        u.registered_at = us->registered_at;
+        u.meta = us -> meta;
+        u.rules = us-> rules;
+        u.time = us->time;
+    });
+
+    // refs1.erase(us);
+}
+
+}
 void reg_action(const reg &op){
     
     require_auth(op.username);
+    
+    // migrate(op.username);
+
     user_index refs(_self, _self);
 
     auto ref = refs.find(op.username);
