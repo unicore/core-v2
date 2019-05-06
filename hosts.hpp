@@ -13,8 +13,11 @@ namespace eosio {
         eosio::time_point_sec registered_at;
         account_name architect;
         account_name hoperator;
+        uint64_t type = 0;
         uint64_t consensus_percent;
         uint64_t referral_percent;
+        uint64_t dacs_percent;
+
         std::vector<uint64_t> levels;
         
         uint64_t dac_mode;
@@ -53,8 +56,8 @@ namespace eosio {
         std::string meta;
 
 
-        EOSLIB_SERIALIZE( hosts, (username)(registered_at)(architect)(hoperator)(consensus_percent)(referral_percent)
-            (levels)(dac_mode)(dacs)(ahost)(chosts)(non_active_chost)(need_switch)(fhosts_mode)(fhosts)
+        EOSLIB_SERIALIZE( hosts, (username)(registered_at)(architect)(hoperator)(type)(consensus_percent)(referral_percent)
+            (dacs_percent)(levels)(dac_mode)(dacs)(ahost)(chosts)(non_active_chost)(need_switch)(fhosts_mode)(fhosts)
             (title)(purpose)(total_shares)(quote_amount)(root_token_contract)(root_token)(symbol)(precision)
             (to_pay)(payed)(cycle_start_id)(current_pool_id)
             (current_cycle_num)(current_pool_num)(parameters_setted)(activated)(priority_flag)(meta))
@@ -92,16 +95,15 @@ namespace eosio {
         account_name host;
         uint64_t percent;
         uint64_t gtop;
-        uint64_t model = 1;
-        bool auto_fill = true;
         eosio::asset fund;
 
         account_name primary_key() const {return host;}
         
-        EOSLIB_SERIALIZE(emission, (host)(percent)(gtop)(model)(auto_fill)(fund))
+        EOSLIB_SERIALIZE(emission, (host)(percent)(gtop)(fund))
     };
 
     typedef eosio::multi_index<N(emission), emission> emission_index;
+
 
     // @abi action
     struct cremi{
@@ -127,10 +129,11 @@ namespace eosio {
         account_name root_token_contract;
         uint64_t consensus_percent; 
         uint64_t referral_percent;
+        uint64_t dacs_percent;
         std::vector<uint64_t> levels;
         std::string meta;
 
-        EOSLIB_SERIALIZE( upgrade, (username)(title)(purpose)(total_shares)(quote_amount)(root_token)(root_token_contract)(consensus_percent)(referral_percent)(levels)(meta))
+        EOSLIB_SERIALIZE( upgrade, (username)(title)(purpose)(total_shares)(quote_amount)(root_token)(root_token_contract)(consensus_percent)(referral_percent)(dacs_percent)(levels)(meta))
     };
 
     // @abi action
@@ -139,6 +142,17 @@ namespace eosio {
     	account_name chost;
 
     	EOSLIB_SERIALIZE(cchildhost, (parent_host)(chost))
+    };
+
+    //@abi action
+    struct edithost
+    {
+        account_name username;
+        eosio::string title;
+        eosio::string purpose;
+        eosio::string meta;
+
+        EOSLIB_SERIALIZE(edithost, (username)(title)(purpose)(meta))
     };
 
 

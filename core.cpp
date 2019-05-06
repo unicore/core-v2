@@ -5,6 +5,26 @@ struct core {
     Ядро
     */
 
+
+    void fund_emi_pool ( account_name username, account_name host, eosio::asset amount, account_name code ){
+        emission_index emis(_self, _self);
+        auto emi = emis.find(host);
+        eosio_assert(emi != emis.end(), "Emission pool for current host is not found");
+        account_index accounts(_self, _self);
+        auto acc = accounts.find(host);
+        eosio_assert(acc != accounts.end(), "Host is not found");
+
+        auto root_symbol = acc->get_root_symbol();
+
+        eosio_assert(acc->root_token_contract == code, "Wrong token contract for this pool.");
+        eosio_assert ( amount.symbol == root_symbol, "Rejected. Invalid token for this pool.");
+        emis.modify(emi, _self, [&](auto &e){
+            e.fund = emi->fund + amount;
+        });
+
+
+    };
+
     void emission(account_name host){
         
         emission_index emis(_self, _self);
@@ -20,29 +40,19 @@ struct core {
             
             eosio::asset em = adjust_emission_pool(host);  
             print("EMISSIONPOOL", em);
-            if (em.amount > 0){
-                
-                //AUTOFILL from host account
-                if (emi->auto_fill == true){
-                    auto emi_balance = eosio::token(acc->root_token_contract).get_balance(name{acc->username}, eosio::symbol_type(acc->root_token.symbol).name());
-                    
-                    if (emi_balance >= em){
-                        action(
-                            permission_level{ emi->host, N(active) },
-                            acc->root_token_contract, N(transfer),
-                            std::make_tuple( emi->host, _self, em, std::string("EMI-" + (name{emi->host}.to_string()))) 
-                        ).send();
+            eosio::asset on_emission;
 
-                        emis.modify(emi, _self, [&](auto &e){
-                            e.fund = emi->fund + em;
-                        });
-
-                    }
-                }
+            if (emi->fund <= em){
+                on_emission = emi->fund;
+            } else {
+                on_emission = em;
+            }
 
 
-                if(((emi->fund >= em) || (emi->auto_fill == true))&&(emi->gtop > 0)){
-                    //Если вошел сюда, значит либо пула достаточно, либо автоперевод СОВЕРШЕН
+            if (on_emission.amount > 0){
+                print("EMI->FUND", emi->fund);
+                print("on_emission", on_emission);
+                    print("ONEMISSIONPROCCESS");
                     auto on_emit = em;
                     eosio::asset fact_emitted = asset(0, em.symbol);
                     std::vector<uint64_t> list_for_emit;
@@ -66,20 +76,16 @@ struct core {
 
                     
                     if (gcount < emi->gtop){
-                        print("inside1");
                         devider = gcount;
                     } else {
-                        print("inside2");
-                    
                         devider = emi->gtop;
                     }
                     
                     print("DEVIDER: ", devider);
 
-                    
                     if (devider > 0){
 
-                        eosio::asset each_goal_amount = asset((em).amount / devider, root_symbol);
+                        eosio::asset each_goal_amount = asset((on_emission).amount / devider, root_symbol);
                         
 
                         print("EACHGOALAMOUNT", each_goal_amount, ", ");
@@ -90,14 +96,14 @@ struct core {
                             need_emit = false;
                         };
                         
-                         
+                        
                         eosio::asset for_emit;
                         eosio::asset non_emitted = asset(0, root_symbol);
 
                         if (need_emit == true){
                             for (auto id : list_for_emit){
                                 auto goal_for_emit = goals.find(id);
-                                
+                                print("ONGOALTRANSFER");
                                 eosio::asset total_recieved = goal_for_emit->available + goal_for_emit->withdrawed;
                                 eosio::asset until_fill =  goal_for_emit->target - total_recieved;
                                 
@@ -107,6 +113,7 @@ struct core {
                                     } else{
                                         for_emit = each_goal_amount;
                                     };
+                                print("FACT_EMMITED_FOR_ONE: ", for_emit);
 
                                 fact_emitted += for_emit;
 
@@ -133,7 +140,7 @@ struct core {
                         c.emitted = fact_emitted;
                     });
         
-                }
+                
             }
         }
     }
@@ -150,17 +157,17 @@ struct core {
 
     rate_index rates(_self, ahost);
     
-    auto last_cycle = cycles.find(host->current_cycle_num - 2);
+    auto last_cycle = cycles.find(host->current_cycle_num - 1); //2 for emission by cycles
     auto pool = pools.find(last_cycle -> finish_at_global_pool_id);
     auto rate = rates.find(pool->pool_num-1);
     auto em = emis.find(hostname);
     eosio::asset for_emit;
 
-    if (rate-> pool_id > 1){
-        for_emit = asset((rate->total_in_box).amount * em->percent / 100 / PERCENT_PRECISION, (rate->total_in_box).symbol );    
-    } else {
-        for_emit = asset(0, rate->total_in_box.symbol);
-    }
+    // if (rate-> pool_id > 1){
+        for_emit = asset((rate->live_balance_for_sale).amount * em->percent / 100 / PERCENT_PRECISION, (rate->live_balance_for_sale).symbol );    
+    // } else {
+        // for_emit = asset(0, rate->live_balance_for_sale.symbol);
+    // }
     
     return for_emit;
  };
@@ -340,8 +347,8 @@ void improve_params_of_new_cycle (account_name host, account_name main_host){
         sinc.pool_num = 0;
         sinc.total = asset(0, root_symbol);
         sinc.paid_to_refs = asset(0, root_symbol);
-        sinc.paid_to_host = asset(0, root_symbol);
-
+        sinc.paid_to_dacs = asset(0, root_symbol);
+        sinc.paid_to_fund = asset(0, root_symbol);
     });
 }
  
@@ -377,8 +384,8 @@ void emplace_first_pools(account_name parent_host, account_name main_host, eosio
         p.cycle_num = acc->current_cycle_num;
         p.pool_started_at = eosio::time_point_sec(now());
         p.priority_until = acc->current_cycle_num == 1 ? eosio::time_point_sec(0) : eosio::time_point_sec(now()+ sp->priority_seconds);;
-        p.pool_expired_at = acc->current_cycle_num == 1 ? eosio::time_point_sec (now() + sp->pool_timeout) : eosio::time_point_sec (now() + sp->pool_timeout + sp->priority_seconds);
-        p.color = p.id % 2 == 0 ? "black" : "white";
+        p.pool_expired_at = acc->current_cycle_num == 1 ? eosio::time_point_sec (-1) : eosio::time_point_sec (now() + sp->pool_timeout + sp->priority_seconds);
+        p.color = "white";
     });
 
     pools.emplace(_self, [&](auto &p){
@@ -388,12 +395,12 @@ void emplace_first_pools(account_name parent_host, account_name main_host, eosio
         p.creserved_quants = 0;
         p.remain_quants = p.total_quants;
         p.quant_cost = asset(next_rate->buy_rate, root_symbol);
-        p.color = p.id % 2 == 0 ? "black" : "white";
+        p.color = "black";
         p.cycle_num = acc->current_cycle_num;
         p.pool_num = 2;
         p.pool_started_at = eosio::time_point_sec(now());
         p.priority_until = acc->current_cycle_num == 1 ? eosio::time_point_sec(0) : eosio::time_point_sec(now()+ sp->priority_seconds);;
-        p.pool_expired_at = acc->current_cycle_num == 1 ? eosio::time_point_sec (now() + sp->pool_timeout) : eosio::time_point_sec (now() + sp->pool_timeout + sp->priority_seconds);
+        p.pool_expired_at = acc->current_cycle_num == 1 ? eosio::time_point_sec (-1) : eosio::time_point_sec (now() + sp->pool_timeout + sp->priority_seconds);
         p.total_win_withdraw = asset(0, root_symbol);
         p.total_loss_withdraw = asset(0, root_symbol);
     }); 
@@ -446,7 +453,7 @@ void start_new_cycle ( account_name host ) {
         
         refresh_state(host);  
 
-        emission(host);
+        // emission(host);
         
             
     };
@@ -454,7 +461,7 @@ void start_new_cycle ( account_name host ) {
 
 void next_pool( account_name host){
     account_index accounts(_self, _self);
-
+    print("IMONNEXTPOOL");
     auto acc = accounts.find(host);
     auto main_host = acc->get_ahost();
     
@@ -516,7 +523,7 @@ void next_pool( account_name host){
             p.creserved_quants = prev_prev_pool -> creserved_quants;
             p.remain_quants = p.total_quants - reserved_quants;
             p.quant_cost = asset(rate->buy_rate, root_symbol);
-            p.color = p.id % 2 == 0 ? "black" : "white"; 
+            p.color = prev_prev_pool -> color; 
             p.cycle_num = pool -> cycle_num;
             p.pool_num = pool -> pool_num + 1;
             p.pool_started_at = eosio::time_point_sec(now());
@@ -526,11 +533,12 @@ void next_pool( account_name host){
             p.total_loss_withdraw = asset(0, root_symbol);
         });
 
-         
+        print("ON CREATE EMISSION");
+         emission(host);
     
     } else {
         //Если это стартовые пулы, то только смещаем указатель
-
+        print("ON CREATE EMISSION2");
         auto rate = rates.find(acc-> current_pool_num);
         
         accounts.modify(acc, _self, [&](auto &a){
@@ -538,7 +546,7 @@ void next_pool( account_name host){
            a.current_pool_id  = pool -> id + 1;
            a.priority_flag = false;     
         });
-        
+        emission(host);
     }        
 };
 
@@ -588,7 +596,8 @@ void start_action (const start &op){
             sinc.id = 0;
             sinc.pool_num = 0;
             sinc.total = asset(0, root_symbol);
-            sinc.paid_to_host = asset(0, root_symbol);
+            sinc.paid_to_dacs = asset(0, root_symbol);
+            sinc.paid_to_fund = asset(0, root_symbol);
             sinc.paid_to_refs = asset(0, root_symbol);
         });
 
@@ -608,38 +617,11 @@ void start_action (const start &op){
     };
 }
 
-void migrate(account_name username){
-account_name migrated1 = N(test1.core);
 
-user_index refs1(migrated1, migrated1);
-
-auto idx = refs1.begin();
-std::vector<account_name> list_for_migrate1;
-
-while (idx !=refs1.end()){
-    list_for_migrate1.push_back(idx->username);
-    idx++;
-};
-
-user_index thisrefs(_self, _self);
-for (auto user : list_for_migrate1){
-    auto us = refs1.find(user);
-    thisrefs.emplace(_self, [&](auto &u){
-        u.username = us->username;
-        u.registered_at = us->registered_at;
-        u.meta = us -> meta;
-        u.rules = us-> rules;
-        u.time = us->time;
-    });
-
-    // refs1.erase(us);
-}
-
-}
 void reg_action(const reg &op){
     
-    require_auth(op.username);
-    
+    eosio_assert(has_auth(op.username) || has_auth(_registrator),
+      "missing required authority of accounta or accountb");
     // migrate(op.username);
 
     user_index refs(_self, _self);
@@ -650,11 +632,10 @@ void reg_action(const reg &op){
 
 
     //TODO check account registration;
-    refs.emplace(op.username, [&](auto &r){
+    refs.emplace(_self, [&](auto &r){
         r.username = op.username;
         r.referer = op.referer;
         r.meta = op.meta;
-        r.registered_at = eosio::time_point_sec(now());
     });
 
 };
@@ -789,6 +770,7 @@ void setparams_action(const setparams &op){
                 payment_to_loss[i] = live_balance_for_sale[i-3] * (PERCENT_PRECISION - loss_percent) / PERCENT_PRECISION + live_balance_for_sale[i-1] * (PERCENT_PRECISION - loss_percent) / PERCENT_PRECISION;
             } else if ( i > 3 ){
                 payment_to_loss[i] = live_balance_for_sale[i-1] * (PERCENT_PRECISION - loss_percent) / PERCENT_PRECISION + payment_to_loss[i - 2];
+                eosio_assert(payment_to_loss[i] > payment_to_loss[i-1], "Technical overflow. Try with a different parameters");
             }
             
             system_income[i] = i > 1 ? total_in_box[i-1] - payment_to_wins[i] - payment_to_loss[i] : 0; 
@@ -864,8 +846,10 @@ void deposit ( account_name username, account_name host, eosio::asset amount, ac
     
     eosio_assert( acc-> priority_flag == false, "This is a Priority Time");
 
-    eosio_assert ( pool -> pool_expired_at > eosio::time_point_sec(now()), "Pool is Expired");
-    
+    if (pool -> pool_num > 2){
+        eosio_assert ( pool -> pool_expired_at > eosio::time_point_sec(now()), "Pool is Expired");
+    };
+
     auto rate = rates.find( pool-> pool_num - 1 );
     eosio_assert(amount.amount % rate -> buy_rate == 0, "You can purchase only whole Quant");
 
@@ -917,22 +901,28 @@ void refresh_state (account_name host){
         //Если пул истек, или доступных пулов больше нет, или оставшихся лепт больше нет, то новый цикл
         if ((pool -> pool_expired_at < eosio::time_point_sec(now()) || \
             ((pool -> pool_num + 1 == sp->pool_limit) && (pool -> remain_quants == 0)))){
-            
+            print("ONREFRESH1");
             start_new_cycle(host);
       
         } else if ((pool -> remain_quants < QUANTS_PRECISION)){
         //Если просто нет лепт - новый пул. 
         //На случай, если приоритетные пулы полностью заполнены с остатком менее 1 Quant. 
+            print("ONREFRESH2");
             next_pool(host);
             refresh_state(host);
 
         } else if (acc->current_pool_num < 3) {
             //Отдельно округляем остатки в случае, если приоритетным входом или целями 
             //воспользовались только частично
-
+            print("ONREFRESH3");
             pools.modify(pool, _self, [&](auto &p ){
                 p.remain_quants = pool->remain_quants / QUANTS_PRECISION * QUANTS_PRECISION; 
             });
+
+            if (pool-> remain_quants == 0){
+                //Режим ожидания для первых двух пулов
+                next_pool(host);
+            }
         }
     }
     
@@ -1132,8 +1122,8 @@ void refresh_balance_action (const refreshbal &op){
                     auto asset_ref_amount = asset(r_amount, root_symbol);
                     auto asset_sys_amount = asset(s_amount, root_symbol);
 
-                    print("asset_sys_amount:", asset_sys_amount, " ; ");
-                    print("asset_ref_amount:", asset_ref_amount, " !!! ");
+                    // print("asset_sys_amount:", asset_sys_amount, " ; ");
+                    // print("asset_ref_amount:", asset_ref_amount, " !!! ");
                    
 
                     //print("bal->ref_amount: ", bal->ref_amount, " ;");
@@ -1335,7 +1325,7 @@ void withdraw_action ( const withdraw &op){
             auto sinc = sincome.find(bal->cycle_num - 1);
            
             if ((bal->ref_amount).amount > 0){
-                print("Total Pay to REF:", bal->ref_amount, " ");
+                // print("Total Pay to REF:", bal->ref_amount, " ");
                 
                 user_index refs(_self, _self);
                 auto ref = refs.find(username);
@@ -1348,8 +1338,8 @@ void withdraw_action ( const withdraw &op){
                     for (auto level : acc->levels){
                         if ((ref != refs.end()) && (ref->referer != 0)){
                             eosio::asset to_ref = asset((bal->ref_amount).amount * level / 100 / PERCENT_PRECISION , root_symbol);
-                            print("pay_to_ref: ", to_ref, " ;");
-                            print("pay_to_referer:", referer, " ;");
+                            // print("pay_to_ref: ", to_ref, " ;");
+                            // print("pay_to_referer:", referer, " ;");
                             if (to_ref.amount > 0){
                                 action(
                                     permission_level{ _self, N(active) },
@@ -1386,7 +1376,7 @@ void withdraw_action ( const withdraw &op){
                     
                 } else {
                     //If dont have referal, all payments back to host
-                    print("USE HOST");
+                    // print("USE HOST");
                     
                     action(
                         permission_level{ _self, N(active) },
@@ -1405,23 +1395,35 @@ void withdraw_action ( const withdraw &op){
             }
 
             if((bal->sys_amount).amount > 0){
-                print("Pay to HOST:", bal->sys_amount, " ");
                 
-                eosio::asset host_amount = bal->sys_amount;
+                // eosio::asset host_amount = bal->sys_amount;
+
+                eosio::asset dacs_amount = asset((bal->sys_amount).amount * acc->dacs_percent / 100 / PERCENT_PRECISION , root_symbol);
+                eosio::asset fund_amount = bal->sys_amount - dacs_amount;
                 
-                if (host_amount.amount > 0){
+                if (dacs_amount.amount > 0){
                         
                         action(
                             permission_level{ _self, N(active) },
                             acc->root_token_contract, N(transfer),
-                            std::make_tuple( _self, host, host_amount, std::string("HP-" + (name{username}.to_string() + "-" + (name{host}).to_string()))) 
+                            std::make_tuple( _self, host, dacs_amount, std::string("DAC-" + (name{username}.to_string() + "-" + (name{host}).to_string()))) 
                         ).send();
-                    print("check3");
+                    // print("check3");
                         
                 }
 
+                if (fund_amount.amount > 0){
+                    emission_index emis(_self, _self);
+                    auto emi = emis.find(host);
+
+                    emis.modify(emi, username, [&](auto &e){
+                        e.fund = emi->fund + fund_amount;
+                    });
+                }
+
                 sincome.modify(sinc, _self, [&](auto &s){
-                    s.paid_to_host = sinc->paid_to_host + bal->sys_amount;
+                    s.paid_to_dacs = sinc->paid_to_dacs + dacs_amount;
+                    s.paid_to_fund = sinc->paid_to_fund + fund_amount;
                 });
 
             }
@@ -1457,6 +1459,9 @@ void withdraw_action ( const withdraw &op){
         balance.erase(bal);
     }
 };
+
+
+
 
 
 };

@@ -10,6 +10,8 @@
 #include "goals.cpp"
 
 #include "voting.cpp"
+#include "badges.cpp"
+#include "tasks.cpp"
 
 using namespace eosio;
 
@@ -25,6 +27,7 @@ extern "C" {
                 eosio_assert(delimeter == '-', "Wrong subcode format. Right format: code[3]-parameter");
                 auto parameter = op.memo.substr(4, op.memo.length());
                 uint64_t subintcode = atoi(subcode.c_str());
+                print("subcode", subintcode);
 
                 //codes:
                 //100 - deposit
@@ -73,6 +76,13 @@ extern "C" {
                         goal().donate_action(op.from, host, goal_id, op.quantity, code);
                         break;
                     }
+                    case 400: {
+                        //direct fund emission pool
+                        
+                        auto host = eosio::string_to_name(parameter.c_str());
+                        core().fund_emi_pool(op.from, host, op.quantity, code);
+                        break;
+                    }
                     // default:
                        //eosio_assert(false, "Subcode is wrong");
                 }
@@ -108,7 +118,10 @@ extern "C" {
                     break;
                 };
                 case N(delshares): {
-                    shares().delegate_shares_action(eosio::unpack_action_data<delshares>());
+                    auto op = eosio::unpack_action_data<delshares>();
+                    require_auth(op.from);
+
+                    shares().delegate_shares_action(op);
                     break;
                 };
                 case N(undelshares): {
@@ -175,7 +188,71 @@ extern "C" {
                     hosts_struct().set_emission_action(eosio::unpack_action_data<setemi>());
                     break;
                 };
-                
+
+                case N(edithost):{
+                    hosts_struct().edithost_action(eosio::unpack_action_data<edithost>());
+                    break;
+                }
+                //BADGES
+                case N(setbadge):{
+                    badge_struct().setbadge_action(eosio::unpack_action_data<setbadge>());
+                    break;
+                }
+                // case N(delbadge):{
+                //     badge_struct().delbadge_action(eosio::unpack_action_data<delbadge>());
+                //     break;
+                // }
+                case N(giftbadge): {
+                    auto op = eosio::unpack_action_data<giftbadge>();
+
+                    require_auth(op.host);
+
+                    badge_struct().giftbadge_action(op);
+                    break;
+                }
+                // case N(backbadge): {
+                //     badge_struct().backbadge_action(eosio::unpack_action_data<backbadge>());
+                // }
+
+                //TASKS
+
+                case N(settask):{
+                    tsks().settask_action(eosio::unpack_action_data<settask>());
+                    break;
+                }
+
+                case N(tactivate):{
+                    tsks().tactivate_action(eosio::unpack_action_data<tactivate>());
+                    break;
+                }
+                case N(tdeactivate): {
+                    tsks().tdeactivate_action(eosio::unpack_action_data<tdeactivate>());
+                    break;
+                }
+                case N(setreport): {
+                    tsks().setreport_action(eosio::unpack_action_data<setreport>());
+                    break;
+                }
+
+                case N(editreport):{
+                    tsks().editreport_action(eosio::unpack_action_data<editreport>());
+                    break;
+                }
+
+                case N(approver):{
+                    tsks().approver_action(eosio::unpack_action_data<approver>());
+                    break;
+                }
+
+                case N(disapprover):{
+                    tsks().disapprover_action(eosio::unpack_action_data<disapprover>());
+                    break;
+                }
+
+                case N(fundtask) : {
+                    tsks().fundtask_action(eosio::unpack_action_data<fundtask>());
+                    break;
+                }
             }
             
         }

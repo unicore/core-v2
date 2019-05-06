@@ -117,7 +117,7 @@ struct shares {
 
 
 	void delegate_shares_action (const delshares &op){
-		require_auth(op.from);
+	 	
 		power_index power_from_idx (_self, op.from);
 		power_index power_to_idx (_self, op.reciever);
 
@@ -137,13 +137,13 @@ struct shares {
 
 		if (dlgtns == delegations.end()){
 
-			delegations.emplace(op.from, [&](auto &d){
+			delegations.emplace(_self, [&](auto &d){
 				d.reciever = op.reciever;
 				d.shares = op.shares;
 			});
 
 		} else {
-			delegations.modify(dlgtns, op.from, [&](auto &d){
+			delegations.modify(dlgtns, _self, [&](auto &d){
 				d.shares += op.shares;
 			});
 		};
@@ -160,7 +160,7 @@ struct shares {
 
 		//Emplace or modify power object of reciever and propagate votes changes;
 		if (power_to == power_to_idx.end()){
-			power_to_idx.emplace(op.from, [&](auto &pt){
+			power_to_idx.emplace(_self, [&](auto &pt){
 				pt.host = op.host;
 				pt.power = op.shares;
 				pt.delegated = op.shares;		
@@ -168,7 +168,7 @@ struct shares {
 		} else {
 			//modify
 			propagate_votes_changes(op.host, op.reciever, power_to->power, power_to->power + op.shares);
-			power_to_idx.modify(power_to, op.from, [&](auto &pt){
+			power_to_idx.modify(power_to, _self, [&](auto &pt){
 				pt.power += op.shares;
 				pt.delegated += op.shares;
 			});
@@ -296,6 +296,6 @@ struct shares {
                m.quote.balance.symbol = quote_amount.symbol;
             });
 		} else 
-		eosio_assert(false, "Market already created");
+			eosio_assert(false, "Market already created");
 	};
 };

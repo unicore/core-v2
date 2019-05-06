@@ -12,20 +12,23 @@
 #include "shares.hpp"
 #include "goals.hpp"
 #include "voting.hpp"
+#include "badges.hpp"
+#include "tasks.hpp"
 
 #define QUANTS_PRECISION 1000000
 #define PERCENT_PRECISION 10000
 
 
 namespace eosio {
-    static const account_name _self = N(core.core);
-    static const account_name _CORE = N(core);
+    static const account_name _self = N(core);
+    static const account_name _registrator = N(registrator);
     
     static const eosio::symbol_name _SYM = S(4, FLO);
 
     static const uint64_t _SHARES_VESTING_DURATION = 604800;
     static const uint64_t _TOTAL_VOTES = 7;
     static const uint64_t _MAX_LEVELS = 7;
+
 
     // @abi table spiral i64
     struct spiral{
@@ -152,11 +155,12 @@ namespace eosio {
         uint64_t pool_num;
         eosio::asset total;
         eosio::asset paid_to_refs;
-        eosio::asset paid_to_host;
+        eosio::asset paid_to_dacs;
+        eosio::asset paid_to_fund;
         uint64_t primary_key() const {return id;}
         bool is_empty()const { return !( total.amount ); }
         
-        EOSLIB_SERIALIZE(sincome, (id)(ahost)(pool_num)(total)(paid_to_refs)(paid_to_host))
+        EOSLIB_SERIALIZE(sincome, (id)(ahost)(pool_num)(total)(paid_to_refs)(paid_to_dacs)(paid_to_fund))
 
     };
     typedef eosio::multi_index<N(sincome), sincome> sincome_index;
@@ -167,14 +171,13 @@ namespace eosio {
         account_name username;
         account_name referer;
         bool rules = true;
-        eosio::time_point_sec registered_at;
-        uint64_t time;
+        bool is_host = false;
         
         std::string meta;
         account_name primary_key() const{return username;}
         account_name by_secondary_key() const{return referer;}
 
-        EOSLIB_SERIALIZE(users, (username)(referer)(rules)(registered_at)(time)(meta))
+        EOSLIB_SERIALIZE(users, (username)(referer)(rules)(is_host)(meta))
     };
 
     typedef eosio::multi_index<N(users), users,

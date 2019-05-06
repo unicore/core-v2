@@ -35,6 +35,7 @@ struct goal {
         goals.emplace(username, [&](auto &g){
         	g.id = goals.available_primary_key();
         	g.username = username;
+        	g.benefactor = username;
         	g.created = eosio::time_point_sec(now());
         	g.host = host;
         	g.title = title;
@@ -43,6 +44,7 @@ struct goal {
         	g.withdrawed = asset(0, root_symbol);
         	g.available = asset(0, root_symbol);
         	g.validated = validated;
+        	g.expired_at = eosio::time_point_sec (now() + op.expiration);
         });
 	};
 
@@ -56,6 +58,7 @@ struct goal {
         auto root_symbol = (acc->root_token).symbol;
 
         auto username = op.username;
+        auto benefactor = op.benefactor;
         auto title = op.title;
         auto description = op.description;
         auto host = op.host;
@@ -74,7 +77,7 @@ struct goal {
         goals.modify(goal, username, [&](auto &g){
         	g.title = title;
         	g.description = description;
-        	g.host = host;
+        	g.benefactor = benefactor;
         	g.target = target;
         });
 
@@ -156,7 +159,7 @@ struct goal {
     	action(
             permission_level{ _self, N(active) },
 		    acc->root_token_contract, N(transfer),
-    	    std::make_tuple( _self, username, on_withdraw, std::string("Goal Withdraw")) 
+    	    std::make_tuple( _self, goal->benefactor, on_withdraw, std::string("Goal Withdraw")) 
         ).send();
 
         goals.modify(goal, username, [&](auto &g){

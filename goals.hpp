@@ -8,6 +8,7 @@ namespace eosio {
         uint64_t id;
         account_name username;
         account_name host;
+        account_name benefactor;
         eosio::time_point_sec created;
 
         std::string title;
@@ -23,6 +24,8 @@ namespace eosio {
         bool checked = false;
         std::string report;
         eosio::asset withdrawed;
+        eosio::time_point_sec expired_at;
+
         std::vector<account_name> voters;
         
         uint64_t primary_key()const { return id; }
@@ -33,8 +36,8 @@ namespace eosio {
         account_name by_host() const {return host;}
         
         
-        EOSLIB_SERIALIZE( goals, (id)(username)(host)(created)(title)(description)(target)(available)(total_votes)(validated)(completed)(reported)
-            (checked)(report)(withdrawed)(voters))
+        EOSLIB_SERIALIZE( goals, (id)(username)(host)(benefactor)(created)(title)(description)(target)(available)(total_votes)(validated)(completed)(reported)
+            (checked)(report)(withdrawed)(expired_at)(voters))
     };
 
     typedef eosio::multi_index <N(goals), goals,
@@ -54,8 +57,8 @@ namespace eosio {
         std::string title;
         std::string description;
         eosio::asset target;
-
-        EOSLIB_SERIALIZE( setgoal, (username)(host)(title)(description)(target))
+        uint64_t expiration;
+        EOSLIB_SERIALIZE( setgoal, (username)(host)(title)(description)(target)(expiration))
     };
 
       // @abi action
@@ -63,11 +66,12 @@ namespace eosio {
         uint64_t goal_id;
         account_name username;
         account_name host;
+        account_name benefactor;
         std::string title;
         std::string description;
         eosio::asset target;
 
-        EOSLIB_SERIALIZE( editgoal, (username)(host)(goal_id)(title)(description)(target))
+        EOSLIB_SERIALIZE( editgoal, (username)(host)(benefactor)(goal_id)(title)(description)(target))
 
     };
 

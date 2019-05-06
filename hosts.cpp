@@ -19,9 +19,10 @@ struct hosts_struct {
     void upgrade_action(const upgrade &op){
         require_auth(op.username);
         
-        eosio_assert(op.purpose.length() < 1024, "Purpose is a maximum 1024 symbols. Describe the idea shortly.");
-        //check title lenght
+        eosio_assert(op.purpose.length() > 0, "Purpose should contain a symbols. Describe the idea shortly.");
 
+        //check title lenght
+        eosio_assert((op.title.length() < 1024) && (op.title.length() > 0) , "Title should be more then 10 symbols and less then 1024");
         user_index users(_self,_self);
         auto user = users.find(op.username);
         eosio_assert(user != users.end(), "User is not registered");
@@ -35,6 +36,7 @@ struct hosts_struct {
         
         eosio_assert(op.consensus_percent <= 100 * PERCENT_PRECISION, "consensus_percent should be between 0 and 100 * PERCENT_PRECISION (1000000)");
         eosio_assert(op.referral_percent <= 100 * PERCENT_PRECISION, "referral_percent should be between 0 and 100 * PERCENT_PRECISION (1000000)");
+        eosio_assert(op.dacs_percent <= 100 * PERCENT_PRECISION, "dacs_percent should be between 0 and 100 * PERCENT_PRECISION (1000000)");
 
         //CHECK for referal levels;
         uint64_t level_count = 0;
@@ -100,7 +102,12 @@ struct hosts_struct {
             a.fhosts_mode = 0;
             a.consensus_percent = op.consensus_percent;
             a.referral_percent = op.referral_percent;
+            a.dacs_percent = op.dacs_percent;
             a.levels= op.levels;
+        });
+
+        users.modify(user, _self, [&](auto &u){
+            u.is_host = true;
         });
 
         emission_index emis(_self, _self);
@@ -203,5 +210,26 @@ struct hosts_struct {
 
 	  
     };
+
+    void edithost_action(const edithost &op){
+        require_auth (op.username);
+
+        account_index hosts(_self, _self);
+        auto host = hosts.find(op.username);
+        eosio_assert(host != hosts.end(), "Host is not founded");
+        
+        eosio_assert(op.purpose.length() > 0, "Purpose should contain a symbols. Describe the idea shortly.");
+
+        //check title lenght
+        eosio_assert((op.title.length() < 1024) && (op.title.length() > 0) , "Title should be more then 10 symbols and less then 1024");
+        
+
+        hosts.modify(host, op.username, [&](auto &h){
+            h.purpose = op.purpose;
+            h.meta = op.meta;
+            h.title = op.title;
+        });
+        
+    }
 
 };
