@@ -16,6 +16,34 @@ struct hosts_struct {
         return result;
     };
 
+    void set_architect_action (const setarch &op){
+        require_auth(op.host);
+
+        account_index accounts(_self, _self);
+        auto acc = accounts.find(op.host);
+        eosio_assert(acc != accounts.end(), "Host is not found");
+        accounts.modify(acc, _self, [&](auto &a){
+            a.architect = op.architect;
+        });
+
+    };
+
+    void deactivate_action(const deactivate &op){
+        require_auth(op.architect);
+
+        account_index accounts(_self, _self);
+        auto acc = accounts.find(op.host);
+
+        eosio_assert(acc != accounts.end(), "Host is not found");
+        eosio_assert(acc->activated == true, "Host is already deactivated");
+        eosio_assert(acc->current_pool_num == 1, "Cannot deactivate protocol after rotation launch.");
+        eosio_assert(acc->current_cycle_num == 1, "Cannot deactivate protocol after rotation launch.");
+        
+        accounts.modify(acc, _self, [&](auto &a){
+            a.activated = false;
+        });
+    };
+
     void upgrade_action(const upgrade &op){
         require_auth(op.username);
         
@@ -36,7 +64,9 @@ struct hosts_struct {
         
         eosio_assert(op.consensus_percent <= 100 * PERCENT_PRECISION, "consensus_percent should be between 0 and 100 * PERCENT_PRECISION (1000000)");
         eosio_assert(op.referral_percent <= 100 * PERCENT_PRECISION, "referral_percent should be between 0 and 100 * PERCENT_PRECISION (1000000)");
+        
         eosio_assert(op.dacs_percent <= 100 * PERCENT_PRECISION, "dacs_percent should be between 0 and 100 * PERCENT_PRECISION (1000000)");
+        eosio_assert(op.referral_percent + op.dacs_percent == 100 * PERCENT_PRECISION, "Referral and Dacs percent should me 100% PERCENT_PRECISION in their summ");
 
         //CHECK for referal levels;
         uint64_t level_count = 0;
@@ -187,17 +217,17 @@ struct hosts_struct {
     	account_index hosts(_self, _self);
 
     	auto host = hosts.find(username);
-    	
+    	eosio_assert(host != hosts.end(), "Host is not founded");
+        
    		//PAY for upgrade only in CORE!.
     	eosio_assert(amount.symbol == _SYM, "Wrong asset. Only CORE token can be used for upgrade");
     	
 	   	//Check for enough upgrade amount for quote asset
     	eosio_assert(amount == host->to_pay, "Amount is not equal amount for upgrade");
-    	eosio_assert(host != hosts.end(), "Host is not founded");
     	eosio_assert(host->payed == 0, "Already payed");
 
     	std::vector<account_name> childs = host->chosts;
-	
+	   
     	hosts.modify(host, _self, [&](auto &h){
 			h.payed = true;
 			h.to_pay = asset(0, _SYM);
@@ -212,10 +242,12 @@ struct hosts_struct {
     };
 
     void edithost_action(const edithost &op){
-        require_auth (op.username);
+        require_auth (op.architect);
 
         account_index hosts(_self, _self);
-        auto host = hosts.find(op.username);
+        auto host = hosts.find(op.host);
+        eosio_assert(host->architect == op.architect, "You are not architect of currenty community");
+
         eosio_assert(host != hosts.end(), "Host is not founded");
         
         eosio_assert(op.purpose.length() > 0, "Purpose should contain a symbols. Describe the idea shortly.");
@@ -224,7 +256,7 @@ struct hosts_struct {
         eosio_assert((op.title.length() < 1024) && (op.title.length() > 0) , "Title should be more then 10 symbols and less then 1024");
         
 
-        hosts.modify(host, op.username, [&](auto &h){
+        hosts.modify(host, op.architect, [&](auto &h){
             h.purpose = op.purpose;
             h.meta = op.meta;
             h.title = op.title;

@@ -105,19 +105,24 @@ namespace eosio {
     typedef eosio::multi_index<N(emission), emission> emission_index;
 
 
-    // @abi action
-    struct cremi{
-        account_name host;
-        uint64_t percent;
-    };
 
     // @abi action
     struct setemi{
         account_name host;
         uint64_t percent;
         uint64_t gtop;
+        EOSLIB_SERIALIZE( setemi, (host)(percent)(gtop))
+   
     };
     
+    // @abi action
+    struct setarch{
+        account_name host;
+        account_name architect;
+        EOSLIB_SERIALIZE( setarch, (host)(architect))
+    };
+
+
     // @abi action
     struct upgrade{
         account_name username;
@@ -147,12 +152,21 @@ namespace eosio {
     //@abi action
     struct edithost
     {
-        account_name username;
+        account_name architect;
+        account_name host;
         eosio::string title;
         eosio::string purpose;
         eosio::string meta;
 
-        EOSLIB_SERIALIZE(edithost, (username)(title)(purpose)(meta))
+        EOSLIB_SERIALIZE(edithost, (architect)(host)(title)(purpose)(meta))
+    };
+
+    //@abi action
+    struct deactivate{
+        account_name architect;
+        account_name host;
+
+        EOSLIB_SERIALIZE(deactivate, (architect)(host))
     };
 
 

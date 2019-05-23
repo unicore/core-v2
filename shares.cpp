@@ -275,6 +275,8 @@ struct shares {
 		eosio_assert( tokens_out.amount > 1, "token amount received from selling shares is too low" );
 	    
 	    make_vesting_action(username, tokens_out);
+	    
+	    propagate_votes_changes(op.host, username, userpower->power, userpower-> power - shares);
 
 	    power.modify(userpower, username, [&](auto &p){
 	    	p.power = userpower->power - shares;

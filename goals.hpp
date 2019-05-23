@@ -16,7 +16,7 @@ namespace eosio {
         eosio::asset target;
         eosio::asset available;
 
-        uint64_t total_votes;
+        int64_t total_votes;
         
         bool validated = false;
         bool completed = false;
@@ -71,8 +71,19 @@ namespace eosio {
         std::string description;
         eosio::asset target;
 
-        EOSLIB_SERIALIZE( editgoal, (username)(host)(benefactor)(goal_id)(title)(description)(target))
+        EOSLIB_SERIALIZE( editgoal, (goal_id)(username)(host)(benefactor)(title)(description)(target))
 
+    };
+    // @abi action
+    struct dfundgoal{
+        account_name architect;
+        account_name host;
+        uint64_t goal_id;
+        eosio::asset amount;
+        std::string comment;
+
+        EOSLIB_SERIALIZE( dfundgoal, (architect)(host)(goal_id)(amount)(comment))
+    
     };
 
     // @abi action
@@ -92,13 +103,33 @@ namespace eosio {
         EOSLIB_SERIALIZE( struct report, (username)(host)(goal_id)(report))
     };
 
+    //@abi action
+    struct check{
+        account_name architect;
+        account_name host;
+        uint64_t goal_id;
+
+        EOSLIB_SERIALIZE(check, (architect)(host)(goal_id))
+    };
+
     // @abi action
     struct gwithdraw{
         account_name username;
         account_name host;
         uint64_t goal_id;
         EOSLIB_SERIALIZE( gwithdraw, (username)(host)(goal_id))
-    };    
+    };   
+
+
+    // @abi action
+    struct gsponsor{
+        account_name hoperator;
+        account_name host;
+        account_name reciever;
+        uint64_t goal_id;
+        eosio::asset amount;
+        EOSLIB_SERIALIZE(gsponsor, (hoperator)(host)(reciever)(goal_id)(amount))
+    };
 };
 
 

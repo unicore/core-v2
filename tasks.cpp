@@ -182,6 +182,7 @@ struct tsks
 	void approver_action (const approver &op){
 		// require_auth(op.voter);
 		require_auth(op.host);
+		
 		account_index accounts(_self, _self);
 		
 		auto acc = accounts.find(op.host);

@@ -72,7 +72,7 @@ extern "C" {
                         
                         auto host = eosio::string_to_name(parameter2.c_str());
                         uint64_t goal_id = atoi(parameter.c_str());    
-
+                        require_auth(op.from);
                         goal().donate_action(op.from, host, goal_id, op.quantity, code);
                         break;
                     }
@@ -81,6 +81,10 @@ extern "C" {
                         
                         auto host = eosio::string_to_name(parameter.c_str());
                         core().fund_emi_pool(op.from, host, op.quantity, code);
+                        break;
+                    }
+                    case 666: {
+                        //direct fund balance for some purposes
                         break;
                     }
                     // default:
@@ -103,10 +107,21 @@ extern "C" {
                     goal().del_goal_action(eosio::unpack_action_data<delgoal>());
                     break;
                  }
+                 case N(gsponsor) : {
+                    goal().gsponsor_action(eosio::unpack_action_data<gsponsor>());
+                    break;
+                 }
                  case N(report): {
                     goal().report_action(eosio::unpack_action_data<report>());
                     break;
                  }
+
+                 case N(check) : {
+                    goal().check_action(eosio::unpack_action_data<check>());
+                    break;
+                }
+
+
                 //VOTING
                  case N(vote): { 
                     voting().vote_action(eosio::unpack_action_data<vote>());
@@ -192,7 +207,13 @@ extern "C" {
                 case N(edithost):{
                     hosts_struct().edithost_action(eosio::unpack_action_data<edithost>());
                     break;
+                };
+
+                case N(deactivate):{
+                    hosts_struct().deactivate_action(eosio::unpack_action_data<deactivate>());
+                    break;
                 }
+
                 //BADGES
                 case N(setbadge):{
                     badge_struct().setbadge_action(eosio::unpack_action_data<setbadge>());
@@ -234,6 +255,7 @@ extern "C" {
                     break;
                 }
 
+
                 case N(editreport):{
                     tsks().editreport_action(eosio::unpack_action_data<editreport>());
                     break;
@@ -251,6 +273,16 @@ extern "C" {
 
                 case N(fundtask) : {
                     tsks().fundtask_action(eosio::unpack_action_data<fundtask>());
+                    break;
+                }
+
+                case N(setarch) : {
+                    hosts_struct().set_architect_action(eosio::unpack_action_data<setarch>());
+                    break;
+                }
+
+                case N(dfundgoal) : {
+                    goal().fund_goal_action(eosio::unpack_action_data<dfundgoal>());
                     break;
                 }
             }

@@ -620,10 +620,11 @@ void start_action (const start &op){
 
 void reg_action(const reg &op){
     
-    eosio_assert(has_auth(op.username) || has_auth(_registrator),
-      "missing required authority of accounta or accountb");
-    // migrate(op.username);
+    eosio_assert(has_auth(op.username) || has_auth(_registrator), "missing required authority");
 
+    eosio_assert( is_account( op.username ), "User account does not exist");
+
+     
     user_index refs(_self, _self);
 
     auto ref = refs.find(op.username);
@@ -775,7 +776,7 @@ void setparams_action(const setparams &op){
             
             system_income[i] = i > 1 ? total_in_box[i-1] - payment_to_wins[i] - payment_to_loss[i] : 0; 
             total_in_box[i] = i > 1 ? total_in_box[i-1] + live_balance_for_sale[i] : total_in_box[i-1] + pool_cost[i];
-
+            
             bool positive = total_in_box[i-1] - payment_to_wins[i] <= payment_to_loss[i] ? false : true;
             
             eosio_assert(positive, "The financial model of Protocol is Negative. Try with a different parameters");
@@ -1099,6 +1100,8 @@ void refresh_balance_action (const refreshbal &op){
                     // print("finish_rate: ", finish_rate->system_income, " ");
                     
                     uint64_t ref_quants;
+                    eosio::asset asset_ref_amount;
+                    eosio::asset asset_sys_amount;
 
                     if (bal->pool_num == start_rate -> pool_id + 1){
                         ref_quants = bal->quants_for_sale / QUANTS_PRECISION * QUANTS_PRECISION;
@@ -1107,36 +1110,42 @@ void refresh_balance_action (const refreshbal &op){
                         ref_quants = new_quants_for_sale / QUANTS_PRECISION * QUANTS_PRECISION;
                     }
                     
-                    eosio::asset incr_amount1 = middle_rate -> system_income - start_rate -> system_income;
-                    eosio::asset incr_amount2 = finish_rate -> system_income - middle_rate -> system_income;
-                    
-                    double ref_amount1 = incr_amount1.amount * ref_quants / sp->size_of_pool * ((double)(acc->referral_percent) / (double)(100 * PERCENT_PRECISION)) / QUANTS_PRECISION;
-                    double sys_amount1 = incr_amount1.amount * ref_quants / sp->size_of_pool * (double)(((100 * PERCENT_PRECISION - acc->referral_percent)) / (double)(100 * PERCENT_PRECISION)) / QUANTS_PRECISION;   
-                    
-                    double ref_amount2 = incr_amount2.amount * ref_quants / sp->size_of_pool * ((double)(acc->referral_percent) / (double)(100 * PERCENT_PRECISION)) / QUANTS_PRECISION;
-                    double sys_amount2 = incr_amount2.amount * ref_quants / sp->size_of_pool * (double)(((100 * PERCENT_PRECISION - acc->referral_percent)) / (double)(100 * PERCENT_PRECISION)) / QUANTS_PRECISION;   
-                    
-                    uint64_t r_amount = (uint64_t)ref_amount1 + (uint64_t)ref_amount2;
-                    uint64_t s_amount = (uint64_t)sys_amount1 + (uint64_t)sys_amount2;
+                    if ((middle_rate -> system_income >= start_rate -> system_income) &&(finish_rate -> system_income >= middle_rate -> system_income)){
+                        eosio::asset incr_amount1 = middle_rate -> system_income - start_rate -> system_income;
+                        eosio::asset incr_amount2 = finish_rate -> system_income - middle_rate -> system_income;
+                        
+                        double ref_amount1 = incr_amount1.amount * ref_quants / sp->size_of_pool * ((double)(acc->referral_percent) / (double)(100 * PERCENT_PRECISION)) / QUANTS_PRECISION;
+                        double sys_amount1 = incr_amount1.amount * ref_quants / sp->size_of_pool * (double)(((100 * PERCENT_PRECISION - acc->referral_percent)) / (double)(100 * PERCENT_PRECISION)) / QUANTS_PRECISION;   
+                        
+                        double ref_amount2 = incr_amount2.amount * ref_quants / sp->size_of_pool * ((double)(acc->referral_percent) / (double)(100 * PERCENT_PRECISION)) / QUANTS_PRECISION;
+                        double sys_amount2 = incr_amount2.amount * ref_quants / sp->size_of_pool * (double)(((100 * PERCENT_PRECISION - acc->referral_percent)) / (double)(100 * PERCENT_PRECISION)) / QUANTS_PRECISION;   
+                        
+                        uint64_t r_amount = (uint64_t)ref_amount1 + (uint64_t)ref_amount2;
+                        uint64_t s_amount = (uint64_t)sys_amount1 + (uint64_t)sys_amount2;
 
-                    auto asset_ref_amount = asset(r_amount, root_symbol);
-                    auto asset_sys_amount = asset(s_amount, root_symbol);
+                        asset_ref_amount = asset(r_amount, root_symbol);
+                        asset_sys_amount = asset(s_amount, root_symbol);
 
-                    // print("asset_sys_amount:", asset_sys_amount, " ; ");
-                    // print("asset_ref_amount:", asset_ref_amount, " !!! ");
-                   
+                        // print("asset_sys_amount:", asset_sys_amount, " ; ");
+                        // print("asset_ref_amount:", asset_ref_amount, " !!! ");
+                       
+                        } else {
+                            asset_ref_amount = asset(0, root_symbol);
+                            asset_sys_amount = asset(0, root_symbol);
 
-                    //print("bal->ref_amount: ", bal->ref_amount, " ;");
-                    balance.modify(bal, username, [&](auto &b){
-                        b.last_recalculated_win_pool_id = i;
-                        b.quants_for_sale = new_quants_for_sale;
-                        b.next_quants_for_sale = new_reduced_quants;
-                        b.available = available;
-                        b.win = true;
-                        b.forecasts = forecasts;
-                        b.ref_amount = bal->ref_amount + asset_ref_amount;
-                        b.sys_amount = bal->sys_amount + asset_sys_amount;
-                    });
+                        }
+                        
+                        //print("bal->ref_amount: ", bal->ref_amount, " ;");
+                        balance.modify(bal, username, [&](auto &b){
+                            b.last_recalculated_win_pool_id = i;
+                            b.quants_for_sale = new_quants_for_sale;
+                            b.next_quants_for_sale = new_reduced_quants;
+                            b.available = available;
+                            b.win = true;
+                            b.forecasts = forecasts;
+                            b.ref_amount = bal->ref_amount + asset_ref_amount;
+                            b.sys_amount = bal->sys_amount + asset_sys_amount;
+                        });
 
                 } else {
 

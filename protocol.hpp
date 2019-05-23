@@ -23,7 +23,7 @@ namespace eosio {
     static const account_name _self = N(core);
     static const account_name _registrator = N(registrator);
     
-    static const eosio::symbol_name _SYM = S(4, FLO);
+    static const eosio::symbol_name _SYM = S(4,FLO);
 
     static const uint64_t _SHARES_VESTING_DURATION = 604800;
     static const uint64_t _TOTAL_VOTES = 7;
