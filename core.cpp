@@ -1,10 +1,10 @@
 namespace eosio{
 struct core {
 
-    /* 
-    Ядро
-    */
-
+    /**
+    @brief 
+    **/
+    
 
     void fund_emi_pool ( account_name username, account_name host, eosio::asset amount, account_name code ){
         emission_index emis(_self, _self);
@@ -383,8 +383,8 @@ void emplace_first_pools(account_name parent_host, account_name main_host, eosio
         p.pool_num = 1;
         p.cycle_num = acc->current_cycle_num;
         p.pool_started_at = eosio::time_point_sec(now());
-        p.priority_until = acc->current_cycle_num == 1 ? eosio::time_point_sec(0) : eosio::time_point_sec(now()+ sp->priority_seconds);;
-        p.pool_expired_at = acc->current_cycle_num == 1 ? eosio::time_point_sec (-1) : eosio::time_point_sec (now() + sp->pool_timeout + sp->priority_seconds);
+        p.priority_until = acc->current_cycle_num == 1 ? eosio::time_point_sec(0) : eosio::time_point_sec(now()+ sp->priority_seconds);
+        p.pool_expired_at = eosio::time_point_sec (-1);
         p.color = "white";
     });
 
@@ -399,13 +399,23 @@ void emplace_first_pools(account_name parent_host, account_name main_host, eosio
         p.cycle_num = acc->current_cycle_num;
         p.pool_num = 2;
         p.pool_started_at = eosio::time_point_sec(now());
-        p.priority_until = acc->current_cycle_num == 1 ? eosio::time_point_sec(0) : eosio::time_point_sec(now()+ sp->priority_seconds);;
-        p.pool_expired_at = acc->current_cycle_num == 1 ? eosio::time_point_sec (-1) : eosio::time_point_sec (now() + sp->pool_timeout + sp->priority_seconds);
+        p.priority_until = acc->current_cycle_num == 1 ? eosio::time_point_sec(0) : eosio::time_point_sec(now()+ sp->priority_seconds);
+        p.pool_expired_at = eosio::time_point_sec (-1);
         p.total_win_withdraw = asset(0, root_symbol);
         p.total_loss_withdraw = asset(0, root_symbol);
     }); 
 }
 
+void start_new_cycle_manual (const mstartcycle &op){
+    account_index accounts(_self, _self);
+           
+    auto acc = accounts.find(op.host);
+    
+    eosio_assert(acc != accounts.end(), "Account is not found.");
+    require_auth(acc->architect);
+    start_new_cycle(op.host);
+
+}
 
 void start_new_cycle ( account_name host ) {
     account_index accounts(_self, _self);

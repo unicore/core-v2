@@ -20,8 +20,8 @@
 
 
 namespace eosio {
-    static const account_name _self = N(core);
-    static const account_name _registrator = N(registrator);
+    static const account_name _self = N(tt.tc);
+    static const account_name _registrator = N(bob.tc);
     
     static const eosio::symbol_name _SYM = S(4,FLO);
 
@@ -267,6 +267,13 @@ namespace eosio {
 
         EOSLIB_SERIALIZE( refreshst, (host))
     };
+
+      // @abi action
+    struct mstartcycle{
+        account_name host;
+        EOSLIB_SERIALIZE( mstartcycle, (host))
+    };
+
 
     
 };

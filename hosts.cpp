@@ -241,6 +241,25 @@ struct hosts_struct {
 	  
     };
 
+    void ehosttime_action(const ehosttime &op){
+        require_auth (op.architect);
+
+        account_index hosts(_self, _self);
+        auto host = hosts.find(op.host);
+        eosio_assert(host->architect == op.architect, "You are not architect of currenty community");
+        print("im here");
+        eosio_assert((op.priority_seconds < 7884000), "Pool Priority Seconds must be greater or equal then 0 sec and less then 7884000 sec");
+        eosio_assert((op.pool_timeout >= 60) && (op.pool_timeout < 7884000),"Pool Timeout must be greater or equal then 1 sec and less then 7884000 sec");
+    
+        spiral_index spiral(_self, op.host);
+        auto sp = spiral.find(0);
+
+        spiral.modify(sp, op.architect, [&](auto &s){
+            s.pool_timeout = op.pool_timeout;
+            s.priority_seconds = op.priority_seconds;
+        });
+    }
+
     void edithost_action(const edithost &op){
         require_auth (op.architect);
 

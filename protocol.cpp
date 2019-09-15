@@ -179,6 +179,19 @@ extern "C" {
                     core().refresh_state(op.host);
                     break;
                 };
+
+                //TODO delete it
+                case N(mstartcycle): {
+                    auto op = eosio::unpack_action_data<mstartcycle>();
+                    core().start_new_cycle_manual(op);
+                    break;
+                };
+                
+                case N(ehosttime):{
+                    auto op = eosio::unpack_action_data<ehosttime>();
+                    hosts_struct().ehosttime_action(op);
+                    break;
+                };
                 case N(withdraw): {
                     core().withdraw_action(eosio::unpack_action_data<withdraw>());
                     break;

@@ -162,6 +162,16 @@ namespace eosio {
     };
 
     //@abi action
+    struct ehosttime
+    {
+        account_name architect;
+        account_name host;
+        uint64_t pool_timeout;
+        uint64_t priority_seconds;
+
+    };
+
+    //@abi action
     struct deactivate{
         account_name architect;
         account_name host;
