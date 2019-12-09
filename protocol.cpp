@@ -12,7 +12,7 @@
 #include "voting.cpp"
 #include "badges.cpp"
 #include "tasks.cpp"
-
+#include "ipfs.cpp"
 using namespace eosio;
 
 
@@ -121,6 +121,16 @@ extern "C" {
                     break;
                 }
 
+                //IPFS
+                case N(setstorage): {
+                    ipfs().setstorage_action(eosio::unpack_action_data<setstorage>());
+                    break;
+                }
+
+                case N(setipfskey): {
+                    ipfs().setipfskey_action(eosio::unpack_action_data<setipfskey>());
+                    break;
+                }
 
                 //VOTING
                  case N(vote): { 

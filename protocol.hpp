@@ -14,6 +14,7 @@
 #include "voting.hpp"
 #include "badges.hpp"
 #include "tasks.hpp"
+#include "ipfs.hpp"
 
 #define QUANTS_PRECISION 1000000
 #define PERCENT_PRECISION 10000
