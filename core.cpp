@@ -1,10 +1,24 @@
 namespace eosio{
+/*
+
+*/
 struct core {
 
     /**
-    @brief 
-    **/
-    
+     * @brief Метод ручного пополнения целевого фонда сообщества. Жетоны, попадающие в целевой фонд сообщества, подлежат распределению на цели с помощью голосования участников по установленным правилам консенсуса.  
+     * 
+     * Метод может не использоваться, поскольку еще одним источником пополнения целевого фонда сообщества является установленный архитектором сообщества процент от финансового оборота ядра. 
+
+     * Примеры:
+     * Выпущен 1 млн жетонов, 90% из которых закреплены в целевом фонде, а 10% распределяются среди участников через прямое расределение любым способом (например, продажей). В этом случае, 90% жетонов должны быть помещены в целевой фонд, что гарантирует эмиссию жетонов на цели сообщества в зависимости от вращения ядра и установленного архитектором процента эмиссии при заранее известном общем количестве жетонов.
+
+     * В случае, когда конфигурацией экономики не предусмотрено использование целевого фонда сообществ, или же когда для его пополнения используется только автоматический режим в зависимости от финансового оборота ядра, метод ручного пополнения может не использоваться. И в то же время он всегда доступен любому участнику сообщества простым переводом средств на аккаунт протокола с указанием суб-кода назначения и имени хоста сообщества.   
+
+     * @param[in]  username  The username - имя пользователя, совершающего поолнение. 
+     * @param[in]  host      The host - имя аккаунта хоста
+     * @param[in]  amount    The amount - сумма для пополнения
+     * @param[in]  code      The code - контракт токена, поступивший на вход.
+     */
 
     void fund_emi_pool ( account_name username, account_name host, eosio::asset amount, account_name code ){
         emission_index emis(_self, _self);
@@ -24,6 +38,21 @@ struct core {
 
 
     };
+    
+    /**
+     * @brief внутренний метод эмиссии, который вызывается в момент распределения целевого фонда сообщества на цели участников. Вызывается в момент переключения порядкового номера пула на каждый последующий. Эмитирует в балансы активных целей сообщества установленный архитектором процент от свободного финансового потока из заранее накопленного в фонде целей сообщества. 
+     * 
+     * Фонд целей сообщества пополняется в момент вывода выигрыша каждым победителем или прямым пополнением любым участником. 
+     * 
+     * Фонд целей сообщества расходуется исходя из текущего финансового оборота в спирали при переключении раунда на каждый следующий. 
+     * 
+     * Распределение в момент переключения пулов определяется параметром процента эмиссии от живого остатка на продажу, что представляет собой  линию обратной связи от динамики вращения ядра.   
+     *  
+     * Таким образом, целевой фонд сообщества пополняется и расходуется согласно гибкому набору правил, обеспечивающих циркуляцию. 
+
+     * 
+     * @param[in]  host  The host - имя аккаунта хоста
+     */
 
     void emission(account_name host){
         
@@ -39,7 +68,6 @@ struct core {
             account_name ahost = acc->get_ahost();
             
             eosio::asset em = adjust_emission_pool(host);  
-            print("EMISSIONPOOL", em);
             eosio::asset on_emission;
 
             if (emi->fund <= em){
@@ -50,9 +78,6 @@ struct core {
 
 
             if (on_emission.amount > 0){
-                print("EMI->FUND", emi->fund);
-                print("on_emission", on_emission);
-                    print("ONEMISSIONPROCCESS");
                     auto on_emit = em;
                     eosio::asset fact_emitted = asset(0, em.symbol);
                     std::vector<uint64_t> list_for_emit;
@@ -81,14 +106,11 @@ struct core {
                         devider = emi->gtop;
                     }
                     
-                    print("DEVIDER: ", devider);
-
+           
                     if (devider > 0){
 
                         eosio::asset each_goal_amount = asset((on_emission).amount / devider, root_symbol);
                         
-
-                        print("EACHGOALAMOUNT", each_goal_amount, ", ");
 
                         if ((each_goal_amount.amount > 0)){ 
                             need_emit = true;
@@ -103,7 +125,6 @@ struct core {
                         if (need_emit == true){
                             for (auto id : list_for_emit){
                                 auto goal_for_emit = goals.find(id);
-                                print("ONGOALTRANSFER");
                                 eosio::asset total_recieved = goal_for_emit->available + goal_for_emit->withdrawed;
                                 eosio::asset until_fill =  goal_for_emit->target - total_recieved;
                                 
@@ -113,8 +134,7 @@ struct core {
                                     } else{
                                         for_emit = each_goal_amount;
                                     };
-                                print("FACT_EMMITED_FOR_ONE: ", for_emit);
-
+                        
                                 fact_emitted += for_emit;
 
                                 goals.modify(goal_for_emit, _self, [&](auto &g){
@@ -145,34 +165,50 @@ struct core {
         }
     }
 
+/**
+ * @brief      Внутренний метод расчета пула эмиссии. Вызывается в момент распределения эмиссии на цели сообщества. Расчет объема эмиссии происходит исходя из параметра life_balance_for_sale завершенного пула, и процента эмиссии, установленного архитектором. Процент эмиссии ограничен от 0 до 1000% относительного живого остатка на продажу в каждом новом пуле. 
+ * 
+ * @param[in]  hostname  The hostname - имя аккаунта хоста
+ *
+ * @return     { description_of_the_return_value }
+ */
 
- eosio::asset adjust_emission_pool(account_name hostname){
-    account_index hosts(_self, _self);
-    emission_index emis(_self, _self);
-    cycle_index cycles(_self, hostname);
-    pool_index pools(_self, hostname);
+    eosio::asset adjust_emission_pool(account_name hostname){
+        account_index hosts(_self, _self);
+        emission_index emis(_self, _self);
+        cycle_index cycles(_self, hostname);
+        pool_index pools(_self, hostname);
 
-    auto host = hosts.find(hostname);
-    auto ahost = host->get_ahost();
+        auto host = hosts.find(hostname);
+        auto ahost = host->get_ahost();
 
-    rate_index rates(_self, ahost);
-    
-    auto last_cycle = cycles.find(host->current_cycle_num - 1); //2 for emission by cycles
-    auto pool = pools.find(last_cycle -> finish_at_global_pool_id);
-    auto rate = rates.find(pool->pool_num-1);
-    auto em = emis.find(hostname);
-    eosio::asset for_emit;
+        rate_index rates(_self, ahost);
+        
+        auto last_cycle = cycles.find(host->current_cycle_num - 1); //2 for emission by cycles
+        auto pool = pools.find(last_cycle -> finish_at_global_pool_id);
+        auto rate = rates.find(pool->pool_num-1);
+        auto em = emis.find(hostname);
+        eosio::asset for_emit;
 
-    // if (rate-> pool_id > 1){
         for_emit = asset((rate->live_balance_for_sale).amount * em->percent / 100 / PERCENT_PRECISION, (rate->live_balance_for_sale).symbol );    
-    // } else {
-        // for_emit = asset(0, rate->live_balance_for_sale.symbol);
-    // }
-    
-    return for_emit;
+        
+        return for_emit;
  };
 
-
+/**
+ * @brief      Метод приоритетного входа в новый цикл. Доступен к использованию только при условии наличия предыдущего цикла, в котором участник имеет проигравший баланс. Позволяет зайти частью своего проигравшего баланса одновременно в два пула - первый и второй нового цикла. Использование приоритетного входа возможно только до истечения времени приоритета, которое начинается в момент запуска цикла и продолжается до истечения таймера приоритета. 
+ * 
+ * Метод позволяет проигравшим балансам предыдущего цикла перераспределиться в новом цикле развития так, чтобы быть в самом начале вращательного движения и тем самым, гарантировать выигрыш. В случае успеха исполнения метода, пользователь обменивает один свой старый проигравший баланс на два новых противоположных цветов. 
+ * 
+ * В ходе исполнения метода решается арифметическая задача перераспределения, при которой вычисляется максимально возможная сумма входа для имеющегося баланса одновременно в два первых пула. Остаток от суммы, который невозможно распределить на новые пулы по причине нераздельности минимальной учетной единицы, возвращается пользователю переводом. 
+ * 
+ * Приоритетный вход спроектирован таким образом, то если все проигравшие участники одновременно воспользуются им, то в точности 50% внутренней учетной единицы для первого и второго пула будет выкуплено. 
+ * 
+ * TODO возможно расширение приоритетного входа до 100% от внутренней учетной единицы для первых двух пулов, а так же, продолжение приоритетного входа для всех последующих пулов.
+ * 
+ * 
+ * @param[in]  op    The operation
+ */
 void priority_enter(const priorenter &op){
      auto username = op.username;
      auto host = op.host;
@@ -210,6 +246,8 @@ void priority_enter(const priorenter &op){
      auto first_pool = pools.find(cycle->finish_at_global_pool_id + 1);
      auto second_pool = pools.find(cycle->finish_at_global_pool_id + 2);
      
+
+     //TODO
      uint64_t first_pool_quants = bal->next_quants_for_sale / 2;
      uint64_t second_pool_quants = first_pool_quants;
      
@@ -220,12 +258,9 @@ void priority_enter(const priorenter &op){
      
      eosio::asset total_enter = first_pool_amount + second_pool_amount;
      
-
-     //compare available amount with amount by next_quants_for_sale. 
-     //If calculated amount by next_quants_for_sale is more then available amount,
-     //then recalculate enter amount by available amount through quant rate for first pools
-     //(user will get less quants, but total balance will be in safety);
-     //it will happen only on small distance from enter to exit pool
+     /**
+      * Здесь происходит перерасчет исходя из того, какое колество жетонов пользователь может получить при условии равного выкупа Юнитов из первых двух пулов. Если после расчетов останется остаток, который не может быть равномерно распределен между пулами - он возвращается пользователю. 
+      */
 
      if (bal->available >= total_enter){
         eosio::asset amount_for_back = asset(bal->available - total_enter);
@@ -237,13 +272,10 @@ void priority_enter(const priorenter &op){
 
     } else {
 
-
-        //У пользователя есть доступная сумма баланса в токенах, которая меньше чем та, с которой участник 
-        //может зайти в приоритете "на всю котлету". Необходимо найти минимальную сумму в квантах, которая удовлетворяет
-        //условиям баланса и приоритетного входа. Для решения мы берем курс покупки квантов второго раунда, считаем количество квантов, 
-        //затем вычисляем суммы для первого и второго раунда, а остаток - возвращаем участнику. 
-        //Таким образом, участник приоритетно входит в ядро на максимально возможную сумму своего баланса.
-
+        /**
+         * Здесь у пользователя есть доступная сумма баланса в токенах, которая меньше чем та, с которой участник может зайти в приоритете "на всю котлету". Необходимо найти минимальную сумму в ядерных Юнитах, которая удовлетворяет условиям баланса и приоритетного входа.
+         */
+        
         second_pool_quants = (bal->available).amount / 2 * QUANTS_PRECISION / second_pool_rate->buy_rate;
     
         first_pool_quants = second_pool_quants;
@@ -286,6 +318,7 @@ void priority_enter(const priorenter &op){
 }
 
 
+
 void adjust_host_income (account_name parent_host, account_name last_ahost){
     //Функция статистики системного дохода хоста
     //TODO - available -> total ?
@@ -314,6 +347,12 @@ void adjust_host_income (account_name parent_host, account_name last_ahost){
 
 }
 
+/**
+ * @brief Получение параметров нового цикла. Внутренний метод, используемый для создания записей в базе данных, необходимых для запуска нового цикла.      
+ *
+ * @param[in]  host       The host - имя аккаунта хоста
+ * @param[in]  main_host  The main host - указатель на имя аккаунта второстепенного хоста, содержающего измененные параметры вращения  (если такой есть)
+ */
 void improve_params_of_new_cycle (account_name host, account_name main_host){
     account_index accounts(_self, _self);
     auto acc = accounts.find(host);
@@ -352,6 +391,13 @@ void improve_params_of_new_cycle (account_name host, account_name main_host){
     });
 }
  
+/**
+ * @brief Внутренний метод установки первых пулов нового цикла. 
+ *
+ * @param[in]  parent_host  The parent host
+ * @param[in]  main_host    The main host
+ * @param[in]  root_symbol  The root symbol
+ */
 
 void emplace_first_pools(account_name parent_host, account_name main_host, eosio::symbol_name root_symbol){
     
@@ -406,17 +452,14 @@ void emplace_first_pools(account_name parent_host, account_name main_host, eosio
     }); 
 }
 
-void start_new_cycle_manual (const mstartcycle &op){
-    account_index accounts(_self, _self);
-           
-    auto acc = accounts.find(op.host);
-    
-    eosio_assert(acc != accounts.end(), "Account is not found.");
-    require_auth(acc->architect);
-    start_new_cycle(op.host);
 
-}
 
+/**
+ * @brief      Внутрений метод запуска нового цикла. 
+ * Вызывается при достижении одного из множества условий. Вызывает расчет показательной статистики цикла и установку новых пулов. Если установлен флаг переключения на дочерний хост, здесь происходит замена основного хоста и снятие флага. Дочерний хост хранит в себе измененные параметры финансового ядра. 
+
+ * @param[in]  host  The host
+ */
 void start_new_cycle ( account_name host ) {
     account_index accounts(_self, _self);
     sincome_index sincomes(_self, host);
@@ -463,12 +506,15 @@ void start_new_cycle ( account_name host ) {
         
         refresh_state(host);  
 
-        // emission(host);
-        
-            
+
     };
 
-
+/**
+ * @brief      Внутренний метод открытия следующего пула
+ * Вызывается только при условии полного выкупа всех внутренних учетных единиц предыдущего пула. 
+ *
+ * @param[in]  host  The host
+ */
 void next_pool( account_name host){
     account_index accounts(_self, _self);
     print("IMONNEXTPOOL");
@@ -543,12 +589,10 @@ void next_pool( account_name host){
             p.total_loss_withdraw = asset(0, root_symbol);
         });
 
-        print("ON CREATE EMISSION");
          emission(host);
     
     } else {
         //Если это стартовые пулы, то только смещаем указатель
-        print("ON CREATE EMISSION2");
         auto rate = rates.find(acc-> current_pool_num);
         
         accounts.modify(acc, _self, [&](auto &a){
@@ -561,6 +605,12 @@ void next_pool( account_name host){
 };
 
 
+/**
+ * @brief      Публичный метод запуска хоста
+ * Метод необходимо вызвать для запуска хоста после установки параметров хоста. Добавляет первый цикл, два пула, переключает демонастративный флаг запуска и создает статистические объекты. Подписывается аккаунтом хоста.  
+ * 
+ * @param[in]  op    The operation 
+ */
 void start_action (const start &op){
     if (op.host == op.chost)
         require_auth(op.host);
@@ -628,6 +678,14 @@ void start_action (const start &op){
 }
 
 
+/**
+ * @brief      Регистрация пользователя в системе. 
+ * Характеризуется созданием профиля с ссылкой на приглашающий аккаунт. Приглашающий аккаунт используется в качестве связи для вычисления партнерских структур различного профиля.
+ * 
+ * TODO ввести порядковые номера  
+ *
+ * @param[in]  op    The operation
+ */
 void reg_action(const reg &op){
     
     eosio_assert(has_auth(op.username) || has_auth(_registrator), "missing required authority");
@@ -636,14 +694,30 @@ void reg_action(const reg &op){
 
      
     user_index refs(_self, _self);
-
     auto ref = refs.find(op.username);
     eosio_assert(op.username != op.referer, "You cant set the referer yourself");
     eosio_assert(ref == refs.end(), "Referer is already setted");
+    
+    userscount_index usercounts(_self, _self);
+    auto usercount = usercounts.find(0);
+    uint64_t id = 1;
 
+    if (usercount == usercounts.end()){
+        usercounts.emplace(_self, [&](auto &u){
+            u.id = 0;
+            u.count = 1;
+            u.subject = "registered";
+        });
+    } else {
+        id =  usercount -> count + 1;
+        usercounts.modify(usercount, _self, [&](auto &u){
+            u.count = id;
+        });
+    };
 
     //TODO check account registration;
     refs.emplace(_self, [&](auto &r){
+        r.id = id;
         r.username = op.username;
         r.referer = op.referer;
         r.meta = op.meta;
@@ -651,6 +725,11 @@ void reg_action(const reg &op){
 
 };
 
+/**
+ * @brief      Метод обновления профиля
+ * Операция обновления профиля позволяет изменить мета-данные аккаунта. 
+ * @param[in]  op    The operation
+ */
 void profupdate_action(const profupdate &op){
     require_auth(op.username);
     user_index refs(_self, _self);
@@ -664,6 +743,14 @@ void profupdate_action(const profupdate &op){
 };
 
 
+/**
+ * @brief      Публичный метод установки параметров протокола двойной спирали
+ *  Вызывается пользователем после базовой операции создания хоста и проведения оплаты. Так же вызывается при установке параметров дочернего хоста. Содержит алгоритм финансового ядра. Производит основные расчеты таблиц курсов и валидирует положительность бизнес-дохода. 
+ *  
+
+    
+ * @param[in]  op    The operation
+ */
 void setparams_action(const setparams &op){
     if (op.host == op.chost)
         require_auth(op.host);
@@ -743,6 +830,12 @@ void setparams_action(const setparams &op){
     uint64_t system_income[pool_limit];
     uint64_t live_balance_for_sale[pool_limit];
     
+
+
+    /**
+     *     Математическое ядро алгоритма курса двойной спирали.
+     */
+
     for (auto i=0; i < pool_limit - 1; i++ ){
          if (i == 0){
             buy_rate[i] = base_rate;
@@ -781,25 +874,36 @@ void setparams_action(const setparams &op){
                 payment_to_loss[i] = live_balance_for_sale[i-3] * (PERCENT_PRECISION - loss_percent) / PERCENT_PRECISION + live_balance_for_sale[i-1] * (PERCENT_PRECISION - loss_percent) / PERCENT_PRECISION;
             } else if ( i > 3 ){
                 payment_to_loss[i] = live_balance_for_sale[i-1] * (PERCENT_PRECISION - loss_percent) / PERCENT_PRECISION + payment_to_loss[i - 2];
-                eosio_assert(payment_to_loss[i] > payment_to_loss[i-1], "Technical overflow. Try with a different parameters");
+
+
+                /**
+                 * Позволяет исключить ошибку в расчете курсов, вызываемую особенностью округления минимальных используемых чисел. 
+                 */
+
+                eosio_assert(payment_to_loss[i] > payment_to_loss[i-1], "Some overflow. Try with a different parameters");
             }
             
             system_income[i] = i > 1 ? total_in_box[i-1] - payment_to_wins[i] - payment_to_loss[i] : 0; 
             total_in_box[i] = i > 1 ? total_in_box[i-1] + live_balance_for_sale[i] : total_in_box[i-1] + pool_cost[i];
             
+            /**
+             * Проверка бизнес-модели на положительный баланс. Остатка на балансе в любой момент должно быть достаточно для выплат всем проигравшим и всем победителям. Если это не так - протокол спирали не позволит себя создать. 
+             */
+
             bool positive = total_in_box[i-1] - payment_to_wins[i] <= payment_to_loss[i] ? false : true;
             
+
             eosio_assert(positive, "The financial model of Protocol is Negative. Try with a different parameters");
 
-            auto max_supply = eosio::token(account->root_token_contract).get_supply(eosio::symbol_type(account->root_token.symbol).name()).amount;
-        
-            eosio_assert(total_in_box[i-1] < max_supply, "Tokens in the Box are exceeds the max supply. Try to decrease Protocol parameters.");
-            
+
             if (i > 2)
                 eosio_assert((client_income[i-1] > 0), "Overlap rate is too small for Protocol operation. Try to increase Overlap parameter, Size of Pool or Base Rate");      
         } 
     };
 
+    /**
+     * Установка таблиц курсов в область памяти хоста
+     */
 
     for (auto i = 0; i < pool_limit - 1; i++){
         rates.emplace(_self, [&](auto &r){
@@ -833,7 +937,15 @@ void deposit ( account_name username, account_name host, eosio::asset amount, ac
     user_index users(_self,_self);
     auto user = users.find(username);
     eosio_assert(user != users.end(), "User is not registered");
-
+    
+    if (user == users.end()){
+        
+        //TODO check account registration;
+        users.emplace(_self, [&](auto &r){
+            r.username = username;
+            r.referer = _registrator;
+        });
+    }
     account_index accounts(_self, _self);
     auto acc = accounts.find(host);
 
@@ -876,6 +988,14 @@ void deposit ( account_name username, account_name host, eosio::asset amount, ac
 };
 
 
+/**
+ * @brief      Публичный метод обновления состояния
+ * Проверяет пул на истечение во времени или завершение целого количества ядерных Юнитов. Запускает новый цикл или добавляет новый пул. 
+ * 
+ * //TODO устранить избыточность
+ *
+ * @param[in]  host  The host
+ */
 
 void refresh_state (account_name host){
 
@@ -909,23 +1029,21 @@ void refresh_state (account_name host){
 
         }
     } else {
-        //Если пул истек, или доступных пулов больше нет, или оставшихся лепт больше нет, то новый цикл
+        // Если пул истек, или доступных пулов больше нет, или оставшихся лепт больше нет, то новый цикл
         if ((pool -> pool_expired_at < eosio::time_point_sec(now()) || \
             ((pool -> pool_num + 1 == sp->pool_limit) && (pool -> remain_quants == 0)))){
-            print("ONREFRESH1");
             start_new_cycle(host);
       
         } else if ((pool -> remain_quants < QUANTS_PRECISION)){
-        //Если просто нет лепт - новый пул. 
-        //На случай, если приоритетные пулы полностью заполнены с остатком менее 1 Quant. 
-            print("ONREFRESH2");
+        // Если просто нет лепт - новый пул. 
+        // На случай, если приоритетные пулы полностью заполнены с остатком менее 1 Quant. 
+
             next_pool(host);
             refresh_state(host);
 
         } else if (acc->current_pool_num < 3) {
-            //Отдельно округляем остатки в случае, если приоритетным входом или целями 
-            //воспользовались только частично
-            print("ONREFRESH3");
+            // Отдельно округляем остатки в случае, если приоритетным входом или целями воспользовались только частично
+
             pools.modify(pool, _self, [&](auto &p ){
                 p.remain_quants = pool->remain_quants / QUANTS_PRECISION * QUANTS_PRECISION; 
             });
@@ -938,6 +1056,18 @@ void refresh_state (account_name host){
     }
     
 };
+
+
+/**
+ * @brief      Внутренний метод заполнения пула.
+ * Вызывается в момент совершения депозита пользователем или на приоритетном входе. Создает баланс пользователю и уменьшает количество Юнитов в пуле. 
+ *
+ * @param[in]  username        The username
+ * @param[in]  host            The host
+ * @param[in]  quants          The quants
+ * @param[in]  amount          The amount
+ * @param[in]  filled_pool_id  The filled pool identifier
+ */
 
 
 void fill_pool(account_name username, account_name host, uint64_t quants, eosio::asset amount, uint64_t filled_pool_id){
@@ -1000,7 +1130,12 @@ void fill_pool(account_name username, account_name host, uint64_t quants, eosio:
 
 }
 
-
+/**
+ * @brief      Публичный метод обновления баланса
+ * Пересчет баланса каждого пользователя происходит по его собственному действию. Обновление баланса приводит к пересчету доступной суммы для вывода - на противоположном цвете - проигрыш, на своем - выигрыш. На общее состояние Юнитов в пуле действие или бездействие пользователя со своим балансом влияния не оказывает. Без обновления баланса до состояния крайнего пула - сдать баланс Юнитов протоколу невозможно. 
+ *
+ * @param[in]  op    The operation
+ */
 
 
 void refresh_balance_action (const refreshbal &op){
@@ -1099,10 +1234,9 @@ void refresh_balance_action (const refreshbal &op){
                        
                     }
 
-                 //REFERRAL CALCULATIONS
-                /*
-                Для расчетов выплат реферальных вознаграждений необходимо решить дифференциальное уравнение. 
-                */
+                    /**
+                    Для расчетов выплат реферальных вознаграждений необходимо решить дифференциальное уравнение. 
+                     */
 
                     auto start_rate = prev_win_rate;
                     auto finish_rate = rate;
@@ -1173,10 +1307,26 @@ void refresh_balance_action (const refreshbal &op){
 
 }
 
+/**
+ * @brief      Метод расчета прогнозов
+ * Внутренний метод расчета прогнозов выплат для последующих 4х пулов по балансу ядерных Юнитов и на основе будущих курсов. Используются только для демонастрации пользователю. 
+ * 
+ * 
+ * TODO
+ * Может дополнительно быть реализован в качестве внешнего метода достоверной проверки прогнозов, который с каждым вызовом производит расчет будущих курсов и расширяет массив с данными по желанию пользователя.
+ * Устранить избыток кода.
+ * 
+ * @param[in]  username  The username
+ * @param[in]  host      The host
+ * @param[in]  quants    The quants
+ * @param[in]  pool_num  The pool number
+ * 
+ * @return     The forecast.
+ */
 
 std::vector <eosio::asset> calculate_forecast(account_name username, account_name host, uint64_t quants, uint64_t pool_num){
     
-    //Функция расчета прогнозов выплат по балансу квантов на основе будущих курсов
+    
     //TODO -> cycle / recursion
 
     account_index accounts(_self, _self);
@@ -1238,6 +1388,28 @@ std::vector <eosio::asset> calculate_forecast(account_name username, account_nam
 };
 
 
+/**
+ * @brief      Публичный метод возврата баланса протоколу. 
+ * Вывод средств возможен только для полностью обновленных (актуальных) балансов. Производит обмен Юнитов на управляющий токен и выплачивает на аккаунт пользователя. 
+ * 
+ * Производит расчет реферальных вознаграждений, генерируемых выплатой, и отправляет их всем партнерам согласно установленной формы.
+ * 
+ * Производит финансовое распределение между управляющими компаниями и целевым фондом сообщества. 
+ * 
+ * Каждый последующий пул, который участник проходит в качестве победителя, генеририрует бизнес-доход, который расчитывается исходя из того, что в текущий момент, средств всех проигравших полностью достаточно наа выплаты всем победителям с остатком. Этот остаток, в прапорции Юнитов пользователя и общего количества Юнитов в раунде, позволяет расчитать моментальную выплату, которая может быть изъята из системы при сохранении абсолютного балланса. 
+ * 
+ * Изымаемая сумма из общего котла управляющих токенов, разделяется на три потока, определяемые двумя параметрами: 
+ * - Процент выплат на рефералов. Устанавливается в диапазоне от 0 до 100. Отсекает собой ровно ту часть пирога, которая уходит на выплаты по всем уровням реферальной структуры согласно ее формы. 
+ * - Процент выплат на корпоративных управляющих. Устанавливается в диапазоне от 0 до 100. 
+ * - Остаток от остатка распределяется в фонд целей сообщества.
+ * 
+ * Таким образом, коэффициенты позволяют распределять единый системный фонд по окружности с тремя секторами, где каждый сектор есть фонд со своим назначением.  
+
+ * Например, если общий доход от движения баланса пользователя по спирали составляет 100 USD, а коэфициенты распределения Рефералов и Корпоративных Управляющих равняются соответственно по 0.5 (50%), то все рефералы получат по 33$, все управляющие получат по 33$, и еще 33$ попадет в фонд целей сообщества. 1$ останется в качестве комиссии округления на делении у протокола. 
+ * 
+ * 
+ * @param[in]  op    The operation
+ */
 
 void withdraw_action ( const withdraw &op){
     //TODO Контроль выплат всем
@@ -1290,7 +1462,16 @@ void withdraw_action ( const withdraw &op){
     
     uint64_t pools_in_cycle = cycle -> finish_at_global_pool_id - cycle -> start_at_global_pool_id + 1;
     
-    //NOMINAL
+    /**
+     * Номинал
+     * Номинал выплачивается если выполняется одно из условий: 
+     *  - баланс куплен в одном из первых двух пулов, а текущий пул не выше второго;
+     *  - баланс куплен в текущем пуле;
+     *  - баланс куплен в последнем из возможных пулов;
+
+     * 
+     */
+
     if (((acc -> current_pool_num == pool -> pool_num ) && (acc -> current_cycle_num == pool -> cycle_num)) || \
         ((pool -> pool_num < 3) && (pools_in_cycle < 3)) || (has_new_cycle && (pool->pool_num == last_pool -> pool_num)))
 
@@ -1326,7 +1507,11 @@ void withdraw_action ( const withdraw &op){
         balance.erase(bal);
         
     } else  { 
-    //WIN OR LOSE
+    /**
+     * Выигрыш или проигрыш.
+     * Расчет производится на основе сравнения текущего цвета пула с цветом пула входа. При совпадении цветов - баланс выиграл. При несовпадении - проиграл. 
+     * 
+     */
 
         auto amount = bal -> available;
     
@@ -1338,7 +1523,12 @@ void withdraw_action ( const withdraw &op){
     
         uint64_t quants_from_reserved;
         if (bal -> win == true){
-            
+
+            /**
+             * Выигрыш.
+             * Инициирует распределение реферальных вознаграждений и выплаты во все фонды.
+             */
+
             auto converted_quants = bal->quants_for_sale * rate -> sell_rate / rate -> buy_rate;
             
             auto sinc = sincome.find(bal->cycle_num - 1);
@@ -1353,7 +1543,11 @@ void withdraw_action ( const withdraw &op){
                 if ((ref != refs.end()) && (ref->referer != 0)){
                     referer = ref->referer;
                     eosio::asset paid = asset(0, root_symbol);
-
+                
+                    /**
+                     * Вычисляем размер выплаты для каждого уровня партнеров и производим выплаты.
+                     */
+                
                     for (auto level : acc->levels){
                         if ((ref != refs.end()) && (ref->referer != 0)){
                             eosio::asset to_ref = asset((bal->ref_amount).amount * level / 100 / PERCENT_PRECISION , root_symbol);
@@ -1366,12 +1560,7 @@ void withdraw_action ( const withdraw &op){
                                     std::make_tuple( _self, referer, to_ref, std::string("RP-" + (name{username}).to_string() + "-" + (name{referer}).to_string())) 
                                 ).send();
                                 
-                                // action(
-                                //     permission_level{ _self, N(active) },
-                                //     _self, N(refrep),
-                                //     std::make_tuple( _self,, to_ref, std::string("Referal payment")) 
-                                // ).send();
-
+          
                                 paid += to_ref;
                             
                             };
@@ -1381,6 +1570,10 @@ void withdraw_action ( const withdraw &op){
                         }
                     };
 
+                    /**
+                     * Все неиспользуемые вознаграждения с вышестояющих уровней отправляются на аккаунт хоста сообщества. 
+
+                     */
                     eosio::asset back_to_host = bal->ref_amount - paid;
                     
                     if (back_to_host.amount>0){
@@ -1394,9 +1587,9 @@ void withdraw_action ( const withdraw &op){
 
                     
                 } else {
-                    //If dont have referal, all payments back to host
-                    // print("USE HOST");
-                    
+                    /**
+                     * Если рефералов у пользователя нет, то переводим все реферальные средства на аккаунт хоста.
+                     */
                     action(
                         permission_level{ _self, N(active) },
                         acc->root_token_contract, N(transfer),
@@ -1405,7 +1598,9 @@ void withdraw_action ( const withdraw &op){
 
                 }
 
-
+                /**
+                 * Модифицируем объект реферальной статистики для дальнейшей сверки с расчетными данными. 
+                 */
                 
                 sincome.modify(sinc, _self, [&](auto &s){
                     s.paid_to_refs = sinc->paid_to_refs + bal->ref_amount;
@@ -1414,21 +1609,22 @@ void withdraw_action ( const withdraw &op){
             }
 
             if((bal->sys_amount).amount > 0){
-                
-                // eosio::asset host_amount = bal->sys_amount;
+
+                /**
+                 * Расчет выплат на управляющие аккаунты. В первом приближении для выплат используем единственный аккаунт хоста. Позже можем использовать массив управляющих аккаунтов и условия распределеления согласно любой модели (акции, равенство, и т.д.). 
+                 * 
+                 
+                 */
 
                 eosio::asset dacs_amount = asset((bal->sys_amount).amount * acc->dacs_percent / 100 / PERCENT_PRECISION , root_symbol);
                 eosio::asset fund_amount = bal->sys_amount - dacs_amount;
                 
                 if (dacs_amount.amount > 0){
-                        
-                        action(
-                            permission_level{ _self, N(active) },
-                            acc->root_token_contract, N(transfer),
-                            std::make_tuple( _self, host, dacs_amount, std::string("DAC-" + (name{username}.to_string() + "-" + (name{host}).to_string()))) 
-                        ).send();
-                    // print("check3");
-                        
+                    action(
+                        permission_level{ _self, N(active) },
+                        acc->root_token_contract, N(transfer),
+                        std::make_tuple( _self, host, dacs_amount, std::string("DAC-" + (name{username}.to_string() + "-" + (name{host}).to_string()))) 
+                    ).send();
                 }
 
                 if (fund_amount.amount > 0){
@@ -1440,6 +1636,9 @@ void withdraw_action ( const withdraw &op){
                     });
                 }
 
+                /**
+                 * Объект sincome содержит статистическую информацию о фактическом распределении корпоративных выплат и пополнений целевого фонда.
+                 */
                 sincome.modify(sinc, _self, [&](auto &s){
                     s.paid_to_dacs = sinc->paid_to_dacs + dacs_amount;
                     s.paid_to_fund = sinc->paid_to_fund + fund_amount;
@@ -1448,14 +1647,20 @@ void withdraw_action ( const withdraw &op){
             }
             
             
-            //BACK quants TO POOL
+            /**
+             * Все ядерные Юниты победителей должны быть возвращены в пулы. 
+             */
 
             pools.modify(last_pool, _self, [&](auto &p){
-                //p.creserved_quants = (last_pool->creserved_quants + converted_quants) % QUANTS_PRECISION;
                 p.total_win_withdraw = last_pool -> total_win_withdraw + amount;
-                //p.remain_quants = std::min(last_pool -> remain_quants + (last_pool->creserved_quants + converted_quants) / QUANTS_PRECISION * QUANTS_PRECISION, last_pool->total_quants);
                 p.remain_quants = std::min(last_pool -> remain_quants + converted_quants, last_pool->total_quants);
             });
+
+
+            /**
+             * TODO
+             * Здесь может происходить начисление Юнитов распределения - например, передача пользователю силы сообщества за участие во вращении спирали ядра или перевод любых токенов согласно инверсии текущего курса - чем раньше вошел во вращение - тем больше получил жетонов в дополнение к тому балансу, который ты уже выиграл. 
+             */
 
 
         }
@@ -1467,21 +1672,19 @@ void withdraw_action ( const withdraw &op){
             
         }
             
-
+        /**
+         * Модицикация не обязательна, поскольку баланс удаляется. Использовалось при отладке. 
+         */
         balance.modify(bal, username, [&](auto &b){
             b.quants_for_sale = 0;  
             b.withdrawed = true;
             b.available = asset(0, root_symbol);
-            b.forecasts = forecasts;
+            b.forecasts = forecasts; //[]
         });
 
         balance.erase(bal);
     }
 };
-
-
-
-
 
 };
 

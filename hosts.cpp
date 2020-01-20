@@ -2,8 +2,18 @@
 
 using namespace eosio;
 
-struct hosts_struct {
+/**
+ * @brief      Структура хоста
+ */
 
+struct hosts_struct {
+    /**
+     * @brief      Returns a string representation of an asset.
+     *
+     * @param[in]  val   The value
+     *
+     * @return     String representation of the asset.
+     */
     std::string asset_to_string(eosio::asset val){
         uint64_t v = val.symbol.value;
         v >>= 8;
@@ -16,6 +26,12 @@ struct hosts_struct {
         return result;
     };
 
+    /**
+     * @brief      Sets the architect.
+     * Устанавливает архитектора сообщества, обладающего полномочиями специальных действий. 
+     * 
+     * @param[in]  op    The new value
+     */
     void set_architect_action (const setarch &op){
         require_auth(op.host);
 
@@ -28,22 +44,38 @@ struct hosts_struct {
 
     };
 
-    void deactivate_action(const deactivate &op){
-        require_auth(op.architect);
+    // /**
+    //  * @brief      Метод деактивации протокола. 
+    //  * Может быть использован для отмены запуска протокола до его фактического запуска в целях изменения параметров. 
+    //  * 
+    //  * @param[in]  op    The operation
+    //  */
+    // void deactivate_action(const deactivate &op){
+    //     require_auth(op.architect);
 
-        account_index accounts(_self, _self);
-        auto acc = accounts.find(op.host);
+    //     account_index accounts(_self, _self);
+    //     auto acc = accounts.find(op.host);
 
-        eosio_assert(acc != accounts.end(), "Host is not found");
-        eosio_assert(acc->activated == true, "Host is already deactivated");
-        eosio_assert(acc->current_pool_num == 1, "Cannot deactivate protocol after rotation launch.");
-        eosio_assert(acc->current_cycle_num == 1, "Cannot deactivate protocol after rotation launch.");
+    //     eosio_assert(acc != accounts.end(), "Host is not found");
+    //     eosio_assert(acc->activated == true, "Host is already deactivated");
+
+    //     eosio_assert(acc->current_pool_num == 1, "Cannot deactivate protocol after rotation launch.");
+    //     eosio_assert(acc->current_cycle_num == 1, "Cannot deactivate protocol after rotation launch.");
         
-        accounts.modify(acc, _self, [&](auto &a){
-            a.activated = false;
-        });
-    };
+    //     accounts.modify(acc, _self, [&](auto &a){
+    //         a.activated = false;
+    //     });
+    // };
 
+
+
+    /**
+     * @brief      Метод апгрейда аккаунта до статуса сообщества
+     * Принимает ряд параметров, такие как процент консенсуса, реферальный процент, уровни вознаграждений финансовых партнеров, 
+     * корпоративный процент, а так же параметры рынка силы. 
+     *  
+     * @param[in]  op    The operation
+     */
     void upgrade_action(const upgrade &op){
         require_auth(op.username);
         
@@ -60,13 +92,13 @@ struct hosts_struct {
         eosio_assert(op.purpose.find("&#") , "Symbols '&#' is prohibited in purpose");
 
         eosio_assert(op.quote_amount.amount > 0, "Quote amount must be greater then zero");
-        eosio_assert(op.quote_amount.symbol == _SYM, "Quote symbol for market is only CORE");
+        // eosio_assert(op.quote_amount.symbol == _SYM, "Quote symbol for market is only CORE");
         
         eosio_assert(op.consensus_percent <= 100 * PERCENT_PRECISION, "consensus_percent should be between 0 and 100 * PERCENT_PRECISION (1000000)");
         eosio_assert(op.referral_percent <= 100 * PERCENT_PRECISION, "referral_percent should be between 0 and 100 * PERCENT_PRECISION (1000000)");
         
         eosio_assert(op.dacs_percent <= 100 * PERCENT_PRECISION, "dacs_percent should be between 0 and 100 * PERCENT_PRECISION (1000000)");
-        eosio_assert(op.referral_percent + op.dacs_percent == 100 * PERCENT_PRECISION, "Referral and Dacs percent should me 100% PERCENT_PRECISION in their summ");
+        eosio_assert(op.referral_percent + op.dacs_percent <= 100 * PERCENT_PRECISION, "Referral and Dacs percent should be less or equal 100% PERCENT_PRECISION in their summ");
 
         //CHECK for referal levels;
         uint64_t level_count = 0;
@@ -75,7 +107,7 @@ struct hosts_struct {
 
         for (auto level : op.levels){
             level_count++;
-            eosio_assert(level <= prev_level, "Percentage on each referal level should decrease or not change");
+            // eosio_assert(level <= prev_level, "Percentage on each referal level should decrease or not change");
             //TODO WHY?
             eosio_assert(level != 0, "Zero-level is prohibited.");
             percent_count += level;
@@ -110,7 +142,7 @@ struct hosts_struct {
 
         accounts.emplace(_self, [&](auto &a){
             a.username = op.username;
-            a.architect = op.username;
+            // a.architect = op.username;
             a.hoperator = op.username;
             a.activated = false;
             a.title = op.title;
@@ -119,7 +151,9 @@ struct hosts_struct {
             a.dac_mode = 0;
             a.total_shares = op.total_shares;
             a.quote_amount = op.quote_amount;
+            a.quote_token_contract = op.quote_token_contract;
             a.root_token = op.root_token;
+            a.voting_only_up = op.voting_only_up;
             a.symbol = asset_to_string(op.root_token);
             a.precision = op.root_token.symbol.precision();
             a.root_token_contract = op.root_token_contract;
@@ -153,29 +187,13 @@ struct hosts_struct {
 
     }
 
-
-    void set_emission_action(const setemi&op){
-        require_auth(op.host);
-        account_index hosts (_self, _self);
-        auto host = hosts.find(op.host);
-        eosio_assert(host != hosts.end(), "Host not exist");
-        
-        auto ahost = host->get_ahost();
-        auto root_symbol = host->get_root_symbol();
-    
-        emission_index emis(_self, _self);
-        auto emi = emis.find(op.host);
-        eosio_assert(op.gtop < 100, "Goal top should be less then 100");
-        eosio_assert(op.percent < 100 * PERCENT_PRECISION, "Emission percent should be less then 100 * PERCENT_PRECISION");
-        
-        emis.modify(emi, op.host, [&](auto &e){
-            e.percent = op.percent;
-            e.gtop = op.gtop;
-        });
-
-    }
-
-    
+    /**
+     * @brief      Метод создания дочернего хоста
+     * Позволяет сообществу на границе циклов изменять параметры финансового ядра, 
+     * распологая их в области памяти аккаунта дочернего хоста. 
+     *
+     * @param[in]  op    The operation
+     */
     void create_chost_action(const cchildhost &op){
     	auto parent_host = op.parent_host;
     	auto chost = op.chost;
@@ -213,15 +231,23 @@ struct hosts_struct {
 
     }
 
-    void pay_for_upgrade(account_name username, eosio::asset amount){
+    /**
+     * @brief      Метод оплаты комиссии создания дочернего хоста
+     *
+     * @param[in]  username  The username
+     * @param[in]  amount    The amount
+     */
+    void pay_for_upgrade(account_name username, eosio::asset amount, account_name code){
     	account_index hosts(_self, _self);
 
     	auto host = hosts.find(username);
     	eosio_assert(host != hosts.end(), "Host is not founded");
         
    		//PAY for upgrade only in CORE!.
-    	eosio_assert(amount.symbol == _SYM, "Wrong asset. Only CORE token can be used for upgrade");
-    	
+    	eosio_assert(amount.symbol == host->quote_amount.symbol, "Wrong symbol for market");
+        
+        eosio_assert(code == host->quote_token_contract, "Wrong symbol for market");
+        
 	   	//Check for enough upgrade amount for quote asset
     	eosio_assert(amount == host->to_pay, "Amount is not equal amount for upgrade");
     	eosio_assert(host->payed == 0, "Already payed");
@@ -241,25 +267,38 @@ struct hosts_struct {
 	  
     };
 
-    void ehosttime_action(const ehosttime &op){
-        require_auth (op.architect);
+    // /**
+    //  * @brief      Метод редактирования времени 
+    //  *
+    //  * @param[in]  op    The operation
+    //  */
+    // void ehosttime_action(const ehosttime &op){
+    //     require_auth (op.architect);
 
-        account_index hosts(_self, _self);
-        auto host = hosts.find(op.host);
-        eosio_assert(host->architect == op.architect, "You are not architect of currenty community");
-        print("im here");
-        eosio_assert((op.priority_seconds < 7884000), "Pool Priority Seconds must be greater or equal then 0 sec and less then 7884000 sec");
-        eosio_assert((op.pool_timeout >= 60) && (op.pool_timeout < 7884000),"Pool Timeout must be greater or equal then 1 sec and less then 7884000 sec");
+    //     account_index hosts(_self, _self);
+    //     auto host = hosts.find(op.host);
+    //     eosio_assert(host->architect == op.architect, "You are not architect of currenty community");
+        
+    //     eosio_assert((op.priority_seconds < 7884000), "Pool Priority Seconds must be greater or equal then 0 sec and less then 7884000 sec");
+    //     eosio_assert((op.pool_timeout >= 60) && (op.pool_timeout < 7884000),"Pool Timeout must be greater or equal then 1 sec and less then 7884000 sec");
     
-        spiral_index spiral(_self, op.host);
-        auto sp = spiral.find(0);
+    //     spiral_index spiral(_self, op.host);
+    //     auto sp = spiral.find(0);
 
-        spiral.modify(sp, op.architect, [&](auto &s){
-            s.pool_timeout = op.pool_timeout;
-            s.priority_seconds = op.priority_seconds;
-        });
-    }
+    //     spiral.modify(sp, op.architect, [&](auto &s){
+    //         s.pool_timeout = op.pool_timeout;
+    //         s.priority_seconds = op.priority_seconds;
+    //     });
+    // }
 
+
+
+
+    /**
+     * @brief      Метод редактирования информации о хосте
+     *
+     * @param[in]  op    The operation
+     */
     void edithost_action(const edithost &op){
         require_auth (op.architect);
 

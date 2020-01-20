@@ -2,9 +2,16 @@ using namespace eosio;
 
 struct shares {
 
+  /**
+   * @brief      Создание вестинг-баланса
+   * Внутренний метод, используемый при обратном обмене силы сообщества на котировочный токен. 
+   * Обеспечивает линейный обмен токенов в продолжительности времени. 
+   * @param[in]  owner   The owner
+   * @param[in]  amount  The amount
+   */
 	void make_vesting_action(account_name owner, eosio::asset amount){
 	    eosio_assert(amount.is_valid(), "Amount not valid");
-	    eosio_assert(amount.symbol == _SYM, "Not valid symbol for this vesting contract");
+	    // eosio_assert(amount.symbol == _SYM, "Not valid symbol for this vesting contract");
 	    eosio_assert(is_account(owner), "Owner account does not exist");
 	    
 	    vesting_index vests (_self, owner);
@@ -19,6 +26,11 @@ struct shares {
 
 	}
 
+  /**
+   * @brief      Метод обновления баланса.  
+   * Обновляет вестинг-баланс до актуальных параметров продолжительности. 
+   * @param[in]  op    The operation
+   */
   void refresh_action(const refreshsh &op){
     require_auth(op.owner);
     vesting_index vests(_self, op.owner);
@@ -44,7 +56,12 @@ struct shares {
     }
   }
 
-
+  /**
+   * @brief      Вывод вестинг-баланса
+   * Обеспечивает вывод доступных средств из вестинг-баланса. 
+   *
+   * @param[in]  op    The operation
+   */
   void withdraw_action(const withdrawsh &op){
     require_auth(op.owner);
     vesting_index vests(_self, op.owner);
@@ -60,7 +77,7 @@ struct shares {
 
     vests.modify(v, op.owner, [&](auto &m){
         m.withdrawed = v->withdrawed + v->available;
-        m.available = eosio::asset(0, _SYM);
+        m.available = eosio::asset(0, (v->available).symbol);
       });
 
     if (v->withdrawed == v->amount){
@@ -69,20 +86,29 @@ struct shares {
     
   };
 
-
-	void buyshares_action ( account_name buyer, account_name host, eosio::asset amount ){
-		eosio_assert(amount.symbol == _SYM, "Wrong symbol for buy shares");
+  /**
+   * @brief      Метод покупки силы сообщества
+   * Обеспечивает покупку силы сообщества за котировочный токен по внутренней рыночной цене, определяемой с помощью алгоритма банкор. 
+   * @param[in]  buyer   The buyer
+   * @param[in]  host    The host
+   * @param[in]  amount  The amount
+   */
+	void buyshares_action ( account_name buyer, account_name host, eosio::asset amount, account_name code ){
+		// eosio_assert(amount.symbol == _SYM, "Wrong symbol for buy shares");
 		
 		account_index accounts(_self, _self);
 		user_index users(_self,_self);
-        auto user = users.find(buyer);
-        eosio_assert(user != users.end(), "User is not registered");
+    auto user = users.find(buyer);
+    eosio_assert(user != users.end(), "User is not registered");
+
 
 		auto exist = accounts.find(host);
 		eosio_assert(exist != accounts.end(), "Host is not founded");
+		eosio_assert(exist -> quote_token_contract == code, "Wrong quote token contract");
+    eosio_assert(exist -> quote_amount.symbol == amount.symbol, "Wrong quote token symbol");
 		
-		powermarket market(_self, host);
-		auto itr = market.find(S(4, BANCORE));
+    powermarket market(_self, host);
+		auto itr = market.find(S(0, BANCORE));
 		auto tmp = *itr;
 		uint64_t shares_out;
 		market.modify( itr, 0, [&]( auto &es ) {
@@ -115,6 +141,12 @@ struct shares {
 
 	};
 
+  /**
+   * @brief      Метод делегирования силы.
+   * Позволяет делегировать купленную силу для принятия каких-либо решений в пользу любого аккаунта. 
+   *
+   * @param[in]  op    The operation
+   */
 
 	void delegate_shares_action (const delshares &op){
 	 	
@@ -177,6 +209,15 @@ struct shares {
 		}		
 	}
 
+  /**
+   * @brief      Обновление счетчика голосов
+   * Внутренний метод, используемый для обновления голосов у целей в момент покупки/продажи силы. 
+   *
+   * @param[in]  host       The host
+   * @param[in]  voter      The voter
+   * @param[in]  old_power  The old power
+   * @param[in]  new_power  The new power
+   */
 	void propagate_votes_changes(account_name host, account_name voter, uint64_t old_power, uint64_t new_power){
 		votes_index votes(_self, voter);
 		goals_index goals(_self, host);
@@ -204,7 +245,11 @@ struct shares {
 
 
 
-
+  /**
+   * @brief      Метод возврата делегированной силы
+   *
+   * @param[in]  op    The operation
+   */
 	void undelegate_shares_action (const undelshares &op){
 		require_auth(op.reciever);
 
@@ -253,24 +298,32 @@ struct shares {
 
 	}
 
+  /**
+   * @brief      Публичный метод продажи силы рынку за котировочный токен
+   *
+   * @param[in]  op    The operation
+   */
 	void sellshares_action ( const sellshares &op ){
 		require_auth(op.username);
 		auto host = op.host;
 		auto username = op.username;
 		uint64_t shares = op.shares;
 
+    account_index accounts(_self, _self);
+    auto exist = accounts.find(host);
+    
 		power_index power(_self, username);
 		auto userpower = power.find(host);
 		auto upower = (userpower->staked);
 		eosio_assert(upower >= shares, "Not enought power available for sell");
 
 		powermarket market(_self, host);
-		auto itr = market.find(S(4, BANCORE));
+		auto itr = market.find(S(0, BANCORE));
 		auto tmp = *itr;
 
 		eosio::asset tokens_out;
 		market.modify( itr, 0, [&]( auto& es ) {
-        	tokens_out = es.convert( asset(shares,S(0, POWER)), _SYM);
+        	tokens_out = es.convert( asset(shares,S(0, POWER)), exist -> quote_amount.symbol);
 	    });
 		eosio_assert( tokens_out.amount > 1, "token amount received from selling shares is too low" );
 	    
@@ -285,13 +338,20 @@ struct shares {
 	    
 	};
 
+  /**
+   * @brief      Публичный метод создания банкор-рынка.
+   *
+   * @param[in]  host          The host
+   * @param[in]  total_shares  The total shares
+   * @param[in]  quote_amount  The quote amount
+   */
 	void create_bancor_market(account_name host, uint64_t total_shares, eosio::asset quote_amount){
 		powermarket market(_self, host);
-		auto itr = market.find(S(4,BANCORE));
+		auto itr = market.find(S(0,BANCORE));
 		if (itr == market.end()){
 			itr = market.emplace( host, [&]( auto& m ) {
                m.supply.amount = 100000000000000ll;
-               m.supply.symbol = S(4,BANCORE);
+               m.supply.symbol = S(0,BANCORE);
                m.base.balance.amount = total_shares;
                m.base.balance.symbol = S(0, POWER);
                m.quote.balance.amount = quote_amount.amount;

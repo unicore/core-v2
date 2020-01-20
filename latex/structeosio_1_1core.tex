@@ -1,0 +1,429 @@
+\hypertarget{structeosio_1_1core}{}\section{eosio\+:\+:core Struct Reference}
+\label{structeosio_1_1core}\index{eosio\+::core@{eosio\+::core}}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \mbox{\hyperlink{structeosio_1_1core_afe6cd2a363060de08f71f3f6a42079f7}{fund\+\_\+emi\+\_\+pool}} (account\+\_\+name username, account\+\_\+name host, eosio\+::asset amount, account\+\_\+name code)
+\begin{DoxyCompactList}\small\item\em Метод ручного пополнения целевого фонда сообщества. Жетоны, попадающие в целевой фонд сообщества, подлежат распределению на цели с помощью голосования участников по установленным правилам консенсуса. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structeosio_1_1core_aa6d6b898bb6a6ff984ca47ff45bb2504}{emission}} (account\+\_\+name host)
+\begin{DoxyCompactList}\small\item\em внутренний метод эмиссии, который вызывается в момент распределения целевого фонда сообщества на цели участников. Вызывается в момент переключения порядкового номера пула на каждый последующий. Эмитирует в балансы активных целей сообщества установленный архитектором процент от свободного финансового потока из заранее накопленного в фонде целей сообщества. \end{DoxyCompactList}\item 
+eosio\+::asset \mbox{\hyperlink{structeosio_1_1core_acf8abb1c3da1cc66eeb0777a3ebd74a6}{adjust\+\_\+emission\+\_\+pool}} (account\+\_\+name hostname)
+\begin{DoxyCompactList}\small\item\em Внутренний метод расчета пула эмиссии. Вызывается в момент распределения эмиссии на цели сообщества. Расчет объема эмиссии происходит исходя из параметра life\+\_\+balance\+\_\+for\+\_\+sale завершенного пула, и процента эмиссии, установленного архитектором. Процент эмиссии ограничен от 0 до 1000\% относительного живого остатка на продажу в каждом новом пуле. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structeosio_1_1core_adf5822c41f9acc44534c06eb5d3e616b}{priority\+\_\+enter}} (const \mbox{\hyperlink{structeosio_1_1priorenter}{priorenter}} \&op)
+\begin{DoxyCompactList}\small\item\em Метод приоритетного входа в новый цикл. Доступен к использованию только при условии наличия предыдущего цикла, в котором участник имеет проигравший баланс. Позволяет зайти частью своего проигравшего баланса одновременно в два пула -\/ первый и второй нового цикла. Использование приоритетного входа возможно только до истечения времени приоритета, которое начинается в момент запуска цикла и продолжается до истечения таймера приоритета. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structeosio_1_1core_abdc36cbde13d6919274e1615cf72fecd}\label{structeosio_1_1core_abdc36cbde13d6919274e1615cf72fecd}} 
+void {\bfseries adjust\+\_\+host\+\_\+income} (account\+\_\+name parent\+\_\+host, account\+\_\+name last\+\_\+ahost)
+\item 
+void \mbox{\hyperlink{structeosio_1_1core_aa951318e432688f045d6893748a444cd}{improve\+\_\+params\+\_\+of\+\_\+new\+\_\+cycle}} (account\+\_\+name host, account\+\_\+name main\+\_\+host)
+\begin{DoxyCompactList}\small\item\em Получение параметров нового цикла. Внутренний метод, используемый для создания записей в базе данных, необходимых для запуска нового цикла. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structeosio_1_1core_a1c8358af15c27c968b4879661242ee7a}{emplace\+\_\+first\+\_\+pools}} (account\+\_\+name parent\+\_\+host, account\+\_\+name main\+\_\+host, eosio\+::symbol\+\_\+name root\+\_\+symbol)
+\begin{DoxyCompactList}\small\item\em Внутренний метод установки первых пулов нового цикла. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structeosio_1_1core_a0d8a3a33305dee1fc3cda981cacf009a}{start\+\_\+new\+\_\+cycle}} (account\+\_\+name host)
+\begin{DoxyCompactList}\small\item\em Внутрений метод запуска нового цикла. Вызывается при достижении одного из множества условий. Вызывает расчет показательной статистики цикла и установку новых пулов. Если установлен флаг переключения на дочерний хост, здесь происходит замена основного хоста и снятие флага. Дочерний хост хранит в себе измененные параметры финансового ядра. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structeosio_1_1core_a7436c6f8e26b2cb9f73884616d3f4c64}{next\+\_\+pool}} (account\+\_\+name host)
+\begin{DoxyCompactList}\small\item\em Внутренний метод открытия следующего пула Вызывается только при условии полного выкупа всех внутренних учетных единиц предыдущего пула. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structeosio_1_1core_a52b7bd0a4e7810a9911112c745f43fdb}{start\+\_\+action}} (const \mbox{\hyperlink{structeosio_1_1start}{start}} \&op)
+\begin{DoxyCompactList}\small\item\em Публичный метод запуска хоста Метод необходимо вызвать для запуска хоста после установки параметров хоста. Добавляет первый цикл, два пула, переключает демонастративный флаг запуска и создает статистические объекты. Подписывается аккаунтом хоста. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structeosio_1_1core_ad6781ce293510a94cc421d386c9aae92}{reg\+\_\+action}} (const \mbox{\hyperlink{structeosio_1_1reg}{reg}} \&op)
+\begin{DoxyCompactList}\small\item\em Регистрация пользователя в системе. Характеризуется созданием профиля с ссылкой на приглашающий аккаунт. Приглашающий аккаунт используется в качестве связи для вычисления партнерских структур различного профиля. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structeosio_1_1core_a1ce681caf15438f64bd6cef01c008079}{profupdate\+\_\+action}} (const \mbox{\hyperlink{structeosio_1_1profupdate}{profupdate}} \&op)
+\begin{DoxyCompactList}\small\item\em Метод обновления профиля Операция обновления профиля позволяет изменить мета-\/данные аккаунта. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structeosio_1_1core_aeab146cbd52805b0e9689e32489d57d7}{setparams\+\_\+action}} (const \mbox{\hyperlink{structeosio_1_1setparams}{setparams}} \&op)
+\begin{DoxyCompactList}\small\item\em Публичный метод установки параметров протокола двойной спирали Вызывается пользователем после базовой операции создания хоста и проведения оплаты. Так же вызывается при установке параметров дочернего хоста. Содержит алгоритм финансового ядра. Производит основные расчеты таблиц курсов и валидирует положительность бизнес-\/дохода. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{structeosio_1_1core_afed92df918c207bde2047a062a785e13}\label{structeosio_1_1core_afed92df918c207bde2047a062a785e13}} 
+void {\bfseries deposit} (account\+\_\+name username, account\+\_\+name host, eosio\+::asset amount, account\+\_\+name code)
+\item 
+void \mbox{\hyperlink{structeosio_1_1core_afcfd6d8fd630694c723ff06e4cd8cdfe}{refresh\+\_\+state}} (account\+\_\+name host)
+\begin{DoxyCompactList}\small\item\em Публичный метод обновления состояния Проверяет пул на истечение во времени или завершение целого количества ядерных Юнитов. Запускает новый цикл или добавляет новый пул. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structeosio_1_1core_a1638e74f48c2316a81db6e06f7593173}{fill\+\_\+pool}} (account\+\_\+name username, account\+\_\+name host, uint64\+\_\+t quants, eosio\+::asset amount, uint64\+\_\+t filled\+\_\+pool\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Внутренний метод заполнения пула. Вызывается в момент совершения депозита пользователем или на приоритетном входе. Создает баланс пользователю и уменьшает количество Юнитов в пуле. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structeosio_1_1core_aebbed426e5072f1c0f43f051ff3c6e9d}{refresh\+\_\+balance\+\_\+action}} (const \mbox{\hyperlink{structeosio_1_1refreshbal}{refreshbal}} \&op)
+\begin{DoxyCompactList}\small\item\em Публичный метод обновления баланса Пересчет баланса каждого пользователя происходит по его собственному действию. Обновление баланса приводит к пересчету доступной суммы для вывода -\/ на противоположном цвете -\/ проигрыш, на своем -\/ выигрыш. На общее состояние Юнитов в пуле действие или бездействие пользователя со своим балансом влияния не оказывает. Без обновления баланса до состояния крайнего пула -\/ сдать баланс Юнитов протоколу невозможно. \end{DoxyCompactList}\item 
+std\+::vector$<$ eosio\+::asset $>$ \mbox{\hyperlink{structeosio_1_1core_ada24c50e781f7ed749e93f87ed68491d}{calculate\+\_\+forecast}} (account\+\_\+name username, account\+\_\+name host, uint64\+\_\+t quants, uint64\+\_\+t pool\+\_\+num)
+\begin{DoxyCompactList}\small\item\em Метод расчета прогнозов Внутренний метод расчета прогнозов выплат для последующих 4х пулов по балансу ядерных Юнитов и на основе будущих курсов. Используются только для демонастрации пользователю. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{structeosio_1_1core_a9de3452f29b79947afee91916eb429eb}{withdraw\+\_\+action}} (const \mbox{\hyperlink{structeosio_1_1withdraw}{withdraw}} \&op)
+\begin{DoxyCompactList}\small\item\em Публичный метод возврата баланса протоколу. Вывод средств возможен только для полностью обновленных (актуальных) балансов. Производит обмен Юнитов на управляющий токен и выплачивает на аккаунт пользователя. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{structeosio_1_1core_acf8abb1c3da1cc66eeb0777a3ebd74a6}\label{structeosio_1_1core_acf8abb1c3da1cc66eeb0777a3ebd74a6}} 
+\index{eosio\+::core@{eosio\+::core}!adjust\+\_\+emission\+\_\+pool@{adjust\+\_\+emission\+\_\+pool}}
+\index{adjust\+\_\+emission\+\_\+pool@{adjust\+\_\+emission\+\_\+pool}!eosio\+::core@{eosio\+::core}}
+\subsubsection{\texorpdfstring{adjust\+\_\+emission\+\_\+pool()}{adjust\_emission\_pool()}}
+{\footnotesize\ttfamily eosio\+::asset eosio\+::core\+::adjust\+\_\+emission\+\_\+pool (\begin{DoxyParamCaption}\item[{account\+\_\+name}]{hostname }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Внутренний метод расчета пула эмиссии. Вызывается в момент распределения эмиссии на цели сообщества. Расчет объема эмиссии происходит исходя из параметра life\+\_\+balance\+\_\+for\+\_\+sale завершенного пула, и процента эмиссии, установленного архитектором. Процент эмиссии ограничен от 0 до 1000\% относительного живого остатка на продажу в каждом новом пуле. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em hostname} & The hostname -\/ имя аккаунта хоста\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+\{ description\+\_\+of\+\_\+the\+\_\+return\+\_\+value \} 
+\end{DoxyReturn}
+\mbox{\Hypertarget{structeosio_1_1core_ada24c50e781f7ed749e93f87ed68491d}\label{structeosio_1_1core_ada24c50e781f7ed749e93f87ed68491d}} 
+\index{eosio\+::core@{eosio\+::core}!calculate\+\_\+forecast@{calculate\+\_\+forecast}}
+\index{calculate\+\_\+forecast@{calculate\+\_\+forecast}!eosio\+::core@{eosio\+::core}}
+\subsubsection{\texorpdfstring{calculate\+\_\+forecast()}{calculate\_forecast()}}
+{\footnotesize\ttfamily std\+::vector$<$eosio\+::asset$>$ eosio\+::core\+::calculate\+\_\+forecast (\begin{DoxyParamCaption}\item[{account\+\_\+name}]{username,  }\item[{account\+\_\+name}]{host,  }\item[{uint64\+\_\+t}]{quants,  }\item[{uint64\+\_\+t}]{pool\+\_\+num }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Метод расчета прогнозов Внутренний метод расчета прогнозов выплат для последующих 4х пулов по балансу ядерных Юнитов и на основе будущих курсов. Используются только для демонастрации пользователю. 
+
+T\+O\+DO Может дополнительно быть реализован в качестве внешнего метода достоверной проверки прогнозов, который с каждым вызовом производит расчет будущих курсов и расширяет массив с данными по желанию пользователя. Устранить избыток кода.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em username} & The username \\
+\hline
+\mbox{\tt in}  & {\em host} & The host \\
+\hline
+\mbox{\tt in}  & {\em quants} & The quants \\
+\hline
+\mbox{\tt in}  & {\em pool\+\_\+num} & The pool number\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+The forecast. 
+\end{DoxyReturn}
+\mbox{\Hypertarget{structeosio_1_1core_aa6d6b898bb6a6ff984ca47ff45bb2504}\label{structeosio_1_1core_aa6d6b898bb6a6ff984ca47ff45bb2504}} 
+\index{eosio\+::core@{eosio\+::core}!emission@{emission}}
+\index{emission@{emission}!eosio\+::core@{eosio\+::core}}
+\subsubsection{\texorpdfstring{emission()}{emission()}}
+{\footnotesize\ttfamily void eosio\+::core\+::emission (\begin{DoxyParamCaption}\item[{account\+\_\+name}]{host }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+внутренний метод эмиссии, который вызывается в момент распределения целевого фонда сообщества на цели участников. Вызывается в момент переключения порядкового номера пула на каждый последующий. Эмитирует в балансы активных целей сообщества установленный архитектором процент от свободного финансового потока из заранее накопленного в фонде целей сообщества. 
+
+Фонд целей сообщества пополняется в момент вывода выигрыша каждым победителем или прямым пополнением любым участником.
+
+Фонд целей сообщества расходуется исходя из текущего финансового оборота в спирали при переключении раунда на каждый следующий.
+
+Распределение в момент переключения пулов определяется параметром процента эмиссии от живого остатка на продажу, что представляет собой линию обратной связи от динамики вращения ядра. ~\newline
+ Таким образом, целевой фонд сообщества пополняется и расходуется согласно гибкому набору правил, обеспечивающих циркуляцию.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em host} & The host -\/ имя аккаунта хоста \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{structeosio_1_1core_a1c8358af15c27c968b4879661242ee7a}\label{structeosio_1_1core_a1c8358af15c27c968b4879661242ee7a}} 
+\index{eosio\+::core@{eosio\+::core}!emplace\+\_\+first\+\_\+pools@{emplace\+\_\+first\+\_\+pools}}
+\index{emplace\+\_\+first\+\_\+pools@{emplace\+\_\+first\+\_\+pools}!eosio\+::core@{eosio\+::core}}
+\subsubsection{\texorpdfstring{emplace\+\_\+first\+\_\+pools()}{emplace\_first\_pools()}}
+{\footnotesize\ttfamily void eosio\+::core\+::emplace\+\_\+first\+\_\+pools (\begin{DoxyParamCaption}\item[{account\+\_\+name}]{parent\+\_\+host,  }\item[{account\+\_\+name}]{main\+\_\+host,  }\item[{eosio\+::symbol\+\_\+name}]{root\+\_\+symbol }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Внутренний метод установки первых пулов нового цикла. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em parent\+\_\+host} & The parent host \\
+\hline
+\mbox{\tt in}  & {\em main\+\_\+host} & The main host \\
+\hline
+\mbox{\tt in}  & {\em root\+\_\+symbol} & The root symbol \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{structeosio_1_1core_a1638e74f48c2316a81db6e06f7593173}\label{structeosio_1_1core_a1638e74f48c2316a81db6e06f7593173}} 
+\index{eosio\+::core@{eosio\+::core}!fill\+\_\+pool@{fill\+\_\+pool}}
+\index{fill\+\_\+pool@{fill\+\_\+pool}!eosio\+::core@{eosio\+::core}}
+\subsubsection{\texorpdfstring{fill\+\_\+pool()}{fill\_pool()}}
+{\footnotesize\ttfamily void eosio\+::core\+::fill\+\_\+pool (\begin{DoxyParamCaption}\item[{account\+\_\+name}]{username,  }\item[{account\+\_\+name}]{host,  }\item[{uint64\+\_\+t}]{quants,  }\item[{eosio\+::asset}]{amount,  }\item[{uint64\+\_\+t}]{filled\+\_\+pool\+\_\+id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Внутренний метод заполнения пула. Вызывается в момент совершения депозита пользователем или на приоритетном входе. Создает баланс пользователю и уменьшает количество Юнитов в пуле. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em username} & The username \\
+\hline
+\mbox{\tt in}  & {\em host} & The host \\
+\hline
+\mbox{\tt in}  & {\em quants} & The quants \\
+\hline
+\mbox{\tt in}  & {\em amount} & The amount \\
+\hline
+\mbox{\tt in}  & {\em filled\+\_\+pool\+\_\+id} & The filled pool identifier \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{structeosio_1_1core_afe6cd2a363060de08f71f3f6a42079f7}\label{structeosio_1_1core_afe6cd2a363060de08f71f3f6a42079f7}} 
+\index{eosio\+::core@{eosio\+::core}!fund\+\_\+emi\+\_\+pool@{fund\+\_\+emi\+\_\+pool}}
+\index{fund\+\_\+emi\+\_\+pool@{fund\+\_\+emi\+\_\+pool}!eosio\+::core@{eosio\+::core}}
+\subsubsection{\texorpdfstring{fund\+\_\+emi\+\_\+pool()}{fund\_emi\_pool()}}
+{\footnotesize\ttfamily void eosio\+::core\+::fund\+\_\+emi\+\_\+pool (\begin{DoxyParamCaption}\item[{account\+\_\+name}]{username,  }\item[{account\+\_\+name}]{host,  }\item[{eosio\+::asset}]{amount,  }\item[{account\+\_\+name}]{code }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Метод ручного пополнения целевого фонда сообщества. Жетоны, попадающие в целевой фонд сообщества, подлежат распределению на цели с помощью голосования участников по установленным правилам консенсуса. 
+
+Метод может не использоваться, поскольку еще одним источником пополнения целевого фонда сообщества является установленный архитектором сообщества процент от финансового оборота ядра.
+
+Примеры\+: Выпущен 1 млн жетонов, 90\% из которых закреплены в целевом фонде, а 10\% распределяются среди участников через прямое расределение любым способом (например, продажей). В этом случае, 90\% жетонов должны быть помещены в целевой фонд, что гарантирует эмиссию жетонов на цели сообщества в зависимости от вращения ядра и установленного архитектором процента эмиссии при заранее известном общем количестве жетонов.
+
+В случае, когда конфигурацией экономики не предусмотрено использование целевого фонда сообществ, или же когда для его пополнения используется только автоматический режим в зависимости от финансового оборота ядра, метод ручного пополнения может не использоваться. И в то же время он всегда доступен любому участнику сообщества простым переводом средств на аккаунт протокола с указанием суб-\/кода назначения и имени хоста сообщества. ~\newline
+ 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em username} & The username -\/ имя пользователя, совершающего поолнение. \\
+\hline
+\mbox{\tt in}  & {\em host} & The host -\/ имя аккаунта хоста \\
+\hline
+\mbox{\tt in}  & {\em amount} & The amount -\/ сумма для пополнения \\
+\hline
+\mbox{\tt in}  & {\em code} & The code -\/ контракт токена, поступивший на вход. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{structeosio_1_1core_aa951318e432688f045d6893748a444cd}\label{structeosio_1_1core_aa951318e432688f045d6893748a444cd}} 
+\index{eosio\+::core@{eosio\+::core}!improve\+\_\+params\+\_\+of\+\_\+new\+\_\+cycle@{improve\+\_\+params\+\_\+of\+\_\+new\+\_\+cycle}}
+\index{improve\+\_\+params\+\_\+of\+\_\+new\+\_\+cycle@{improve\+\_\+params\+\_\+of\+\_\+new\+\_\+cycle}!eosio\+::core@{eosio\+::core}}
+\subsubsection{\texorpdfstring{improve\+\_\+params\+\_\+of\+\_\+new\+\_\+cycle()}{improve\_params\_of\_new\_cycle()}}
+{\footnotesize\ttfamily void eosio\+::core\+::improve\+\_\+params\+\_\+of\+\_\+new\+\_\+cycle (\begin{DoxyParamCaption}\item[{account\+\_\+name}]{host,  }\item[{account\+\_\+name}]{main\+\_\+host }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Получение параметров нового цикла. Внутренний метод, используемый для создания записей в базе данных, необходимых для запуска нового цикла. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em host} & The host -\/ имя аккаунта хоста \\
+\hline
+\mbox{\tt in}  & {\em main\+\_\+host} & The main host -\/ указатель на имя аккаунта второстепенного хоста, содержающего измененные параметры вращения (если такой есть) \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{structeosio_1_1core_a7436c6f8e26b2cb9f73884616d3f4c64}\label{structeosio_1_1core_a7436c6f8e26b2cb9f73884616d3f4c64}} 
+\index{eosio\+::core@{eosio\+::core}!next\+\_\+pool@{next\+\_\+pool}}
+\index{next\+\_\+pool@{next\+\_\+pool}!eosio\+::core@{eosio\+::core}}
+\subsubsection{\texorpdfstring{next\+\_\+pool()}{next\_pool()}}
+{\footnotesize\ttfamily void eosio\+::core\+::next\+\_\+pool (\begin{DoxyParamCaption}\item[{account\+\_\+name}]{host }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Внутренний метод открытия следующего пула Вызывается только при условии полного выкупа всех внутренних учетных единиц предыдущего пула. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em host} & The host \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{structeosio_1_1core_adf5822c41f9acc44534c06eb5d3e616b}\label{structeosio_1_1core_adf5822c41f9acc44534c06eb5d3e616b}} 
+\index{eosio\+::core@{eosio\+::core}!priority\+\_\+enter@{priority\+\_\+enter}}
+\index{priority\+\_\+enter@{priority\+\_\+enter}!eosio\+::core@{eosio\+::core}}
+\subsubsection{\texorpdfstring{priority\+\_\+enter()}{priority\_enter()}}
+{\footnotesize\ttfamily void eosio\+::core\+::priority\+\_\+enter (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structeosio_1_1priorenter}{priorenter}} \&}]{op }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Метод приоритетного входа в новый цикл. Доступен к использованию только при условии наличия предыдущего цикла, в котором участник имеет проигравший баланс. Позволяет зайти частью своего проигравшего баланса одновременно в два пула -\/ первый и второй нового цикла. Использование приоритетного входа возможно только до истечения времени приоритета, которое начинается в момент запуска цикла и продолжается до истечения таймера приоритета. 
+
+Метод позволяет проигравшим балансам предыдущего цикла перераспределиться в новом цикле развития так, чтобы быть в самом начале вращательного движения и тем самым, гарантировать выигрыш. В случае успеха исполнения метода, пользователь обменивает один свой старый проигравший баланс на два новых противоположных цветов.
+
+В ходе исполнения метода решается арифметическая задача перераспределения, при которой вычисляется максимально возможная сумма входа для имеющегося баланса одновременно в два первых пула. Остаток от суммы, который невозможно распределить на новые пулы по причине нераздельности минимальной учетной единицы, возвращается пользователю переводом.
+
+Приоритетный вход спроектирован таким образом, то если все проигравшие участники одновременно воспользуются им, то в точности 50\% внутренней учетной единицы для первого и второго пула будет выкуплено.
+
+T\+O\+DO возможно расширение приоритетного входа до 100\% от внутренней учетной единицы для первых двух пулов, а так же, продолжение приоритетного входа для всех последующих пулов.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em op} & The operation \\
+\hline
+\end{DoxyParams}
+Здесь происходит перерасчет исходя из того, какое колество жетонов пользователь может получить при условии равного выкупа Юнитов из первых двух пулов. Если после расчетов останется остаток, который не может быть равномерно распределен между пулами -\/ он возвращается пользователю.
+
+Здесь у пользователя есть доступная сумма баланса в токенах, которая меньше чем та, с которой участник может зайти в приоритете \char`\"{}на всю котлету\char`\"{}. Необходимо найти минимальную сумму в ядерных Юнитах, которая удовлетворяет условиям баланса и приоритетного входа.\mbox{\Hypertarget{structeosio_1_1core_a1ce681caf15438f64bd6cef01c008079}\label{structeosio_1_1core_a1ce681caf15438f64bd6cef01c008079}} 
+\index{eosio\+::core@{eosio\+::core}!profupdate\+\_\+action@{profupdate\+\_\+action}}
+\index{profupdate\+\_\+action@{profupdate\+\_\+action}!eosio\+::core@{eosio\+::core}}
+\subsubsection{\texorpdfstring{profupdate\+\_\+action()}{profupdate\_action()}}
+{\footnotesize\ttfamily void eosio\+::core\+::profupdate\+\_\+action (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structeosio_1_1profupdate}{profupdate}} \&}]{op }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Метод обновления профиля Операция обновления профиля позволяет изменить мета-\/данные аккаунта. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em op} & The operation \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{structeosio_1_1core_aebbed426e5072f1c0f43f051ff3c6e9d}\label{structeosio_1_1core_aebbed426e5072f1c0f43f051ff3c6e9d}} 
+\index{eosio\+::core@{eosio\+::core}!refresh\+\_\+balance\+\_\+action@{refresh\+\_\+balance\+\_\+action}}
+\index{refresh\+\_\+balance\+\_\+action@{refresh\+\_\+balance\+\_\+action}!eosio\+::core@{eosio\+::core}}
+\subsubsection{\texorpdfstring{refresh\+\_\+balance\+\_\+action()}{refresh\_balance\_action()}}
+{\footnotesize\ttfamily void eosio\+::core\+::refresh\+\_\+balance\+\_\+action (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structeosio_1_1refreshbal}{refreshbal}} \&}]{op }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Публичный метод обновления баланса Пересчет баланса каждого пользователя происходит по его собственному действию. Обновление баланса приводит к пересчету доступной суммы для вывода -\/ на противоположном цвете -\/ проигрыш, на своем -\/ выигрыш. На общее состояние Юнитов в пуле действие или бездействие пользователя со своим балансом влияния не оказывает. Без обновления баланса до состояния крайнего пула -\/ сдать баланс Юнитов протоколу невозможно. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em op} & The operation \\
+\hline
+\end{DoxyParams}
+~\newline
+Для расчетов выплат реферальных вознаграждений необходимо решить дифференциальное уравнение.\mbox{\Hypertarget{structeosio_1_1core_afcfd6d8fd630694c723ff06e4cd8cdfe}\label{structeosio_1_1core_afcfd6d8fd630694c723ff06e4cd8cdfe}} 
+\index{eosio\+::core@{eosio\+::core}!refresh\+\_\+state@{refresh\+\_\+state}}
+\index{refresh\+\_\+state@{refresh\+\_\+state}!eosio\+::core@{eosio\+::core}}
+\subsubsection{\texorpdfstring{refresh\+\_\+state()}{refresh\_state()}}
+{\footnotesize\ttfamily void eosio\+::core\+::refresh\+\_\+state (\begin{DoxyParamCaption}\item[{account\+\_\+name}]{host }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Публичный метод обновления состояния Проверяет пул на истечение во времени или завершение целого количества ядерных Юнитов. Запускает новый цикл или добавляет новый пул. 
+
+//\+T\+O\+DO устранить избыточность
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em host} & The host \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{structeosio_1_1core_ad6781ce293510a94cc421d386c9aae92}\label{structeosio_1_1core_ad6781ce293510a94cc421d386c9aae92}} 
+\index{eosio\+::core@{eosio\+::core}!reg\+\_\+action@{reg\+\_\+action}}
+\index{reg\+\_\+action@{reg\+\_\+action}!eosio\+::core@{eosio\+::core}}
+\subsubsection{\texorpdfstring{reg\+\_\+action()}{reg\_action()}}
+{\footnotesize\ttfamily void eosio\+::core\+::reg\+\_\+action (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structeosio_1_1reg}{reg}} \&}]{op }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Регистрация пользователя в системе. Характеризуется созданием профиля с ссылкой на приглашающий аккаунт. Приглашающий аккаунт используется в качестве связи для вычисления партнерских структур различного профиля. 
+
+T\+O\+DO ввести порядковые номера ~\newline
+ 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em op} & The operation \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{structeosio_1_1core_aeab146cbd52805b0e9689e32489d57d7}\label{structeosio_1_1core_aeab146cbd52805b0e9689e32489d57d7}} 
+\index{eosio\+::core@{eosio\+::core}!setparams\+\_\+action@{setparams\+\_\+action}}
+\index{setparams\+\_\+action@{setparams\+\_\+action}!eosio\+::core@{eosio\+::core}}
+\subsubsection{\texorpdfstring{setparams\+\_\+action()}{setparams\_action()}}
+{\footnotesize\ttfamily void eosio\+::core\+::setparams\+\_\+action (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structeosio_1_1setparams}{setparams}} \&}]{op }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Публичный метод установки параметров протокола двойной спирали Вызывается пользователем после базовой операции создания хоста и проведения оплаты. Так же вызывается при установке параметров дочернего хоста. Содержит алгоритм финансового ядра. Производит основные расчеты таблиц курсов и валидирует положительность бизнес-\/дохода. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em op} & The operation \\
+\hline
+\end{DoxyParams}
+Математическое ядро алгоритма курса двойной спирали.
+
+Позволяет исключить ошибку в расчете курсов, вызываемую особенностью округления минимальных используемых чисел.
+
+Проверка бизнес-\/модели на положительный баланс. Остатка на балансе в любой момент должно быть достаточно для выплат всем проигравшим и всем победителям. Если это не так -\/ протокол спирали не позволит себя создать.
+
+Установка таблиц курсов в область памяти хоста\mbox{\Hypertarget{structeosio_1_1core_a52b7bd0a4e7810a9911112c745f43fdb}\label{structeosio_1_1core_a52b7bd0a4e7810a9911112c745f43fdb}} 
+\index{eosio\+::core@{eosio\+::core}!start\+\_\+action@{start\+\_\+action}}
+\index{start\+\_\+action@{start\+\_\+action}!eosio\+::core@{eosio\+::core}}
+\subsubsection{\texorpdfstring{start\+\_\+action()}{start\_action()}}
+{\footnotesize\ttfamily void eosio\+::core\+::start\+\_\+action (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structeosio_1_1start}{start}} \&}]{op }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Публичный метод запуска хоста Метод необходимо вызвать для запуска хоста после установки параметров хоста. Добавляет первый цикл, два пула, переключает демонастративный флаг запуска и создает статистические объекты. Подписывается аккаунтом хоста. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em op} & The operation \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{structeosio_1_1core_a0d8a3a33305dee1fc3cda981cacf009a}\label{structeosio_1_1core_a0d8a3a33305dee1fc3cda981cacf009a}} 
+\index{eosio\+::core@{eosio\+::core}!start\+\_\+new\+\_\+cycle@{start\+\_\+new\+\_\+cycle}}
+\index{start\+\_\+new\+\_\+cycle@{start\+\_\+new\+\_\+cycle}!eosio\+::core@{eosio\+::core}}
+\subsubsection{\texorpdfstring{start\+\_\+new\+\_\+cycle()}{start\_new\_cycle()}}
+{\footnotesize\ttfamily void eosio\+::core\+::start\+\_\+new\+\_\+cycle (\begin{DoxyParamCaption}\item[{account\+\_\+name}]{host }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Внутрений метод запуска нового цикла. Вызывается при достижении одного из множества условий. Вызывает расчет показательной статистики цикла и установку новых пулов. Если установлен флаг переключения на дочерний хост, здесь происходит замена основного хоста и снятие флага. Дочерний хост хранит в себе измененные параметры финансового ядра. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em host} & The host \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{structeosio_1_1core_a9de3452f29b79947afee91916eb429eb}\label{structeosio_1_1core_a9de3452f29b79947afee91916eb429eb}} 
+\index{eosio\+::core@{eosio\+::core}!withdraw\+\_\+action@{withdraw\+\_\+action}}
+\index{withdraw\+\_\+action@{withdraw\+\_\+action}!eosio\+::core@{eosio\+::core}}
+\subsubsection{\texorpdfstring{withdraw\+\_\+action()}{withdraw\_action()}}
+{\footnotesize\ttfamily void eosio\+::core\+::withdraw\+\_\+action (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{structeosio_1_1withdraw}{withdraw}} \&}]{op }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [inline]}}
+
+
+
+Публичный метод возврата баланса протоколу. Вывод средств возможен только для полностью обновленных (актуальных) балансов. Производит обмен Юнитов на управляющий токен и выплачивает на аккаунт пользователя. 
+
+Производит расчет реферальных вознаграждений, генерируемых выплатой, и отправляет их всем партнерам согласно установленной формы.
+
+Производит финансовое распределение между управляющими компаниями и целевым фондом сообщества.
+
+Каждый последующий пул, который участник проходит в качестве победителя, генеририрует бизнес-\/доход, который расчитывается исходя из того, что в текущий момент, средств всех проигравших полностью достаточно наа выплаты всем победителям с остатком. Этот остаток, в прапорции Юнитов пользователя и общего количества Юнитов в раунде, позволяет расчитать моментальную выплату, которая может быть изъята из системы при сохранении абсолютного балланса.
+
+Изымаемая сумма из общего котла управляющих токенов, разделяется на три потока, определяемые двумя параметрами\+:
+\begin{DoxyItemize}
+\item Процент выплат на рефералов. Устанавливается в диапазоне от 0 до 100. Отсекает собой ровно ту часть пирога, которая уходит на выплаты по всем уровням реферальной структуры согласно ее формы.
+\item Процент выплат на корпоративных управляющих. Устанавливается в диапазоне от 0 до 100.
+\item Остаток от остатка распределяется в фонд целей сообщества.
+\end{DoxyItemize}
+
+Таким образом, коэффициенты позволяют распределять единый системный фонд по окружности с тремя секторами, где каждый сектор есть фонд со своим назначением. ~\newline
+~\newline
+~\newline
+~\newline
+~\newline
+~\newline
+~\newline
+~\newline
+~\newline
+~\newline
+~\newline
+~\newline
+~\newline
+ Например, если общий доход от движения баланса пользователя по спирали составляет 100 U\+SD, а коэфициенты распределения Рефералов и Корпоративных Управляющих равняются соответственно по 0.\+5 (50\%), то все рефералы получат по 33\$, все управляющие получат по 33\$, и еще 33\$ попадет в фонд целей сообщества. 1\$ останется в качестве комиссии округления на делении у протокола.
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em op} & The operation \\
+\hline
+\end{DoxyParams}
+Номинал Номинал выплачивается если выполняется одно из условий\+:
+\begin{DoxyItemize}
+\item баланс куплен в одном из первых двух пулов, а текущий пул не выше второго;
+\item баланс куплен в текущем пуле;
+\item баланс куплен в последнем из возможных пулов;
+\end{DoxyItemize}
+
+Выигрыш или проигрыш. Расчет производится на основе сравнения текущего цвета пула с цветом пула входа. При совпадении цветов -\/ баланс выиграл. При несовпадении -\/ проиграл.
+
+Выигрыш. Инициирует распределение реферальных вознаграждений и выплаты во все фонды.
+
+Вычисляем размер выплаты для каждого уровня партнеров и производим выплаты.
+
+Все неиспользуемые вознаграждения с вышестояющих уровней отправляются на аккаунт хоста сообщества.
+
+Если рефералов у пользователя нет, то переводим все реферальные средства на аккаунт хоста.
+
+Модифицируем объект реферальной статистики для дальнейшей сверки с расчетными данными.
+
+Расчет выплат на управляющие аккаунты. В первом приближении для выплат используем единственный аккаунт хоста. Позже можем использовать массив управляющих аккаунтов и условия распределеления согласно любой модели (акции, равенство, и т.\+д.).
+
+Объект sincome содержит статистическую информацию о фактическом распределении корпоративных выплат и пополнений целевого фонда.
+
+Все ядерные Юниты победителей должны быть возвращены в пулы.
+
+T\+O\+DO Здесь может происходить начисление Юнитов распределения -\/ например, передача пользователю силы сообщества за участие во вращении спирали ядра или перевод любых токенов согласно инверсии текущего курса -\/ чем раньше вошел во вращение -\/ тем больше получил жетонов в дополнение к тому балансу, который ты уже выиграл.
+
+Модицикация не обязательна, поскольку баланс удаляется. Использовалось при отладке.
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+core.\+cpp\end{DoxyCompactItemize}

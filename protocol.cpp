@@ -13,6 +13,8 @@
 #include "badges.cpp"
 #include "tasks.cpp"
 #include "ipfs.cpp"
+#include "cms.cpp"
+
 using namespace eosio;
 
 
@@ -34,9 +36,10 @@ extern "C" {
                 //110 - pay for host
                 //200 - buyshares
                 //300 - goal activate action
+                //400 - direct fund emission pool
+                //500 - buy data
+                //666 - direct fund core balance for some purposes
                 
-                //TODO CHECK FOR CODE!!! if (code == N(eosio.token)){
-
                 switch (subintcode){
                     case 100: {
                         //check for code inside
@@ -50,18 +53,17 @@ extern "C" {
                         //check for code outside
                         //auto cd = eosio::string_to_name(code.c_str());
                         //Pay for upgrade
-                        eosio_assert(code == N(eosio.token), "Only eosio.token contract can be used for upgrade");
+                        
                         auto host = eosio::string_to_name(parameter.c_str());
-                        hosts_struct().pay_for_upgrade(host, op.quantity);
+                        hosts_struct().pay_for_upgrade(host, op.quantity, code);
                         break;
                     }
                     case 200: {
                         //check for code outside
                         //auto cd = eosio::string_to_name(code.c_str());
                         //Buy Shares
-                        eosio_assert(code == N(eosio.token), "Only eosio.token contract can be used for buy power");
                         auto host = eosio::string_to_name(parameter.c_str());
-                        shares().buyshares_action(op.from, host, op.quantity);
+                        shares().buyshares_action(op.from, host, op.quantity, code);
                         break;
                     }
                     case 300: {
@@ -81,6 +83,20 @@ extern "C" {
                         
                         auto host = eosio::string_to_name(parameter.c_str());
                         core().fund_emi_pool(op.from, host, op.quantity, code);
+                        break;
+                    }
+
+                    case 500: {
+                        //BUY DATA
+                        auto delimeter2 = parameter.find('-');
+                        std::string parameter2 = parameter.substr(delimeter2+1, parameter.length());
+                        
+                        auto owner = eosio::string_to_name(parameter2.c_str());
+                        auto buyer = op.from;
+                        uint64_t data_id = atoi(parameter.c_str());  
+                        require_auth(buyer);  
+
+                        ipfs().buydata_action(owner, data_id, buyer, op.quantity, code);
                         break;
                     }
                     case 666: {
@@ -115,15 +131,36 @@ extern "C" {
                     goal().report_action(eosio::unpack_action_data<report>());
                     break;
                  }
-
                  case N(check) : {
                     goal().check_action(eosio::unpack_action_data<check>());
                     break;
                 }
 
+                //CMS
+                case N(setcontent): {
+                    cms().setcontent_action(eosio::unpack_action_data<setcontent>());
+                    break;
+                }
+
+                case N(rmcontent): {
+                    cms().rmcontent_action(eosio::unpack_action_data<rmcontent>());
+                    break;
+                }
+
+                case N(setcmsconfig): {
+                    cms().setcmsconfig_action(eosio::unpack_action_data<setcmsconfig>());
+                    break;
+                }
+
+
                 //IPFS
                 case N(setstorage): {
                     ipfs().setstorage_action(eosio::unpack_action_data<setstorage>());
+                    break;
+                }
+
+                case N(removeroute): {
+                    ipfs().removeroute_action(eosio::unpack_action_data<removeroute>());
                     break;
                 }
 
@@ -132,6 +169,16 @@ extern "C" {
                     break;
                 }
 
+                case N(selldata): {
+                    ipfs().selldata_action(eosio::unpack_action_data<selldata>());
+                    break;
+                }
+                
+                case N(dataapprove): {
+                    ipfs().orbapprove_action(eosio::unpack_action_data<dataapprove>());
+                    break;
+                }
+               
                 //VOTING
                  case N(vote): { 
                     voting().vote_action(eosio::unpack_action_data<vote>());
@@ -189,19 +236,7 @@ extern "C" {
                     core().refresh_state(op.host);
                     break;
                 };
-
-                //TODO delete it
-                case N(mstartcycle): {
-                    auto op = eosio::unpack_action_data<mstartcycle>();
-                    core().start_new_cycle_manual(op);
-                    break;
-                };
                 
-                case N(ehosttime):{
-                    auto op = eosio::unpack_action_data<ehosttime>();
-                    hosts_struct().ehosttime_action(op);
-                    break;
-                };
                 case N(withdraw): {
                     core().withdraw_action(eosio::unpack_action_data<withdraw>());
                     break;
@@ -223,7 +258,7 @@ extern "C" {
                     break;
                 };
                 case N(setemi):{
-                    hosts_struct().set_emission_action(eosio::unpack_action_data<setemi>());
+                    goal().set_emission_action(eosio::unpack_action_data<setemi>());
                     break;
                 };
 
@@ -232,11 +267,7 @@ extern "C" {
                     break;
                 };
 
-                case N(deactivate):{
-                    hosts_struct().deactivate_action(eosio::unpack_action_data<deactivate>());
-                    break;
-                }
-
+            
                 //BADGES
                 case N(setbadge):{
                     badge_struct().setbadge_action(eosio::unpack_action_data<setbadge>());

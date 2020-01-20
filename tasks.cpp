@@ -1,8 +1,22 @@
 namespace eosio{
 
+/**
+ * @brief      Модуль задач
+ * Задачи есть составляющие части достижения любой цели. 
+ * Постановка задач осуществляется только в рамках целей. 
+ * Задачи могут быть 
+ * 	- публичными, т.е. достуными к исполнению каждым участником сообщества, 
+ * 	- приватными, т.е. доступными к исполнению только внутренним управляющим командам.
+ */
+
 struct tsks
 {
-
+	/**
+	 * @brief      Публичный метод создания задачи
+	 * Может использовать только аккаунт хоста на текущий момент. 
+	 *
+	 * @param[in]  op    The operation
+	 */
 	void settask_action (const settask &op){
 		
 		require_auth(op.host);
@@ -38,7 +52,12 @@ struct tsks
 
 	}
 
-
+	/**
+	 * @brief      Публичный метод фондирования задачи
+	 * Исполняется хостом для пополнения баланса задачи из доступного баланса цели. 
+	 * 
+	 * @param[in]  op    The operation
+	 */
 	void fundtask_action(const fundtask &op){
 		require_auth(op.host);
 
@@ -71,6 +90,12 @@ struct tsks
 
 	}
 
+	/**
+	 * @brief      Метод активации задачи
+	 * Вызывается хостом для активации выполнения поставленной задачи. 
+	 * 
+	 * @param[in]  op    The operation
+	 */
 	void tactivate_action (const tactivate &op){
 		require_auth(op.host);
 		account_index accounts(_self, _self);
@@ -91,6 +116,11 @@ struct tsks
 
 	}
 	
+	/**
+	 * @brief      Публичный метод деактивации задачи
+	 * Применимо для публичных задач, когда поставленная цель достигнута или недостижима.
+	 * @param[in]  op    The operation
+	 */
 	void tdeactivate_action (const tdeactivate &op){
 		require_auth(op.host);
 		account_index accounts(_self, _self);
@@ -111,6 +141,12 @@ struct tsks
 
 	}
 
+	/**
+	 * @brief      Публичный метод создания отчета о выполненной задаче
+	 * Применяется исполнителем задачи для того, чтобы отправить отчет на проверку. 
+	 * 
+	 * @param[in]  op    The operation
+	 */
 	void setreport_action (const setreport &op){
 		// account_name host;
 		// account_name username;
@@ -132,12 +168,9 @@ struct tsks
 		tasks_index tasks(_self, op.host);
 		auto task = tasks.find(op.task_id);
 		eosio_assert(task != tasks.end(), "Task is not found");
-		eosio_assert(task-> active == true, "Task is not active");
-		
-		
-		//check by complex key USERNAME & ID
-		//IF not exist - do
-
+		eosio_assert(task -> active == true, "Task is not active");
+		eosio_assert(task -> is_public == true, "Only public tasks is accessable for now");
+	
 		reports_index reports(_self, op.host);
 		
 		auto users_with_id = reports.template get_index<N(user_with_task)>();
@@ -160,6 +193,11 @@ struct tsks
 
 	}
 
+	/**
+	 * @brief      Публиный метод редактирования отчета
+	 * В случае, если отчет не принят, участник получает возможность отредактировать свой отчет и выслать его на проверку повторно. 
+	 * @param[in]  op    The operation
+	 */
 	void editreport_action (const editreport &op){
 		// require_auth(op.voter);
 		require_auth(op.username);
@@ -179,6 +217,12 @@ struct tsks
 		});
 	}
 
+	/**
+	 * @brief      Публичный метод одобрения отчета
+	 * Используется хостом для того, чтобы принять задачу как выполненную и выдать вознаграждение / награду в виде значка. 
+	 *
+	 * @param[in]  op    The operation
+	 */
 	void approver_action (const approver &op){
 		// require_auth(op.voter);
 		require_auth(op.host);
@@ -230,6 +274,11 @@ struct tsks
 	
 	}
 
+	/**
+	 * @brief      Публичный метод отклонения отчета
+	 * 
+	 * @param[in]  op    The operation
+	 */
 	void disapprover_action (const disapprover &op){
 		require_auth(op.host);
 		account_index accounts(_self, _self);

@@ -1,13 +1,22 @@
 
 using namespace eosio;
 
+/**
+ * @brief      Модуль целей. 
+ * Использует долю потока эмиссии для финансирования целей сообщества. 
+ * Каждый участник может предложить цель к финансированию. Суть и смысл цели ограничен только желаниями сообщества.
+ * Каждая цель должна пройти минимальный порог процента собранных голосов от держателей силы сообщества.
+ * Цели, прошедшие порог консенсуса сообщества, попадают в лист финансирования. 
+ * Все цели в листе финансирования получают равный поток финансирования относительно друг друга.
+ * Финансирование поступает в объект баланса цели в момент перехода на каждый следующий пул, или напрямую из фонда сообщества по подписи архитектора.  
+ * 
+ */
 struct goal {
-
-/*
-Модуль Целей
-*/
-
-
+  /**
+   * @brief      Метод создания цели
+   * 
+   * @param[in]  op    The new value
+   */
 	void set_goal_action(const setgoal &op){
 		require_auth(op.username);
 		
@@ -48,6 +57,13 @@ struct goal {
         });
 	};
 
+
+  /**
+   * @brief      Метод прямого финансирования цели
+   * Используется архитектором для финансирования цели из фонда 
+   *
+   * @param[in]  op    The operation
+   */
 	void fund_goal_action(const dfundgoal &op){
 		require_auth(op.architect);
 	    // account_name architect;
@@ -74,6 +90,11 @@ struct goal {
 
 	};
 
+ /**
+  * @brief      Метод редактирования цели
+  *
+  * @param[in]  op    The operation
+  */
 
 	void edit_goal_action(const editgoal &op){
 		require_auth(op.username);
@@ -112,6 +133,11 @@ struct goal {
 
 	}
 
+  /**
+   * @brief      Метод удаления цели
+   *
+   * @param[in]  op    The operation
+   */
 	void del_goal_action(const delgoal &op){
 		require_auth(op.username);
 		goals_index goals(_self, op.host);
@@ -126,7 +152,11 @@ struct goal {
 
 	}
 
-
+  /**
+   * @brief      Метод создания отчета о завершенной цели
+   *
+   * @param[in]  op    The operation
+   */
 	void report_action(const report &op){
 		require_auth(op.username);
 		
@@ -149,6 +179,12 @@ struct goal {
 		});
 	}
 
+  /**
+   * @brief      Метод проверки отчета
+   * Отчет о достижении цели на текущий момент проверяется только архитектором. 
+   *
+   * @param[in]  op    The operation
+   */
 	void check_action(const check &op){
 		require_auth(op.architect);
 		account_index accounts(_self, _self);
@@ -166,6 +202,16 @@ struct goal {
 		});
 	};
 
+  /**
+   * @brief      Метод спонсорского взноса на цель
+   * Позволяет любому участнику произвести финансирование цели из числа собственных средств. 
+   *
+   * @param[in]  from      The from
+   * @param[in]  host      The host
+   * @param[in]  goal_id   The goal identifier
+   * @param[in]  quantity  The quantity
+   * @param[in]  code      The code
+   */
 	void donate_action(account_name from, account_name host, uint64_t goal_id, eosio::asset quantity, account_name code){
 		// require_auth(from);
 		
@@ -191,36 +237,78 @@ struct goal {
 
 	}
 
+  /**
+   * @brief      Метод финансирования цели через оператора сообщества.
+   * Позволяет оператору сообщества расходовать баланс целей на перечисления прямым спонсорам. 
+   * Используется в риверсной экономической модели, когда корневой токен сообщества является котировочным токеном силы сообщества, 
+   * и накаким другим способом изначально не распределяется, кроме как на спонсоров целей (дефицитная ICO - модель).
+   *
+   * @param[in]  op    The operation
+   */
+  void gsponsor_action(const gsponsor &op){
+    require_auth (op.hoperator);
 
-	void gsponsor_action(const gsponsor &op){
-		require_auth (op.hoperator);
+    account_index accounts(_self, _self);
+    auto acc = accounts.find(op.host);
+    eosio_assert(acc->hoperator == op.hoperator, "Wrong operator for this host");
+    goals_index goals(_self, op.host);
 
-		account_index accounts(_self, _self);
-		auto acc = accounts.find(op.host);
-		eosio_assert(acc->hoperator == op.hoperator, "Wrong operator for this host");
-		goals_index goals(_self, op.host);
+    auto goal = goals.find(op.goal_id);
+    eosio_assert(goal != goals.end(), "Goal is not founded");
+    auto root_symbol = (acc->root_token).symbol;
 
-		auto goal = goals.find(op.goal_id);
-		eosio_assert(goal != goals.end(), "Goal is not founded");
-		auto root_symbol = (acc->root_token).symbol;
+    eosio_assert(op.amount.symbol == root_symbol, "Wrong root symbol");
 
-		eosio_assert(op.amount.symbol == root_symbol, "Wrong root symbol");
+    eosio_assert(goal->available >= op.amount, "Not enough tokens for sponsorhip action. ");
 
-		eosio_assert(goal->available >= op.amount, "Not enough tokens for sponsorhip action. ");
-
-		action(
+    action(
                 permission_level{ _self, N(active) },
                 acc->root_token_contract, N(transfer),
                 std::make_tuple( _self, op.reciever, op.amount, std::string("Sponsor")) 
         ).send();
 
         goals.modify(goal, op.hoperator, [&](auto &g){
-        	g.available = g.available - op.amount;
-        	g.withdrawed = g.withdrawed + op.amount;
+          g.available = g.available - op.amount;
+          g.withdrawed = g.withdrawed + op.amount;
         });
 
-	}
+  }
 
+
+/**
+ * @brief Метод установки скорости эмиссии и размера листа финансирования
+ *       
+ *
+ * @param[in]  op    The new value
+ */
+    void set_emission_action(const setemi&op){
+        require_auth(op.host);
+        account_index hosts (_self, _self);
+        auto host = hosts.find(op.host);
+        eosio_assert(host != hosts.end(), "Host not exist");
+        
+        auto ahost = host->get_ahost();
+        auto root_symbol = host->get_root_symbol();
+    
+        emission_index emis(_self, _self);
+        auto emi = emis.find(op.host);
+        eosio_assert(op.gtop <= 100, "Goal top should be less then 100");
+        eosio_assert(op.percent <= 1000 * PERCENT_PRECISION, "Emission percent should be less then 100 * PERCENT_PRECISION");
+        
+        emis.modify(emi, op.host, [&](auto &e){
+            e.percent = op.percent;
+            e.gtop = op.gtop;
+        });
+
+    }
+
+
+  /**
+   * @brief      Метод вывода баланса цели
+   * Выводит доступный баланс цели на аккаунт бенефактора (постановщика) цели.
+   *
+   * @param[in]  op    The operation
+   */
 	void gwithdraw_action(const gwithdraw &op){
 		require_auth(op.username);
 		auto username = op.username;

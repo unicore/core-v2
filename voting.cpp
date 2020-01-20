@@ -52,8 +52,8 @@ struct voting
 		auto voter = op.voter;
 		
 		user_index users(_self,_self);
-        auto user = users.find(op.voter);
-        eosio_assert(user != users.end(), "User is not registered");
+    auto user = users.find(op.voter);
+    eosio_assert(user != users.end(), "User is not registered");
 
 		uint64_t vote_count = count_votes(voter, host);
 
@@ -71,7 +71,7 @@ struct voting
 		auto acc = accounts.find(goal->host);
 
 		powermarket market(_self, host);
-		auto itr = market.find(S(4,BANCORE));
+		auto itr = market.find(S(4, POWER));
 		auto liquid_shares = acc->total_shares - itr->base.balance.amount;
 
 		// print("LIQUIDSHARES ", liquid_shares);
@@ -98,25 +98,29 @@ struct voting
 			//ADD VOTE
 			eosio_assert(vote_count < _TOTAL_VOTES, "Votes limit is exceeded");
 
-	        eosio_assert(goal->completed == false, "You cant vote for completed goal");
-	        
-	        voters.push_back(voter);
-	        
-	        goals.modify(goal, voter, [&](auto &g){
-	         	op.up == true ? g.total_votes = goal->total_votes + pow -> power : g.total_votes =  goal->total_votes - pow->power;
-	         	
-	         	g.voters = voters;
-	         	int64_t votes_percent = g.total_votes * 100 * PERCENT_PRECISION / liquid_shares;
-	         	g.validated = votes_percent >= acc->consensus_percent && g.total_votes > 0;
-				
-	        });
+      eosio_assert(goal->completed == false, "You cant vote for completed goal");
+      
+      if (op.up == false){
+      	eosio_assert(acc->voting_only_up == false, "Downvoting is prohibited");
+      }
 
-	        votes.emplace(voter, [&](auto &v){
-	        	v.id = votes.available_primary_key();
-	        	v.goal_id = goal->id;
-	        	v.host = goal->host;
-	        	v.power = op.up == true ? pow -> power : -pow->power;
-	        });
+      voters.push_back(voter);
+      
+      goals.modify(goal, voter, [&](auto &g){
+       	op.up == true ? g.total_votes = goal->total_votes + pow -> power : g.total_votes =  goal->total_votes - pow->power;
+       	
+       	g.voters = voters;
+       	int64_t votes_percent = g.total_votes * 100 * PERCENT_PRECISION / liquid_shares;
+       	g.validated = votes_percent >= acc->consensus_percent && g.total_votes > 0;
+		
+      });
+
+      votes.emplace(voter, [&](auto &v){
+      	v.id = votes.available_primary_key();
+      	v.goal_id = goal->id;
+      	v.host = goal->host;
+      	v.power = op.up == true ? pow -> power : -pow->power;
+      });
 	        
 		} else {
 			auto voters = goal -> voters;

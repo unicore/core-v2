@@ -35,9 +35,11 @@ namespace eosio {
 
         std::string title;
         std::string purpose;
-        
+        bool voting_only_up = false;
+        bool can_architect_fund_goals = true;
         uint64_t total_shares;
         eosio::asset quote_amount;
+        account_name quote_token_contract;
         account_name root_token_contract;
         eosio::asset root_token;
         std::string symbol;
@@ -58,7 +60,7 @@ namespace eosio {
 
         EOSLIB_SERIALIZE( hosts, (username)(registered_at)(architect)(hoperator)(type)(consensus_percent)(referral_percent)
             (dacs_percent)(levels)(dac_mode)(dacs)(ahost)(chosts)(non_active_chost)(need_switch)(fhosts_mode)(fhosts)
-            (title)(purpose)(total_shares)(quote_amount)(root_token_contract)(root_token)(symbol)(precision)
+            (title)(purpose)(voting_only_up)(can_architect_fund_goals)(total_shares)(quote_amount)(quote_token_contract)(root_token_contract)(root_token)(symbol)(precision)
             (to_pay)(payed)(cycle_start_id)(current_pool_id)
             (current_cycle_num)(current_pool_num)(parameters_setted)(activated)(priority_flag)(meta))
 
@@ -130,15 +132,17 @@ namespace eosio {
         std::string purpose;
         uint64_t total_shares;
         eosio::asset quote_amount;
+        account_name quote_token_contract;
         eosio::asset root_token;
         account_name root_token_contract;
+        bool voting_only_up = true;
         uint64_t consensus_percent; 
         uint64_t referral_percent;
         uint64_t dacs_percent;
         std::vector<uint64_t> levels;
         std::string meta;
 
-        EOSLIB_SERIALIZE( upgrade, (username)(title)(purpose)(total_shares)(quote_amount)(root_token)(root_token_contract)(consensus_percent)(referral_percent)(dacs_percent)(levels)(meta))
+        EOSLIB_SERIALIZE( upgrade, (username)(title)(purpose)(total_shares)(quote_amount)(quote_token_contract)(root_token)(root_token_contract)(voting_only_up)(consensus_percent)(referral_percent)(dacs_percent)(levels)(meta))
     };
 
     // @abi action

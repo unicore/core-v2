@@ -1,13 +1,17 @@
 
 using namespace eosio;
 
+/**
+ * @brief      Модуль Знаков Отличия
+ */
 struct badge_struct {
 
-/*
-Модуль Значков
-*/
-
-
+	/**
+	 * @brief      Метод создания значка
+	 *
+	 *
+	 * @param[in]  op    The operation
+	 */
 	void setbadge_action(const setbadge &op){
 		require_auth(op.host);
 		
@@ -48,21 +52,11 @@ struct badge_struct {
 
 	};
 
-	// void delbadge_action(const delbadge &op){
-	// 	require_auth(op.host);
-		
-	// 	account_index accounts(_self, _self);
-	// 	auto acc = accounts.find(op.host);
-
-	// 	eosio_assert(acc != accounts.end(), "Host is not found");
-	// 	badge_index badges(_self, op.host);
-	// 	auto badge = badges.find(op.badge_id);
-	// 	eosio_assert(badge->total == badge->remain, "Cannot delete this badge in reason that already gifted");
-
-	// 	badges.erase(badge);
-
-	// };
-	
+	/**
+	 * @brief      Метод передачи значка награждаемому
+	 *
+	 * @param[in]  op    The operation
+	 */
 	void giftbadge_action(const giftbadge &op){
 		account_index accounts(_self, _self);
 		auto acc = accounts.find(op.host);
@@ -109,10 +103,16 @@ struct badge_struct {
 
 		shares().delegate_shares_action(delsh);
 
-
 	};
 
+	/**
+	 * @brief      Метод возврата значка
+	 * Может быть использован хостом для возврата выданного значка. 
+	 *
+	 * @param[in]  op    The operation
+	 */
 	void backbadge_action(const backbadge &op){
+
 		require_auth(op.host);
 		account_index accounts(_self, _self);
 		auto acc = accounts.find(op.host);

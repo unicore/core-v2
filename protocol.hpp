@@ -15,17 +15,20 @@
 #include "badges.hpp"
 #include "tasks.hpp"
 #include "ipfs.hpp"
+#include "cms.hpp"
 
 #define QUANTS_PRECISION 1000000
 #define PERCENT_PRECISION 10000
 
-
 namespace eosio {
     static const account_name _self = N(tt.tc);
     static const account_name _registrator = N(bob.tc);
-    
+    static const account_name _curator = N(bob.tc);
+
+
     static const eosio::symbol_name _SYM = S(4,FLO);
 
+    static const uint64_t _DATA_ORDER_EXPIRATION = 86400;
     static const uint64_t _SHARES_VESTING_DURATION = 604800;
     static const uint64_t _TOTAL_VOTES = 7;
     static const uint64_t _MAX_LEVELS = 7;
@@ -167,18 +170,34 @@ namespace eosio {
     typedef eosio::multi_index<N(sincome), sincome> sincome_index;
     
 
+
+    // @abi table userscount
+    struct userscount
+     {
+         uint64_t id;
+         uint64_t count;
+         eosio::string subject = "registered";
+         uint64_t primary_key() const {return 0;}
+
+         EOSLIB_SERIALIZE(userscount, (id)(count)(subject))
+     }; 
+    typedef eosio::multi_index<N(userscount), userscount> userscount_index;
+
+
     // @abi table users i64
     struct users{
         account_name username;
         account_name referer;
-        bool rules = true;
+        uint64_t id;
+        bool verified = false;
+        bool accepted_rules = false;
         bool is_host = false;
         
         std::string meta;
         account_name primary_key() const{return username;}
         account_name by_secondary_key() const{return referer;}
 
-        EOSLIB_SERIALIZE(users, (username)(referer)(rules)(is_host)(meta))
+        EOSLIB_SERIALIZE(users, (username)(referer)(id)(verified)(accepted_rules)(is_host)(meta))
     };
 
     typedef eosio::multi_index<N(users), users,
