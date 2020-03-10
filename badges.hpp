@@ -21,19 +21,19 @@ namespace eosio {
 	struct usbadges{
 		uint64_t id;
 		account_name host;
-		uint64_t badge_type;
+		uint64_t badge_id;
+
         eosio::string caption;
         eosio::string description;
         eosio::string iurl;
 		eosio::string comment;
-		eosio::time_point_sec recieved_at;
-        bool backed = false;
-        eosio::string backreason;
+		uint64_t power;
+        eosio::time_point_sec recieved_at;
 
 		uint64_t primary_key() const {return id;}
 		uint64_t host_key() const {return host;}
 		
-		EOSLIB_SERIALIZE(struct usbadges, (id)(host)(badge_type)(caption)(description)(iurl)(comment)(recieved_at)(backed)(backreason))
+		EOSLIB_SERIALIZE(struct usbadges, (id)(host)(badge_id)(caption)(description)(iurl)(comment)(power)(recieved_at))
 	};
 
 	typedef eosio::multi_index<N(usbadges), usbadges> usbadge_index;
@@ -67,10 +67,10 @@ namespace eosio {
     struct giftbadge {
     	account_name host;
     	account_name to;
-    	uint64_t badge_type;
+    	uint64_t badge_id;
     	eosio::string comment;
 
-    	EOSLIB_SERIALIZE(giftbadge, (host)(to)(badge_type)(comment))
+    	EOSLIB_SERIALIZE(giftbadge, (host)(to)(badge_id)(comment))
     };
 
     //@abi action backbadge

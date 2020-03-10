@@ -185,7 +185,7 @@ function SearchBox(name, resultsPath, inFrame, label)
     var e  = (evt) ? evt : window.event; // for IE
     if (e.keyCode==40 || e.keyCode==13)
     {
-      if (e.shiftKey==1)
+      if (e.quants_precisionKey==1)
       {
         this.OnSearchSelectShow();
         var win=this.DOMSearchSelectWindow();

@@ -35,7 +35,7 @@ struct hosts_struct {
     void set_architect_action (const setarch &op){
         require_auth(op.host);
 
-        account_index accounts(_self, _self);
+        account_index accounts(_self, op.host);
         auto acc = accounts.find(op.host);
         eosio_assert(acc != accounts.end(), "Host is not found");
         accounts.modify(acc, _self, [&](auto &a){
@@ -98,7 +98,10 @@ struct hosts_struct {
         eosio_assert(op.referral_percent <= 100 * PERCENT_PRECISION, "referral_percent should be between 0 and 100 * PERCENT_PRECISION (1000000)");
         
         eosio_assert(op.dacs_percent <= 100 * PERCENT_PRECISION, "dacs_percent should be between 0 and 100 * PERCENT_PRECISION (1000000)");
-        eosio_assert(op.referral_percent + op.dacs_percent <= 100 * PERCENT_PRECISION, "Referral and Dacs percent should be less or equal 100% PERCENT_PRECISION in their summ");
+        eosio_assert(op.referral_percent <= 100 * PERCENT_PRECISION, "Referral and Dacs percent should be less or equal 100% PERCENT_PRECISION in their summ");
+
+        eosio_assert(op.emission_percent <= 1000 * PERCENT_PRECISION, "emission_percent should be between 0 and 1000 * PERCENT_PRECISION (10000000)");
+        eosio_assert(op.gtop <= 100, "Goal top should be less then 100");
 
         //CHECK for referal levels;
         uint64_t level_count = 0;
@@ -117,7 +120,7 @@ struct hosts_struct {
         eosio_assert(level_count <= _MAX_LEVELS, "Exceed the maximum number of levels");
         //END CHECK
 
-        account_index accounts(_self, _self);
+        account_index accounts(_self, op.username);
         
         auto itr = accounts.find(op.username);
         eosio_assert(itr == accounts.end(), "Account is already upgraded to Host");
@@ -128,8 +131,8 @@ struct hosts_struct {
         //check for exist quote and root tokens
 
 
-        auto failure_if_root_not_exist = eosio::token(op.root_token_contract).get_supply(eosio::symbol_type(op.root_token.symbol).name()).amount;
-        
+        auto failure_if_root_not_exist1 = eosio::token(op.root_token_contract).get_supply(eosio::symbol_type(op.root_token.symbol).name()).amount;
+        auto failure_if_root_not_exist2 = eosio::token(op.quote_token_contract).get_supply(eosio::symbol_type(op.quote_amount.symbol).name()).amount;
         
         auto to_pay = op.quote_amount;
 
@@ -142,7 +145,7 @@ struct hosts_struct {
 
         accounts.emplace(_self, [&](auto &a){
             a.username = op.username;
-            // a.architect = op.username;
+            a.architect = op.username;
             a.hoperator = op.username;
             a.activated = false;
             a.title = op.title;
@@ -174,13 +177,14 @@ struct hosts_struct {
             u.is_host = true;
         });
 
-        emission_index emis(_self, _self);
+        emission_index emis(_self, op.username);
         auto emi = emis.find(op.username);
         eosio_assert(emi == emis.end(), "Emission object already created");
 
         emis.emplace(op.username, [&](auto &e){
             e.host = op.username;
-            e.percent = 0;
+            e.gtop = op.gtop;
+            e.percent = op.emission_percent;
             e.fund = asset(0, op.root_token.symbol);
         });
 
@@ -197,7 +201,7 @@ struct hosts_struct {
     void create_chost_action(const cchildhost &op){
     	auto parent_host = op.parent_host;
     	auto chost = op.chost;
-    	account_index hosts(_self, _self);
+    	account_index hosts(_self, parent_host);
     	auto acc = hosts.find(parent_host);
     	eosio_assert(acc != hosts.end(), "Parent host is not exist");
     	require_auth(parent_host);
@@ -218,7 +222,9 @@ struct hosts_struct {
     	
     	childs.push_back(chost);
 
-    	eosio::asset to_pay = asset(10000, _SYM);
+        auto root_symbol = acc->get_root_symbol();
+        
+    	eosio::asset to_pay = asset(10000, root_symbol);
         
     	hosts.modify(acc, parent_host, [&](auto &h){
     		h.chosts = childs;
@@ -238,7 +244,7 @@ struct hosts_struct {
      * @param[in]  amount    The amount
      */
     void pay_for_upgrade(account_name username, eosio::asset amount, account_name code){
-    	account_index hosts(_self, _self);
+    	account_index hosts(_self, username);
 
     	auto host = hosts.find(username);
     	eosio_assert(host != hosts.end(), "Host is not founded");
@@ -261,7 +267,7 @@ struct hosts_struct {
 
         if (childs.begin() == childs.end())
     	{
-    		shares().create_bancor_market(username, host->total_shares, host->quote_amount);
+    		shares().create_bancor_market("POWER MARKET", 0, username, host->total_shares, host->quote_amount, host->quote_token_contract, _SHARES_VESTING_DURATION);
 		};
 
 	  
@@ -302,7 +308,7 @@ struct hosts_struct {
     void edithost_action(const edithost &op){
         require_auth (op.architect);
 
-        account_index hosts(_self, _self);
+        account_index hosts(_self, op.host);
         auto host = hosts.find(op.host);
         eosio_assert(host->architect == op.architect, "You are not architect of currenty community");
 

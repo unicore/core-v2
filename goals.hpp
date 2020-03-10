@@ -6,11 +6,12 @@ namespace eosio {
     struct goals{
         
         uint64_t id;
+        uint64_t type;
         account_name username;
         account_name host;
         account_name benefactor;
         eosio::time_point_sec created;
-
+        std::string permlink;
         std::string title;
         std::string description;
         eosio::asset target;
@@ -27,17 +28,18 @@ namespace eosio {
         eosio::time_point_sec expired_at;
 
         std::vector<account_name> voters;
-        
+        std::string meta;
+
         uint64_t primary_key()const { return id; }
         uint64_t by_votes() const { return total_votes; }
         uint64_t by_completed() const {return completed; }
         
         account_name by_username() const {return username; }
         account_name by_host() const {return host;}
+        uint128_t by_username_and_host() const { return combine_ids(username, host); }
         
-        
-        EOSLIB_SERIALIZE( goals, (id)(username)(host)(benefactor)(created)(title)(description)(target)(available)(total_votes)(validated)(completed)(reported)
-            (checked)(report)(withdrawed)(expired_at)(voters))
+        EOSLIB_SERIALIZE( goals, (id)(type)(username)(host)(benefactor)(created)(permlink)(title)(description)(target)(available)(total_votes)(validated)(completed)(reported)
+            (checked)(report)(withdrawed)(expired_at)(voters)(meta))
     };
 
     typedef eosio::multi_index <N(goals), goals,
@@ -52,13 +54,16 @@ namespace eosio {
 
     // @abi action
     struct setgoal{
+        uint64_t id;
         account_name username;
+        account_name benefactor;
         account_name host;
         std::string title;
+        std::string permlink;
         std::string description;
         eosio::asset target;
         uint64_t expiration;
-        EOSLIB_SERIALIZE( setgoal, (username)(host)(title)(description)(target)(expiration))
+        EOSLIB_SERIALIZE( setgoal, (id)(username)(benefactor)(host)(title)(permlink)(description)(target)(expiration))
     };
 
       // @abi action
@@ -74,6 +79,8 @@ namespace eosio {
         EOSLIB_SERIALIZE( editgoal, (goal_id)(username)(host)(benefactor)(title)(description)(target))
 
     };
+
+
     // @abi action
     struct dfundgoal{
         account_name architect;

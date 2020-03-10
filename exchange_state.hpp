@@ -18,25 +18,33 @@ namespace eosio {
 
    // @abi table powermarket i64
    struct exchange_state {
+      uint64_t id;
+      std::string name;
+      uint64_t vesting_seconds = 0;
       asset    supply;
+
 
       struct connector {
          asset balance;
          double weight = 1;
+         account_name contract;
+         
+         std::string emission_function;
+         uint64_t emission_percent;
 
-         EOSLIB_SERIALIZE( connector, (balance)(weight) )
+         EOSLIB_SERIALIZE( connector, (balance)(weight)(contract)(emission_function)(emission_percent) )
       };
 
       connector base;
       connector quote;
 
-      uint64_t primary_key()const { return supply.symbol; }
-
+      uint64_t primary_key()const { return id; }
+      
       asset convert_to_exchange( connector& c, asset in ); 
       asset convert_from_exchange( connector& c, asset in );
       asset convert( asset from, symbol_type to );
 
-      EOSLIB_SERIALIZE( exchange_state, (supply)(base)(quote) )
+      EOSLIB_SERIALIZE( exchange_state, (id)(name)(vesting_seconds)(supply)(base)(quote) )
    };
 
    typedef eosio::multi_index<N(powermarket), exchange_state> powermarket;

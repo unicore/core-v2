@@ -9,7 +9,7 @@ struct shares {
    * @param[in]  owner   The owner
    * @param[in]  amount  The amount
    */
-	void make_vesting_action(account_name owner, eosio::asset amount){
+	void make_vesting_action(account_name owner, eosio::asset amount, uint64_t vesting_seconds){
 	    eosio_assert(amount.is_valid(), "Amount not valid");
 	    // eosio_assert(amount.symbol == _SYM, "Not valid symbol for this vesting contract");
 	    eosio_assert(is_account(owner), "Owner account does not exist");
@@ -21,7 +21,7 @@ struct shares {
 	      v.owner = owner;
 	      v.amount = amount;
 	      v.startat = eosio::time_point_sec(now());
-	      v.duration = _SHARES_VESTING_DURATION;
+	      v.duration = vesting_seconds;
 	    });
 
 	}
@@ -96,7 +96,7 @@ struct shares {
 	void buyshares_action ( account_name buyer, account_name host, eosio::asset amount, account_name code ){
 		// eosio_assert(amount.symbol == _SYM, "Wrong symbol for buy shares");
 		
-		account_index accounts(_self, _self);
+		account_index accounts(_self, host);
 		user_index users(_self,_self);
     auto user = users.find(buyer);
     eosio_assert(user != users.end(), "User is not registered");
@@ -108,7 +108,7 @@ struct shares {
     eosio_assert(exist -> quote_amount.symbol == amount.symbol, "Wrong quote token symbol");
 		
     powermarket market(_self, host);
-		auto itr = market.find(S(0, BANCORE));
+		auto itr = market.find(0);
 		auto tmp = *itr;
 		uint64_t shares_out;
 		market.modify( itr, 0, [&]( auto &es ) {
@@ -141,6 +141,93 @@ struct shares {
 
 	};
 
+
+
+  /**
+   * @brief      Внутренний метод возврата силы при возврате значка.
+   * Используется при возврате знака отличия хосту
+   *
+   * @param[in]  op    The operation
+   */
+
+  void back_power_with_badge_action (account_name host, account_name from, uint64_t shares){
+    account_index accounts(_self, host);
+    auto acc = accounts.find(host);
+    eosio_assert(acc != accounts.end(), "Host is not found");
+    
+    power_index power_to_idx (_self, from);
+    auto power_to = power_to_idx.find(host);
+      
+    //modify
+    propagate_votes_changes(host, from, power_to->power, power_to->power - shares);
+    
+    power_to_idx.modify(power_to, _self, [&](auto &pt){
+      pt.power -= shares;
+      pt.with_badges -= shares; 
+    });
+
+    powermarket market(_self, host);
+    auto itr = market.find(0);
+    
+    market.modify( itr, 0, [&]( auto& es ) {
+      es.base.balance = asset((itr -> base).balance.amount + shares, S(0, POWER));
+    });
+
+ 
+  }
+
+
+  /**
+   * @brief      Внутренний метод эмиссии силы.
+   * Используется при выдаче знака отличия  
+   *
+   * @param[in]  op    The operation
+   */
+
+  void give_shares_with_badge_action (account_name host, account_name reciever, uint64_t shares){
+    account_index accounts(_self, host);
+    auto acc = accounts.find(host);
+    eosio_assert(acc != accounts.end(), "Host is not found");
+    
+    power_index power_to_idx (_self, reciever);
+    auto power_to = power_to_idx.find(host);
+    
+    powermarket market(_self, host);
+
+    auto itr = market.find(0);
+    
+    eosio_assert((itr->base).balance.amount >= shares, "Not enought shares on market");
+
+    
+    
+    market.modify( itr, 0, [&]( auto& es ) {
+      es.base.balance = asset((itr -> base).balance.amount - shares, S(0, POWER));
+    });
+
+    //Emplace or modify power object of reciever and propagate votes changes;
+    if (power_to == power_to_idx.end()){
+      
+      power_to_idx.emplace(_self, [&](auto &pt){
+        pt.host = host;
+        pt.power = shares;
+        pt.delegated = 0;
+        pt.with_badges = shares;
+      });
+    
+    } else {
+      
+      //modify
+      propagate_votes_changes(host, reciever, power_to->power, power_to->power + shares);
+      
+      power_to_idx.modify(power_to, _self, [&](auto &pt){
+        pt.power += shares;
+        pt.with_badges += shares; 
+      });
+
+      
+    }   
+  }
+
   /**
    * @brief      Метод делегирования силы.
    * Позволяет делегировать купленную силу для принятия каких-либо решений в пользу любого аккаунта. 
@@ -155,11 +242,11 @@ struct shares {
 
 		delegation_index delegations(_self, op.from);
 		
-		account_index accounts(_self, _self);
+		account_index accounts(_self, op.host);
 		auto acc = accounts.find(op.host);
 
 		auto power_from = power_from_idx.find(op.host);
-		eosio_assert(power_from != power_from_idx.end(),"Nothing to delegate");
+		eosio_assert(power_from != power_from_idx.end(),"Nothing to delegatee");
 		eosio_assert(power_from -> power > 0, "Nothing to delegate");
 		eosio_assert(op.shares > 0, "Delegate amount must be greater then zero");
 		eosio_assert(op.shares <= power_from->staked, "Not enough staked power for delegate");
@@ -309,7 +396,7 @@ struct shares {
 		auto username = op.username;
 		uint64_t shares = op.shares;
 
-    account_index accounts(_self, _self);
+    account_index accounts(_self, host);
     auto exist = accounts.find(host);
     
 		power_index power(_self, username);
@@ -318,7 +405,7 @@ struct shares {
 		eosio_assert(upower >= shares, "Not enought power available for sell");
 
 		powermarket market(_self, host);
-		auto itr = market.find(S(0, BANCORE));
+		auto itr = market.find(0);
 		auto tmp = *itr;
 
 		eosio::asset tokens_out;
@@ -327,7 +414,7 @@ struct shares {
 	    });
 		eosio_assert( tokens_out.amount > 1, "token amount received from selling shares is too low" );
 	    
-	    make_vesting_action(username, tokens_out);
+	    make_vesting_action(username, tokens_out, itr->vesting_seconds);
 	    
 	    propagate_votes_changes(op.host, username, userpower->power, userpower-> power - shares);
 
@@ -345,17 +432,21 @@ struct shares {
    * @param[in]  total_shares  The total shares
    * @param[in]  quote_amount  The quote amount
    */
-	void create_bancor_market(account_name host, uint64_t total_shares, eosio::asset quote_amount){
+	void create_bancor_market(std::string name, uint64_t id, account_name host, uint64_t total_shares, eosio::asset quote_amount, account_name quote_token_contract, uint64_t vesting_seconds){
 		powermarket market(_self, host);
-		auto itr = market.find(S(0,BANCORE));
+		auto itr = market.find(id);
 		if (itr == market.end()){
-			itr = market.emplace( host, [&]( auto& m ) {
+			itr = market.emplace( _self, [&]( auto& m ) {
+               m.id = id;
+               m.vesting_seconds = vesting_seconds;
+               m.name = name;
                m.supply.amount = 100000000000000ll;
                m.supply.symbol = S(0,BANCORE);
                m.base.balance.amount = total_shares;
                m.base.balance.symbol = S(0, POWER);
                m.quote.balance.amount = quote_amount.amount;
                m.quote.balance.symbol = quote_amount.symbol;
+               m.quote.contract = quote_token_contract;
             });
 		} else 
 			eosio_assert(false, "Market already created");

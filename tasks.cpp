@@ -19,8 +19,8 @@ struct tsks
 	 */
 	void settask_action (const settask &op){
 		
-		require_auth(op.host);
-		account_index accounts(_self, _self);
+		require_auth(op.username);
+		account_index accounts(_self, op.host);
 		auto acc = accounts.find(op.host);
 		eosio_assert(acc != accounts.end(), "Host is not found");
 
@@ -34,9 +34,11 @@ struct tsks
 		eosio_assert(goal != goals.end(), "Goal is not found");
 
 		tasks_index tasks(_self, op.host);
-
+		
+		uint64_t task_id = tasks.available_primary_key();
+		
 		tasks.emplace(op.host, [&](auto &t){
-			t.task_id = tasks.available_primary_key();
+			t.task_id = task_id;
 			t.goal_id = op.goal_id;
 			t.title = op.title;
 			t.data = op.data;
@@ -46,10 +48,18 @@ struct tsks
 			t.remain = asset(0, root_symbol);
 			t.is_public  = op.is_public;
 			t.with_badge = op.with_badge;
-			t.badge_type = op.badge_type;
+			t.badge_id = op.badge_id;
 			t.expired_at = eosio::time_point_sec (now() + op.expiration);
 		});
-
+		
+		if (op.username == acc->architect){
+			fundtask fop;
+			fop.host = op.host;
+			fop.task_id = task_id;
+			fop.amount = op.requested;
+			fop.comment = "fund on set by architect";
+			fundtask_action(fop);
+		}
 	}
 
 	/**
@@ -61,7 +71,7 @@ struct tsks
 	void fundtask_action(const fundtask &op){
 		require_auth(op.host);
 
-		account_index accounts(_self, _self);
+		account_index accounts(_self, op.host);
 		auto acc = accounts.find(op.host);
 		eosio_assert(acc != accounts.end(), "Host is not found");
 		
@@ -98,7 +108,7 @@ struct tsks
 	 */
 	void tactivate_action (const tactivate &op){
 		require_auth(op.host);
-		account_index accounts(_self, _self);
+		account_index accounts(_self, op.host);
 		auto acc = accounts.find(op.host);
 		eosio_assert(acc != accounts.end(), "Host is not found");
 
@@ -123,7 +133,7 @@ struct tsks
 	 */
 	void tdeactivate_action (const tdeactivate &op){
 		require_auth(op.host);
-		account_index accounts(_self, _self);
+		account_index accounts(_self, op.host);
 		auto acc = accounts.find(op.host);
 		eosio_assert(acc != accounts.end(), "Host is not found");
 
@@ -154,7 +164,7 @@ struct tsks
 		// eosio::string data;
 
 		require_auth(op.username);
-		account_index accounts(_self, _self);
+		account_index accounts(_self, op.host);
 		user_index users(_self, _self);
 		auto user = users.find(op.username);
 		eosio_assert(user != users.end(), "User is not registered on the core");
@@ -188,6 +198,8 @@ struct tsks
 			r.data = op.data;
 			r.need_check = true;
 			r.requested = task->for_each;
+			r.balance = asset(0, root_symbol);
+			r.withdrawed = asset(0, root_symbol);
 			r.curator = op.host;
 		});
 
@@ -201,7 +213,7 @@ struct tsks
 	void editreport_action (const editreport &op){
 		// require_auth(op.voter);
 		require_auth(op.username);
-		account_index accounts(_self, _self);
+		account_index accounts(_self, op.host);
 		
 		auto acc = accounts.find(op.host);
 		eosio_assert(acc != accounts.end(), "Host is not found");
@@ -214,6 +226,7 @@ struct tsks
 		reports.modify(report, op.username, [&](auto &r){
 			r.need_check = true;
 			r.data = op.data;
+			r.comment = "";
 		});
 	}
 
@@ -227,7 +240,7 @@ struct tsks
 		// require_auth(op.voter);
 		require_auth(op.host);
 		
-		account_index accounts(_self, _self);
+		account_index accounts(_self, op.host);
 		
 		auto acc = accounts.find(op.host);
 		eosio_assert(acc != accounts.end(), "Host is not found");
@@ -247,6 +260,7 @@ struct tsks
 			r.need_check = false;
 			r.comment = op.comment;
 			r.approved = true;
+			r.withdrawed = report->requested;
 		});
 
 
@@ -262,14 +276,16 @@ struct tsks
 			t.remain = task->remain - report->requested;
 		});
 
-		giftbadge gift;
-		gift.host = op.host;
-		gift.to = report->username;
-		gift.badge_type = task->badge_type;
-		gift.comment = std::string("Completed task");
 
+		if (task -> with_badge == true){
+			giftbadge gift;
+			gift.host = op.host;
+			gift.to = report->username;
+			gift.badge_id = task->badge_id;
+			gift.comment = std::string("Completed task");
 
-		badge_struct().giftbadge_action(gift);
+			badge_struct().giftbadge_action(gift);
+		}
 
 	
 	}
@@ -281,7 +297,7 @@ struct tsks
 	 */
 	void disapprover_action (const disapprover &op){
 		require_auth(op.host);
-		account_index accounts(_self, _self);
+		account_index accounts(_self, op.host);
 		
 		auto acc = accounts.find(op.host);
 		eosio_assert(acc != accounts.end(), "Host is not found");

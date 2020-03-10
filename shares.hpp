@@ -6,10 +6,10 @@ namespace eosio {
 		uint64_t power;
 		uint64_t staked;
 		uint64_t delegated;
-
+    uint64_t with_badges;
 		account_name primary_key() const {return host;}
 
-		EOSLIB_SERIALIZE(struct power, (host)(power)(staked)(delegated))
+		EOSLIB_SERIALIZE(struct power, (host)(power)(staked)(delegated)(with_badges))
 	};
 
 	typedef eosio::multi_index<N(power), power> power_index;

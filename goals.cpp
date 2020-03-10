@@ -12,6 +12,26 @@ using namespace eosio;
  * 
  */
 struct goal {
+    void validate_permlink( const std::string& permlink )
+        {
+           eosio_assert( 3 < permlink.size() && permlink.size() < 255, "Permlink is not a valid size." );
+           
+             for( auto c : permlink )
+             {
+                switch( c )
+                {
+                   case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g': case 'h': case 'i':
+                   case 'j': case 'k': case 'l': case 'm': case 'n': case 'o': case 'p': case 'q': case 'r':
+                   case 's': case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z': case '0':
+                   case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+                   case '-':
+                      break;
+                   default:
+                      eosio_assert( false, "Invalid permlink character");
+                }
+             }
+        }
+
   /**
    * @brief      Метод создания цели
    * 
@@ -21,40 +41,56 @@ struct goal {
 		require_auth(op.username);
 		
 		goals_index goals(_self,op.host);
-		account_index accounts(_self, _self);
+		account_index accounts(_self, op.host);
 
 		user_index users(_self,_self);
-        auto user = users.find(op.username);
-        eosio_assert(user != users.end(), "User is not registered");
+    auto user = users.find(op.username);
+    eosio_assert(user != users.end(), "User is not registered");
 
 		auto acc = accounts.find(op.host);
-        auto root_symbol = (acc->root_token).symbol;
+    auto root_symbol = (acc->root_token).symbol;
 
 		auto username = op.username;
-        auto title = op.title;
-        auto description = op.description;
-        auto host = op.host;
-        auto target = op.target;
-        bool validated = acc->consensus_percent == 0;
-        
-        eosio_assert(target.symbol == root_symbol, "Wrong symbol for this host");
-        
-        eosio_assert(title.length() <= 100, "Short Description is a maximum 100 symbols. Describe the goal shortly.");
-       
-        goals.emplace(username, [&](auto &g){
-        	g.id = goals.available_primary_key();
-        	g.username = username;
-        	g.benefactor = username;
-        	g.created = eosio::time_point_sec(now());
-        	g.host = host;
-        	g.title = title;
-        	g.description = description;
-        	g.target = target;
-        	g.withdrawed = asset(0, root_symbol);
-        	g.available = asset(0, root_symbol);
-        	g.validated = validated;
-        	g.expired_at = eosio::time_point_sec (now() + op.expiration);
-        });
+    auto title = op.title;
+    auto description = op.description;
+    auto host = op.host;
+    auto target = op.target;
+    bool validated = acc->consensus_percent == 0;
+    
+    validate_permlink(op.permlink);
+    
+    eosio_assert(target.symbol == root_symbol, "Wrong symbol for this host");
+    
+    eosio_assert(title.length() <= 100, "Short Description is a maximum 100 symbols. Describe the goal shortly");
+    auto goal = goals.find(op.id);
+
+    if (goal == goals.end()){
+      goals.emplace(username, [&](auto &g){
+        g.id = op.id;
+        g.username = username;
+        g.benefactor = op.benefactor;
+        g.created = eosio::time_point_sec(now());
+        g.host = host;
+        g.permlink = op.permlink;
+        g.title = title;
+        g.description = description;
+        g.target = target;
+        g.withdrawed = asset(0, root_symbol);
+        g.available = asset(0, root_symbol);
+        g.validated = validated;
+        g.expired_at = eosio::time_point_sec (now() + op.expiration);
+      });      
+    } else {
+      eosio_assert(username == goal->username, "Only creator can modify the goal");
+
+      goals.modify(goal, username, [&](auto &g){
+        g.benefactor = op.benefactor;
+        g.title = title;
+        g.description = description;
+        g.target = target;
+      });
+    }
+
 	};
 
 
@@ -66,29 +102,26 @@ struct goal {
    */
 	void fund_goal_action(const dfundgoal &op){
 		require_auth(op.architect);
-	    // account_name architect;
-     //    account_name host;
-     //    uint64_t goal_id;
-     //    eosio::asset amount;
-     //    std::string comment;
-    
 
-		account_index accounts(_self, _self);
+		account_index accounts(_self, op.host);
 		auto acc = accounts.find(op.host);
 		eosio_assert(acc->architect == op.architect, "Only architect can direct fund the goal");
 
-	    emission_index emis(_self, _self);
-        auto emi = emis.find(op.host);
+    emission_index emis(_self, op.host);
+    auto emi = emis.find(op.host);
 
-        eosio_assert(emi->fund >= op.amount, "Not enough tokens for fund the goal");
+    eosio_assert(emi->fund >= op.amount, "Not enough tokens for fund the goal");
 
-        donate_action(op.architect, op.host, op.goal_id, op.amount, _self);
+    donate_action(op.architect, op.host, op.goal_id, op.amount, _self);
 
-        emis.modify(emi, op.architect, [&](auto &e){
-        	e.fund = e.fund - op.amount;
-        });
+    emis.modify(emi, op.architect, [&](auto &e){
+    	e.fund = e.fund - op.amount;
+    });
 
 	};
+
+
+
 
  /**
   * @brief      Метод редактирования цели
@@ -100,38 +133,41 @@ struct goal {
 		require_auth(op.username);
 		
 		goals_index goals(_self,op.host);
-        account_index accounts (_self, _self);
+    account_index accounts (_self, op.host);
 
-        auto acc = accounts.find(op.host);
-        auto root_symbol = (acc->root_token).symbol;
+    auto acc = accounts.find(op.host);
+    auto root_symbol = (acc->root_token).symbol;
 
-        auto username = op.username;
-        auto benefactor = op.benefactor;
-        auto title = op.title;
-        auto description = op.description;
-        auto host = op.host;
-        auto goal_id = op.goal_id;
-        auto target = op.target;
-        
-        eosio_assert(target.symbol == root_symbol, "Wrong symbol for this host");
+    auto username = op.username;
+    auto benefactor = op.benefactor;
+    auto title = op.title;
+    auto description = op.description;
+    auto host = op.host;
+    auto goal_id = op.goal_id;
+    auto target = op.target;
     
-        eosio_assert(title.length() <= 100, "Short Description is a maximum 100 symbols");
- 
-        auto goal = goals.find(goal_id);
-        eosio_assert(goal != goals.end(), "Goal is not exist");
+    eosio_assert(target.symbol == root_symbol, "Wrong symbol for this host");
 
-        if (goal->target != op.target){
-        	eosio_assert(goal -> validated == false, "Impossible edit amount after validation");
-		};
+    eosio_assert(title.length() <= 100, "Short Description is a maximum 100 symbols");
 
-        goals.modify(goal, username, [&](auto &g){
-        	g.title = title;
-        	g.description = description;
-        	g.benefactor = benefactor;
-        	g.target = target;
-        });
+    auto goal = goals.find(goal_id);
+    eosio_assert(goal != goals.end(), "Goal is not exist");
+    eosio_assert(goal->username == op.username, "Dont have permissions for edit goal");
+
+    if (goal->target != op.target){
+    	eosio_assert(goal -> validated == false, "Impossible edit amount after validation");
+    };
+
+    goals.modify(goal, username, [&](auto &g){
+    	g.title = title;
+    	g.description = description;
+    	g.benefactor = benefactor;
+    	g.target = target;
+    });
 
 	}
+
+
 
   /**
    * @brief      Метод удаления цели
@@ -147,7 +183,8 @@ struct goal {
 
 		auto goal = goals.find(goal_id);
 		eosio_assert(goal != goals.end(), "Goal is not exist");
-        
+    eosio_assert(goal->username == op.username, "Wrong creator of goal");
+
 		goals.erase(goal);
 
 	}
@@ -165,7 +202,7 @@ struct goal {
 		auto goal_id = op.goal_id;
 		auto report = op.report;
 
-		account_index accounts(_self, _self);
+		account_index accounts(_self, op.host);
 		auto acc = accounts.find(op.host);
 		eosio_assert(acc != accounts.end(), "Host is not found");
 
@@ -187,7 +224,7 @@ struct goal {
    */
 	void check_action(const check &op){
 		require_auth(op.architect);
-		account_index accounts(_self, _self);
+		account_index accounts(_self, op.host);
 		auto acc = accounts.find(op.host);
 		eosio_assert(acc != accounts.end(), "Host is not found");
 
@@ -216,7 +253,7 @@ struct goal {
 		// require_auth(from);
 		
 		goals_index goals(_self, host);
-		account_index accounts(_self, _self);
+		account_index accounts(_self, host);
 		auto acc = accounts.find(host);
 
 		if (code != _self) //For direct donate from fund and by architects action
@@ -248,7 +285,7 @@ struct goal {
   void gsponsor_action(const gsponsor &op){
     require_auth (op.hoperator);
 
-    account_index accounts(_self, _self);
+    account_index accounts(_self, op.host);
     auto acc = accounts.find(op.host);
     eosio_assert(acc->hoperator == op.hoperator, "Wrong operator for this host");
     goals_index goals(_self, op.host);
@@ -262,15 +299,15 @@ struct goal {
     eosio_assert(goal->available >= op.amount, "Not enough tokens for sponsorhip action. ");
 
     action(
-                permission_level{ _self, N(active) },
-                acc->root_token_contract, N(transfer),
-                std::make_tuple( _self, op.reciever, op.amount, std::string("Sponsor")) 
-        ).send();
+      permission_level{ _self, N(active) },
+      acc->root_token_contract, N(transfer),
+      std::make_tuple( _self, op.reciever, op.amount, std::string("Sponsor")) 
+    ).send();
 
-        goals.modify(goal, op.hoperator, [&](auto &g){
-          g.available = g.available - op.amount;
-          g.withdrawed = g.withdrawed + op.amount;
-        });
+    goals.modify(goal, op.hoperator, [&](auto &g){
+      g.available = g.available - op.amount;
+      g.withdrawed = g.withdrawed + op.amount;
+    });
 
   }
 
@@ -282,24 +319,23 @@ struct goal {
  * @param[in]  op    The new value
  */
     void set_emission_action(const setemi&op){
-        require_auth(op.host);
-        account_index hosts (_self, _self);
-        auto host = hosts.find(op.host);
-        eosio_assert(host != hosts.end(), "Host not exist");
-        
-        auto ahost = host->get_ahost();
-        auto root_symbol = host->get_root_symbol();
-    
-        emission_index emis(_self, _self);
-        auto emi = emis.find(op.host);
-        eosio_assert(op.gtop <= 100, "Goal top should be less then 100");
-        eosio_assert(op.percent <= 1000 * PERCENT_PRECISION, "Emission percent should be less then 100 * PERCENT_PRECISION");
-        
-        emis.modify(emi, op.host, [&](auto &e){
-            e.percent = op.percent;
-            e.gtop = op.gtop;
-        });
-
+      require_auth(op.host);
+      account_index hosts (_self, op.host);
+      auto host = hosts.find(op.host);
+      eosio_assert(host != hosts.end(), "Host not exist");
+      
+      auto ahost = host->get_ahost();
+      auto root_symbol = host->get_root_symbol();
+  
+      emission_index emis(_self, op.host);
+      auto emi = emis.find(op.host);
+      eosio_assert(op.gtop <= 100, "Goal top should be less then 100");
+      eosio_assert(op.percent <= 1000 * PERCENT_PRECISION, "Emission percent should be less then 100 * PERCENT_PRECISION");
+      
+      emis.modify(emi, op.host, [&](auto &e){
+          e.percent = op.percent;
+          e.gtop = op.gtop;
+      });
     }
 
 
@@ -319,7 +355,7 @@ struct goal {
 		
 		eosio_assert(goal != goals.end(), "Goal is not founded");
 		
-		account_index accounts(_self, _self);
+		account_index accounts(_self, goal->host);
 		auto acc = accounts.find(goal->host);
 		eosio_assert(acc != accounts.end(), "Host is not founded");
 
@@ -328,18 +364,18 @@ struct goal {
 		eosio_assert(goal->username == username, "You are not owner of this goal");
 		eosio_assert((goal->available).amount > 0, "Cannot withdraw a zero amount");
 
-        eosio::asset on_withdraw = goal->available;
+    eosio::asset on_withdraw = goal->available;
     	
-    	action(
-            permission_level{ _self, N(active) },
-		    acc->root_token_contract, N(transfer),
-    	    std::make_tuple( _self, goal->benefactor, on_withdraw, std::string("Goal Withdraw")) 
-        ).send();
+  	action(
+      permission_level{ _self, N(active) },
+      acc->root_token_contract, N(transfer),
+      std::make_tuple( _self, goal->benefactor, on_withdraw, std::string("Goal Withdraw")) 
+    ).send();
 
-        goals.modify(goal, username, [&](auto &g){
-        	g.available = asset(0, root_symbol);
-        	g.withdrawed += on_withdraw;
-        });
+    goals.modify(goal, username, [&](auto &g){
+    	g.available = asset(0, root_symbol);
+    	g.withdrawed += on_withdraw;
+    });
 
 	}
 

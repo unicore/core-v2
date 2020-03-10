@@ -1,14 +1,12 @@
 
 namespace eosio {
-    uint128_t combine_ids(const uint64_t &x, const uint64_t &y) {
-        return (uint128_t{x} << 64) | y;
-    }
 
 
 	//@abi table tasks
 	struct tasks{
 		uint64_t task_id;
 		uint64_t goal_id;
+    uint64_t type;
 		uint64_t priority;
 		uint64_t period;
 		bool is_public = true;
@@ -20,7 +18,7 @@ namespace eosio {
 		eosio::asset for_each;
 		account_name curator;
 		bool with_badge;
-		uint64_t badge_type;
+		uint64_t badge_id;
 		bool validated = true;
 		bool completed = false;
 		bool active = true;
@@ -28,7 +26,7 @@ namespace eosio {
 
 		uint64_t primary_key()const { return task_id; }
 
-	    EOSLIB_SERIALIZE( tasks, (task_id)(goal_id)(priority)(period)(is_public)(title)(data)(requested)(funded)(remain)(for_each)(curator)(with_badge)(badge_type)(validated)(completed)(active)(expired_at))
+	    EOSLIB_SERIALIZE( tasks, (task_id)(goal_id)(type)(priority)(period)(is_public)(title)(data)(requested)(funded)(remain)(for_each)(curator)(with_badge)(badge_id)(validated)(completed)(active)(expired_at))
     };
 
     typedef eosio::multi_index< N(tasks), tasks> tasks_index;
@@ -39,18 +37,21 @@ namespace eosio {
     	uint64_t report_id;
     	uint64_t task_id; 
     	uint64_t goal_id;
+      uint64_t type;
     	account_name username;
     	account_name curator;
     	eosio::string data;
     	eosio::asset requested;
+      eosio::asset balance;
+      eosio::asset withdrawed;
     	bool need_check = true;
     	bool approved = false;
     	eosio::string comment;
-
+      eosio::time_point_sec expired_at;
     	uint64_t primary_key() const {return report_id;}
-		uint128_t user_with_task() const { return combine_ids(username, task_id); }
+		  uint128_t user_with_task() const { return combine_ids(username, task_id); }
 
-    	EOSLIB_SERIALIZE(reports, (report_id)(task_id)(goal_id)(username)(curator)(data)(requested)(need_check)(approved)(comment))
+    	EOSLIB_SERIALIZE(reports, (report_id)(task_id)(goal_id)(type)(username)(curator)(data)(requested)(balance)(withdrawed)(need_check)(approved)(comment)(expired_at))
     };
 
     typedef eosio::multi_index< N(reports), reports,
@@ -62,6 +63,7 @@ namespace eosio {
 	//@abi action
 	struct settask {
 		account_name host;
+    account_name username;
 		uint64_t goal_id;
 		eosio::string title;
 		eosio::string data;
@@ -69,7 +71,7 @@ namespace eosio {
 		bool is_public;
 		eosio::asset for_each;
 		bool with_badge;
-		uint64_t badge_type;
+		uint64_t badge_id;
 		uint64_t expiration;
 	};
 

@@ -58,8 +58,8 @@ struct cms {
 
     cmsconfig_index cmsconfigs(_self, op.username);
     
-    account_index accounts(_self, _self);  
-      
+    account_index accounts(_self, op.username);  
+
     auto acc = accounts.find(op.username);
     // eosio_assert(acc != accounts.end(), "Host is not found");
 

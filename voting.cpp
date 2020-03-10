@@ -67,11 +67,11 @@ struct voting
 
 
 		auto goal = goals.find(goal_id);
-		account_index accounts (_self, _self);
+		account_index accounts (_self, goal->host);
 		auto acc = accounts.find(goal->host);
 
 		powermarket market(_self, host);
-		auto itr = market.find(S(4, POWER));
+		auto itr = market.find(0);
 		auto liquid_shares = acc->total_shares - itr->base.balance.amount;
 
 		// print("LIQUIDSHARES ", liquid_shares);

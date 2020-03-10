@@ -39,6 +39,9 @@ namespace eosio {
       int64_t out = int64_t(T);
 
       supply.amount -= in.amount;
+      
+      eosio_assert( c.balance.amount >= out, "Not enought balance on bancor" );
+
       c.balance.amount -= out;
 
       return asset( out, c.balance.symbol );
