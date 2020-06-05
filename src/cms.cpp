@@ -16,7 +16,7 @@ struct cms {
   void setcontent_action(const setcontent &op){
     require_auth(op.username);
 
-    cmscontent_index contents(_self, op.username);
+    cmscontent_index contents(_self, op.username.value);
     auto content = contents.find(op.id);
     
     if (content == contents.end()){
@@ -42,7 +42,7 @@ struct cms {
    */
   void rmcontent_action(const rmcontent &op){
     require_auth(op.username);
-    cmscontent_index contents(_self, op.username);
+    cmscontent_index contents(_self, op.username.value);
     auto content = contents.find(op.id);
     contents.erase(content);
   }
@@ -56,11 +56,11 @@ struct cms {
   void setcmsconfig_action(const setcmsconfig &op){
     require_auth(op.username);
 
-    cmsconfig_index cmsconfigs(_self, op.username);
+    cmsconfig_index cmsconfigs(_self, op.username.value);
     
-    account_index accounts(_self, op.username);  
+    account_index accounts(_self, op.username.value);  
 
-    auto acc = accounts.find(op.username);
+    auto acc = accounts.find(op.username.value);
     // check(acc != accounts.end(), "Host is not found");
 
 

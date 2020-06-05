@@ -26,7 +26,7 @@ struct voting
 	uint64_t count_votes(eosio::name voter, eosio::name host){
 		votes_index votes(_self, voter);
 		goals_index goals (_self, _self);
-		// auto users_with_id = reports.template get_index<"user_with_task"_n>();
+		// auto users_with_id = reports.template get_index<"userwithtask"_n>();
 
 		// auto idx = votes.begin();
 
@@ -51,7 +51,7 @@ struct voting
 		auto host = op.host;
 		auto voter = op.voter;
 		
-		user_index users(_self,_self);
+		user_index users(_self,_self.value);
     auto user = users.find(op.voter);
     check(user != users.end(), "User is not registered");
 
@@ -70,7 +70,7 @@ struct voting
 		account_index accounts (_self, goal->host);
 		auto acc = accounts.find(goal->host);
 
-		powermarket market(_self, host);
+		powermarket market(_self, host.value);
 		auto itr = market.find(0);
 		auto liquid_shares = acc->total_shares - itr->base.balance.amount;
 
@@ -87,14 +87,14 @@ struct voting
 		
 
 		// auto vote = votes.find(goal->id);
-		auto goal_id_with_host_idx = votes.template get_index<"id_with_host"_n>();
-		auto votes_ids = combine_ids2(host, goal->id);
+		auto goal_idwithhost_idx = votes.template get_index<"idwithhost"_n>();
+		auto votes_ids = combine_ids2(host.value, goal->id);
 		
-		auto vote = goal_id_with_host_idx.find(votes_ids);
+		auto vote = goal_idwithhost_idx.find(votes_ids);
 
-		// check(vote!= goal_id_with_host_idx.end(), "this is end");
+		// check(vote!= goal_idwithhost_idx.end(), "this is end");
 
-		if (vote == goal_id_with_host_idx.end()){
+		if (vote == goal_idwithhost_idx.end()){
 			//ADD VOTE
 			check(vote_count < _TOTAL_VOTES, "Votes limit is exceeded");
 
@@ -135,7 +135,7 @@ struct voting
 				
 			});
 
-			goal_id_with_host_idx.erase(vote);
+			goal_idwithhost_idx.erase(vote);
 		}
 		// clear_old_votes_action(voter, host);
 		

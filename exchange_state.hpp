@@ -1,12 +1,12 @@
 #pragma once
 
-
-#include <eosio/datastream.hpp>
-#include <eosio/serialize.hpp>
+#include <eosiolib/asset.hpp>
+#include <eosiolib/datastream.hpp>
+#include <eosiolib/serialize.hpp>
 
 namespace eosio {
    using eosio::asset;
-   using eosio::symbol;
+   using eosio::symbol_type;
 
    typedef double real_type;
 
@@ -27,7 +27,7 @@ namespace eosio {
       struct connector {
          asset balance;
          double weight = 1;
-         eosio::name contract;
+         account_name contract;
          
          EOSLIB_SERIALIZE( connector, (balance)(weight)(contract))
       };
@@ -39,9 +39,9 @@ namespace eosio {
       
       asset convert_to_exchange( connector& reserve, const asset& payment );
       asset convert_from_exchange( connector& reserve, const asset& tokens );
-      asset convert( const asset& from, const symbol& to );
+      asset convert( const asset& from, const symbol_type& to );
 
-      asset direct_convert( const asset& from, const symbol& to );
+      asset direct_convert( const asset& from, const symbol_type& to );
 
       static int64_t get_bancor_output( int64_t inp_reserve,
                                         int64_t out_reserve,
@@ -53,6 +53,6 @@ namespace eosio {
       EOSLIB_SERIALIZE( exchange_state, (id)(name)(vesting_seconds)(supply)(base)(quote) )
    };
 
-   typedef eosio::multi_index<"powermarket"_n, exchange_state> powermarket;
+   typedef eosio::multi_index<N(powermarket), exchange_state> powermarket;
 
 } /// namespace eosiosystem

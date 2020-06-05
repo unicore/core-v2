@@ -49,7 +49,7 @@ struct tsks
 			t.is_public  = op.is_public;
 			t.with_badge = op.with_badge;
 			t.badge_id = op.badge_id;
-			t.expired_at = eosio::time_point_sec (now() + op.expiration);
+			t.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + op.expiration);
 		});
 		
 		if (op.username == acc->architect){
@@ -164,28 +164,28 @@ struct tsks
 		// eosio::string data;
 
 		require_auth(op.username);
-		account_index accounts(_self, op.host);
+		account_index accounts(_self, op.host.value);
 		user_index users(_self, _self);
-		auto user = users.find(op.username);
+		auto user = users.find(op.username.value);
 		check(user != users.end(), "User is not registered on the core");
 		
-		auto acc = accounts.find(op.host);
+		auto acc = accounts.find(op.host.value);
 		auto root_symbol = acc->get_root_symbol();
 		
 		// check(root_symbol == op.requested.symbol, "Wrong token for current host");
 		check(acc != accounts.end(), "Host is not found");
 
-		tasks_index tasks(_self, op.host);
+		tasks_index tasks(_self, op.host.value);
 		auto task = tasks.find(op.task_id);
 		check(task != tasks.end(), "Task is not found");
 		check(task -> active == true, "Task is not active");
 		check(task -> is_public == true, "Only public tasks is accessable for now");
 	
-		reports_index reports(_self, op.host);
+		reports_index reports(_self, op.host.value);
 		
-		auto users_with_id = reports.template get_index<"user_with_task"_n>();
+		auto users_with_id = reports.template get_index<"userwithtask"_n>();
 
-		auto report_ids = combine_ids(op.username, op.task_id);
+		auto report_ids = combine_ids(op.username.value, op.task_id);
 		auto user_report = users_with_id.find(report_ids);
 
 		check(user_report == users_with_id.end(), "Report for this task already exist");
@@ -218,7 +218,7 @@ struct tsks
 		auto acc = accounts.find(op.host);
 		check(acc != accounts.end(), "Host is not found");
 
-		reports_index reports(_self, op.host);
+		reports_index reports(_self, op.host.value);
 		auto report = reports.find(op.report_id);
 
 		check(report->need_check == false, "Cannot modify report until check");
@@ -240,15 +240,15 @@ struct tsks
 		// require_auth(op.voter);
 		require_auth(op.host);
 		
-		account_index accounts(_self, op.host);
+		account_index accounts(_self, op.host.value);
 		
-		auto acc = accounts.find(op.host);
+		auto acc = accounts.find(op.host.value);
 		check(acc != accounts.end(), "Host is not found");
 
-		reports_index reports(_self, op.host);
+		reports_index reports(_self, op.host.value);
 		auto report = reports.find(op.report_id);
 		
-		tasks_index tasks(_self, op.host);
+		tasks_index tasks(_self, op.host.value);
 		auto task = tasks.find(report->task_id);
 	
 		
@@ -297,12 +297,12 @@ struct tsks
 	 */
 	void disapprover_action (const disapprover &op){
 		require_auth(op.host);
-		account_index accounts(_self, op.host);
+		account_index accounts(_self, op.host.value);
 		
-		auto acc = accounts.find(op.host);
+		auto acc = accounts.find(op.host.value);
 		check(acc != accounts.end(), "Host is not found");
 
-		reports_index reports(_self, op.host);
+		reports_index reports(_self, op.host.value);
 		auto report = reports.find(op.report_id);
 
 		check(report->approved == false, "Report is already approved and cannot be disapproved now.");

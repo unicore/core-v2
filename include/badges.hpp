@@ -31,7 +31,7 @@ namespace eosio {
         eosio::time_point_sec recieved_at;
 
 		uint64_t primary_key() const {return id;}
-		uint64_t host_key() const {return host;}
+		uint64_t host_key() const {return host.value;}
 		
 		EOSLIB_SERIALIZE(struct usbadges, (id)(host)(badge_id)(caption)(description)(iurl)(comment)(power)(recieved_at))
 	};

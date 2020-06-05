@@ -15,12 +15,12 @@ struct badge_struct {
 	void setbadge_action(const setbadge &op){
 		require_auth(op.host);
 		
-		account_index accounts(_self, op.host);
-		auto acc = accounts.find(op.host);
+		account_index accounts(_self, op.host.value);
+		auto acc = accounts.find(op.host.value);
 		check(acc != accounts.end(), "Host is not found");
 		
 		
-		badge_index badges(_self, op.host);
+		badge_index badges(_self, op.host.value);
 
 		auto badge = badges.find(op.id);
 		if (badge == badges.end()){
@@ -58,17 +58,17 @@ struct badge_struct {
 	 * @param[in]  op    The operation
 	 */
 	void giftbadge_action(const giftbadge &op){
-		account_index accounts(_self, op.host);
-		auto acc = accounts.find(op.host);
+		account_index accounts(_self, op.host.value);
+		auto acc = accounts.find(op.host.value);
 
 		check(acc != accounts.end(), "Host is not found");
-		badge_index badges(_self, op.host);
+		badge_index badges(_self, op.host.value);
 		usbadge_index user_badges(_self, op.to);
 
 
-		user_index users(_self, _self);
+		user_index users(_self, _self.value);
 
-		auto user = users.find(op.to);
+		auto user = users.find(op.to.value);
 		check(user != users.end(), "User is not found");
 		
 		//TODO check annd change badge count
@@ -88,7 +88,7 @@ struct badge_struct {
 			ub.description = host_badge -> description;
 			ub.iurl = host_badge -> iurl;
 			ub.comment = op.comment;
-			ub.recieved_at = eosio::time_point_sec(now());
+			ub.recieved_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
 			ub.host = op.host;
 			ub.power = host_badge -> power;
 		});
@@ -107,11 +107,11 @@ struct badge_struct {
 	void backbadge_action(const backbadge &op){
 
 		require_auth(op.host);
-		account_index accounts(_self, op.host);
-		auto acc = accounts.find(op.host);
+		account_index accounts(_self, op.host.value);
+		auto acc = accounts.find(op.host.value);
 		check(acc != accounts.end(), "Host is not found");
-		badge_index badges(_self, op.host);
-		usbadge_index user_badges(_self, op.from);
+		badge_index badges(_self, op.host.value);
+		usbadge_index user_badges(_self, op.from.value);
 
 		auto usbadge = user_badges.find(op.badge_id);
 		check(usbadge != user_badges.end(), "Badge is not found");

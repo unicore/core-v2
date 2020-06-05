@@ -21,11 +21,11 @@ struct core {
      */
 
     void fund_emi_pool ( eosio::name username, eosio::name host, eosio::asset amount, eosio::name code ){
-        emission_index emis(_self, host);
-        auto emi = emis.find(host);
+        emission_index emis(_self, host.value);
+        auto emi = emis.find(host.value);
         check(emi != emis.end(), "Emission pool for current host is not found");
-        account_index accounts(_self, host);
-        auto acc = accounts.find(host);
+        account_index accounts(_self, host.value);
+        auto acc = accounts.find(host.value);
         check(acc != accounts.end(), "Host is not found");
 
         auto root_symbol = acc->get_root_symbol();
@@ -60,9 +60,9 @@ struct core {
         auto emi = emis.find(host);
 
         if (emi->percent > 0){
-            goals_index goals(_self, host);
-            account_index accounts(_self, host);
-            auto acc = accounts.find(host);
+            goals_index goals(_self, host.value);
+            account_index accounts(_self, host.value);
+            auto acc = accounts.find(host.value);
             auto root_symbol = acc->get_root_symbol();
 
             eosio::name ahost = acc->get_ahost();
@@ -84,7 +84,7 @@ struct core {
                     uint64_t devider;
 
 
-                    auto idx_bv = goals.template get_index<"total_votes"_n>();
+                    auto idx_bv = goals.template get_index<"votes"_n>();
                     auto i_bv = idx_bv.rbegin();
                     bool need_emit = false;
 
@@ -152,7 +152,7 @@ struct core {
 
                     }
                     
-                    cycle_index cycles (_self, host);
+                    cycle_index cycles (_self, host.value);
 
                     auto cycle = cycles.find(acc->current_cycle_num-1);
                     
@@ -174,20 +174,20 @@ struct core {
  */
 
     eosio::asset adjust_emission_pool(eosio::name hostname){
-        account_index hosts(_self, hostname);
-        emission_index emis(_self, hostname);
-        cycle_index cycles(_self, hostname);
-        pool_index pools(_self, hostname);
+        account_index hosts(_self, hostname.value);
+        emission_index emis(_self, hostname.value);
+        cycle_index cycles(_self, hostname.value);
+        pool_index pools(_self, hostname.value);
 
-        auto host = hosts.find(hostname);
+        auto host = hosts.find(hostname.value);
         auto ahost = host->get_ahost();
 
-        rate_index rates(_self, ahost);
+        rate_index rates(_self, ahost.value);
         
         auto last_cycle = cycles.find(host->current_cycle_num - 1); //2 for emission by cycles
         auto pool = pools.find(last_cycle -> finish_at_global_pool_id);
         auto rate = rates.find(pool->pool_num-1);
-        auto em = emis.find(hostname);
+        auto em = emis.find(hostname.value);
         eosio::asset for_emit;
 
         for_emit = asset((rate->live_balance_for_sale).amount * em->percent / 100 / PERCENT_PRECISION, (rate->live_balance_for_sale).symbol );    
@@ -216,15 +216,15 @@ void priority_enter(const priorenter &op){
      
      refresh_state(host); 
 
-     pool_index pools(_self, host);
-     balance_index balances(_self, username);
-     cycle_index cycles(_self, host);
-     rate_index rates(_self, host);
-     account_index accounts(_self, host);
-     spiral_index spiral(_self, host);
+     pool_index pools(_self, host.value);
+     balance_index balances(_self, username.value);
+     cycle_index cycles(_self, host.value);
+     rate_index rates(_self, host.value);
+     account_index accounts(_self, host.value);
+     spiral_index spiral(_self, host.value);
 
 
-     auto acc = accounts.find(host);
+     auto acc = accounts.find(host.value);
      auto main_host = acc->get_ahost();
      auto root_symbol = acc->get_root_symbol();
 
@@ -330,12 +330,12 @@ void priority_enter(const priorenter &op){
  * @param[in]  main_host  The main host - указатель на имя аккаунта второстепенного хоста, содержающего измененные параметры вращения  (если такой есть)
  */
 void improve_params_of_new_cycle (eosio::name host, eosio::name main_host){
-    account_index accounts(_self, host);
-    auto acc = accounts.find(host);
+    account_index accounts(_self, host.value);
+    auto acc = accounts.find(host.value);
     auto root_symbol = acc->get_root_symbol();
     
-    sincome_index sincome(_self, host);
-    cycle_index cycles(_self, host);
+    sincome_index sincome(_self, host.value);
+    cycle_index cycles(_self, host.value);
     
     auto last_cycle = cycles.find(acc->current_cycle_num - 1);
 
@@ -366,17 +366,17 @@ void improve_params_of_new_cycle (eosio::name host, eosio::name main_host){
 
 void emplace_first_pools(eosio::name parent_host, eosio::name main_host, eosio::symbol_code root_symbol){
     
-    spiral_index spiral(_self, main_host);
+    spiral_index spiral(_self, main_host.value);
     auto sp = spiral.find(0);
     check(sp != spiral.end(), "Protocol is not found. Set parameters at first");
-    sincome_index sincome(_self, parent_host);
+    sincome_index sincome(_self, parent_host.value);
     
-    account_index accounts(_self, parent_host);
-    auto acc = accounts.find(parent_host);
-    cycle_index cycles(_self, parent_host);
-    pool_index pools(_self, parent_host);
+    account_index accounts(_self, parent_host.value);
+    auto acc = accounts.find(parent_host.value);
+    cycle_index cycles(_self, parent_host.value);
+    pool_index pools(_self, parent_host.value);
 
-    rate_index rates(_self, main_host);
+    rate_index rates(_self, main_host.value);
     
     auto rate = rates.find(0);
     auto next_rate = rates.find(1);
@@ -397,8 +397,8 @@ void emplace_first_pools(eosio::name parent_host, eosio::name main_host, eosio::
         p.total_loss_withdraw = asset(0, root_symbol);
         p.pool_num = 1;
         p.cycle_num = acc->current_cycle_num;
-        p.pool_started_at = eosio::time_point_sec(now());
-        p.priority_until = acc->current_cycle_num == 1 ? eosio::time_point_sec(0) : eosio::time_point_sec(now()+ sp->priority_seconds);
+        p.pool_started_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+        p.priority_until = acc->current_cycle_num == 1 ? eosio::time_point_sec(0) : eosio::time_point_sec(eosio::current_time_point().sec_since_epoch()+ sp->priority_seconds);
         p.pool_expired_at = eosio::time_point_sec (-1);
         p.color = "white";
     });
@@ -415,8 +415,8 @@ void emplace_first_pools(eosio::name parent_host, eosio::name main_host, eosio::
         p.color = "black";
         p.cycle_num = acc->current_cycle_num;
         p.pool_num = 2;
-        p.pool_started_at = eosio::time_point_sec(now());
-        p.priority_until = acc->current_cycle_num == 1 ? eosio::time_point_sec(0) : eosio::time_point_sec(now()+ sp->priority_seconds);
+        p.pool_started_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+        p.priority_until = acc->current_cycle_num == 1 ? eosio::time_point_sec(0) : eosio::time_point_sec(eosio::current_time_point().sec_since_epoch()+ sp->priority_seconds);
         p.pool_expired_at = eosio::time_point_sec (-1);
         p.total_win_withdraw = asset(0, root_symbol);
         p.total_loss_withdraw = asset(0, root_symbol);
@@ -430,7 +430,7 @@ void emplace_first_pools(eosio::name parent_host, eosio::name main_host, eosio::
 
 
 void change_bw_trade_graph(eosio::name host, uint64_t pool_id, uint64_t cycle_num, uint64_t pool_num, uint64_t buy_rate, uint64_t next_buy_rate, uint64_t total_quants, uint64_t remain_quants){
-    bwtradegraph_index bwtradegraph(_self, host);
+    bwtradegraph_index bwtradegraph(_self, host.value);
 
     uint64_t open = buy_rate; 
     uint64_t low = buy_rate;
@@ -474,10 +474,10 @@ void change_bw_trade_graph(eosio::name host, uint64_t pool_id, uint64_t cycle_nu
  * @param[in]  host  The host
  */
 void start_new_cycle ( eosio::name host ) {
-    account_index accounts(_self, host);
-    cycle_index cycles(_self, host);
+    account_index accounts(_self, host.value);
+    cycle_index cycles(_self, host.value);
             
-    auto acc = accounts.find(host);
+    auto acc = accounts.find(host.value);
     eosio::name main_host = acc->get_ahost();
     eosio::name last_ahost = acc->ahost;
             
@@ -492,22 +492,22 @@ void start_new_cycle ( eosio::name host ) {
             a.ahost = main_host;
         });
 
-        improve_params_of_new_cycle(host, main_host);
+        improve_params_of_new_cycle(host, main_host.value);
 
         emplace_first_pools(host, main_host, root_symbol);
 
     } else {
-        rate_index rates(_self, main_host);
-        spiral_index spiral(_self, main_host);
+        rate_index rates(_self, main_host.value);
+        spiral_index spiral(_self, main_host.value);
         
         auto cycle = cycles.find(acc-> current_cycle_num - 1);
         auto rate = rates.find(0);
         auto next_rate = rates.find(1);
         auto sp = spiral.find(0);
         
-        pool_index pools(_self, host);
+        pool_index pools(_self, host.value);
         uint64_t available_id = pools.available_primary_key();
-        improve_params_of_new_cycle(host, main_host);
+        improve_params_of_new_cycle(host, main_host.value);
         
         emplace_first_pools(host, main_host, root_symbol);
 
@@ -525,17 +525,17 @@ void start_new_cycle ( eosio::name host ) {
  * @param[in]  host  The host
  */
 void next_pool( eosio::name host){
-    account_index accounts(_self, host);
+    account_index accounts(_self, host.value);
     
-    auto acc = accounts.find(host);
+    auto acc = accounts.find(host.value);
     auto main_host = acc->get_ahost();
     
-    sincome_index sincome(_self, host);
-    cycle_index cycles(_self, host);
-    pool_index pools(_self, host);
+    sincome_index sincome(_self, host.value);
+    cycle_index cycles(_self, host.value);
+    pool_index pools(_self, host.value);
 
-    rate_index rates(_self, main_host);
-    spiral_index spiral(_self, main_host);
+    rate_index rates(_self, main_host.value);
+    spiral_index spiral(_self, main_host.value);
     
 
     auto root_symbol = acc->get_root_symbol();
@@ -557,16 +557,16 @@ void next_pool( eosio::name host){
             
 
         //     lpower_index lpower(_self, host);
-        //     powermarket market(_self, host);
+        //     powermarket market(_self, host.value);
             
-        //     auto sincome_by_cycle_and_pool = sincome.template get_index<"bycycleandpool"_n>();
+        //     auto sincome_bycycle_and_pool = sincome.template get_index<"cyclandpool"_n>();
 
-        //     auto sincome_by_cycle_and_pool_ids = combine_ids(acc->current_cycle_num, acc -> current_pool_num);
+        //     auto sincome_bycycle_and_pool_ids = combine_ids(acc->current_cycle_num, acc -> current_pool_num);
             
-        //     auto sinc = sincome_by_cycle_and_pool.find(sincome_by_cycle_and_pool_ids);
+        //     auto sinc = sincome_bycycle_and_pool.find(sincome_bycycle_and_pool_ids);
 
 
-        //     if (sinc != sincome_by_cycle_and_pool.end()){
+        //     if (sinc != sincome_bycycle_and_pool.end()){
                 
         //         auto itr = market.find(0);
         //         auto liquid_power = acc->total_shares - itr->base.balance.amount;
@@ -616,9 +616,9 @@ void next_pool( eosio::name host){
             p.color = prev_prev_pool -> color; 
             p.cycle_num = pool -> cycle_num;
             p.pool_num = pool -> pool_num + 1;
-            p.pool_started_at = eosio::time_point_sec(now());
+            p.pool_started_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
             p.priority_until = eosio::time_point_sec(0);
-            p.pool_expired_at = eosio::time_point_sec (now() + sp->pool_timeout);
+            p.pool_expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + sp->pool_timeout);
             p.total_win_withdraw = asset(0, root_symbol);
             p.total_loss_withdraw = asset(0, root_symbol);
         });
@@ -639,10 +639,10 @@ void next_pool( eosio::name host){
 };
 
 void fixs (const fixs &op){
-    require_auth(op.host);
+    require_auth(op.host.value);
 
-    account_index accounts(_self, op.host);
-    auto acc = accounts.find(op.host);
+    account_index accounts(_self, op.host.value);
+    auto acc = accounts.find(op.host.value);
 
     accounts.modify(acc, op.host, [&](auto &p){
         p.sale_shift = 0;
@@ -663,13 +663,13 @@ void start_action (const start &op){
 
     auto main_host = op.host;
 
-    account_index accounts(_self, main_host);
+    account_index accounts(_self, main_host.value);
 
     
-    sincome_index sincome (_self, main_host);
-    cycle_index cycles (_self, op.host);
+    sincome_index sincome (_self, main_host.value);
+    cycle_index cycles (_self, op.host.value);
 
-    auto account = accounts.find(main_host);
+    auto account = accounts.find(main_host.value);
 
     check(account != accounts.end(), "Account is not upgraded to Host. Please update your account and try again.");
     check(account->payed == true, "Host is not payed and can not start");
@@ -717,10 +717,10 @@ void start_action (const start &op){
 
 void del_action(const del &op){
     require_auth(_registrator);
-    user_index refs(_self, _self);
-    auto u = refs.find(op.username);
+    user_index refs(_self, _self.value);
+    auto u = refs.find(op.username.value);
     refs.erase(u);
-    userscount_index usercounts(_self, _self);
+    userscount_index usercounts(_self, _self.value);
     auto usercount = usercounts.find(0);
     usercounts.modify(usercount, _self, [&](auto &u){
         u.count = u.count - 1;
@@ -743,20 +743,20 @@ void reg_action(const reg &op){
     check( is_account( op.username ), "User account does not exist");
     
      
-    user_index refs(_self, _self);
-    auto ref = refs.find(op.username);
+    user_index refs(_self, _self.value);
+    auto ref = refs.find(op.username.value);
 
     check(op.username != op.referer, "You cant set the referer yourself");
     
     if (op.username != _self){
         check(op.referer != 0, "Registration without referer is not possible");
         check( is_account( op.referer ), "Referer account does not exist");
-        auto pref = refs.find(op.referer);
+        auto pref = refs.find(op.referer.value);
         check(pref != refs.end(), "Referer is not registered in the core");    
     } 
 
     
-    userscount_index usercounts(_self, _self);
+    userscount_index usercounts(_self, _self.value);
     auto usercount = usercounts.find(0);
     uint64_t count = 1;
 
@@ -799,7 +799,7 @@ void reg_action(const reg &op){
  */
 void profupdate_action(const profupdate &op){
     require_auth(op.username);
-    user_index refs(_self, _self);
+    user_index refs(_self, _self.value);
 
     auto ref = refs.find(op.username);
     
@@ -824,9 +824,9 @@ void setparams_action(const setparams &op){
     else 
         require_auth(op.chost);
 
-    account_index accounts(_self, op.host);
+    account_index accounts(_self, op.host.value);
     auto main_host = op.host;
-    auto account = accounts.find(main_host);
+    auto account = accounts.find(main_host.value);
 
     check(account != accounts.end(), "Account is not upgraded to Host. Please update your account and try again.");
     
@@ -837,15 +837,15 @@ void setparams_action(const setparams &op){
         main_host = chosts.back();
         check(account->ahost != main_host, "Protocol is already active and cannot be changed now.");
         check(main_host == op.chost, "Wrong last non-active child host");
-        spiral_index last_params (_self, account->ahost);
+        spiral_index last_params (_self, (account->ahost).value);
         auto lp = last_params.find(0);
         check(lp->size_of_pool <= op.size_of_pool, "Size of pool cannot be decreased in child host");
     } else {
         check(account->activated == false, "Protocol is already active and cannot be changed now.");
     }
 
-    rate_index rates(_self, main_host);
-    spiral_index spiral(_self, main_host);
+    rate_index rates(_self, main_host.value);
+    spiral_index spiral(_self, main_host.value);
     
     auto size_of_pool = op.size_of_pool;
     auto overlap = op.overlap;
@@ -949,10 +949,10 @@ void setparams_action(const setparams &op){
                 payment_to_loss[i] = live_balance_for_sale[i-1] * (HUNDR_PERCENT - loss_percent) / HUNDR_PERCENT + payment_to_loss[i - 2];
 
 
-                check(buy_rate[i] > buy_rate[i-1], "Buy rate should growth. Try with a different parameters");
+                check(buy_rate[i] > buy_rate[i-1], "Buy rate should only growth");
                 
                 //необходимо переработать решение дифференциального уравнения реферальных поступлений и ассерт может быть снят
-                check(payment_to_loss[i] >= payment_to_loss[i-1], "Some overflow. Try with a different parameters");
+                check(payment_to_loss[i] >= payment_to_loss[i-1], "Payment to losses should not growth");
                 
             }
             
@@ -961,7 +961,7 @@ void setparams_action(const setparams &op){
             
 
             // Используем по причине необходимости переработки решения дифференциального уравнения системного дохода. 
-            check(system_income[i] >= system_income[i-1], "System income should not decrease in temporary puproses.");
+            check(system_income[i] >= system_income[i-1], "System income should not decrease");
 
             /**
              * Проверка бизнес-модели на положительный баланс. 
@@ -972,11 +972,11 @@ void setparams_action(const setparams &op){
             bool positive = total_in_box[i-1] - payment_to_wins[i] <= payment_to_loss[i] ? false : true;
             
 
-            check(positive, "The financial model of Protocol is Negative. Try with a different parameters");
+            check(positive, "The financial model of Protocol is Negative.");
 
 
             if (i > 2)
-                check((client_income[i-1] > 0), "Overlap rate is too small for Protocol operation. Try to increase Overlap parameter, Size of Pool or Base Rate");      
+                check((client_income[i-1] > 0), "Try to increase Overlap, Size of Pool or Base Rate");      
         } 
     };
 
@@ -1014,8 +1014,8 @@ void deposit ( eosio::name username, eosio::name host, eosio::asset amount, eosi
     require_auth(username);
     check( amount.is_valid(), "Rejected. Invalid quantity" );
 
-    user_index users(_self,_self);
-    auto user = users.find(username);
+    user_index users(_self,_self.value);
+    auto user = users.find(username.value);
     check(user != users.end(), "User is not registered");
     
     if (user == users.end()){
@@ -1026,16 +1026,16 @@ void deposit ( eosio::name username, eosio::name host, eosio::asset amount, eosi
             r.referer = _registrator;
         });
     }
-    account_index accounts(_self, host);
-    auto acc = accounts.find(host);
+    account_index accounts(_self, host.value);
+    auto acc = accounts.find(host.value);
 
     check(acc->root_token_contract == code, "Wrong token contract for this host");
 
     eosio::name main_host = acc->get_ahost();
     
-    rate_index rates(_self, main_host);
-    pool_index pools(_self, host);
-    spiral_index spiral(_self, host);
+    rate_index rates(_self, main_host.value);
+    pool_index pools(_self, host.value);
+    spiral_index spiral(_self, host.value);
     auto sp = spiral.find(0);
 
     auto root_symbol = acc->get_root_symbol();
@@ -1052,7 +1052,7 @@ void deposit ( eosio::name username, eosio::name host, eosio::asset amount, eosi
     check( acc-> priority_flag == false, "This is a Priority Time");
 
     if (pool -> pool_num > 2){
-        check ( pool -> pool_expired_at > eosio::time_point_sec(now()), "Pool is Expired");
+        check ( pool -> pool_expired_at > eosio::time_point_sec(eosio::current_time_point().sec_since_epoch()), "Pool is Expired");
     };
 
     auto rate = rates.find( pool-> pool_num - 1 );
@@ -1077,7 +1077,7 @@ void deposit ( eosio::name username, eosio::name host, eosio::asset amount, eosi
  */
 
 void add_coredhistory(eosio::name host, eosio::name username, uint64_t pool_id, eosio::asset amount, std::string action, std::string message){
-    coredhistory_index coredhistory(_self, host);
+    coredhistory_index coredhistory(_self, host.value);
     auto coredhist_start = coredhistory.begin();
     auto coredhist_end = coredhistory.rbegin();
     eosio::name payer = action == "deposit" || "convert" ? _self : username;
@@ -1114,17 +1114,17 @@ void add_coredhistory(eosio::name host, eosio::name username, uint64_t pool_id, 
 
 void refresh_state (eosio::name host){
 
-    account_index accounts(_self, host);
-    auto acc = accounts.find(host);
+    account_index accounts(_self, host.value);
+    auto acc = accounts.find(host.value);
     eosio::name main_host = acc->get_ahost();
 
-    pool_index pools(_self, host);
-    spiral_index spiral(_self, main_host);
+    pool_index pools(_self, host.value);
+    spiral_index spiral(_self, main_host.value);
     auto sp = spiral.find(0);
     auto pool = pools.find(acc -> current_pool_id);
     if (acc -> priority_flag == true){
         
-        if (pool->pool_started_at + sp->priority_seconds < eosio::time_point_sec(now()) ||
+        if (pool->pool_started_at + sp->priority_seconds < eosio::time_point_sec(eosio::current_time_point().sec_since_epoch()) ||
             (pool -> remain_quants < sp -> quants_precision)){
             
             accounts.modify(acc, _self, [&](auto &dp){
@@ -1147,7 +1147,7 @@ void refresh_state (eosio::name host){
         }
     } else {
         // Если пул истек, или доступных пулов больше нет, или оставшихся лепт больше нет, то новый цикл
-        if ((pool -> pool_expired_at < eosio::time_point_sec(now()) || \
+        if ((pool -> pool_expired_at < eosio::time_point_sec(eosio::current_time_point().sec_since_epoch()) || \
             ((pool -> pool_num + 1 == sp->pool_limit) && (pool -> remain_quants == 0)))){
             start_new_cycle(host);
       
@@ -1188,20 +1188,21 @@ void refresh_state (eosio::name host){
 
 void fill_pool(eosio::name username, eosio::name host, uint64_t quants, eosio::asset amount, uint64_t filled_pool_id){
     std::vector<eosio::asset> forecasts;
-    account_index accounts(_self, host);
+    account_index accounts(_self, host.value);
     
-    auto acc = accounts.find(host);
+    auto acc = accounts.find(host.value);
     auto main_host = acc -> get_ahost();
 
-    cycle_index cycles(_self, host);
-    pool_index pools(_self, host);
-    rate_index rates(_self, main_host);
-    spiral_index spiral(_self, host);
+    cycle_index cycles(_self, host.value);
+    pool_index pools(_self, host.value);
+    rate_index rates(_self, main_host.value);
+    spiral_index spiral(_self, host.value);
     auto sp = spiral.find(0);
-    balance_index balance(_self, username);
+    balance_index balance(_self, username.value);
     
     auto root_symbol = acc->get_root_symbol();
     auto pool = pools.find(filled_pool_id);
+
     check(pool != pools.end(), "Cant FIND");
     
     auto rate = rates.find(acc->current_pool_num + 1);
@@ -1295,24 +1296,24 @@ void refresh_balance_action (const refreshbal &op){
     uint64_t balance_id = op.balance_id;
 
 
-    balance_index balance (_self, username);
+    balance_index balance (_self, username.value);
     auto bal = balance.find(balance_id);
     check(bal != balance.end(), "Balance is not exist or already withdrawed");
     
     auto chost = bal -> get_ahost();
     auto parent_host = bal -> host;
-    account_index accounts(_self, parent_host);
+    account_index accounts(_self, parent_host.value);
     
-    auto acc = accounts.find(parent_host);
+    auto acc = accounts.find(parent_host.value);
 
     auto root_symbol = acc->get_root_symbol();
     
     refresh_state(parent_host);
     
-    cycle_index cycles(_self, parent_host);
-    rate_index rates(_self, chost);
-    pool_index pools(_self, parent_host);
-    spiral_index spiral(_self, chost);
+    cycle_index cycles(_self, parent_host.value);
+    rate_index rates(_self, chost.value);
+    pool_index pools(_self, parent_host.value);
+    spiral_index spiral(_self, chost.value);
 
     auto sp = spiral.find(0);
     
@@ -1554,13 +1555,13 @@ std::vector <eosio::asset> calculate_forecast(eosio::name username, eosio::name 
     
     //TODO -> cycle / recursion
 
-    account_index accounts(_self, host);
-    auto acc = accounts.find(host);
+    account_index accounts(_self, host.value);
+    auto acc = accounts.find(host.value);
     auto main_host = acc->get_ahost();
 
-    balance_index balance (_self, username);
-    rate_index rates (_self, main_host);
-    spiral_index spiral (_self, main_host);
+    balance_index balance (_self, username.value);
+    rate_index rates (_self, main_host.value);
+    spiral_index spiral (_self, main_host.value);
 
     auto root_symbol = acc->get_root_symbol();
     auto sp = spiral.find(0);
@@ -1679,10 +1680,10 @@ void enablesale_action(const enablesale &op){
 
     require_auth(op.host);
 
-    funds_index funds(_self, _self);
-    auto by_contract_and_symbol = funds.template get_index<"bycontractandsymbol"_n>();
+    funds_index funds(_self, _self.value);
+    auto by_contract_and_symbol = funds.template get_index<"codeandsmbl"_n>();
 
-    auto by_contract_and_symbol_ids = combine_ids(op.token_contract, op.asset_on_sale.symbol);
+    auto by_contract_and_symbol_ids = combine_ids(op.token_contract.value, op.asset_on_sale.symbol.code().raw());
     
     auto fund = by_contract_and_symbol.find(by_contract_and_symbol_ids);
 
@@ -1690,8 +1691,8 @@ void enablesale_action(const enablesale &op){
     check(fund != by_contract_and_symbol.end(), "Fund is not exist");
     
     
-    account_index accounts(_self, op.host);
-    auto acc = accounts.find(op.host);
+    account_index accounts(_self, op.host.value);
+    auto acc = accounts.find(op.host.value);
     check(acc != accounts.end(), "Host is not found");
     
     check(acc->activated == false, "Sale can be enabled only before launch");
@@ -1701,11 +1702,11 @@ void enablesale_action(const enablesale &op){
     //Check for host on fund existing
 
 
-    hostsonfunds_index hostsonfunds(_self, _self);
+    hostsonfunds_index hostsonfunds(_self, _self.value);
 
-    auto by_fund_and_host = hostsonfunds.template get_index<"byfundandhost"_n>();
+    auto by_fund_and_host = hostsonfunds.template get_index<"fundandhost"_n>();
 
-    auto by_fund_and_host_ids = combine_ids(fund->id, op.host);
+    auto by_fund_and_host_ids = combine_ids(fund->id, op.host.value);
     
     auto host_on_fund = by_fund_and_host.find(by_fund_and_host_ids);
 
@@ -1727,7 +1728,7 @@ void enablesale_action(const enablesale &op){
 */
 void connect_host_to_fund_action(const addhostofund &op){
     
-    funds_index funds(_self, _self);
+    funds_index funds(_self, _self.value);
 
     auto fund = funds.find(op.fund_id);
 
@@ -1735,14 +1736,14 @@ void connect_host_to_fund_action(const addhostofund &op){
     
     require_auth(fund -> issuer);
     
-    account_index accounts(_self, op.host);
-    auto acc = accounts.find(op.host);
+    account_index accounts(_self, op.host.value);
+    auto acc = accounts.find(op.host.value);
     check(acc != accounts.end(), "Host is not exist");
     
-    hostsonfunds_index hostsonfunds(_self, _self);
-    auto by_fund_and_host = hostsonfunds.template get_index<"byfundandhost"_n>();
+    hostsonfunds_index hostsonfunds(_self, _self.value);
+    auto by_fund_and_host = hostsonfunds.template get_index<"fundandhost"_n>();
 
-    auto by_fund_and_host_ids = combine_ids(op.fund_id, op.host);
+    auto by_fund_and_host_ids = combine_ids(op.fund_id, op.host.value);
     
     auto host_on_fund = by_fund_and_host.find(by_fund_and_host_ids);
 
@@ -1766,11 +1767,11 @@ void add_asset_to_fund_action(eosio::name username, eosio::asset quantity, eosio
     
     require_auth(username);
 
-    funds_index funds(_self, _self);
+    funds_index funds(_self, _self.value);
 
-    auto by_contract_and_symbol = funds.template get_index<"bycontractandsymbol"_n>();
+    auto by_contract_and_symbol = funds.template get_index<"codeandsmbl"_n>();
 
-    auto by_contract_and_symbol_ids = combine_ids(code, quantity.symbol);
+    auto by_contract_and_symbol_ids = combine_ids(code, quantity.symbol.code().raw());
     
     auto fund = by_contract_and_symbol.find(by_contract_and_symbol_ids);
 
@@ -1796,13 +1797,13 @@ void createfund_action(const createfund &op){
     
     require_auth(s -> issuer);
     
-    funds_index funds(_self, _self);
+    funds_index funds(_self, _self.value);
 
     check(op.fund_asset.amount == 0, "Fund amount should be zero on fund creation process");
 
-    auto by_contract_and_symbol = funds.template get_index<"bycontractandsymbol"_n>();
+    auto by_contract_and_symbol = funds.template get_index<"codeandsmbl"_n>();
 
-    auto by_contract_and_symbol_ids = combine_ids(op.token_contract, op.fund_asset.symbol);
+    auto by_contract_and_symbol_ids = combine_ids(op.token_contract.value, op.fund_asset.symbol.code().raw());
     
     auto fund = by_contract_and_symbol.find(by_contract_and_symbol_ids);
 
@@ -1827,24 +1828,24 @@ void createfund_action(const createfund &op){
 void convert_action(const convert &op){
     require_auth(op.username);
 
-    account_index accounts(_self, op.host);
+    account_index accounts(_self, op.host.value);
 
-    pool_index pools(_self, op.host);
-    rate_index rates(_self, op.host);
-    spiral_index spiral(_self, op.host);
+    pool_index pools(_self, op.host.value);
+    rate_index rates(_self, op.host.value);
+    spiral_index spiral(_self, op.host.value);
 
-    auto acc = accounts.find(op.host);
+    auto acc = accounts.find(op.host.value);
     auto sp = spiral.find(0);
 
     check(acc -> sale_is_enabled == true, "Sale is disabled");
 
     
-    balance_index balances(_self, op.username);    
+    balance_index balances(_self, op.username.value);    
     auto bal = balances.find(op.balance_id);
 
     check(bal != balances.end(), "balance is not found");
 
-    cycle_index cycles(_self, op.host);
+    cycle_index cycles(_self, op.host.value);
     auto cycle = cycles.find(bal-> cycle_num - 1);
     
     check(bal->last_recalculated_win_pool_id == cycle->finish_at_global_pool_id, "Cannot convert not refreshed balance. Refresh Balance first and try again.");
@@ -1874,8 +1875,8 @@ void convert_action(const convert &op){
 void buy_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code){
     require_auth(username);
 
-    account_index accounts(_self, host);
-    auto acc = accounts.find(host);
+    account_index accounts(_self, host.value);
+    auto acc = accounts.find(host.value);
     
     check(acc -> sale_is_enabled == true, "Sale is disabled");
 
@@ -1885,10 +1886,10 @@ void buy_action(eosio::name username, eosio::name host, eosio::asset quantity, e
     check(code == acc->root_token_contract, "Wrong root token for this host");
     check(quantity.symbol == root_symbol, "Wrong root symbol for this host");
 
-    pool_index pools(_self, host);
-    rate_index rates(_self, host);
+    pool_index pools(_self, host.value);
+    rate_index rates(_self, host.value);
 
-    spiral_index spiral(_self, host);
+    spiral_index spiral(_self, host.value);
     auto sp = spiral.find(0);
 
     // auto cycle = cycles.find(pool -> cycle_num - 1);
@@ -1962,20 +1963,20 @@ void withdraw_action ( const withdraw &op){
     auto balance_id = op.balance_id;
     auto host = op.host;
 
-    account_index accounts(_self, host);
-    auto acc = accounts.find(host);
+    account_index accounts(_self, host.value);
+    auto acc = accounts.find(host.value);
     eosio::name main_host = acc->get_ahost();
     auto root_symbol = acc->get_root_symbol();
 
     refresh_state(host);
     
-    rate_index rates(_self, main_host);
-    pool_index pools(_self, host);
-    cycle_index cycles(_self, host);
+    rate_index rates(_self, main_host.value);
+    pool_index pools(_self, host.value);
+    cycle_index cycles(_self, host.value);
 
-    balance_index balance (_self, username);
-    spiral_index spiral(_self, main_host);
-    sincome_index sincome(_self, host);
+    balance_index balance (_self, username.value);
+    spiral_index spiral(_self, main_host.value);
+    sincome_index sincome(_self, host.value);
     std::vector<eosio::asset> forecasts;
     
     
@@ -2195,7 +2196,7 @@ void withdraw_action ( const withdraw &op){
             //TODO may be corrent max with total prev element
             //(if payed before, max should decrease)
     
-            powermarket market(_self, host);
+            powermarket market(_self, host.value);
             auto itr = market.find(0);
             auto liquid_power = acc->total_shares - itr->base.balance.amount;
 
@@ -2282,7 +2283,7 @@ void withdraw_action ( const withdraw &op){
 };
 
     void add_sale_history(hosts acc, rate rate, spiral sp, eosio::asset amount){
-        sale_index sales(_self, acc.username);
+        sale_index sales(_self, acc.username.value);
         auto sale = sales.find(acc.current_pool_id);
         auto root_symbol = acc.get_root_symbol();
 
@@ -2301,11 +2302,11 @@ void withdraw_action ( const withdraw &op){
     }
 
     void check_and_modify_sale_fund(eosio::asset amount, hosts acc){
-        funds_index funds(_self, _self);
+        funds_index funds(_self, _self.value);
 
-        auto funds_by_contract_and_symbol = funds.template get_index<"bycontractandsymbol"_n>();
+        auto funds_by_contract_and_symbol = funds.template get_index<"codeandsmbl"_n>();
 
-        auto fund_by_contract_and_symbol_ids = combine_ids(acc.sale_token_contract, (acc.asset_on_sale).symbol);
+        auto fund_by_contract_and_symbol_ids = combine_ids(acc.sale_token_contract.value, (acc.asset_on_sale).symbol);
         
         auto fund = funds_by_contract_and_symbol.find(fund_by_contract_and_symbol_ids);
 

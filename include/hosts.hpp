@@ -83,7 +83,7 @@ namespace eosio {
             (to_pay)(payed)(cycle_start_id)(current_pool_id)
             (current_cycle_num)(current_pool_num)(parameters_setted)(activated)(priority_flag)(meta))
 
-        eosio::name primary_key()const { return username; }
+        uint64_t primary_key()const { return username.value; }
       
         eosio::name get_ahost() const {
         	if (ahost == username)
@@ -92,7 +92,7 @@ namespace eosio {
         		return ahost; 
         }
 
-        eosio::symbol_code get_root_symbol() const {
+        eosio::symbol get_root_symbol() const {
         	return root_token.symbol;
         }
 
@@ -118,7 +118,7 @@ namespace eosio {
         uint64_t gtop;
         eosio::asset fund;
 
-        eosio::name primary_key() const {return host;}
+        uint64_t primary_key() const {return host.value;}
         
         EOSLIB_SERIALIZE(emission, (host)(percent)(gtop)(fund))
     };
@@ -135,16 +135,16 @@ namespace eosio {
         std::string descriptor;
         
         uint64_t primary_key()const { return id; }
-        uint64_t byissuer()const { return issuer; }
-        uint128_t bycontractandsymbol() const {return combine_ids(token_contract, fund.symbol);}
+        uint64_t byissuer()const { return issuer.value; }
+        uint128_t codeandsmbl() const {return combine_ids(token_contract.value, fund.symbol.code().raw());}
         
         EOSLIB_SERIALIZE(funds, (id)(issuer)(token_contract)(fund)(descriptor))
     };
 
     
     typedef eosio::multi_index<"funds"_n, funds,
-      indexed_by<"bycontractandsymbol"_n, const_mem_fun<funds, uint128_t, 
-                              &funds::bycontractandsymbol>>,
+      indexed_by<"codeandsmbl"_n, const_mem_fun<funds, uint128_t, 
+                              &funds::codeandsmbl>>,
 
       indexed_by<"byissuer"_n, const_mem_fun<funds, uint64_t, 
                               &funds::byissuer>>
@@ -158,14 +158,14 @@ namespace eosio {
         
         uint64_t primary_key()const { return id; }
         
-        uint128_t byfundandhost() const {return combine_ids(fund_id, host);}
+        uint128_t fundandhost() const {return combine_ids(fund_id, host.value);}
         EOSLIB_SERIALIZE(hostsonfunds, (id)(fund_id)(host))
     };
 
     
     typedef eosio::multi_index<"hostsonfunds"_n, hostsonfunds,
-      indexed_by<"byfundandhost"_n, const_mem_fun<hostsonfunds, uint128_t, 
-                              &hostsonfunds::byfundandhost>>
+      indexed_by<"fundandhost"_n, const_mem_fun<hostsonfunds, uint128_t, 
+                              &hostsonfunds::fundandhost>>
     > hostsonfunds_index;
 
 

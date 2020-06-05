@@ -7,7 +7,7 @@ namespace eosio {
 		uint64_t staked;
 		uint64_t delegated;
     uint64_t with_badges;
-		eosio::name primary_key() const {return host;}
+		uint64_t primary_key() const {return host.value;}
 
 		EOSLIB_SERIALIZE(struct power, (host)(power)(staked)(delegated)(with_badges))
 	};
@@ -27,7 +27,7 @@ namespace eosio {
     eosio::asset ref_available_in_asset;
     uint64_t ref_available_segments = 0;
     eosio::asset ref_withdrawed;
-    eosio::name primary_key() const {return host;}
+    uint64_t primary_key() const {return host.value;}
 
     EOSLIB_SERIALIZE(struct pstats, (host)(total_available_in_asset)(pflow_last_withdrawed_pool_id)(pflow_available_segments)(pflow_available_in_asset)(pflow_withdrawed)(ref_available_in_asset)(ref_available_segments)(ref_withdrawed))
   };
@@ -46,13 +46,13 @@ namespace eosio {
 
     uint64_t primary_key() const {return id;}
     
-    uint128_t hostwithpoolid() const { return combine_ids(host, pool_id); }
+    uint128_t hostpoolid() const { return combine_ids(host.value, pool_id); }
     
     EOSLIB_SERIALIZE(struct plog, (id)(host)(pool_id)(cycle_num)(pool_num)(power))
   };
 
   typedef eosio::multi_index<"plog"_n, plog,
-    indexed_by<"hostwithpoolid"_n, const_mem_fun<plog, uint128_t, &plog::hostwithpoolid>>
+    indexed_by<"hostpoolid"_n, const_mem_fun<plog, uint128_t, &plog::hostpoolid>>
   > plog_index;
 
 
@@ -79,7 +79,7 @@ namespace eosio {
 		eosio::name reciever;
 		uint64_t shares;
 
-		eosio::name primary_key() const {return reciever;}
+		uint64_t primary_key() const {return reciever.value;}
 
 		EOSLIB_SERIALIZE(delegations, (reciever)(shares))
 	};

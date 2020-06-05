@@ -49,14 +49,14 @@ namespace eosio {
     	eosio::string comment;
       eosio::time_point_sec expired_at;
     	uint64_t primary_key() const {return report_id;}
-		  uint128_t user_with_task() const { return combine_ids(username, task_id); }
+		  uint128_t userwithtask() const { return combine_ids(username.value, task_id); }
 
     	EOSLIB_SERIALIZE(reports, (report_id)(task_id)(goal_id)(type)(username)(curator)(data)(requested)(balance)(withdrawed)(need_check)(approved)(comment)(expired_at))
     };
 
     typedef eosio::multi_index< "reports"_n, reports,
-    	indexed_by<"user_with_task"_n, const_mem_fun<reports, uint128_t, 
-                              &reports::user_with_task>>
+    	indexed_by<"userwithtask"_n, const_mem_fun<reports, uint128_t, 
+                              &reports::userwithtask>>
     > reports_index;
 
 

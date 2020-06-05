@@ -43,7 +43,7 @@ struct goal {
 		goals_index goals(_self,op.host);
 		account_index accounts(_self, op.host);
 
-		user_index users(_self,_self);
+		user_index users(_self,_self.value);
     auto user = users.find(op.username);
     check(user != users.end(), "User is not registered");
 
@@ -69,7 +69,7 @@ struct goal {
         g.id = op.id;
         g.username = username;
         g.benefactor = op.benefactor;
-        g.created = eosio::time_point_sec(now());
+        g.created = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
         g.host = host;
         g.permlink = op.permlink;
         g.title = title;
@@ -78,7 +78,7 @@ struct goal {
         g.withdrawed = asset(0, root_symbol);
         g.available = asset(0, root_symbol);
         g.validated = validated;
-        g.expired_at = eosio::time_point_sec (now() + op.expiration);
+        g.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + op.expiration);
       });      
     } else {
       check(username == goal->username, "Only creator can modify the goal");
@@ -253,8 +253,8 @@ struct goal {
 		// require_auth(from);
 		
 		goals_index goals(_self, host);
-		account_index accounts(_self, host);
-		auto acc = accounts.find(host);
+		account_index accounts(_self, host.value);
+		auto acc = accounts.find(host.value);
 
 		if (code != _self) //For direct donate from fund and by architects action
 			check(acc->root_token_contract == code, "Wrong root token contract for this host");

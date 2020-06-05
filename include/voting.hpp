@@ -13,7 +13,7 @@ namespace eosio {
 
 		uint64_t primary_key()const { return id; }
 		eosio::name by_host() const {return host;}
-		uint128_t id_with_host() const { return combine_ids2(host, goal_id); }
+		uint128_t idwithhost() const { return combine_ids2(host.value, goal_id); }
 
 	    EOSLIB_SERIALIZE( votes, (id)(goal_id)(host)(power))
     };
@@ -21,7 +21,7 @@ namespace eosio {
 
     typedef eosio::multi_index< "votes"_n, votes,
     indexed_by<"host"_n, const_mem_fun<votes, eosio::name, &votes::by_host>>,
-	indexed_by<"id_with_host"_n, const_mem_fun<votes, uint128_t, &votes::id_with_host>>
+	indexed_by<"idwithhost"_n, const_mem_fun<votes, uint128_t, &votes::idwithhost>>
     > votes_index;
 
 

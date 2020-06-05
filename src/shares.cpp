@@ -14,14 +14,14 @@ struct shares {
 	    // check(amount.symbol == _SYM, "Not valid symbol for this vesting contract");
 	    check(is_account(owner), "Owner account does not exist");
 	    
-	    vesting_index vests (_self, owner);
+	    vesting_index vests (_self, owner.value);
 	    
 	    vests.emplace(_self, [&](auto &v){
 	      v.id = vests.available_primary_key();
         v.host = host;
 	      v.owner = owner;
 	      v.amount = amount;
-	      v.startat = eosio::time_point_sec(now());
+	      v.startat = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
 	      v.duration = vesting_seconds;
 	    });
 
@@ -34,13 +34,13 @@ struct shares {
    */
   void refresh_action(const refreshsh &op){
     require_auth(op.owner);
-    vesting_index vests(_self, op.owner);
+    vesting_index vests(_self, op.owner.value);
     auto v = vests.find(op.id);
     check(v != vests.end(), "Vesting object does not exist");
     
-    if (eosio::time_point_sec(now() ) > v->startat){
+    if (eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() ) > v->startat){
       
-      auto elapsed_seconds = (eosio::time_point_sec(now()) - v->startat).to_seconds();
+      auto elapsed_seconds = (eosio::time_point_sec(eosio::current_time_point().sec_since_epoch()) - v->startat).to_seconds();
       eosio::asset available;
     
       if( elapsed_seconds < v->duration){
@@ -65,12 +65,12 @@ struct shares {
    */
   void withdraw_action(const withdrawsh &op){
     require_auth(op.owner);
-    vesting_index vests(_self, op.owner);
+    vesting_index vests(_self, op.owner.value);
     auto v = vests.find(op.id);
     check(v != vests.end(), "Vesting object does not exist");
     check((v->available).amount > 0, "Only positive amount can be withdrawed");
-    account_index account(_self, v->host);
-    auto acc = account.find(v->host);
+    account_index account(_self, (v->host).value);
+    auto acc = account.find((v->host).value);
 
     action(
         permission_level{ _self, "active"_n },
@@ -96,13 +96,13 @@ struct shares {
   */
   void withdraw_power_units_action(const withbenefit &op){
     require_auth(op.username);
-    pstats_index pstats(_self, op.username);
-    auto pstat = pstats.find(op.host);
+    pstats_index pstats(_self, op.username.value);
+    auto pstat = pstats.find(op.host.value);
     check(pstat != pstats.end(), "Power Stat Object is not found. Refresh your balances first.");
     check((pstat -> pflow_available_in_asset).amount > 0, "Not enough tokens for transfer");
-    account_index account(_self, op.host);
+    account_index account(_self, op.host.value);
 
-    auto acc = account.find(op.host);
+    auto acc = account.find(op.host.value);
     auto root_symbol = acc->get_root_symbol();
     auto on_withdraw = pstat -> pflow_available_in_asset + pstat -> ref_available_in_asset;
     
@@ -139,18 +139,18 @@ struct shares {
   */
   void refresh_power_units_action(const refreshpu &op){
     require_auth(op.username);
-    power_index power(_self, op.username);
+    power_index power(_self, op.username.value);
     // auto pexist = power.find(op.host);
-    account_index account(_self, op.host);
+    account_index account(_self, op.host.value);
 
-    auto acc = account.find(op.host);
+    auto acc = account.find(op.host.value);
     auto root_symbol = acc->get_root_symbol();
     check(acc != account.end(), "Host is not found");
     // check(pexist != power.end(), "User never have any power");
 
 
-    pstats_index pstats(_self, op.username);
-    auto pstat = pstats.find(op.host);
+    pstats_index pstats(_self, op.username.value);
+    auto pstat = pstats.find(op.host.value);
     auto min_pool_id = 0;
 
     bool skip = false;
@@ -160,7 +160,7 @@ struct shares {
 
     
 
-    refbalances_index refbalances(_self, op.username);
+    refbalances_index refbalances(_self, op.username.value);
     auto refbalance = refbalances.begin();
     uint64_t count=0;
     while(refbalance != refbalances.end() && count < 50){
@@ -199,7 +199,7 @@ struct shares {
     }
   
 
-    sincome_index sincomes(_self, op.host);
+    sincome_index sincomes(_self, op.host.value);
     auto sincome = sincomes.lower_bound(min_pool_id);
 
     if ((min_pool_id != 0) && (sincome != sincomes.end()))
@@ -210,19 +210,19 @@ struct shares {
     while(sincome != sincomes.end() && count2 < 50) {
     // if (sincome != sincomes.end()){
 
-      plog_index plogs(_self, op.username);
+      plog_index plogs(_self, op.username.value);
 
-      auto pool_id_with_host_idx = plogs.template get_index<"hostwithpoolid"_n>();
-      auto log_id = combine_ids(op.host, sincome-> pool_id);
+      auto pool_idwithhost_idx = plogs.template get_index<"hostpoolid"_n>();
+      auto log_id = combine_ids(op.host.value, sincome-> pool_id);
 
 
-      auto plog = pool_id_with_host_idx.lower_bound(log_id);  
+      auto plog = pool_idwithhost_idx.lower_bound(log_id);  
       
-      if ((plog != pool_id_with_host_idx.begin()) && (plog -> pool_id > sincome->pool_id)){ 
+      if ((plog != pool_idwithhost_idx.begin()) && (plog -> pool_id > sincome->pool_id)){ 
           plog--;
       };
 
-      if (plog == pool_id_with_host_idx.end()){
+      if (plog == pool_idwithhost_idx.end()){
         skip = true;
       };
 
@@ -272,7 +272,7 @@ struct shares {
               ps.pflow_available_in_asset += segment_asset;
             });          
           }
-          dlog_index dlogs(_self, op.username);
+          dlog_index dlogs(_self, op.username.value);
           
           dlogs.emplace(_self, [&](auto &dl){
             dl.id = dlogs.available_primary_key();
@@ -338,18 +338,18 @@ struct shares {
    *
   */
    void log_event_with_shares (eosio::name username, eosio::name host, int64_t new_power){
-      account_index accounts(_self, host);
-      auto acc = accounts.find(host);
+      account_index accounts(_self, host.value);
+      auto acc = accounts.find(host.value);
 
-      plog_index plogs(_self, username);
+      plog_index plogs(_self, username.value);
  
-      auto pool_id_with_host_idx = plogs.template get_index<"hostwithpoolid"_n>();
-      auto log_ids = combine_ids(host, acc->current_pool_id);
+      auto pool_idwithhost_idx = plogs.template get_index<"hostpoolid"_n>();
+      auto log_ids = combine_ids(host.value, acc->current_pool_id);
       
-      auto log = pool_id_with_host_idx.find(log_ids);
+      auto log = pool_idwithhost_idx.find(log_ids);
 
 
-      if (log == pool_id_with_host_idx.end()){
+      if (log == pool_idwithhost_idx.end()){
         plogs.emplace(_self, [&](auto &l){
           l.id = plogs.available_primary_key();
           l.host = host;
@@ -360,20 +360,20 @@ struct shares {
         });
 
       } else {
-        pool_id_with_host_idx.modify(log, _self, [&](auto &l){
+        pool_idwithhost_idx.modify(log, _self, [&](auto &l){
           l.power = new_power;
         });
       }
 
-      sincome_index sincome(_self, host);
+      sincome_index sincome(_self, host.value);
       auto sinc = sincome.find(acc->current_pool_id);
       
-      rate_index rates(_self, host);
+      rate_index rates(_self, host.value);
       auto rate = rates.find(acc->current_pool_num - 1);
       eosio::name main_host = acc->get_ahost();
       auto root_symbol = acc->get_root_symbol();
 
-      powermarket market(_self, host);
+      powermarket market(_self, host.value);
       auto itr = market.find(0);
       auto liquid_power = acc->total_shares - itr->base.balance.amount;
 
@@ -418,18 +418,18 @@ struct shares {
 	void buyshares_action ( eosio::name buyer, eosio::name host, eosio::asset amount, eosio::name code ){
 		// check(amount.symbol == _SYM, "Wrong symbol for buy shares");
 		
-		account_index accounts(_self, host);
-		user_index users(_self,_self);
-    auto user = users.find(buyer);
+		account_index accounts(_self, host.value);
+		user_index users(_self,_self.value);
+    auto user = users.find(buyer.value);
     check(user != users.end(), "User is not registered");
 
 
-		auto exist = accounts.find(host);
+		auto exist = accounts.find(host.value);
 		check(exist != accounts.end(), "Host is not founded");
 		check(exist -> quote_token_contract == code, "Wrong quote token contract");
     check(exist -> quote_amount.symbol == amount.symbol, "Wrong quote token symbol");
 		
-    powermarket market(_self, host);
+    powermarket market(_self, host.value);
 		auto itr = market.find(0);
 		auto tmp = *itr;
 		uint64_t shares_out;
@@ -439,7 +439,7 @@ struct shares {
 
     check( shares_out > 0, "Amount is not enought for buy 1 share" );
 
-    power_index power(_self, buyer);
+    power_index power(_self, buyer.value);
 
     auto pexist = power.find(host);
     
@@ -479,11 +479,11 @@ struct shares {
    */
 
   void back_shares_with_badge_action (eosio::name host, eosio::name from, uint64_t shares){
-    account_index accounts(_self, host);
-    auto acc = accounts.find(host);
+    account_index accounts(_self, host.value);
+    auto acc = accounts.find(host.value);
     check(acc != accounts.end(), "Host is not found");
     
-    power_index power_to_idx (_self, from);
+    power_index power_to_idx (_self, from.value);
     auto power_to = power_to_idx.find(host);
       
     //modify
@@ -495,7 +495,7 @@ struct shares {
       pt.with_badges -= shares; 
     });
 
-    powermarket market(_self, host);
+    powermarket market(_self, host.value);
     auto itr = market.find(0);
     
     market.modify( itr, 0, [&]( auto& es ) {
@@ -514,14 +514,14 @@ struct shares {
    */
 
   void give_shares_with_badge_action (eosio::name host, eosio::name reciever, uint64_t shares){
-    account_index accounts(_self, host);
-    auto acc = accounts.find(host);
+    account_index accounts(_self, host.value);
+    auto acc = accounts.find(host.value);
     check(acc != accounts.end(), "Host is not found");
     
     power_index power_to_idx (_self, reciever);
     auto power_to = power_to_idx.find(host);
     
-    powermarket market(_self, host);
+    powermarket market(_self, host.value);
 
     auto itr = market.find(0);
     
@@ -731,15 +731,15 @@ struct shares {
 		auto username = op.username;
 		uint64_t shares = op.shares;
 
-    account_index accounts(_self, host);
-    auto exist = accounts.find(host);
+    account_index accounts(_self, host.value);
+    auto exist = accounts.find(host.value);
     
 		power_index power(_self, username);
 		auto userpower = power.find(host);
 		auto upower = (userpower->staked);
 		check(upower >= shares, "Not enought power available for sell");
 
-		powermarket market(_self, host);
+		powermarket market(_self, host.value);
 		auto itr = market.find(0);
 		auto tmp = *itr;
 
@@ -769,7 +769,7 @@ struct shares {
    * @param[in]  quote_amount  The quote amount
    */
 	void create_bancor_market(std::string name, uint64_t id, eosio::name host, uint64_t total_shares, eosio::asset quote_amount, eosio::name quote_token_contract, uint64_t vesting_seconds){
-		powermarket market(_self, host);
+		powermarket market(_self, host.value);
 		auto itr = market.find(id);
 		if (itr == market.end()){
 			itr = market.emplace( _self, [&]( auto& m ) {

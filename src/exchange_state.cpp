@@ -1,7 +1,7 @@
 #include "../include/exchange_state.hpp"
 
 namespace eosio {
-    asset convert_to_exchange( connector& reserve, const asset& payment )
+    asset exchange_state::convert_to_exchange( connector& reserve, const asset& payment )
    {
       const double S0 = supply.amount;
       const double R0 = reserve.balance.amount;
@@ -15,7 +15,7 @@ namespace eosio {
       return asset( int64_t(dS), supply.symbol );
    }
 
-   asset convert_from_exchange( connector& reserve, const asset& tokens )
+   asset exchange_state::convert_from_exchange( connector& reserve, const asset& tokens )
    {
       const double R0 = reserve.balance.amount;
       const double S0 = supply.amount;
@@ -29,12 +29,12 @@ namespace eosio {
       return asset( int64_t(-dR), reserve.balance.symbol );
    }
 
-   asset convert( const asset& from, const symbol_code& to )
+   asset exchange_state::convert( const asset& from, const symbol& to )
    {
       const auto& sell_symbol  = from.symbol;
       const auto& base_symbol  = base.balance.symbol;
       const auto& quote_symbol = quote.balance.symbol;
-      check( sell_symbol != to, "cannot convert to the same symbol" );
+      eosio::check( sell_symbol != to, "cannot convert to the same symbol" );
 
       asset out( 0, to );
       if ( sell_symbol == base_symbol && to == quote_symbol ) {
@@ -44,17 +44,17 @@ namespace eosio {
          const asset tmp = convert_to_exchange( quote, from );
          out = convert_from_exchange( base, tmp );
       } else {
-         check( false, "invalid conversion" );
+         eosio::check( false, "invalid conversion" );
       }
       return out;
    }
 
-   asset direct_convert( const asset& from, const symbol_code& to )
+   asset exchange_state::direct_convert( const asset& from, const symbol& to )
    {
       const auto& sell_symbol  = from.symbol;
       const auto& base_symbol  = base.balance.symbol;
       const auto& quote_symbol = quote.balance.symbol;
-      check( sell_symbol != to, "cannot convert to the same symbol" );
+      eosio::check( sell_symbol != to, "cannot convert to the same symbol" );
 
       asset out( 0, to );
       if ( sell_symbol == base_symbol && to == quote_symbol ) {
@@ -66,12 +66,12 @@ namespace eosio {
          quote.balance += from;
          base.balance  -= out;
       } else {
-         check( false, "invalid conversion" );
+         eosio::check( false, "invalid conversion" );
       }
       return out;
    }
 
-   int64_t get_bancor_output( int64_t inp_reserve,
+   int64_t exchange_state::get_bancor_output( int64_t inp_reserve,
                                               int64_t out_reserve,
                                               int64_t inp )
    {
@@ -86,7 +86,7 @@ namespace eosio {
       return out;
    }
 
-   int64_t get_bancor_input( int64_t out_reserve,
+   int64_t exchange_state::get_bancor_input( int64_t out_reserve,
                                              int64_t inp_reserve,
                                              int64_t out )
    {

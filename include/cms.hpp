@@ -15,8 +15,8 @@ namespace eosio {
   typedef eosio::multi_index<"cmscontent"_n, cmscontent> cmscontent_index;
 
   //   typedef eosio::multi_index<"dataorders"_n, dataorders,
-  //     indexed_by<"by_buyer_and_id"_n, const_mem_fun<dataorders, uint128_t, 
-  //                             &dataorders::by_buyer_and_id>>
+  //     indexed_by<"buyerandid"_n, const_mem_fun<dataorders, uint128_t, 
+  //                             &dataorders::buyerandid>>
   // > dataorders_index;
 
 

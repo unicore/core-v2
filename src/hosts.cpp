@@ -35,8 +35,8 @@ struct hosts_struct {
     void set_architect_action (const setarch &op){
         require_auth(op.host);
 
-        account_index accounts(_self, op.host);
-        auto acc = accounts.find(op.host);
+        account_index accounts(_self, op.host.value);
+        auto acc = accounts.find(op.host.value);
         check(acc != accounts.end(), "Host is not found");
         accounts.modify(acc, _self, [&](auto &a){
             a.architect = op.architect;
@@ -83,8 +83,8 @@ struct hosts_struct {
 
         //check title lenght
         // check((op.title.length() < 1024) && (op.title.length() > 0) , "Title should be more then 10 symbols and less then 1024");
-        user_index users(_self,_self);
-        auto user = users.find(op.username);
+        user_index users(_self,_self.value);
+        auto user = users.find(op.username.value);
         check(user != users.end(), "User is not registered");
 
 
@@ -118,9 +118,9 @@ struct hosts_struct {
         check(level_count <= _MAX_LEVELS, "Exceed the maximum number of levels");
         //END CHECK
 
-        account_index accounts(_self, op.username);
+        account_index accounts(_self, op.username.value);
         
-        auto itr = accounts.find(op.username);
+        auto itr = accounts.find(op.username.value);
         check(itr == accounts.end(), "Account is already upgraded to Host");
 
         //check and set shares quantity
@@ -135,7 +135,7 @@ struct hosts_struct {
         auto to_pay = op.quote_amount;
 
         user_index refs(_self, _self);
-        auto ref = refs.find(op.username);
+        auto ref = refs.find(op.username.value);
         eosio::name referer = ref->referer;
 
         std::vector<eosio::name> empty_dacs;
@@ -159,7 +159,7 @@ struct hosts_struct {
             a.precision = op.root_token.symbol.precision();
             a.root_token_contract = op.root_token_contract;
             a.meta = op.meta;
-            a.registered_at = eosio::time_point_sec(now());
+            a.registered_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
             a.payed = false;
             a.to_pay = to_pay;
             a.ahost = op.username;
@@ -174,7 +174,7 @@ struct hosts_struct {
             a.levels= op.levels;
         });
 
-        ahosts_index ahosts(_self, _self);
+        ahosts_index ahosts(_self, _self.value);
         ahosts.emplace(op.username, [&](auto &a){
             a.username = op.username;
             a.title = op.title;
@@ -188,8 +188,8 @@ struct hosts_struct {
             u.is_host = true;
         });
 
-        emission_index emis(_self, op.username);
-        auto emi = emis.find(op.username);
+        emission_index emis(_self, op.username.value);
+        auto emi = emis.find(op.username.value);
         check(emi == emis.end(), "Emission object already created");
 
         emis.emplace(op.username, [&](auto &e){
@@ -212,8 +212,8 @@ struct hosts_struct {
     void create_chost_action(const cchildhost &op){
     	auto parent_host = op.parent_host;
     	auto chost = op.chost;
-    	account_index hosts(_self, parent_host);
-    	auto acc = hosts.find(parent_host);
+    	account_index hosts(_self, parent_host.value);
+    	auto acc = hosts.find(parent_host.value);
     	check(acc != hosts.end(), "Parent host is not exist");
     	require_auth(parent_host);
     	check(acc->activated == true, "Main host should be activated before set a child host");
@@ -222,7 +222,7 @@ struct hosts_struct {
     	std::vector<eosio::name> childs = acc->chosts;
 
     	//check for exist in main hosts;
-    	auto is_exist = hosts.find(chost);
+    	auto is_exist = hosts.find(chost.value);
     	check(is_exist == hosts.end(), "Child host already registered like father host");
 		check(acc->non_active_chost == false, "Founded not activated child host");
     	
@@ -319,8 +319,8 @@ struct hosts_struct {
     void edithost_action(const edithost &op){
         require_auth (op.architect);
 
-        account_index hosts(_self, op.host);
-        auto host = hosts.find(op.host);
+        account_index hosts(_self, op.host.value);
+        auto host = hosts.find(op.host.value);
         check(host->architect == op.architect, "You are not architect of current community");
 
         check(host != hosts.end(), "Host is not founded");
@@ -337,8 +337,8 @@ struct hosts_struct {
         //     h.title = op.title;
         // });
 
-        ahosts_index ahosts(_self, _self);
-        auto ahost = ahosts.find(op.host);
+        ahosts_index ahosts(_self, _self.value);
+        auto ahost = ahosts.find(op.host.value);
 
         ahosts.modify(ahost, op.architect, [&](auto &a){
             a.title = op.title;

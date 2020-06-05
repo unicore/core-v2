@@ -36,14 +36,14 @@ namespace eosio {
         
         eosio::name by_username() const {return username; }
         eosio::name by_host() const {return host;}
-        uint128_t by_username_and_host() const { return combine_ids(username, host); }
+        uint128_t by_username_and_host() const { return combine_ids(username.value, host.value); }
         
         EOSLIB_SERIALIZE( goals, (id)(type)(username)(host)(benefactor)(created)(permlink)(title)(description)(target)(available)(total_votes)(validated)(completed)(reported)
             (checked)(report)(withdrawed)(expired_at)(voters)(meta))
     };
 
     typedef eosio::multi_index <"goals"_n, goals,
-        indexed_by<"total_votes"_n, const_mem_fun<goals, uint64_t, &goals::by_votes>>,
+        indexed_by<"votes"_n, const_mem_fun<goals, uint64_t, &goals::by_votes>>,
         indexed_by<"completed"_n, const_mem_fun<goals, uint64_t, &goals::by_completed>>,
         indexed_by<"username"_n, const_mem_fun<goals, eosio::name, &goals::by_username>>,
         indexed_by<"host"_n, const_mem_fun<goals, eosio::name, &goals::by_host>>

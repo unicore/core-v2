@@ -42,7 +42,7 @@ namespace eosio {
     uint64_t p_disputes = 0;
     uint64_t n_disputes = 0;
 
-    uint64_t primary_key() const {return username;}
+    uint64_t primary_key() const {return username.value;}
 
     EOSLIB_SERIALIZE(struct userdatacnts, (username)(total_sales)(total_buys)(total_disputes)(p_disputes)(n_disputes))
 
@@ -77,7 +77,7 @@ namespace eosio {
     eosio::name owner;
     uint64_t order_id;
 
-    uint128_t primary_key() const { return combine_ids(owner, order_id); }
+    uint128_t primary_key() const { return combine_ids(owner.value, order_id); }
 
     EOSLIB_SERIALIZE(struct mydataordrs, (owner)(order_id))
   };
@@ -103,15 +103,15 @@ namespace eosio {
     eosio::string meta;
 
     uint64_t primary_key() const {return id;}
-    uint128_t by_buyer_and_id() const {return combine_ids(buyer.value, orbdata_id);}
+    uint128_t buyerandid() const {return combine_ids(buyer.value, orbdata_id);}
 
     EOSLIB_SERIALIZE(struct dataorders, (id)(orbdata_id)(opened_at)(expired_at)(owner)(buyer)(curator)(locked_amount)(approved)
       (key)(dispute)(meta))
   };
 
   typedef eosio::multi_index<"dataorders"_n, dataorders,
-      indexed_by<"by_buyer_and_id"_n, const_mem_fun<dataorders, uint128_t, 
-                              &dataorders::by_buyer_and_id>>
+      indexed_by<"buyerandid"_n, const_mem_fun<dataorders, uint128_t, 
+                              &dataorders::buyerandid>>
   > dataorders_index;
 
 

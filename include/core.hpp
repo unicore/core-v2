@@ -6,6 +6,7 @@
 #include <eosio/multi_index.hpp>
 #include <eosio/contract.hpp>
 #include <eosio/action.hpp>
+#include <eosio/system.hpp>
 #include "eosio.token.hpp"
 #include "hosts.hpp"
 #include "shares.hpp"
@@ -31,12 +32,12 @@ namespace eosio {
         static const eosio::name _self = "tt.tc"_n;
         static const eosio::name _registrator = "bob.tc"_n;
         static const eosio::name _curator = "bob.tc"_n;
-        static const eosio::symbol_code _SYM = S(4,FLO);
+        static constexpr eosio::symbol _SYM     = eosio::symbol(eosio::symbol_code("FLO"), 4);
     #else
         static const eosio::name _self = "core.z"_n;
         static const eosio::name _registrator = "registrator"_n;
         static const eosio::name _curator = "curator"_n;
-        static const eosio::symbol_code _SYM = S(4,UNIT);
+        static constexpr eosio::symbol _SYM     = eosio::symbol(eosio::symbol_code("UNIT"), 4);
 
     #endif
 
@@ -119,13 +120,13 @@ namespace eosio {
         uint64_t low;
         uint64_t close;
         uint64_t primary_key() const {return pool_id;}
-        uint64_t by_cycle() const {return cycle_num;}
+        uint64_t bycycle() const {return cycle_num;}
 
         EOSLIB_SERIALIZE(bwtradegraph, (pool_id)(cycle_num)(pool_num)(open)(high)(low)(close))        
     };
 
     typedef eosio::multi_index<"bwtradegraph"_n, bwtradegraph,
-        indexed_by<"by_cycle"_n, const_mem_fun<bwtradegraph, uint64_t, &bwtradegraph::by_cycle>>
+        indexed_by<"bycycle"_n, const_mem_fun<bwtradegraph, uint64_t, &bwtradegraph::bycycle>>
     > bwtradegraph_index;
 
     
@@ -179,7 +180,7 @@ namespace eosio {
         eosio::time_point_sec pool_expired_at;
         
         uint64_t primary_key() const {return id;}
-        uint64_t by_cycle() const {return cycle_num;}
+        uint64_t bycycle() const {return cycle_num;}
         
         EOSLIB_SERIALIZE(pool,(id)(ahost)(cycle_num)(pool_num)(color)(total_quants)(creserved_quants)(remain_quants)(quant_cost)(total_win_withdraw)(total_loss_withdraw)(pool_started_at)(priority_until)(pool_expired_at))
     };
@@ -260,22 +261,23 @@ namespace eosio {
         uint128_t distributed_segments;
 
         uint64_t primary_key() const {return pool_id;}
-        uint128_t bycycleandpool() const { return combine_ids(cycle_num, pool_num); }
+        uint128_t cyclandpool() const { return combine_ids(cycle_num, pool_num); }
         
         EOSLIB_SERIALIZE(sincome, (pool_id)(ahost)(cycle_num)(pool_num)(liquid_power)(max)(total)(paid_to_refs)(paid_to_dacs)(paid_to_cfund)(paid_to_hfund)(paid_to_sys)(hfund_in_segments)(distributed_segments))
 
     };
     typedef eosio::multi_index<"sincome"_n, sincome,
-    indexed_by<"bycycleandpool"_n, const_mem_fun<sincome, uint128_t, &sincome::bycycleandpool>>
+    indexed_by<"cyclandpool"_n, const_mem_fun<sincome, uint128_t, &sincome::cyclandpool>>
     > sincome_index;
     
     struct currency_stats {
             asset          supply;
             asset          max_supply;
-            eosio::name   issuer;
+            eosio::name    issuer;
 
-            uint64_t primary_key()const { return supply.symbol.name(); }
+            uint64_t primary_key()const { return supply.symbol.code().raw(); }
          };
+
     typedef eosio::multi_index<"stat"_n, currency_stats> stats;
 
 
@@ -301,14 +303,14 @@ namespace eosio {
         
         std::string meta;
         
-        eosio::name primary_key() const{return username;}
-        eosio::name by_secondary_key() const{return referer;}
+        uint64_t primary_key() const{return username.value;}
+        uint64_t byreferer() const{return referer.value;}
 
         EOSLIB_SERIALIZE(users, (username)(referer)(id)(is_host)(meta))
     };
 
     typedef eosio::multi_index<"users"_n, users,
-    indexed_by<"users"_n, const_mem_fun<users, eosio::name, &users::by_secondary_key>>
+    indexed_by<"users"_n, const_mem_fun<users, uint64_t, &users::byreferer>>
     > user_index;
 
 
@@ -322,7 +324,7 @@ namespace eosio {
         bool comments_is_enabled = false;
         std::string meta;
 
-        eosio::name primary_key() const{return username;}
+        uint64_t primary_key() const{return username.value;}
         uint64_t by_votes() const {return votes;}
         EOSLIB_SERIALIZE(ahosts, (username)(votes)(title)(purpose)(manifest)(comments_is_enabled)(meta))
     };
