@@ -29,8 +29,7 @@ extern "C" {
                 eosio_assert(delimeter == '-', "Wrong subcode format. Right format: code[3]-parameter");
                 auto parameter = op.memo.substr(4, op.memo.length());
                 uint64_t subintcode = atoi(subcode.c_str());
-                print("subcode", subintcode);
-
+                
                 //codes:
                 //100 - deposit
                 //110 - pay for host
@@ -43,11 +42,31 @@ extern "C" {
                 
                 switch (subintcode){
                     case 100: {
-                        //check for code inside
+                        //check for code param inside deposit method
                         //auto cd = eosio::string_to_name(code.c_str());
                         //Deposit in the Core
-                        auto host = eosio::string_to_name(parameter.c_str());
-                        core().deposit(op.from, host, op.quantity, code);
+
+                        //100-alice.tc-message
+                        
+                        account_name host; 
+                        std::string message = "";
+
+
+                        auto delimeter2 = parameter.find('-');
+                
+                        if (delimeter2 != -1){
+                            auto host_string = op.memo.substr(4, delimeter2);
+                            
+                            host = eosio::string_to_name(host_string.c_str());
+                            
+                            message = parameter.substr(delimeter2+1, parameter.length());
+                    
+                        } else {
+                            auto host_string = op.memo.substr(4, parameter.length());
+                            host = eosio::string_to_name(host_string.c_str());
+                        }
+                        
+                        core().deposit(op.from, host, op.quantity, code, message);
                         break;
                     }
                     case 110: {
@@ -219,6 +238,18 @@ extern "C" {
                     shares().withdraw_action(eosio::unpack_action_data<withdrawsh>());
                     break;
                 };
+
+                case N(withbenefit): {
+                    shares().withdraw_power_units_action(eosio::unpack_action_data<withbenefit>());
+                    break;
+                };
+                case N(refreshpu): {
+                    shares().refresh_power_units_action(eosio::unpack_action_data<refreshpu>());
+                    break;
+                };
+                
+            
+
                 //HOSTS
                 case N(upgrade): {
                     hosts_struct().upgrade_action(eosio::unpack_action_data<upgrade>());
@@ -293,7 +324,9 @@ extern "C" {
                     core().enablesale_action(eosio::unpack_action_data<enablesale>());
                     break;
                 };
+
             
+
                 //BADGES
                 case N(setbadge):{
                     badge_struct().setbadge_action(eosio::unpack_action_data<setbadge>());

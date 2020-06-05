@@ -121,7 +121,7 @@ struct badge_struct {
 			b.remain = badge -> remain + 1;
 		});
 		
-		shares().back_power_with_badge_action(op.host, op.from, badge->power);
+		shares().back_shares_with_badge_action(op.host, op.from, badge->power);
 		user_badges.erase(usbadge);
 
 	}

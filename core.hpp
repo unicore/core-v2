@@ -18,10 +18,12 @@
 #include "cms.hpp"
 
 
-#define QUARKS_IN_QUANTS 100000000
+#define QUARKS_IN_QUANTS 1000000
 #define PERCENT_PRECISION 10000
 #define HUNDR_PERCENT 1000000
 #define SYS_PERCENT 100000
+#define TOTAL_SEGMENTS 1000000000
+#define MAX_CORE_HISTORY_LENGTH 1000
 
 namespace eosio {
    #define DEBUG_ENABLED true
@@ -32,7 +34,7 @@ namespace eosio {
         static const account_name _curator = N(bob.tc);
         static const eosio::symbol_name _SYM = S(4,FLO);
     #else
-        static const account_name _self = N(core);
+        static const account_name _self = N(core.z);
         static const account_name _registrator = N(registrator);
         static const account_name _curator = N(curator);
         static const eosio::symbol_name _SYM = S(4,UNIT);
@@ -88,13 +90,14 @@ namespace eosio {
         eosio::asset ref_amount; 
         eosio::asset dac_amount;
         eosio::asset cfund_amount;
+        eosio::asset hfund_amount;
         eosio::asset sys_amount;
 
         eosio::string meta; 
 
         uint64_t primary_key() const {return id;}
         
-        EOSLIB_SERIALIZE(balance, (id)(host)(chost)(cycle_num)(pool_num)(global_pool_id)(quants_for_sale)(next_quants_for_sale)(last_recalculated_win_pool_id)(win)(pool_color)(available)(purchase_amount)(if_convert)(withdrawed)(forecasts)(ref_amount)(dac_amount)(cfund_amount)(sys_amount)(meta))
+        EOSLIB_SERIALIZE(balance, (id)(host)(chost)(cycle_num)(pool_num)(global_pool_id)(quants_for_sale)(next_quants_for_sale)(last_recalculated_win_pool_id)(win)(pool_color)(available)(purchase_amount)(if_convert)(withdrawed)(forecasts)(ref_amount)(dac_amount)(cfund_amount)(hfund_amount)(sys_amount)(meta))
     
         account_name get_ahost() const {
             if (host == chost)
@@ -105,6 +108,42 @@ namespace eosio {
     };
 
     typedef eosio::multi_index<N(balance), balance> balance_index;
+
+
+    // @abi table bwtradegraph i64
+    struct bwtradegraph{
+        uint64_t pool_id;
+        uint64_t cycle_num;
+        uint64_t pool_num;
+        uint64_t open;
+        uint64_t high;
+        uint64_t low;
+        uint64_t close;
+        uint64_t primary_key() const {return pool_id;}
+        uint64_t by_cycle() const {return cycle_num;}
+
+        EOSLIB_SERIALIZE(bwtradegraph, (pool_id)(cycle_num)(pool_num)(open)(high)(low)(close))        
+    };
+
+    typedef eosio::multi_index<N(bwtradegraph), bwtradegraph,
+        indexed_by<N(by_cycle), const_mem_fun<bwtradegraph, uint64_t, &bwtradegraph::by_cycle>>
+    > bwtradegraph_index;
+
+    
+    // @abi table refbalances i64
+    struct refbalances{
+        uint64_t id;
+        account_name host;
+        eosio::asset amount;
+        account_name from;
+        uint128_t segments;
+        uint64_t primary_key() const {return id;}
+
+        EOSLIB_SERIALIZE(refbalances, (id)(host)(amount)(from)(segments))
+    };
+    typedef eosio::multi_index<N(refbalances), refbalances> refbalances_index;
+
+
 
     // @abi table cycle i64
     struct cycle{
@@ -172,40 +211,64 @@ namespace eosio {
     };
     typedef eosio::multi_index<N(rate), rate> rate_index;
     
+    // @abi table coredhistory i64
+    struct coredhistory{
+        uint64_t id;
+        uint64_t pool_id;
+        account_name username;
+        std::string action;
+        std::string message;
+        eosio::asset amount;
+        uint64_t primary_key() const {return id;}
+
+        EOSLIB_SERIALIZE(coredhistory, (id)(pool_id)(username)(action)(message)(amount));
     
+    };
+    
+    typedef eosio::multi_index<N(coredhistory), coredhistory> coredhistory_index;
+    
+
+
     // @abi table sale i64
     struct sale{
         uint64_t pool_id;
-        uint64_t rate;
+        uint64_t sell_rate;
         eosio::asset solded;
-        uint64_t backed_quants;
+
         uint64_t primary_key() const {return pool_id;}
 
-        EOSLIB_SERIALIZE(sale, (pool_id)(rate)(solded)(backed_quants));
+        EOSLIB_SERIALIZE(sale, (pool_id)(sell_rate)(solded));
     };
 
     typedef eosio::multi_index<N(sale), sale> sale_index;
-    
-
+ 
 
     // @abi table sincome i64
     struct sincome{
-        uint64_t id;
+        uint64_t pool_id;
         account_name ahost;
+        uint64_t cycle_num;
         uint64_t pool_num;
+        uint64_t liquid_power;
+        eosio::asset max;
         eosio::asset total;
         eosio::asset paid_to_refs;
         eosio::asset paid_to_dacs;
         eosio::asset paid_to_cfund;
+        eosio::asset paid_to_hfund;
         eosio::asset paid_to_sys;
+        uint128_t hfund_in_segments;
+        uint128_t distributed_segments;
 
-        uint64_t primary_key() const {return id;}
-        bool is_empty()const { return !( total.amount ); }
+        uint64_t primary_key() const {return pool_id;}
+        uint128_t bycycleandpool() const { return combine_ids(cycle_num, pool_num); }
         
-        EOSLIB_SERIALIZE(sincome, (id)(ahost)(pool_num)(total)(paid_to_refs)(paid_to_dacs)(paid_to_cfund)(paid_to_sys))
+        EOSLIB_SERIALIZE(sincome, (pool_id)(ahost)(cycle_num)(pool_num)(liquid_power)(max)(total)(paid_to_refs)(paid_to_dacs)(paid_to_cfund)(paid_to_hfund)(paid_to_sys)(hfund_in_segments)(distributed_segments))
 
     };
-    typedef eosio::multi_index<N(sincome), sincome> sincome_index;
+    typedef eosio::multi_index<N(sincome), sincome,
+    indexed_by<N(bycycleandpool), const_mem_fun<sincome, uint128_t, &sincome::bycycleandpool>>
+    > sincome_index;
     
     struct currency_stats {
             asset          supply;
@@ -253,13 +316,21 @@ namespace eosio {
     // @abi table ahosts i64
     struct ahosts{
         account_name username;
-        
+        uint64_t votes;
+        std::string title;
+        std::string purpose;
+        std::string manifest;
+        bool comments_is_enabled = false;
+        std::string meta;
+
         account_name primary_key() const{return username;}
-        
-        EOSLIB_SERIALIZE(ahosts, (username))
+        uint64_t by_votes() const {return votes;}
+        EOSLIB_SERIALIZE(ahosts, (username)(votes)(title)(purpose)(manifest)(comments_is_enabled)(meta))
     };
 
-    typedef eosio::multi_index<N(ahosts), ahosts> ahosts_index;
+    typedef eosio::multi_index<N(ahosts), ahosts,
+    indexed_by<N(ahosts), const_mem_fun<ahosts, uint64_t, &ahosts::by_votes>>
+    > ahosts_index;
 
 
     /* ACTIONS */
@@ -282,7 +353,7 @@ namespace eosio {
         
         EOSLIB_SERIALIZE( fixs, (host))
     };
-    
+
     // @abi action
     struct convert{
         account_name username;

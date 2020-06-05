@@ -1,9 +1,9 @@
 {
-  "main": "src/core.cpp",
+  "main": "core.cpp",
   "contract": "core",
   "include": "",
   "resource": "",
-  "cdt": "cmd",
+  "cdt": "v1.7.0",
   "output": "",
   "scripts": {
     "build": ""

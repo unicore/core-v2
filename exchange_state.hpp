@@ -29,10 +29,7 @@ namespace eosio {
          double weight = 1;
          account_name contract;
          
-         std::string emission_function;
-         uint64_t emission_percent;
-
-         EOSLIB_SERIALIZE( connector, (balance)(weight)(contract)(emission_function)(emission_percent) )
+         EOSLIB_SERIALIZE( connector, (balance)(weight)(contract))
       };
 
       connector base;
@@ -40,9 +37,18 @@ namespace eosio {
 
       uint64_t primary_key()const { return id; }
       
-      asset convert_to_exchange( connector& c, asset in ); 
-      asset convert_from_exchange( connector& c, asset in );
-      asset convert( asset from, symbol_type to );
+      asset convert_to_exchange( connector& reserve, const asset& payment );
+      asset convert_from_exchange( connector& reserve, const asset& tokens );
+      asset convert( const asset& from, const symbol_type& to );
+
+      asset direct_convert( const asset& from, const symbol_type& to );
+
+      static int64_t get_bancor_output( int64_t inp_reserve,
+                                        int64_t out_reserve,
+                                        int64_t inp );
+      static int64_t get_bancor_input( int64_t out_reserve,
+                                       int64_t inp_reserve,
+                                       int64_t out );
 
       EOSLIB_SERIALIZE( exchange_state, (id)(name)(vesting_seconds)(supply)(base)(quote) )
    };

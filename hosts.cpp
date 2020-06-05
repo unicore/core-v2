@@ -79,10 +79,10 @@ struct hosts_struct {
     void upgrade_action(const upgrade &op){
         require_auth(op.username);
         
-        eosio_assert(op.purpose.length() > 0, "Purpose should contain a symbols. Describe the idea shortly.");
+        // eosio_assert(op.purpose.length() > 0, "Purpose should contain a symbols. Describe the idea shortly.");
 
         //check title lenght
-        eosio_assert((op.title.length() < 1024) && (op.title.length() > 0) , "Title should be more then 10 symbols and less then 1024");
+        // eosio_assert((op.title.length() < 1024) && (op.title.length() > 0) , "Title should be more then 10 symbols and less then 1024");
         user_index users(_self,_self);
         auto user = users.find(op.username);
         eosio_assert(user != users.end(), "User is not registered");
@@ -95,11 +95,9 @@ struct hosts_struct {
         // eosio_assert(op.quote_amount.symbol == _SYM, "Quote symbol for market is only CORE");
         
         eosio_assert(op.consensus_percent <= 100 * PERCENT_PRECISION, "consensus_percent should be between 0 and 100 * PERCENT_PRECISION (1000000)");
-        eosio_assert(op.referral_percent <= 100 * PERCENT_PRECISION, "referral_percent should be between 0 and 100 * PERCENT_PRECISION (1000000)");
         
-        eosio_assert(op.dacs_percent <= 100 * PERCENT_PRECISION, "dacs_percent should be between 0 and 100 * PERCENT_PRECISION (1000000)");
-        eosio_assert(op.referral_percent <= 100 * PERCENT_PRECISION, "Referral and Dacs percent should be less or equal 100% PERCENT_PRECISION in their summ");
-
+        eosio_assert(op.referral_percent + op.dacs_percent + op.cfund_percent + op.hfund_percent == 100 * PERCENT_PRECISION, "All payment percents should equal 100 * PERCENT_PRECISION (1000000)");
+        
         eosio_assert(op.emission_percent <= 1000 * PERCENT_PRECISION, "emission_percent should be between 0 and 1000 * PERCENT_PRECISION (10000000)");
         eosio_assert(op.gtop <= 100, "Goal top should be less then 100");
 
@@ -148,13 +146,13 @@ struct hosts_struct {
             a.architect = op.username;
             a.hoperator = op.username;
             a.activated = false;
-            a.title = op.title;
-            a.purpose = op.purpose;
             a.dacs = empty_dacs;
             a.dac_mode = 0;
             a.total_shares = op.total_shares;
             a.quote_amount = op.quote_amount;
+            a.quote_symbol = asset_to_string(op.quote_amount);
             a.quote_token_contract = op.quote_token_contract;
+            a.quote_precision = op.quote_amount.symbol.precision();
             a.root_token = op.root_token;
             a.voting_only_up = op.voting_only_up;
             a.symbol = asset_to_string(op.root_token);
@@ -170,8 +168,21 @@ struct hosts_struct {
             a.consensus_percent = op.consensus_percent;
             a.referral_percent = op.referral_percent;
             a.dacs_percent = op.dacs_percent;
+            a.cfund_percent = op.cfund_percent;
+            a.hfund_percent = op.hfund_percent;
+            a.sys_percent = SYS_PERCENT;
             a.levels= op.levels;
         });
+
+        ahosts_index ahosts(_self, _self);
+        ahosts.emplace(op.username, [&](auto &a){
+            a.username = op.username;
+            a.title = op.title;
+            a.purpose = op.purpose;
+            a.manifest = "";
+            a.comments_is_enabled = false;
+        });
+
 
         users.modify(user, _self, [&](auto &u){
             u.is_host = true;
@@ -310,21 +321,32 @@ struct hosts_struct {
 
         account_index hosts(_self, op.host);
         auto host = hosts.find(op.host);
-        eosio_assert(host->architect == op.architect, "You are not architect of currenty community");
+        eosio_assert(host->architect == op.architect, "You are not architect of current community");
 
         eosio_assert(host != hosts.end(), "Host is not founded");
         
-        eosio_assert(op.purpose.length() > 0, "Purpose should contain a symbols. Describe the idea shortly.");
+        // eosio_assert(op.purpose.length() > 0, "Purpose should contain a symbols. Describe the idea shortly.");
 
         //check title lenght
-        eosio_assert((op.title.length() < 1024) && (op.title.length() > 0) , "Title should be more then 10 symbols and less then 1024");
+        // eosio_assert((op.title.length() < 1024) && (op.title.length() > 0) , "Title should be more then 10 symbols and less then 1024");
         
 
-        hosts.modify(host, op.architect, [&](auto &h){
-            h.purpose = op.purpose;
-            h.meta = op.meta;
-            h.title = op.title;
+        // hosts.modify(host, op.architect, [&](auto &h){
+        //     h.purpose = op.purpose;
+        //     h.meta = op.meta;
+        //     h.title = op.title;
+        // });
+
+        ahosts_index ahosts(_self, _self);
+        auto ahost = ahosts.find(op.host);
+
+        ahosts.modify(ahost, op.architect, [&](auto &a){
+            a.title = op.title;
+            a.purpose = op.purpose;
+            a.manifest = op.manifest;
         });
+
+
         
     }
 
