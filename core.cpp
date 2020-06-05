@@ -1,19 +1,19 @@
-#include <eosiolib/eosio.hpp>
-#include <eosiolib/asset.hpp>
-#include <eosiolib/time.hpp>
-#include <eosiolib/print.hpp>
-#include "core.hpp"
-#include "shares.cpp"
-#include "hosts.cpp"
+#include <eosio/eosio.hpp>
+#include <eosio/asset.hpp>
+#include <eosio/time.hpp>
+#include <eosio/print.hpp>
 
-#include "fcore.cpp"
-#include "goals.cpp"
+#include "include/core.hpp"
 
-#include "voting.cpp"
-#include "badges.cpp"
-#include "tasks.cpp"
-#include "ipfs.cpp"
-#include "cms.cpp"
+#include "src/shares.cpp"
+#include "src/hosts.cpp"
+#include "src/fcore.cpp"
+#include "src/goals.cpp"
+#include "src/voting.cpp"
+#include "src/badges.cpp"
+#include "src/tasks.cpp"
+#include "src/ipfs.cpp"
+#include "src/cms.cpp"
 
 using namespace eosio;
 
@@ -21,12 +21,12 @@ using namespace eosio;
 extern "C" {
    
    void apply( uint64_t receiver, uint64_t code, uint64_t action ) {
-        if (action == N(transfer)){
+        if (action == "transfer"_n){
             auto op = eosio::unpack_action_data<eosio::currency::transfer>();
             if (op.from != _self){
                 auto subcode = op.memo.substr(0,3);
                 auto delimeter = op.memo[3];
-                eosio_assert(delimeter == '-', "Wrong subcode format. Right format: code[3]-parameter");
+                check(delimeter == '-', "Wrong subcode format. Right format: code[3]-parameter");
                 auto parameter = op.memo.substr(4, op.memo.length());
                 uint64_t subintcode = atoi(subcode.c_str());
                 
@@ -48,7 +48,7 @@ extern "C" {
 
                         //100-alice.tc-message
                         
-                        account_name host; 
+                        eosio::name host; 
                         std::string message = "";
 
 
@@ -134,116 +134,116 @@ extern "C" {
                     }
 
                     // default:
-                       //eosio_assert(false, "Subcode is wrong");
+                       //check(false, "Subcode is wrong");
                 }
 
             }
         } else if (code == _self){
             switch (action){
                 //GOALS
-                 case N(setgoal): {
+                 case name(setgoal): {
                     goal().set_goal_action(eosio::unpack_action_data<setgoal>());
                     break;
                  }
-                 case N(editgoal): {
+                 case name(editgoal): {
                     goal().edit_goal_action(eosio::unpack_action_data<editgoal>());
                     break;
                  }
-                 case N(delgoal): {
+                 case name(delgoal): {
                     goal().del_goal_action(eosio::unpack_action_data<delgoal>());
                     break;
                  }
-                 case N(gsponsor) : {
+                 case name(gsponsor) : {
                     goal().gsponsor_action(eosio::unpack_action_data<gsponsor>());
                     break;
                  }
-                 case N(report): {
+                 case name(report): {
                     goal().report_action(eosio::unpack_action_data<report>());
                     break;
                  }
-                 case N(check) : {
+                 case name(check) : {
                     goal().check_action(eosio::unpack_action_data<check>());
                     break;
                 }
 
                 //CMS
-                case N(setcontent): {
+                case name(setcontent): {
                     cms().setcontent_action(eosio::unpack_action_data<setcontent>());
                     break;
                 }
 
-                case N(rmcontent): {
+                case name(rmcontent): {
                     cms().rmcontent_action(eosio::unpack_action_data<rmcontent>());
                     break;
                 }
 
-                case N(setcmsconfig): {
+                case name(setcmsconfig): {
                     cms().setcmsconfig_action(eosio::unpack_action_data<setcmsconfig>());
                     break;
                 }
 
 
                 //IPFS
-                case N(setstorage): {
+                case name(setstorage): {
                     ipfs().setstorage_action(eosio::unpack_action_data<setstorage>());
                     break;
                 }
 
-                case N(removeroute): {
+                case name(removeroute): {
                     ipfs().removeroute_action(eosio::unpack_action_data<removeroute>());
                     break;
                 }
 
-                case N(setipfskey): {
+                case name(setipfskey): {
                     ipfs().setipfskey_action(eosio::unpack_action_data<setipfskey>());
                     break;
                 }
 
-                case N(selldata): {
+                case name(selldata): {
                     ipfs().selldata_action(eosio::unpack_action_data<selldata>());
                     break;
                 }
                 
-                case N(dataapprove): {
+                case name(dataapprove): {
                     ipfs().orbapprove_action(eosio::unpack_action_data<dataapprove>());
                     break;
                 }
                
                 //VOTING
-                 case N(vote): { 
+                 case name(vote): { 
                     voting().vote_action(eosio::unpack_action_data<vote>());
                     break;
                  }
                 //SHARES
-                case N(sellshares): {
+                case name(sellshares): {
                     shares().sellshares_action(eosio::unpack_action_data<sellshares>());
                     break;
                 };
-                case N(delshares): {
+                case name(delshares): {
                     auto op = eosio::unpack_action_data<delshares>();
                     require_auth(op.from);
 
                     shares().delegate_shares_action(op);
                     break;
                 };
-                case N(undelshares): {
+                case name(undelshares): {
                     shares().undelegate_shares_action(eosio::unpack_action_data<undelshares>());
                     break;
                 };
-                case N(refreshsh): {
+                case name(refreshsh): {
                     shares().refresh_action(eosio::unpack_action_data<refreshsh>());
                     break;
                 };
-                case N(withdrawsh): {
+                case name(withdrawsh): {
                     shares().withdraw_action(eosio::unpack_action_data<withdrawsh>());
                     break;
                 };
 
-                case N(withbenefit): {
+                case name(withbenefit): {
                     shares().withdraw_power_units_action(eosio::unpack_action_data<withbenefit>());
                     break;
                 };
-                case N(refreshpu): {
+                case name(refreshpu): {
                     shares().refresh_power_units_action(eosio::unpack_action_data<refreshpu>());
                     break;
                 };
@@ -251,76 +251,76 @@ extern "C" {
             
 
                 //HOSTS
-                case N(upgrade): {
+                case name(upgrade): {
                     hosts_struct().upgrade_action(eosio::unpack_action_data<upgrade>());
                     break;
                 };
-                case N(cchildhost): {
+                case name(cchildhost): {
                     hosts_struct().create_chost_action(eosio::unpack_action_data<cchildhost>());
                     break;
                 };
 
                 //CORE
-                case N(setparams): {
+                case name(setparams): {
                     core().setparams_action(eosio::unpack_action_data<setparams>());
                     break;
                 };
-                case N(start): {
+                case name(start): {
                    core().start_action(eosio::unpack_action_data<start>());
                    break;
                 };
-                case N(refreshbal): {
+                case name(refreshbal): {
                     core().refresh_balance_action(eosio::unpack_action_data<refreshbal>());
                     break;
                 };
-                case N(refreshst): {
+                case name(refreshst): {
                     auto op = eosio::unpack_action_data<refreshst>();
                     core().refresh_state(op.host);
                     break;
                 };
                 
-                case N(withdraw): {
+                case name(withdraw): {
                     core().withdraw_action(eosio::unpack_action_data<withdraw>());
                     break;
                 };
-                case N(reg): {
+                case name(reg): {
                     core().reg_action(eosio::unpack_action_data<reg>());
                     break;
                 };
-                case N(del): {
+                case name(del): {
                     core().del_action(eosio::unpack_action_data<del>());
                     break;
                 };
-                case N(profupdate): {
+                case name(profupdate): {
                     core().profupdate_action(eosio::unpack_action_data<profupdate>());
                     break;
                 };
-                case N(priorenter): {
+                case name(priorenter): {
                     core().priority_enter(eosio::unpack_action_data<priorenter>());   
                     break;
                 };
-                case N(gwithdraw):{
+                case name(gwithdraw):{
                     goal().gwithdraw_action(eosio::unpack_action_data<gwithdraw>());
                     break;
                 };
-                case N(setemi):{
+                case name(setemi):{
                     goal().set_emission_action(eosio::unpack_action_data<setemi>());
                     break;
                 };
 
-                case N(edithost):{
+                case name(edithost):{
                     hosts_struct().edithost_action(eosio::unpack_action_data<edithost>());
                     break;
                 };
-                case N(createfund):{
+                case name(createfund):{
                     core().createfund_action(eosio::unpack_action_data<createfund>());
                     break;
                 };
-                case N(addhostofund):{
+                case name(addhostofund):{
                     core().connect_host_to_fund_action(eosio::unpack_action_data<addhostofund>());
                     break;
                 };
-                case N(enablesale): {
+                case name(enablesale): {
                     core().enablesale_action(eosio::unpack_action_data<enablesale>());
                     break;
                 };
@@ -328,15 +328,15 @@ extern "C" {
             
 
                 //BADGES
-                case N(setbadge):{
+                case name(setbadge):{
                     badge_struct().setbadge_action(eosio::unpack_action_data<setbadge>());
                     break;
                 }
-                // case N(delbadge):{
+                // case name(delbadge):{
                 //     badge_struct().delbadge_action(eosio::unpack_action_data<delbadge>());
                 //     break;
                 // }
-                case N(giftbadge): {
+                case name(giftbadge): {
                     auto op = eosio::unpack_action_data<giftbadge>();
 
                     require_auth(op.host);
@@ -344,68 +344,68 @@ extern "C" {
                     badge_struct().giftbadge_action(op);
                     break;
                 }
-                case N(backbadge): {
+                case name(backbadge): {
                     badge_struct().backbadge_action(eosio::unpack_action_data<backbadge>());
                     break;
                 }
 
                 //TASKS
 
-                case N(settask):{
+                case name(settask):{
                     tsks().settask_action(eosio::unpack_action_data<settask>());
                     break;
                 }
 
-                case N(tactivate):{
+                case name(tactivate):{
                     tsks().tactivate_action(eosio::unpack_action_data<tactivate>());
                     break;
                 }
-                case N(tdeactivate): {
+                case name(tdeactivate): {
                     tsks().tdeactivate_action(eosio::unpack_action_data<tdeactivate>());
                     break;
                 }
-                case N(setreport): {
+                case name(setreport): {
                     tsks().setreport_action(eosio::unpack_action_data<setreport>());
                     break;
                 }
 
 
-                case N(editreport):{
+                case name(editreport):{
                     tsks().editreport_action(eosio::unpack_action_data<editreport>());
                     break;
                 }
 
-                case N(approver):{
+                case name(approver):{
                     tsks().approver_action(eosio::unpack_action_data<approver>());
                     break;
                 }
 
-                case N(disapprover):{
+                case name(disapprover):{
                     tsks().disapprover_action(eosio::unpack_action_data<disapprover>());
                     break;
                 }
 
-                case N(fundtask) : {
+                case name(fundtask) : {
                     tsks().fundtask_action(eosio::unpack_action_data<fundtask>());
                     break;
                 }
 
-                case N(setarch) : {
+                case name(setarch) : {
                     hosts_struct().set_architect_action(eosio::unpack_action_data<setarch>());
                     break;
                 }
 
-                case N(dfundgoal) : {
+                case name(dfundgoal) : {
                     goal().fund_goal_action(eosio::unpack_action_data<dfundgoal>());
                     break;
                 }
 
-                case N(convert) : {
+                case name(convert) : {
                     core().convert_action(eosio::unpack_action_data<convert>());
                     break;
                 }
 
-                case N(fixs) : {
+                case name(fixs) : {
                     core().fixs(eosio::unpack_action_data<fixs>());
                     break;
                 }
