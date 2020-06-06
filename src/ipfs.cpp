@@ -60,8 +60,7 @@ struct ipfs {
     orbdata_index orbdts(_self, op.username.value);
     auto data = orbdts.find(op.id);
     check(data == orbdts.end(), "Cannot use same ID");
-    auto failure_if_root_not_exist = eosio::token(op.root_token_contract).get_supply(eosio::symbol_code(op.amount.symbol).name()).amount;
-
+    auto failure_if_root_not_exist   = eosio::token::get_supply(op.root_token_contract, op.amount.symbol.code() );
     orbdts.emplace(op.username, [&](auto &ds){
       ds.id = op.id;
       ds.data = op.data;

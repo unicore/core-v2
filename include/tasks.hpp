@@ -2,8 +2,7 @@
 namespace eosio {
 
 
-	//@abi table tasks
-	struct tasks{
+	struct [[eosio::table]] tasks{
 		uint64_t task_id;
 		uint64_t goal_id;
     uint64_t type;
@@ -32,8 +31,7 @@ namespace eosio {
     typedef eosio::multi_index< "tasks"_n, tasks> tasks_index;
 
 
-    //@abi table reports
-    struct reports{
+    struct [[eosio::table]] reports{
     	uint64_t report_id;
     	uint64_t task_id; 
     	uint64_t goal_id;
@@ -60,8 +58,7 @@ namespace eosio {
     > reports_index;
 
 
-	//@abi action
-	struct settask {
+	struct [[eosio::action]] settask {
 		eosio::name host;
     eosio::name username;
 		uint64_t goal_id;
@@ -75,54 +72,54 @@ namespace eosio {
 		uint64_t expiration;
 	};
 
-	//@abi action
-	struct fundtask {
+	
+  struct [[eosio::action]] fundtask {
 		eosio::name host;
 		uint64_t task_id;
 		eosio::asset amount;
 		eosio::string comment;
 	};
 
-	//@abi action
-	struct tactivate
+	
+  struct [[eosio::action]] tactivate
 	{
 		eosio::name host;
 		uint64_t task_id;
 	};
 	
-	//@abi action
-	struct tdeactivate
+	
+  struct [[eosio::action]] tdeactivate
 	{
 		eosio::name host;
 		uint64_t task_id;
 	};
 
-	//@abi action
-	struct setreport {
+	
+  struct [[eosio::action]] setreport {
 		eosio::name host;
 		eosio::name username;
 		uint64_t task_id;
 		eosio::string data;
 	};
 
-	//@abi action
-	struct editreport{
+	
+  struct [[eosio::action]] editreport{
 		eosio::name host;
 		eosio::name username;
 		uint64_t report_id;
 		eosio::string data;
 	};
 
-	//@abi action
-	struct approver{
+	
+  struct [[eosio::action]] approver{
 		eosio::name host;
 		uint64_t report_id;
 		eosio::string comment;
 
 	};
 
-	//@abi action
-	struct disapprover{
+	
+  struct [[eosio::action]] disapprover{
 		eosio::name host;
 		uint64_t report_id;
 		eosio::string comment;

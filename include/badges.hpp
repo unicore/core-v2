@@ -1,7 +1,8 @@
 namespace eosio {
 	
-	//@abi table badges
-	struct badges{
+
+
+	struct  [[eosio::table]] badges{
 		uint64_t id;
 		eosio::string caption;
 		eosio::string description;
@@ -17,8 +18,8 @@ namespace eosio {
 
 	typedef eosio::multi_index<"badges"_n, badges> badge_index;
 
-	//@abi table usbadges
-	struct usbadges{
+
+	struct  [[eosio::table]] usbadges{
 		uint64_t id;
 		eosio::name host;
 		uint64_t badge_id;
@@ -39,8 +40,7 @@ namespace eosio {
 	typedef eosio::multi_index<"usbadges"_n, usbadges> usbadge_index;
 
 
-    //@abi action setbadge
-    struct setbadge {
+    struct  [[eosio::table]] setbadge {
     	uint64_t id;
     	eosio::name host;
     	eosio::string caption;
@@ -63,8 +63,7 @@ namespace eosio {
 
     // };
 
-    //@abi action giftbadge
-    struct giftbadge {
+    struct [[eosio::action]] giftbadge {
     	eosio::name host;
     	eosio::name to;
     	uint64_t badge_id;
@@ -73,8 +72,7 @@ namespace eosio {
     	EOSLIB_SERIALIZE(giftbadge, (host)(to)(badge_id)(comment))
     };
 
-    //@abi action backbadge
-    struct backbadge {
+    struct [[eosio::action]] backbadge {
     	eosio::name host;
     	eosio::name from;
     	uint64_t badge_id;

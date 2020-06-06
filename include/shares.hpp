@@ -1,7 +1,6 @@
 namespace eosio {
 	
-	//@abi table power
-	struct power{
+	struct [[eosio::table]] power{
 		eosio::name host;
     uint64_t power;
 		uint64_t staked;
@@ -15,8 +14,7 @@ namespace eosio {
 	typedef eosio::multi_index<"power"_n, power> power_index;
 
 
-  //@abi table pstats
-  struct pstats{
+  struct [[eosio::table]] pstats{
     eosio::name host;
     eosio::asset total_available_in_asset;
     uint64_t pflow_last_withdrawed_pool_id;
@@ -34,8 +32,7 @@ namespace eosio {
 
   typedef eosio::multi_index<"pstats"_n, pstats> pstats_index;
 
-  //@abi table plog
-  struct plog{
+  struct [[eosio::table]] plog{
     uint64_t id;
     eosio::name host;
     uint64_t pool_id;
@@ -57,8 +54,7 @@ namespace eosio {
 
 
 
-  //@abi table dlog
-  struct dlog{
+  struct [[eosio::table]] dlog{
     uint64_t id;
     eosio::name host;
     uint64_t pool_id;
@@ -74,8 +70,7 @@ namespace eosio {
   typedef eosio::multi_index<"dlog"_n, dlog> dlog_index;
 
 
-	//@abi table delegations
-	struct delegations{
+	struct [[eosio::table]] delegations{
 		eosio::name reciever;
 		uint64_t shares;
 
@@ -87,67 +82,62 @@ namespace eosio {
 	typedef eosio::multi_index<"delegations"_n, delegations> delegation_index;
 
 
-    //@abi table vesting i64 
-    struct vesting{
-    	uint64_t id;
-      eosio::name host;
-    	eosio::name owner;
-    	eosio::time_point_sec startat;
-    	uint64_t duration;
-    	eosio::asset amount;
-    	eosio::asset available;
-    	eosio::asset withdrawed;
+  struct [[eosio::table]] vesting{
+  	uint64_t id;
+    eosio::name host;
+  	eosio::name owner;
+  	eosio::time_point_sec startat;
+  	uint64_t duration;
+  	eosio::asset amount;
+  	eosio::asset available;
+  	eosio::asset withdrawed;
 
-    	uint64_t primary_key() const {return id;}
+  	uint64_t primary_key() const {return id;}
 
-    	EOSLIB_SERIALIZE(vesting, (id)(host)(owner)(startat)(duration)(amount)(available)(withdrawed))
-    };
+  	EOSLIB_SERIALIZE(vesting, (id)(host)(owner)(startat)(duration)(amount)(available)(withdrawed))
+  };
 
-    typedef eosio::multi_index<"vesting"_n, vesting> vesting_index;
+  typedef eosio::multi_index<"vesting"_n, vesting> vesting_index;
 
 
-    //@abi action refreshsh
-    struct refreshsh {
-    	eosio::name owner;
-    	uint64_t id;
+  struct [[eosio::action]] refreshsh {
+  	eosio::name owner;
+  	uint64_t id;
 
-    	EOSLIB_SERIALIZE(refreshsh, (owner)(id))
+  	EOSLIB_SERIALIZE(refreshsh, (owner)(id))
 
-    };
+  };
 
-    //@abi action withbenefit
-    struct withbenefit{
-      eosio::name username;
-      eosio::name host;
+  struct [[eosio::action]] withbenefit{
+    eosio::name username;
+    eosio::name host;
 
-      EOSLIB_SERIALIZE(withbenefit, (username)(host))
-    };
+    EOSLIB_SERIALIZE(withbenefit, (username)(host))
+  };
 
-    //@abi action refreshpu
-    struct refreshpu{
-      eosio::name username;
-      eosio::name host;
+  struct [[eosio::action]] refreshpu{
+    eosio::name username;
+    eosio::name host;
 
-      EOSLIB_SERIALIZE(refreshpu, (username)(host))
-    };
+    EOSLIB_SERIALIZE(refreshpu, (username)(host))
+  };
 
-    //@abi action withdrawsh
-    struct withdrawsh {
-    	eosio::name owner;
-    	uint64_t id;
-     	EOSLIB_SERIALIZE(withdrawsh, (owner)(id))
-    };
+  struct [[eosio::action]] withdrawsh {
+  	eosio::name owner;
+  	uint64_t id;
+   	EOSLIB_SERIALIZE(withdrawsh, (owner)(id))
+  };
 
-	// @abi action
-	struct sellshares {
+	
+  struct [[eosio::action]] sellshares {
 		eosio::name username;
 		eosio::name host;
 		uint64_t shares;
 		EOSLIB_SERIALIZE(sellshares, (username)(host)(shares))
 	};
 
-	// @abi action
-	struct delshares{
+	
+  struct [[eosio::action]] delshares{
 		eosio::name from;
 		eosio::name reciever;
 		eosio::name host;
@@ -156,8 +146,8 @@ namespace eosio {
 		EOSLIB_SERIALIZE(delshares, (from)(reciever)(host)(shares))
 	};
 
-	// @abi action
-	struct undelshares{
+	
+  struct [[eosio::action]] undelshares{
 		eosio::name from;
 		eosio::name reciever;
 		eosio::name host;

@@ -1,7 +1,6 @@
 namespace eosio {
 
-  //@abi table storage
-  struct storage {
+  struct [[eosio::table]] storage {
     uint64_t id;
     eosio::string name;
     eosio::string address;
@@ -16,8 +15,7 @@ namespace eosio {
   typedef eosio::multi_index<"storage"_n, storage> storage_index;
 
 
-  //@abi table ipfskeys
-  struct ipfskeys{
+  struct [[eosio::table]] ipfskeys{
     uint64_t id;
     bool revoked = false;
     eosio::time_point_sec revokedAt;
@@ -32,8 +30,7 @@ namespace eosio {
   typedef eosio::multi_index<"ipfskeys"_n, ipfskeys> ipfskeys_index;
 
 
-  //@abi table userdatacnts
-  struct userdatacnts
+  struct [[eosio::table]] userdatacnts
   {
     eosio::name username;
     uint64_t total_sales = 0;
@@ -52,8 +49,7 @@ namespace eosio {
 
 
 
-  //@abi table orbdata
-  struct orbdata {
+  struct [[eosio::table]] orbdata {
     uint64_t id;
     eosio::string data;
     eosio::name root_token_contract;
@@ -72,8 +68,10 @@ namespace eosio {
 
   typedef eosio::multi_index<"orbdata"_n, orbdata> orbdata_index;
 
-  //@abi table mydataordrs
-  struct mydataordrs {
+
+
+
+  struct [[eosio::table]] mydataordrs {
     eosio::name owner;
     uint64_t order_id;
 
@@ -85,8 +83,9 @@ namespace eosio {
   typedef eosio::multi_index< "mydataordrs"_n, mydataordrs> mydataordrs_index;
 
 
-  //@abi table dataorders
-  struct dataorders {
+
+
+  struct [[eosio::table]] dataorders {
     uint64_t id;  
     uint64_t orbdata_id;   
     eosio::time_point_sec opened_at;
@@ -115,8 +114,8 @@ namespace eosio {
   > dataorders_index;
 
 
-  //@abi action selldata
-  struct selldata
+  
+  struct [[eosio::action]] selldata
   {
     eosio::name username;
     uint64_t id;
@@ -127,8 +126,7 @@ namespace eosio {
     EOSLIB_SERIALIZE(selldata, (username)(id)(data)(root_token_contract)(amount))
   };
 
-  //@abi action dataapprove
-  struct dataapprove
+  struct [[eosio::action]] dataapprove
   {
     eosio::name username;
     eosio::name owner;
@@ -142,8 +140,7 @@ namespace eosio {
 
 
 
-  //@abi action datadispute
-  struct datadispute
+  struct [[eosio::action]] datadispute
   {
     eosio::name username;
     eosio::string data;
@@ -153,8 +150,7 @@ namespace eosio {
     EOSLIB_SERIALIZE(datadispute, (username)(data)(root_token_contract)(amount))
   };
 
-  //@abi action datarelease
-  struct datarelease
+  struct [[eosio::action]] datarelease
   {
     eosio::name username;
     eosio::string data;
@@ -164,13 +160,7 @@ namespace eosio {
     EOSLIB_SERIALIZE(datarelease, (username)(data)(root_token_contract)(amount))
   };
 
-
-
-
-
-
-  //@abi action setstorage
-  struct setstorage {
+  struct [[eosio::action]] setstorage {
     eosio::name username;
     uint64_t id;
     eosio::string name;
@@ -179,8 +169,8 @@ namespace eosio {
     EOSLIB_SERIALIZE(setstorage, (username)(id)(name)(address))
   };
 
- //@abi action removeroute
-  struct removeroute {
+
+  struct [[eosio::action]] removeroute {
     eosio::name username;
     uint64_t id;
     
@@ -188,8 +178,7 @@ namespace eosio {
   };
 
 
-  //@abi action setipfskey
-  struct setipfskey {
+  struct [[eosio::action]] setipfskey {
     eosio::name username;
     eosio::string pkey;
     eosio::string meta;

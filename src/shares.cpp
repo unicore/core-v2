@@ -402,7 +402,7 @@ struct shares {
         });
       } 
       // auto idx = votes.template get_index<"host"_n>();
-      // auto i_bv = idx.lower_bound(host);
+      // auto i_bv = idx.lower_bound(host.value);
 
 
    } 
@@ -433,15 +433,15 @@ struct shares {
 		auto itr = market.find(0);
 		auto tmp = *itr;
 		uint64_t shares_out;
-		market.modify( itr, 0, [&]( auto &es ) {
-	    	shares_out = (es.convert( amount, S(0, POWER))).amount;
+		market.modify( itr, _self, [&]( auto &es ) {
+	    	shares_out = (es.convert( amount, eosio::symbol(eosio::symbol_code("POWER"), 0))).amount;
 	    });
 
     check( shares_out > 0, "Amount is not enought for buy 1 share" );
 
     power_index power(_self, buyer.value);
 
-    auto pexist = power.find(host);
+    auto pexist = power.find(host.value);
     
 
     if (pexist == power.end()){
@@ -484,7 +484,7 @@ struct shares {
     check(acc != accounts.end(), "Host is not found");
     
     power_index power_to_idx (_self, from.value);
-    auto power_to = power_to_idx.find(host);
+    auto power_to = power_to_idx.find(host.value);
       
     //modify
     propagate_votes_changes(host, from, power_to->power, power_to->power - shares);
@@ -498,8 +498,8 @@ struct shares {
     powermarket market(_self, host.value);
     auto itr = market.find(0);
     
-    market.modify( itr, 0, [&]( auto& es ) {
-      es.base.balance = asset((itr -> base).balance.amount + shares, S(0, POWER));
+    market.modify( itr, _self, [&]( auto& es ) {
+      es.base.balance = asset((itr -> base).balance.amount + shares, eosio::symbol(eosio::symbol_code("POWER"), 0));
     });
 
  
@@ -518,8 +518,8 @@ struct shares {
     auto acc = accounts.find(host.value);
     check(acc != accounts.end(), "Host is not found");
     
-    power_index power_to_idx (_self, reciever);
-    auto power_to = power_to_idx.find(host);
+    power_index power_to_idx (_self, reciever.value);
+    auto power_to = power_to_idx.find(host.value);
     
     powermarket market(_self, host.value);
 
@@ -529,8 +529,8 @@ struct shares {
 
     
     
-    market.modify( itr, 0, [&]( auto& es ) {
-      es.base.balance = asset((itr -> base).balance.amount - shares, S(0, POWER));
+    market.modify( itr, _self, [&]( auto& es ) {
+      es.base.balance = asset((itr -> base).balance.amount - shares, eosio::symbol(eosio::symbol_code("POWER"), 0));
     });
 
     //Emplace or modify power object of reciever and propagate votes changes;
@@ -568,22 +568,22 @@ struct shares {
 
 	void delegate_shares_action (const delshares &op){
 	 	require_auth(op.from);
-		power_index power_from_idx (_self, op.from);
-		power_index power_to_idx (_self, op.reciever);
+		power_index power_from_idx (_self, op.from.value);
+		power_index power_to_idx (_self, op.reciever.value);
 
-		delegation_index delegations(_self, op.from);
+		delegation_index delegations(_self, op.from.value);
 		
-		account_index accounts(_self, op.host);
-		auto acc = accounts.find(op.host);
+		account_index accounts(_self, op.host.value);
+		auto acc = accounts.find(op.host.value);
 
-		auto power_from = power_from_idx.find(op.host);
+		auto power_from = power_from_idx.find(op.host.value);
 		check(power_from != power_from_idx.end(),"Nothing to delegatee");
 		check(power_from -> power > 0, "Nothing to delegate");
 		check(op.shares > 0, "Delegate amount must be greater then zero");
 		check(op.shares <= power_from->staked, "Not enough staked power for delegate");
 		
-		auto dlgtns = delegations.find(op.reciever);
-		auto power_to = power_to_idx.find(op.host);
+		auto dlgtns = delegations.find(op.reciever.value);
+		auto power_to = power_to_idx.find(op.host.value);
 
 		if (dlgtns == delegations.end()){
 
@@ -641,13 +641,13 @@ struct shares {
    * @param[in]  new_power  The new power
    */
 	void propagate_votes_changes(eosio::name host, eosio::name voter, uint64_t old_power, uint64_t new_power){
-		votes_index votes(_self, voter);
-		goals_index goals(_self, host);
+		votes_index votes(_self, voter.value);
+		goals_index goals(_self, host.value);
 
 		//by host;
 
 		auto idx = votes.template get_index<"host"_n>();
-        auto matched_itr = idx.lower_bound(host);
+        auto matched_itr = idx.lower_bound(host.value);
        
         while(matched_itr != idx.end() && matched_itr->host == host){
 			auto goal = goals.find(matched_itr -> goal_id);
@@ -675,18 +675,18 @@ struct shares {
 	void undelegate_shares_action (const undelshares &op){
 		require_auth(op.reciever);
 
-		power_index power_from_idx (_self, op.from);
-		power_index power_to_idx (_self, op.reciever);
+		power_index power_from_idx (_self, op.from.value);
+		power_index power_to_idx (_self, op.reciever.value);
 
-		delegation_index delegations(_self, op.reciever);
-		auto dlgtns = delegations.find(op.from);
+		delegation_index delegations(_self, op.reciever.value);
+		auto dlgtns = delegations.find(op.from.value);
 
 		check(dlgtns != delegations.end(), "Nothing to undelegate");
 		check(dlgtns -> shares >= op.shares, "Not enought shares for undelegate");
 		check(op.shares > 0, "Undelegate amount must be greater then zero");
 		
-		auto power_from = power_from_idx.find(op.host);
-		auto power_to = power_to_idx.find(op.host);
+		auto power_from = power_from_idx.find(op.host.value);
+		auto power_to = power_to_idx.find(op.host.value);
 
 		if (dlgtns->shares - op.shares == 0){
 			delegations.erase(dlgtns);
@@ -734,8 +734,8 @@ struct shares {
     account_index accounts(_self, host.value);
     auto exist = accounts.find(host.value);
     
-		power_index power(_self, username);
-		auto userpower = power.find(host);
+		power_index power(_self, username.value);
+		auto userpower = power.find(host.value);
 		auto upower = (userpower->staked);
 		check(upower >= shares, "Not enought power available for sell");
 
@@ -744,8 +744,8 @@ struct shares {
 		auto tmp = *itr;
 
 		eosio::asset tokens_out;
-		market.modify( itr, 0, [&]( auto& es ) {
-        	tokens_out = es.convert( asset(shares,S(0, POWER)), exist -> quote_amount.symbol);
+		market.modify( itr, _self, [&]( auto& es ) {
+        	tokens_out = es.convert( asset(shares,eosio::symbol(eosio::symbol_code("POWER"), 0)), exist -> quote_amount.symbol);
 	    });
 		check( tokens_out.amount > 1, "token amount received from selling shares is too low" );
 	    
@@ -777,9 +777,10 @@ struct shares {
                m.vesting_seconds = vesting_seconds;
                m.name = name;
                m.supply.amount = 100000000000000ll;
-               m.supply.symbol = S(0,BANCORE);
+               m.supply.symbol = eosio::symbol(eosio::symbol_code("BANCORE"), 0);
                m.base.balance.amount = total_shares;
-               m.base.balance.symbol = S(0, POWER);
+               m.base.balance.symbol = eosio::symbol(eosio::symbol_code("POWER"), 0);
+
                m.quote.balance.amount = quote_amount.amount;
                m.quote.balance.symbol = quote_amount.symbol;
                m.quote.contract = quote_token_contract;

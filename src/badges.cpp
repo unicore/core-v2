@@ -63,7 +63,7 @@ struct badge_struct {
 
 		check(acc != accounts.end(), "Host is not found");
 		badge_index badges(_self, op.host.value);
-		usbadge_index user_badges(_self, op.to);
+		usbadge_index user_badges(_self, op.to.value);
 
 
 		user_index users(_self, _self.value);

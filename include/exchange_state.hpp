@@ -16,8 +16,7 @@ namespace eosio {
     *  side effects associated with using this API.
     */
 
-   // @abi table powermarket i64
-   struct exchange_state {
+   struct [[eosio::table]] exchange_state {
       uint64_t id;
       std::string name;
       uint64_t vesting_seconds = 0;

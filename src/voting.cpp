@@ -4,8 +4,8 @@ struct voting
 {
 
 	void clear_old_votes_action (eosio::name voter, eosio::name host){
-		votes_index votes(_self, voter);
-		goals_index goals (_self, host);
+		votes_index votes(_self, voter.value);
+		goals_index goals (_self, host.value);
 
 		auto idx = votes.begin();
 		std::vector<uint64_t> list_for_delete;
@@ -24,14 +24,14 @@ struct voting
 	}
 
 	uint64_t count_votes(eosio::name voter, eosio::name host){
-		votes_index votes(_self, voter);
-		goals_index goals (_self, _self);
+		votes_index votes(_self, voter.value);
+		goals_index goals (_self, _self.value);
 		// auto users_with_id = reports.template get_index<"userwithtask"_n>();
 
 		// auto idx = votes.begin();
 
 		auto idx = votes.template get_index<"host"_n>();
-		auto i_bv = idx.lower_bound(host);
+		auto i_bv = idx.lower_bound(host.value);
 
 		uint64_t count = 0;
 
@@ -52,23 +52,23 @@ struct voting
 		auto voter = op.voter;
 		
 		user_index users(_self,_self.value);
-    auto user = users.find(op.voter);
+    auto user = users.find(op.voter.value);
     check(user != users.end(), "User is not registered");
 
 		uint64_t vote_count = count_votes(voter, host);
 
 		
-		goals_index goals(_self, host);
-		power_index power(_self, voter);
-		votes_index votes(_self, voter);
+		goals_index goals(_self, host.value);
+		power_index power(_self, voter.value);
+		votes_index votes(_self, voter.value);
 
 
 
 
 
 		auto goal = goals.find(goal_id);
-		account_index accounts (_self, goal->host);
-		auto acc = accounts.find(goal->host);
+		account_index accounts (_self, (goal->host).value);
+		auto acc = accounts.find((goal->host).value);
 
 		powermarket market(_self, host.value);
 		auto itr = market.find(0);
@@ -79,7 +79,7 @@ struct voting
 		
 		check(goal != goals.end(), "Goal is not founded");
 
-		auto pow = power.find(goal->host);
+		auto pow = power.find((goal->host).value);
 		check(pow != power.end(), "You dont have shares for voting process");
 		check(pow -> power != 0, "You cant vote with zero power");
 		

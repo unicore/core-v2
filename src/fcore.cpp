@@ -56,8 +56,8 @@ struct core {
 
     void emission(eosio::name host){
         
-        emission_index emis(_self, host);
-        auto emi = emis.find(host);
+        emission_index emis(_self, host.value);
+        auto emi = emis.find(host.value);
 
         if (emi->percent > 0){
             goals_index goals(_self, host.value);
@@ -364,7 +364,7 @@ void improve_params_of_new_cycle (eosio::name host, eosio::name main_host){
  * @param[in]  root_symbol  The root symbol
  */
 
-void emplace_first_pools(eosio::name parent_host, eosio::name main_host, eosio::symbol_code root_symbol){
+void emplace_first_pools(eosio::name parent_host, eosio::name main_host, eosio::symbol root_symbol){
     
     spiral_index spiral(_self, main_host.value);
     auto sp = spiral.find(0);
@@ -492,7 +492,7 @@ void start_new_cycle ( eosio::name host ) {
             a.ahost = main_host;
         });
 
-        improve_params_of_new_cycle(host, main_host.value);
+        improve_params_of_new_cycle(host, main_host);
 
         emplace_first_pools(host, main_host, root_symbol);
 
@@ -507,7 +507,7 @@ void start_new_cycle ( eosio::name host ) {
         
         pool_index pools(_self, host.value);
         uint64_t available_id = pools.available_primary_key();
-        improve_params_of_new_cycle(host, main_host.value);
+        improve_params_of_new_cycle(host, main_host);
         
         emplace_first_pools(host, main_host, root_symbol);
 
@@ -639,7 +639,7 @@ void next_pool( eosio::name host){
 };
 
 void fixs (const fixs &op){
-    require_auth(op.host.value);
+    require_auth(op.host);
 
     account_index accounts(_self, op.host.value);
     auto acc = accounts.find(op.host.value);
@@ -749,7 +749,7 @@ void reg_action(const reg &op){
     check(op.username != op.referer, "You cant set the referer yourself");
     
     if (op.username != _self){
-        check(op.referer != 0, "Registration without referer is not possible");
+        check(op.referer.value != 0, "Registration without referer is not possible");
         check( is_account( op.referer ), "Referer account does not exist");
         auto pref = refs.find(op.referer.value);
         check(pref != refs.end(), "Referer is not registered in the core");    
@@ -801,7 +801,7 @@ void profupdate_action(const profupdate &op){
     require_auth(op.username);
     user_index refs(_self, _self.value);
 
-    auto ref = refs.find(op.username);
+    auto ref = refs.find(op.username.value);
     
     refs.modify(ref, op.username, [&](auto &r){
         r.meta = op.meta;
@@ -1771,7 +1771,7 @@ void add_asset_to_fund_action(eosio::name username, eosio::asset quantity, eosio
 
     auto by_contract_and_symbol = funds.template get_index<"codeandsmbl"_n>();
 
-    auto by_contract_and_symbol_ids = combine_ids(code, quantity.symbol.code().raw());
+    auto by_contract_and_symbol_ids = combine_ids(code.value, quantity.symbol.code().raw());
     
     auto fund = by_contract_and_symbol.find(by_contract_and_symbol_ids);
 
@@ -1792,8 +1792,8 @@ void add_asset_to_fund_action(eosio::name username, eosio::asset quantity, eosio
 */
 
 void createfund_action(const createfund &op){
-    stats stat(op.token_contract, op.fund_asset.symbol.name());
-    auto s = stat.find(op.fund_asset.symbol.name());
+    stats stat(op.token_contract, op.fund_asset.symbol.code().raw());
+    auto s = stat.find(op.fund_asset.symbol.code().raw());
     
     require_auth(s -> issuer);
     
@@ -2085,11 +2085,11 @@ void withdraw_action ( const withdraw &op){
             if ((bal->ref_amount).amount > 0){
                 // print("Total Pay to REF:", bal->ref_amount, " ");
                 
-                user_index refs(_self, _self);
-                auto ref = refs.find(username);
+                user_index refs(_self, _self.value);
+                auto ref = refs.find(username.value);
                 eosio::name referer;
 
-                if ((ref != refs.end()) && (ref->referer != 0)){
+                if ((ref != refs.end()) && ((ref->referer).value != 0)){
                     referer = ref->referer;
                     eosio::asset paid = asset(0, root_symbol);
                 
@@ -2098,9 +2098,9 @@ void withdraw_action ( const withdraw &op){
                      */
                 
                     for (auto level : acc->levels){
-                        if ((ref != refs.end()) && (ref->referer != 0)){
+                        if ((ref != refs.end()) && ((ref->referer).value != 0)){
                             eosio::asset to_ref = asset((bal->ref_amount).amount * level / 100 / PERCENT_PRECISION , root_symbol);
-                            refbalances_index refbalances(_self, referer);
+                            refbalances_index refbalances(_self, referer.value);
                             refbalances.emplace(op.username, [&](auto &rb){
                                 rb.id = refbalances.available_primary_key();
                                 rb.host = op.host;
@@ -2112,7 +2112,7 @@ void withdraw_action ( const withdraw &op){
          
                             paid += to_ref;
                             
-                            ref = refs.find(referer);
+                            ref = refs.find(referer.value);
                             referer = ref->referer;
                         }
                     };
@@ -2170,8 +2170,8 @@ void withdraw_action ( const withdraw &op){
                  * Выплаты в целевой фонд сообщества
                  */
 
-                emission_index emis(_self, host);
-                auto emi = emis.find(host);
+                emission_index emis(_self, host.value);
+                auto emi = emis.find(host.value);
 
                 emis.modify(emi, username, [&](auto &e){
                     e.fund = emi->fund + bal->cfund_amount;
@@ -2306,7 +2306,7 @@ void withdraw_action ( const withdraw &op){
 
         auto funds_by_contract_and_symbol = funds.template get_index<"codeandsmbl"_n>();
 
-        auto fund_by_contract_and_symbol_ids = combine_ids(acc.sale_token_contract.value, (acc.asset_on_sale).symbol);
+        auto fund_by_contract_and_symbol_ids = combine_ids(acc.sale_token_contract.value, (acc.asset_on_sale).symbol.code().raw());
         
         auto fund = funds_by_contract_and_symbol.find(fund_by_contract_and_symbol_ids);
 

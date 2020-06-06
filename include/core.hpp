@@ -4,6 +4,7 @@
 #include <eosio/asset.hpp>
 #include <eosio/time.hpp>
 #include <eosio/multi_index.hpp>
+
 #include <eosio/contract.hpp>
 #include <eosio/action.hpp>
 #include <eosio/system.hpp>
@@ -48,8 +49,7 @@ namespace eosio {
     static const uint64_t _MAX_LEVELS = 7;
 
 
-    // @abi table spiral i64
-    struct spiral{
+    struct [[eosio::table]] spiral{
         uint64_t id;
         uint64_t size_of_pool;
         uint64_t quants_precision = 0;
@@ -69,8 +69,8 @@ namespace eosio {
     typedef eosio::multi_index<"spiral"_n, spiral> spiral_index;
 
 
-    // @abi table balance i64
-    struct balance{
+    
+    struct [[eosio::table]] balance{
         uint64_t id;
         eosio::name host;
         eosio::name chost;
@@ -110,8 +110,7 @@ namespace eosio {
     typedef eosio::multi_index<"balance"_n, balance> balance_index;
 
 
-    // @abi table bwtradegraph i64
-    struct bwtradegraph{
+    struct [[eosio::table]] bwtradegraph{
         uint64_t pool_id;
         uint64_t cycle_num;
         uint64_t pool_num;
@@ -130,8 +129,7 @@ namespace eosio {
     > bwtradegraph_index;
 
     
-    // @abi table refbalances i64
-    struct refbalances{
+    struct [[eosio::table]] refbalances{
         uint64_t id;
         eosio::name host;
         eosio::asset amount;
@@ -145,8 +143,7 @@ namespace eosio {
 
 
 
-    // @abi table cycle i64
-    struct cycle{
+    struct [[eosio::table]] cycle{
         uint64_t id;
         eosio::name ahost;
         uint64_t start_at_global_pool_id;
@@ -162,8 +159,7 @@ namespace eosio {
 
 
    
-    // @abi table pool i64
-    struct pool{
+    struct [[eosio::table]] pool{
         uint64_t id;
         eosio::name ahost;
         uint64_t cycle_num;
@@ -188,8 +184,7 @@ namespace eosio {
     typedef eosio::multi_index<"pool"_n, pool> pool_index;
     
 
-    // @abi table rate i64
-    struct rate {
+    struct [[eosio::table]] rate {
         uint64_t pool_id;
         uint64_t buy_rate=0;
         uint64_t sell_rate=0;
@@ -211,8 +206,7 @@ namespace eosio {
     };
     typedef eosio::multi_index<"rate"_n, rate> rate_index;
     
-    // @abi table coredhistory i64
-    struct coredhistory{
+    struct [[eosio::table]] coredhistory{
         uint64_t id;
         uint64_t pool_id;
         eosio::name username;
@@ -229,8 +223,7 @@ namespace eosio {
     
 
 
-    // @abi table sale i64
-    struct sale{
+    struct [[eosio::table]] sale{
         uint64_t pool_id;
         uint64_t sell_rate;
         eosio::asset solded;
@@ -243,8 +236,7 @@ namespace eosio {
     typedef eosio::multi_index<"sale"_n, sale> sale_index;
  
 
-    // @abi table sincome i64
-    struct sincome{
+    struct [[eosio::table]] sincome{
         uint64_t pool_id;
         eosio::name ahost;
         uint64_t cycle_num;
@@ -270,7 +262,7 @@ namespace eosio {
     indexed_by<"cyclandpool"_n, const_mem_fun<sincome, uint128_t, &sincome::cyclandpool>>
     > sincome_index;
     
-    struct currency_stats {
+    struct [[eosio::table]] currency_stats {
             asset          supply;
             asset          max_supply;
             eosio::name    issuer;
@@ -281,8 +273,7 @@ namespace eosio {
     typedef eosio::multi_index<"stat"_n, currency_stats> stats;
 
 
-    // @abi table userscount
-    struct userscount
+    struct [[eosio::table]] userscount
      {
          uint64_t id;
          uint64_t count;
@@ -294,8 +285,7 @@ namespace eosio {
     typedef eosio::multi_index<"userscount"_n, userscount> userscount_index;
 
 
-    // @abi table users i64
-    struct users{
+    struct [[eosio::table]] users{
         eosio::name username;
         eosio::name referer;
         uint64_t id;
@@ -314,8 +304,7 @@ namespace eosio {
     > user_index;
 
 
-    // @abi table ahosts i64
-    struct ahosts{
+    struct  [[eosio::table]] ahosts{
         eosio::name username;
         uint64_t votes;
         std::string title;
@@ -334,10 +323,14 @@ namespace eosio {
     > ahosts_index;
 
 
+
+
+
+
+
     /* ACTIONS */
 
-    // @abi action
-    struct reg {
+    struct [[eosio::action]] reg {
         eosio::name username;
         eosio::name referer;
         std::string meta;
@@ -346,8 +339,7 @@ namespace eosio {
     };
 
 
-    // @abi action
-    struct fixs {
+    struct [[eosio::action]] fixs {
         eosio::name host;
         // uint64_t pool;
         // std::string meta;
@@ -355,8 +347,8 @@ namespace eosio {
         EOSLIB_SERIALIZE( fixs, (host))
     };
 
-    // @abi action
-    struct convert{
+    
+    struct [[eosio::action]] convert{
         eosio::name username;
         eosio::name host;
         uint64_t balance_id;
@@ -364,23 +356,21 @@ namespace eosio {
         EOSLIB_SERIALIZE( convert, (username)(host)(balance_id))
     };
 
-    // @abi action
-    struct del {
+    
+    struct [[eosio::action]] del {
         eosio::name username;
         
         EOSLIB_SERIALIZE( del, (username))
     };
 
-   // @abi action
-    struct profupdate {
+   struct [[eosio::action]] profupdate {
         eosio::name username;
         std::string meta;
         
         EOSLIB_SERIALIZE( profupdate, (username)(meta))
     };
  
-    // @abi action
-    struct setparams{
+    struct [[eosio::action]] setparams{
         eosio::name host;
         eosio::name chost;
         uint64_t size_of_pool;
@@ -396,16 +386,16 @@ namespace eosio {
 
     };
 
-    // @abi action
-    struct start{
+    
+    struct [[eosio::action]] start{
         eosio::name host;
         eosio::name chost;
         EOSLIB_SERIALIZE( start, (host)(chost))
 
     };
 
-    // @abi action
-    struct withdraw{
+    
+    struct [[eosio::action]] withdraw{
         eosio::name username; 
         eosio::name host;
         uint64_t balance_id;
@@ -416,8 +406,8 @@ namespace eosio {
 
     };
 
-    // @abi action
-    struct priorenter{
+    
+    struct [[eosio::action]] priorenter{
         eosio::name username; 
         eosio::name host;
         uint64_t balance_id;
@@ -427,25 +417,23 @@ namespace eosio {
 
 
     };
-
-
-    // @abi action
-    struct refreshbal{
+    
+    struct [[eosio::action]] refreshbal{
         eosio::name username;
         uint64_t balance_id;
         uint64_t partrefresh;
         EOSLIB_SERIALIZE( refreshbal, (username)(balance_id)(partrefresh))
     };
 
-      // @abi action
-    struct refreshst{
+    
+    struct [[eosio::action]] refreshst{
         eosio::name host;
 
         EOSLIB_SERIALIZE( refreshst, (host))
     };
 
-      // @abi action
-    struct mstartcycle{
+    
+    struct [[eosio::action]] mstartcycle{
         eosio::name host;
         EOSLIB_SERIALIZE( mstartcycle, (host))
     };

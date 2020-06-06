@@ -20,8 +20,8 @@ struct tsks
 	void settask_action (const settask &op){
 		
 		require_auth(op.username);
-		account_index accounts(_self, op.host);
-		auto acc = accounts.find(op.host);
+		account_index accounts(_self, op.host.value);
+		auto acc = accounts.find(op.host.value);
 		check(acc != accounts.end(), "Host is not found");
 
 
@@ -29,11 +29,11 @@ struct tsks
 		check(op.requested.symbol == root_symbol, "Wrong token for current host" );
 		check(op.for_each.symbol == root_symbol, "Wrong token for current host" );
 
-		goals_index goals(_self, op.host);
+		goals_index goals(_self, op.host.value);
 		auto goal = goals.find(op.goal_id);
 		check(goal != goals.end(), "Goal is not found");
 
-		tasks_index tasks(_self, op.host);
+		tasks_index tasks(_self, op.host.value);
 		
 		uint64_t task_id = tasks.available_primary_key();
 		
@@ -71,14 +71,14 @@ struct tsks
 	void fundtask_action(const fundtask &op){
 		require_auth(op.host);
 
-		account_index accounts(_self, op.host);
-		auto acc = accounts.find(op.host);
+		account_index accounts(_self, op.host.value);
+		auto acc = accounts.find(op.host.value);
 		check(acc != accounts.end(), "Host is not found");
 		
-		tasks_index tasks(_self, op.host);
+		tasks_index tasks(_self, op.host.value);
 		auto task = tasks.find(op.task_id);
 		check(task != tasks.end(), "Task is not exist");
-		goals_index goals(_self, op.host);
+		goals_index goals(_self, op.host.value);
 		
 		auto goal = goals.find(task->goal_id);
 		
@@ -108,11 +108,11 @@ struct tsks
 	 */
 	void tactivate_action (const tactivate &op){
 		require_auth(op.host);
-		account_index accounts(_self, op.host);
-		auto acc = accounts.find(op.host);
+		account_index accounts(_self, op.host.value);
+		auto acc = accounts.find(op.host.value);
 		check(acc != accounts.end(), "Host is not found");
 
-		tasks_index tasks(_self, op.host);
+		tasks_index tasks(_self, op.host.value);
 
 		auto task = tasks.find(op.task_id);
 
@@ -133,11 +133,11 @@ struct tsks
 	 */
 	void tdeactivate_action (const tdeactivate &op){
 		require_auth(op.host);
-		account_index accounts(_self, op.host);
-		auto acc = accounts.find(op.host);
+		account_index accounts(_self, op.host.value);
+		auto acc = accounts.find(op.host.value);
 		check(acc != accounts.end(), "Host is not found");
 
-		tasks_index tasks(_self, op.host);
+		tasks_index tasks(_self, op.host.value);
 
 		auto task = tasks.find(op.task_id);
 
@@ -165,7 +165,7 @@ struct tsks
 
 		require_auth(op.username);
 		account_index accounts(_self, op.host.value);
-		user_index users(_self, _self);
+		user_index users(_self, _self.value);
 		auto user = users.find(op.username.value);
 		check(user != users.end(), "User is not registered on the core");
 		
@@ -213,9 +213,9 @@ struct tsks
 	void editreport_action (const editreport &op){
 		// require_auth(op.voter);
 		require_auth(op.username);
-		account_index accounts(_self, op.host);
+		account_index accounts(_self, op.host.value);
 		
-		auto acc = accounts.find(op.host);
+		auto acc = accounts.find(op.host.value);
 		check(acc != accounts.end(), "Host is not found");
 
 		reports_index reports(_self, op.host.value);

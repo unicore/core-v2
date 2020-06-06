@@ -17,26 +17,20 @@ namespace eosio {
       public:
          using contract::contract;
 
-         [[eosio::action]]
          void create( name   issuer,
                       asset  maximum_supply);
 
-         [[eosio::action]]
          void issue( name to, asset quantity, string memo );
 
-         [[eosio::action]]
          void retire( asset quantity, string memo );
 
-         [[eosio::action]]
          void transfer( name    from,
                         name    to,
                         asset   quantity,
                         string  memo );
 
-         [[eosio::action]]
          void open( name owner, const symbol& symbol, name ram_payer );
 
-         [[eosio::action]]
          void close( name owner, const symbol& symbol );
 
          static asset get_supply( name token_contract_account, symbol_code sym_code )

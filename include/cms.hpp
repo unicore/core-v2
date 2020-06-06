@@ -1,7 +1,6 @@
 namespace eosio {
 
-  //@abi table cmscontent
-  struct cmscontent {
+  struct  [[eosio::table]] cmscontent {
     uint64_t id;
     uint8_t lang_id;
     eosio::string name;
@@ -21,8 +20,7 @@ namespace eosio {
 
 
 
-  //@abi table cmsconfig
-  struct cmsconfig {
+  struct  [[eosio::table]] cmsconfig {
     uint64_t id;
     eosio::string config;
 
@@ -37,8 +35,7 @@ namespace eosio {
 
 
 
-  //@abi action setcontent
-  struct setcontent
+  struct [[eosio::action]] setcontent
   {
     eosio::name username;
     uint64_t id;
@@ -48,8 +45,8 @@ namespace eosio {
     EOSLIB_SERIALIZE(setcontent, (username)(id)(lang_id)(content))
   };
 
-  //@abi action rmcontent
-  struct rmcontent
+  
+  struct [[eosio::action]] rmcontent
   {
     eosio::name username;
     uint64_t id;
@@ -60,8 +57,7 @@ namespace eosio {
 
 
 
-  //@abi action setcmsconfig
-  struct setcmsconfig
+  struct [[eosio::action]] setcmsconfig
   {
     eosio::name username;
     eosio::string config;

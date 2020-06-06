@@ -10,8 +10,7 @@ namespace eosio {
         return (uint128_t{x} << 64) | y;
     }
 
-    // @abi table hosts
-    struct hosts{
+    struct [[eosio::table]] hosts{
         eosio::name username;
         eosio::time_point_sec registered_at;
         eosio::name architect;
@@ -111,8 +110,7 @@ namespace eosio {
 
     typedef eosio::multi_index <"hosts"_n, hosts> account_index;
     
-    //@abi table emission
-    struct emission{
+    struct [[eosio::table]] emission{
         eosio::name host;
         uint64_t percent;
         uint64_t gtop;
@@ -126,8 +124,7 @@ namespace eosio {
     typedef eosio::multi_index<"emission"_n, emission> emission_index;
 
 
-    //@abi table funds
-    struct funds{
+    struct [[eosio::table]] funds{
         uint64_t id;
         eosio::name issuer;
         eosio::name token_contract;
@@ -150,8 +147,7 @@ namespace eosio {
                               &funds::byissuer>>
     > funds_index;
 
-    //@abi table hostsonfunds
-    struct hostsonfunds{
+    struct [[eosio::table]] hostsonfunds{
         uint64_t id;
         uint64_t fund_id;
         eosio::name host;
@@ -169,8 +165,7 @@ namespace eosio {
     > hostsonfunds_index;
 
 
-    //@abi action
-    struct enablesale{
+    struct [[eosio::action]] enablesale{
         eosio::name host;
         eosio::name token_contract;
         eosio::asset asset_on_sale;
@@ -178,8 +173,7 @@ namespace eosio {
         EOSLIB_SERIALIZE( enablesale, (host)(token_contract)(asset_on_sale)(sale_shift))
     };
 
-    //@abi action
-    struct addhostofund{
+    struct [[eosio::action]] addhostofund{
         uint64_t fund_id;
         eosio::name host;                
         
@@ -187,8 +181,7 @@ namespace eosio {
     };
 
 
-    // @abi action
-    struct createfund{
+    struct [[eosio::action]] createfund{
         eosio::name token_contract;
         eosio::asset fund_asset;
         std::string descriptor;
@@ -197,8 +190,7 @@ namespace eosio {
     };
 
 
-    // @abi action
-    struct setemi{
+    struct [[eosio::action]] setemi{
         eosio::name host;
         uint64_t percent;
         uint64_t gtop;
@@ -206,16 +198,14 @@ namespace eosio {
    
     };
     
-    // @abi action
-    struct setarch{
+    struct [[eosio::action]] setarch{
         eosio::name host;
         eosio::name architect;
         EOSLIB_SERIALIZE( setarch, (host)(architect))
     };
 
 
-    // @abi action
-    struct upgrade{
+    struct [[eosio::action]] upgrade{
         eosio::name username;
         std::string title;
         std::string purpose;
@@ -239,16 +229,15 @@ namespace eosio {
         EOSLIB_SERIALIZE( upgrade, (username)(title)(purpose)(total_shares)(quote_amount)(quote_token_contract)(root_token)(root_token_contract)(voting_only_up)(consensus_percent)(referral_percent)(dacs_percent)(cfund_percent)(hfund_percent)(levels)(emission_percent)(gtop)(meta))
     };
 
-    // @abi action
-    struct cchildhost{
+    struct [[eosio::action]] cchildhost{
     	eosio::name parent_host;
     	eosio::name chost;
 
     	EOSLIB_SERIALIZE(cchildhost, (parent_host)(chost))
     };
 
-    //@abi action
-    struct edithost
+    
+    struct [[eosio::action]] edithost
     {
         eosio::name architect;
         eosio::name host;
@@ -260,8 +249,8 @@ namespace eosio {
         EOSLIB_SERIALIZE(edithost, (architect)(host)(title)(purpose)(manifest)(meta))
     };
 
-    //@abi action
-    struct ehosttime
+    
+    struct [[eosio::action]] ehosttime
     {
         eosio::name architect;
         eosio::name host;
@@ -270,8 +259,7 @@ namespace eosio {
 
     };
 
-    //@abi action
-    struct deactivate{
+    struct [[eosio::action]] deactivate{
         eosio::name architect;
         eosio::name host;
 

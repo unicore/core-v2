@@ -40,14 +40,14 @@ struct goal {
 	void set_goal_action(const setgoal &op){
 		require_auth(op.username);
 		
-		goals_index goals(_self,op.host);
-		account_index accounts(_self, op.host);
+		goals_index goals(_self,op.host.value);
+		account_index accounts(_self, op.host.value);
 
 		user_index users(_self,_self.value);
-    auto user = users.find(op.username);
+    auto user = users.find(op.username.value);
     check(user != users.end(), "User is not registered");
 
-		auto acc = accounts.find(op.host);
+		auto acc = accounts.find(op.host.value);
     auto root_symbol = (acc->root_token).symbol;
 
 		auto username = op.username;
@@ -103,12 +103,12 @@ struct goal {
 	void fund_goal_action(const dfundgoal &op){
 		require_auth(op.architect);
 
-		account_index accounts(_self, op.host);
-		auto acc = accounts.find(op.host);
+		account_index accounts(_self, op.host.value);
+		auto acc = accounts.find(op.host.value);
 		check(acc->architect == op.architect, "Only architect can direct fund the goal");
 
-    emission_index emis(_self, op.host);
-    auto emi = emis.find(op.host);
+    emission_index emis(_self, op.host.value);
+    auto emi = emis.find(op.host.value);
 
     check(emi->fund >= op.amount, "Not enough tokens for fund the goal");
 
@@ -132,10 +132,10 @@ struct goal {
 	void edit_goal_action(const editgoal &op){
 		require_auth(op.username);
 		
-		goals_index goals(_self,op.host);
-    account_index accounts (_self, op.host);
+		goals_index goals(_self,op.host.value);
+    account_index accounts (_self, op.host.value);
 
-    auto acc = accounts.find(op.host);
+    auto acc = accounts.find(op.host.value);
     auto root_symbol = (acc->root_token).symbol;
 
     auto username = op.username;
@@ -176,7 +176,7 @@ struct goal {
    */
 	void del_goal_action(const delgoal &op){
 		require_auth(op.username);
-		goals_index goals(_self, op.host);
+		goals_index goals(_self, op.host.value);
         
 		auto username = op.username;
 		auto goal_id = op.goal_id;
@@ -197,13 +197,13 @@ struct goal {
 	void report_action(const report &op){
 		require_auth(op.username);
 		
-		goals_index goals(_self, op.host);
+		goals_index goals(_self, op.host.value);
 		auto username = op.username;
 		auto goal_id = op.goal_id;
 		auto report = op.report;
 
-		account_index accounts(_self, op.host);
-		auto acc = accounts.find(op.host);
+		account_index accounts(_self, op.host.value);
+		auto acc = accounts.find(op.host.value);
 		check(acc != accounts.end(), "Host is not found");
 
 		auto goal = goals.find(goal_id);
@@ -222,13 +222,13 @@ struct goal {
    *
    * @param[in]  op    The operation
    */
-	void check_action(const check &op){
+	void check_action(const struct check &op){
 		require_auth(op.architect);
-		account_index accounts(_self, op.host);
-		auto acc = accounts.find(op.host);
+		account_index accounts(_self, op.host.value);
+		auto acc = accounts.find(op.host.value);
 		check(acc != accounts.end(), "Host is not found");
 
-		goals_index goals(_self, op.host);
+		goals_index goals(_self, op.host.value);
 		auto goal = goals.find(op.goal_id);
 		check(goal != goals.end(), "Goal is not found");
 		check(op.architect == acc->architect, "Only architect can check report for now");
@@ -252,7 +252,7 @@ struct goal {
 	void donate_action(eosio::name from, eosio::name host, uint64_t goal_id, eosio::asset quantity, eosio::name code){
 		// require_auth(from);
 		
-		goals_index goals(_self, host);
+		goals_index goals(_self, host.value);
 		account_index accounts(_self, host.value);
 		auto acc = accounts.find(host.value);
 
@@ -285,10 +285,10 @@ struct goal {
   void gsponsor_action(const gsponsor &op){
     require_auth (op.hoperator);
 
-    account_index accounts(_self, op.host);
-    auto acc = accounts.find(op.host);
+    account_index accounts(_self, op.host.value);
+    auto acc = accounts.find(op.host.value);
     check(acc->hoperator == op.hoperator, "Wrong operator for this host");
-    goals_index goals(_self, op.host);
+    goals_index goals(_self, op.host.value);
 
     auto goal = goals.find(op.goal_id);
     check(goal != goals.end(), "Goal is not founded");
@@ -320,15 +320,15 @@ struct goal {
  */
     void set_emission_action(const setemi&op){
       require_auth(op.host);
-      account_index hosts (_self, op.host);
-      auto host = hosts.find(op.host);
+      account_index hosts (_self, op.host.value);
+      auto host = hosts.find(op.host.value);
       check(host != hosts.end(), "Host not exist");
       
       auto ahost = host->get_ahost();
       auto root_symbol = host->get_root_symbol();
   
-      emission_index emis(_self, op.host);
-      auto emi = emis.find(op.host);
+      emission_index emis(_self, op.host.value);
+      auto emi = emis.find(op.host.value);
       check(op.gtop <= 100, "Goal top should be less then 100");
       check(op.percent <= 1000 * PERCENT_PRECISION, "Emission percent should be less then 100 * PERCENT_PRECISION");
       
@@ -350,13 +350,13 @@ struct goal {
 		auto username = op.username;
 		auto goal_id = op.goal_id;
 		
-		goals_index goals(_self, op.host);
+		goals_index goals(_self, op.host.value);
 		auto goal = goals.find(goal_id);
 		
 		check(goal != goals.end(), "Goal is not founded");
 		
-		account_index accounts(_self, goal->host);
-		auto acc = accounts.find(goal->host);
+		account_index accounts(_self, (goal->host).value);
+		auto acc = accounts.find((goal->host).value);
 		check(acc != accounts.end(), "Host is not founded");
 
 		auto root_symbol = (acc->root_token).symbol;

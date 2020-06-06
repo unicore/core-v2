@@ -13,7 +13,7 @@
     "mainnet": "",
     "kylin": "",
     "jungle": "",
-    "local": ""
+    "local": "tt.tc"
   },
   "test": {
     "npmClient": ""

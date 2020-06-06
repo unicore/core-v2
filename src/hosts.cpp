@@ -14,8 +14,9 @@ struct hosts_struct {
      *
      * @return     String representation of the asset.
      */
-    std::string asset_to_string(eosio::asset val){
-        uint64_t v = val.symbol.value;
+    std::string symbol_to_string(asset val) const
+    {
+        uint64_t v = val.symbol.code().raw();
         v >>= 8;
         string result;
         while (v > 0) {
@@ -24,7 +25,7 @@ struct hosts_struct {
                 v >>= 8;
         }
         return result;
-    };
+    }
 
     /**
      * @brief      Sets the architect.
@@ -54,7 +55,7 @@ struct hosts_struct {
     //     require_auth(op.architect);
 
     //     account_index accounts(_self, _self);
-    //     auto acc = accounts.find(op.host);
+    //     auto acc = accounts.find(op.host.value);
 
     //     check(acc != accounts.end(), "Host is not found");
     //     check(acc->activated == true, "Host is already deactivated");
@@ -128,13 +129,13 @@ struct hosts_struct {
        	check(op.total_shares >= 100, "Total shares must be greater or equal 100");
         //check for exist quote and root tokens
 
+        auto failure_if_root_not_exist1   = eosio::token::get_supply(op.root_token_contract, op.root_token.symbol.code() );
+        auto failure_if_root_not_exist2   = eosio::token::get_supply(op.quote_token_contract, op.quote_amount.symbol.code() );
 
-        auto failure_if_root_not_exist1 = eosio::token(op.root_token_contract).get_supply(eosio::symbol_code(op.root_token.symbol).name()).amount;
-        auto failure_if_root_not_exist2 = eosio::token(op.quote_token_contract).get_supply(eosio::symbol_code(op.quote_amount.symbol).name()).amount;
         
         auto to_pay = op.quote_amount;
 
-        user_index refs(_self, _self);
+        user_index refs(_self, _self.value);
         auto ref = refs.find(op.username.value);
         eosio::name referer = ref->referer;
 
@@ -150,12 +151,12 @@ struct hosts_struct {
             a.dac_mode = 0;
             a.total_shares = op.total_shares;
             a.quote_amount = op.quote_amount;
-            a.quote_symbol = asset_to_string(op.quote_amount);
+            a.quote_symbol = op.quote_amount.symbol.code().to_string();
             a.quote_token_contract = op.quote_token_contract;
             a.quote_precision = op.quote_amount.symbol.precision();
             a.root_token = op.root_token;
             a.voting_only_up = op.voting_only_up;
-            a.symbol = asset_to_string(op.root_token);
+            a.symbol = op.root_token.symbol.code().to_string();
             a.precision = op.root_token.symbol.precision();
             a.root_token_contract = op.root_token_contract;
             a.meta = op.meta;
@@ -228,7 +229,7 @@ struct hosts_struct {
     	
     	// //Check for exist not active child
     	if (childs.begin() != childs.end()){
-    		eosio::name last_child = childs.back() - 1;
+    		eosio::name last_child = childs.back();
 		}
     	
     	childs.push_back(chost);
@@ -255,9 +256,9 @@ struct hosts_struct {
      * @param[in]  amount    The amount
      */
     void pay_for_upgrade(eosio::name username, eosio::asset amount, eosio::name code){
-    	account_index hosts(_self, username);
+    	account_index hosts(_self, username.value);
 
-    	auto host = hosts.find(username);
+    	auto host = hosts.find(username.value);
     	check(host != hosts.end(), "Host is not founded");
         
    		//PAY for upgrade only in CORE!.
@@ -293,7 +294,7 @@ struct hosts_struct {
     //     require_auth (op.architect);
 
     //     account_index hosts(_self, _self);
-    //     auto host = hosts.find(op.host);
+    //     auto host = hosts.find(op.host.value);
     //     check(host->architect == op.architect, "You are not architect of currenty community");
         
     //     check((op.priority_seconds < 7884000), "Pool Priority Seconds must be greater or equal then 0 sec and less then 7884000 sec");

@@ -2,8 +2,7 @@
 namespace eosio {
     
 
-    // @abi table goals
-    struct goals{
+    struct [[eosio::table]]  goals{
         
         uint64_t id;
         uint64_t type;
@@ -31,11 +30,11 @@ namespace eosio {
         std::string meta;
 
         uint64_t primary_key()const { return id; }
-        uint64_t by_votes() const { return total_votes; }
-        uint64_t by_completed() const {return completed; }
+        uint64_t byvotes() const { return total_votes; }
+        uint64_t bycompleted() const {return completed; }
         
-        eosio::name by_username() const {return username; }
-        eosio::name by_host() const {return host;}
+        uint64_t byusername() const {return username.value; }
+        uint64_t byhost() const {return host.value;}
         uint128_t by_username_and_host() const { return combine_ids(username.value, host.value); }
         
         EOSLIB_SERIALIZE( goals, (id)(type)(username)(host)(benefactor)(created)(permlink)(title)(description)(target)(available)(total_votes)(validated)(completed)(reported)
@@ -43,17 +42,17 @@ namespace eosio {
     };
 
     typedef eosio::multi_index <"goals"_n, goals,
-        indexed_by<"votes"_n, const_mem_fun<goals, uint64_t, &goals::by_votes>>,
-        indexed_by<"completed"_n, const_mem_fun<goals, uint64_t, &goals::by_completed>>,
-        indexed_by<"username"_n, const_mem_fun<goals, eosio::name, &goals::by_username>>,
-        indexed_by<"host"_n, const_mem_fun<goals, eosio::name, &goals::by_host>>
+        indexed_by<"votes"_n, const_mem_fun<goals, uint64_t, &goals::byvotes>>,
+        indexed_by<"completed"_n, const_mem_fun<goals, uint64_t, &goals::bycompleted>>,
+        indexed_by<"username"_n, const_mem_fun<goals, uint64_t, &goals::byusername>>,
+        indexed_by<"host"_n, const_mem_fun<goals, uint64_t, &goals::byhost>>
     > goals_index;
 
 
     /* ACTIONS */
 
-    // @abi action
-    struct setgoal{
+    
+    struct [[eosio::action]] setgoal{
         uint64_t id;
         eosio::name username;
         eosio::name benefactor;
@@ -66,8 +65,8 @@ namespace eosio {
         EOSLIB_SERIALIZE( setgoal, (id)(username)(benefactor)(host)(title)(permlink)(description)(target)(expiration))
     };
 
-      // @abi action
-    struct editgoal{
+    
+    struct [[eosio::action]] editgoal{
         uint64_t goal_id;
         eosio::name username;
         eosio::name host;
@@ -81,8 +80,8 @@ namespace eosio {
     };
 
 
-    // @abi action
-    struct dfundgoal{
+    
+    struct [[eosio::action]] dfundgoal{
         eosio::name architect;
         eosio::name host;
         uint64_t goal_id;
@@ -93,16 +92,16 @@ namespace eosio {
     
     };
 
-    // @abi action
-    struct delgoal{
+    
+    struct [[eosio::action]] delgoal{
         eosio::name username;
         eosio::name host;
         uint64_t goal_id;
         EOSLIB_SERIALIZE( delgoal, (username)(host)(goal_id))
     };
 
-    // @abi action
-    struct report{
+    
+    struct [[eosio::action]] report{
         eosio::name username;
         eosio::name host;
         uint64_t goal_id;
@@ -110,8 +109,8 @@ namespace eosio {
         EOSLIB_SERIALIZE( struct report, (username)(host)(goal_id)(report))
     };
 
-    //@abi action
-    struct check{
+    
+    struct [[eosio::action]] check{
         eosio::name architect;
         eosio::name host;
         uint64_t goal_id;
@@ -119,8 +118,8 @@ namespace eosio {
         EOSLIB_SERIALIZE(check, (architect)(host)(goal_id))
     };
 
-    // @abi action
-    struct gwithdraw{
+    
+    struct [[eosio::action]] gwithdraw{
         eosio::name username;
         eosio::name host;
         uint64_t goal_id;
@@ -128,8 +127,8 @@ namespace eosio {
     };   
 
 
-    // @abi action
-    struct gsponsor{
+    
+    struct [[eosio::action]] gsponsor{
         eosio::name hoperator;
         eosio::name host;
         eosio::name reciever;
