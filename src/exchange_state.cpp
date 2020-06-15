@@ -1,4 +1,3 @@
-#include "../include/exchange_state.hpp"
 
 namespace eosio {
     asset exchange_state::convert_to_exchange( connector& reserve, const asset& payment )

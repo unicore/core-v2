@@ -1,14 +1,18 @@
+#pragma once
+
 #include <algorithm>
 #include <cmath>
 #include <eosio/eosio.hpp>
 #include <eosio/asset.hpp>
 #include <eosio/time.hpp>
 #include <eosio/multi_index.hpp>
-
 #include <eosio/contract.hpp>
 #include <eosio/action.hpp>
 #include <eosio/system.hpp>
 #include "eosio.token.hpp"
+#include <eosio/print.hpp>
+#include <eosio/datastream.hpp>
+
 #include "hosts.hpp"
 #include "shares.hpp"
 #include "goals.hpp"
@@ -17,6 +21,7 @@
 #include "tasks.hpp"
 #include "ipfs.hpp"
 #include "cms.hpp"
+#include "crypto.hpp"
 
 
 #define QUARKS_IN_QUANTS 1000000
@@ -47,6 +52,8 @@ namespace eosio {
     static const uint64_t _SHARES_VESTING_DURATION = 604800;
     static const uint64_t _TOTAL_VOTES = 7;
     static const uint64_t _MAX_LEVELS = 7;
+
+
 
 
     struct [[eosio::table]] spiral{

@@ -1,6 +1,3 @@
-
-using namespace eosio;
-
 /**
  * @brief      Модуль Знаков Отличия
  */

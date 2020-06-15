@@ -13,7 +13,7 @@
     "mainnet": "",
     "kylin": "",
     "jungle": "",
-    "local": "tt.tc"
+    "local": "unicore"
   },
   "test": {
     "npmClient": ""

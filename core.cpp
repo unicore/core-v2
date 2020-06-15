@@ -1,10 +1,5 @@
-#include <eosio/eosio.hpp>
-#include <eosio/asset.hpp>
-#include <eosio/time.hpp>
-#include <eosio/print.hpp>
-
 #include "include/core.hpp"
-#include "include/eosio.token.hpp"
+
 #include "src/shares.cpp"
 #include "src/hosts.cpp"
 #include "src/fcore.cpp"
