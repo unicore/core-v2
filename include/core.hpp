@@ -22,6 +22,8 @@
 #include "ipfs.hpp"
 #include "cms.hpp"
 #include "crypto.hpp"
+#include "comments.hpp"
+#include "conditions.hpp"
 
 
 #define QUARKS_IN_QUANTS 1000000
@@ -32,52 +34,176 @@
 #define MAX_CORE_HISTORY_LENGTH 1000
 
 namespace eosio {
-   #define DEBUG_ENABLED true
+    static constexpr uint64_t _DATA_ORDER_EXPIRATION = 86400;
+    static constexpr uint64_t _SHARES_VESTING_DURATION = 604800;
+    static constexpr uint64_t _TOTAL_VOTES = 7;
+    static constexpr uint64_t _MAX_LEVELS = 7;
 
+    static constexpr eosio::name _me = "unicore"_n;
+        
     #ifdef DEBUG_ENABLED
-        static const eosio::name _self = "tt.tc"_n;
-        static const eosio::name _registrator = "bob.tc"_n;
-        static const eosio::name _curator = "bob.tc"_n;
+        static constexpr eosio::name _registrator = "registrator"_n;
+        static constexpr eosio::name _curator = "bob.tc"_n;
+        static constexpr eosio::name _saving = "eosio.saving"_n;
         static constexpr eosio::symbol _SYM     = eosio::symbol(eosio::symbol_code("FLO"), 4);
     #else
-        static const eosio::name _self = "core.z"_n;
-        static const eosio::name _registrator = "registrator"_n;
-        static const eosio::name _curator = "curator"_n;
-        static constexpr eosio::symbol _SYM     = eosio::symbol(eosio::symbol_code("UNIT"), 4);
+        static constexpr eosio::name _registrator = "registrator"_n;
+        static constexpr eosio::name _curator = "curator"_n;
+        static constexpr eosio::name _saving = "eosio.saving"_n;
+        static constexpr eosio::symbol _SYM     = eosio::symbol(eosio::symbol_code("FLO"), 4);
 
     #endif
 
-
-    static const uint64_t _DATA_ORDER_EXPIRATION = 86400;
-    static const uint64_t _SHARES_VESTING_DURATION = 604800;
-    static const uint64_t _TOTAL_VOTES = 7;
-    static const uint64_t _MAX_LEVELS = 7;
+class [[eosio::contract]] unicore : public eosio::contract {
+   #define DEBUG_ENABLED true
 
 
 
 
-    struct [[eosio::table]] spiral{
-        uint64_t id;
-        uint64_t size_of_pool;
-        uint64_t quants_precision = 0;
-        uint64_t overlap;
-        uint64_t profit_growth;
-        uint64_t base_rate;
-        uint64_t loss_percent;
-        uint64_t pool_limit;
-        uint64_t pool_timeout;
-        uint64_t priority_seconds;
+    public:
+        unicore(eosio::name receiver, eosio::name code, eosio::datastream<const char*> ds ): eosio::contract(receiver, code, ds)
+        {}
+        void apply(uint64_t receiver, uint64_t code, uint64_t action);
+        // uint128_t unicore::combine_ids(const uint64_t &x, const uint64_t &y);
+        // uint128_t unicore::combine_ids2(const uint64_t &x, const uint64_t &y);
 
-        uint64_t primary_key() const {return id;}
+        [[eosio::action]] void reg(eosio::name username, eosio::name referer, std::string meta);
+        [[eosio::action]] void convert(eosio::name username, eosio::name host, uint64_t balance_id);
+        [[eosio::action]] void del(eosio::name username);
+        [[eosio::action]] void profupdate(eosio::name username, std::string meta);
 
-        EOSLIB_SERIALIZE(spiral, (id)(size_of_pool)(quants_precision)(overlap)(profit_growth)(base_rate)(loss_percent)(pool_limit)(pool_timeout)(priority_seconds))
+        [[eosio::action]] void setparams(eosio::name host, eosio::name chost, uint64_t size_of_pool,
+            uint64_t quants_precision, uint64_t overlap, uint64_t profit_growth, uint64_t base_rate,
+            uint64_t loss_percent, uint64_t pool_limit, uint64_t pool_timeout, uint64_t priority_seconds);
+
+        [[eosio::action]] void start(eosio::name host, eosio::name chost); 
+        [[eosio::action]] void withdraw(eosio::name username, eosio::name host, uint64_t balance_id);
+        [[eosio::action]] void priorenter(eosio::name username, eosio::name host, uint64_t balance_id);
+        [[eosio::action]] void refreshbal(eosio::name username, uint64_t balance_id, uint64_t partrefresh);
+        
+        static void pay_for_upgrade(eosio::name username, eosio::asset amount, eosio::name code);
+        
+        static void refresh_state(eosio::name host);
+
+        [[eosio::action]] void init(uint64_t system_income);
+
+        [[eosio::action]] void refreshst(eosio::name host);
+
+        //BADGES
+        [[eosio::action]] void setbadge(uint64_t id, eosio::name host, eosio::string caption, eosio::string description, eosio::string iurl, uint64_t total, uint64_t power);
+        // [[eosio::action]] void giftbadge(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment);
+        [[eosio::action]] void backbadge(eosio::name host, eosio::name from, uint64_t badge_id, eosio::string comment);
+        
+        static void giftbadge_action(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment);
+        static void deposit ( eosio::name username, eosio::name host, eosio::asset amount, eosio::name code, std::string message );
+
+        //CMS
+        [[eosio::action]] void setcontent(eosio::name username, uint64_t id, uint64_t lang_id, eosio::string content);
+        [[eosio::action]] void rmcontent(eosio::name username, uint64_t id);
+        [[eosio::action]] void setcmsconfig(eosio::name username, eosio::string config);
+
+        //GOALS
+        [[eosio::action]] void setgoal(eosio::name username, eosio::name benefactor, eosio::name host, std::string title, std::string permlink, std::string description, eosio::asset target, uint64_t expiration);
+        [[eosio::action]] void editgoal(uint64_t goal_id, eosio::name username, eosio::name host, eosio::name benefactor, std::string title, std::string description, eosio::asset target);
+        [[eosio::action]] void dfundgoal(eosio::name architect, eosio::name host, uint64_t goal_id, eosio::asset amount, std::string comment);
+        [[eosio::action]] void delgoal(eosio::name username, eosio::name host, uint64_t goal_id);
+        [[eosio::action]] void report(eosio::name username, eosio::name host, uint64_t goal_id, std::string report);
+        [[eosio::action]] void check(eosio::name architect, eosio::name host, uint64_t goal_id);
+        [[eosio::action]] void gwithdraw(eosio::name username, eosio::name host, uint64_t goal_id);
+        [[eosio::action]] void gsponsor(eosio::name hoperator, eosio::name host, eosio::name reciever, uint64_t goal_id, eosio::asset amount);
+        [[eosio::action]] void setemi(eosio::name host, uint64_t percent, uint64_t gtop);
+        static void donate_action(eosio::name from, eosio::name host, uint64_t goal_id, eosio::asset quantity, eosio::name code);
+        static eosio::asset adjust_goals_emission_pool(eosio::name hostname);
+        static void fund_emi_pool ( eosio::name username, eosio::name host, eosio::asset amount, eosio::name code );
+        static void add_asset_to_fund_action(eosio::name username, eosio::asset quantity, eosio::name code);
+
+        //POT
+        [[eosio::action]] void enablesale(eosio::name host, eosio::name token_contract, eosio::asset asset_on_sale, int64_t sale_shift);
+        [[eosio::action]] void addhostofund(uint64_t fund_id, eosio::name host);
+        [[eosio::action]] void createfund(eosio::name token_contract, eosio::asset fund_asset, std::string descriptor);
+        static eosio::asset buy_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, bool transfer);
+
+
+        //HOST
+        [[eosio::action]] void setarch(eosio::name host, eosio::name architect);
+        [[eosio::action]] void upgrade(eosio::name username, std::string title, std::string purpose, uint64_t total_shares, eosio::asset quote_amount, eosio::name quote_token_contract, eosio::asset root_token, eosio::name root_token_contract, bool voting_only_up, uint64_t consensus_percent, uint64_t referral_percent, uint64_t dacs_percent, uint64_t cfund_percent, uint64_t hfund_percent, std::vector<uint64_t> levels, uint64_t emission_percent, uint64_t gtop, std::string meta);
+        [[eosio::action]] void cchildhost(eosio::name parent_host, eosio::name chost);
+        [[eosio::action]] void edithost(eosio::name architect, eosio::name host, eosio::string title, eosio::string purpose, eosio::string manifest, eosio::string meta);
+        [[eosio::action]] void fixs(eosio::name host);
+        
+
+        //DATA
+        [[eosio::action]] void selldata(eosio::name username, uint64_t id, eosio::string data, eosio::name root_token_contract, eosio::asset amount);
+        [[eosio::action]] void dataapprove(eosio::name username, eosio::name owner, eosio::name who, uint64_t order_id, eosio::string message);
+        // [[eosio::action]] void datadispute(eosio::name username, eosio::string data, eosio::name root_token_contract, eosio::asset amount);
+        // [[eosio::action]] void datarelease(eosio::name username, eosio::string data, eosio::name root_token_contract, eosio::asset amount);
+        [[eosio::action]] void setstorage(eosio::name username, uint64_t id, eosio::string name, eosio::string address);
+        [[eosio::action]] void removeroute(eosio::name username, uint64_t id);
+        [[eosio::action]] void setipfskey (eosio::name username, eosio::string pkey, eosio::string meta);
+        
+        static void buydata_action(eosio::name owner, uint64_t data_id, eosio::name buyer, eosio::asset quantity, eosio::name code);
+
+        //MARKETS
+        [[eosio::action]] void refreshsh (eosio::name owner, uint64_t id);
+        [[eosio::action]] void withpbenefit(eosio::name username, eosio::name host);
+        [[eosio::action]] void withrbenefit(eosio::name username, eosio::name host);
+        [[eosio::action]] void refreshpu(eosio::name username, eosio::name host);
+        [[eosio::action]] void withdrawsh(eosio::name owner, uint64_t id);
+        [[eosio::action]] void sellshares(eosio::name username, eosio::name host, uint64_t shares);
+        [[eosio::action]] void undelshares(eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares);
+        static void buyshares_action ( eosio::name buyer, eosio::name host, eosio::asset amount, eosio::name code );
+        static void delegate_shares_action(eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares);
+        
+        //TASKS
+        [[eosio::action]] void settask(eosio::name host, eosio::name username, uint64_t goal_id, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t expiration);
+        [[eosio::action]] void fundtask(eosio::name host, uint64_t task_id, eosio::asset amount, eosio::string comment);
+        [[eosio::action]] void tactivate(eosio::name host, uint64_t task_id);
+        [[eosio::action]] void tdeactivate(eosio::name host, uint64_t task_id);
+        [[eosio::action]] void setreport(eosio::name host, eosio::name username, uint64_t task_id, eosio::string data);
+        [[eosio::action]] void editreport(eosio::name host, eosio::name username, uint64_t report_id, eosio::string data);
+        [[eosio::action]] void approver(eosio::name host, uint64_t report_id, eosio::string comment); 
+        [[eosio::action]] void disapprover(eosio::name host, uint64_t report_id, eosio::string comment);
+
+
+        //VOTING
+        [[eosio::action]] void vote(eosio::name voter, eosio::name host, uint64_t goal_id, bool up);
+        static void propagate_votes_changes(eosio::name host, eosio::name voter, uint64_t old_power, uint64_t new_power);
+        
+        //CONDITIONS
+        [[eosio::action]] void setcondition(eosio::name host, eosio::string key, uint64_t value);
+        [[eosio::action]] void rmcondition(eosio::name host, uint64_t key); 
+        static void rmfromhostwl(eosio::name host, eosio::name username);
+        static void addtohostwl(eosio::name host, eosio::name username);
+        static bool checkcondition(eosio::name host, eosio::string key, uint64_t value);
+        static void checkminpwr(eosio::name host, eosio::name username);
+
+        std::string symbol_to_string(eosio::asset val) const;
+        static void change_bw_trade_graph(eosio::name host, uint64_t pool_id, uint64_t cycle_num, uint64_t pool_num, uint64_t buy_rate, uint64_t next_buy_rate, uint64_t total_quants, uint64_t remain_quants);
+        
+        static void add_coredhistory(eosio::name host, eosio::name username, uint64_t pool_id, eosio::asset amount, std::string action, std::string message);
+
+        static void create_bancor_market(std::string name, uint64_t id, eosio::name host, uint64_t total_shares, eosio::asset quote_amount, eosio::name quote_token_contract, uint64_t vesting_seconds);
+        static std::vector <eosio::asset> calculate_forecast(eosio::name username, eosio::name host, uint64_t quants, uint64_t pool_num, eosio::asset purchase_amount, bool calculate_first);
+        static void fill_pool(eosio::name username, eosio::name host, uint64_t quants, eosio::asset amount, uint64_t filled_pool_id);
+        static void check_and_modify_sale_fund(eosio::asset amount, hosts acc);
+        static void give_shares_with_badge_action (eosio::name host, eosio::name reciever, uint64_t shares);
+        static void back_shares_with_badge_action (eosio::name host, eosio::name from, uint64_t shares);
+        static void add_sale_history(hosts acc, rate rate, spiral sp, eosio::asset amount);
+};
+
+
+    struct [[eosio::table, eosio::contract("unicore")]] gpercents {
+        eosio::name key;
+        uint64_t value;
+        uint64_t primary_key() const {return key.value;}
+
+        EOSLIB_SERIALIZE(gpercents, (key)(value))
     };
 
-    typedef eosio::multi_index<"spiral"_n, spiral> spiral_index;
-
+    typedef eosio::multi_index<"gpercents"_n, gpercents> gpercents_index;
 
     
-    struct [[eosio::table]] balance{
+    struct [[eosio::table, eosio::contract("unicore")]] balance{
         uint64_t id;
         eosio::name host;
         eosio::name chost;
@@ -91,6 +217,7 @@ namespace eosio {
         std::string pool_color;
         eosio::asset available; 
         eosio::asset purchase_amount;
+        eosio::asset start_convert_amount;
         eosio::asset if_convert; 
         bool withdrawed = false;
         std::vector<eosio::asset> forecasts;
@@ -104,7 +231,7 @@ namespace eosio {
 
         uint64_t primary_key() const {return id;}
         
-        EOSLIB_SERIALIZE(balance, (id)(host)(chost)(cycle_num)(pool_num)(global_pool_id)(quants_for_sale)(next_quants_for_sale)(last_recalculated_win_pool_id)(win)(pool_color)(available)(purchase_amount)(if_convert)(withdrawed)(forecasts)(ref_amount)(dac_amount)(cfund_amount)(hfund_amount)(sys_amount)(meta))
+        EOSLIB_SERIALIZE(balance, (id)(host)(chost)(cycle_num)(pool_num)(global_pool_id)(quants_for_sale)(next_quants_for_sale)(last_recalculated_win_pool_id)(win)(pool_color)(available)(purchase_amount)(start_convert_amount)(if_convert)(withdrawed)(forecasts)(ref_amount)(dac_amount)(cfund_amount)(hfund_amount)(sys_amount)(meta))
     
         eosio::name get_ahost() const {
             if (host == chost)
@@ -117,7 +244,7 @@ namespace eosio {
     typedef eosio::multi_index<"balance"_n, balance> balance_index;
 
 
-    struct [[eosio::table]] bwtradegraph{
+    struct [[eosio::table, eosio::contract("unicore")]] bwtradegraph{
         uint64_t pool_id;
         uint64_t cycle_num;
         uint64_t pool_num;
@@ -132,11 +259,11 @@ namespace eosio {
     };
 
     typedef eosio::multi_index<"bwtradegraph"_n, bwtradegraph,
-        indexed_by<"bycycle"_n, const_mem_fun<bwtradegraph, uint64_t, &bwtradegraph::bycycle>>
+        eosio::indexed_by<"bycycle"_n, eosio::const_mem_fun<bwtradegraph, uint64_t, &bwtradegraph::bycycle>>
     > bwtradegraph_index;
 
     
-    struct [[eosio::table]] refbalances{
+    struct [[eosio::table, eosio::contract("unicore")]] refbalances{
         uint64_t id;
         eosio::name host;
         eosio::asset amount;
@@ -150,7 +277,7 @@ namespace eosio {
 
 
 
-    struct [[eosio::table]] cycle{
+    struct [[eosio::table, eosio::contract("unicore")]] cycle{
         uint64_t id;
         eosio::name ahost;
         uint64_t start_at_global_pool_id;
@@ -166,7 +293,7 @@ namespace eosio {
 
 
    
-    struct [[eosio::table]] pool{
+    struct [[eosio::table, eosio::contract("unicore")]] pool{
         uint64_t id;
         eosio::name ahost;
         uint64_t cycle_num;
@@ -191,29 +318,8 @@ namespace eosio {
     typedef eosio::multi_index<"pool"_n, pool> pool_index;
     
 
-    struct [[eosio::table]] rate {
-        uint64_t pool_id;
-        uint64_t buy_rate=0;
-        uint64_t sell_rate=0;
-        eosio::asset quant_buy_rate;
-        eosio::asset quant_sell_rate;
-        eosio::asset client_income;
-        eosio::asset delta;
-        eosio::asset pool_cost;
-        eosio::asset total_in_box;
-        eosio::asset payment_to_wins;
-        eosio::asset payment_to_loss;
-        eosio::asset system_income;
-        eosio::asset live_balance_for_sale;
-        
-        
-        uint64_t primary_key() const{return pool_id;}
 
-        EOSLIB_SERIALIZE(rate, (pool_id)(buy_rate)(sell_rate)(quant_buy_rate)(quant_sell_rate)(client_income)(delta)(pool_cost)(total_in_box)(payment_to_wins)(payment_to_loss)(system_income)(live_balance_for_sale))
-    };
-    typedef eosio::multi_index<"rate"_n, rate> rate_index;
-    
-    struct [[eosio::table]] coredhistory{
+    struct [[eosio::table, eosio::contract("unicore")]] coredhistory{
         uint64_t id;
         uint64_t pool_id;
         eosio::name username;
@@ -230,7 +336,7 @@ namespace eosio {
     
 
 
-    struct [[eosio::table]] sale{
+    struct [[eosio::table, eosio::contract("unicore")]] sale{
         uint64_t pool_id;
         uint64_t sell_rate;
         eosio::asset solded;
@@ -243,7 +349,7 @@ namespace eosio {
     typedef eosio::multi_index<"sale"_n, sale> sale_index;
  
 
-    struct [[eosio::table]] sincome{
+    struct [[eosio::table, eosio::contract("unicore")]] sincome{
         uint64_t pool_id;
         eosio::name ahost;
         uint64_t cycle_num;
@@ -260,16 +366,16 @@ namespace eosio {
         uint128_t distributed_segments;
 
         uint64_t primary_key() const {return pool_id;}
-        uint128_t cyclandpool() const { return combine_ids(cycle_num, pool_num); }
+        uint128_t cyclandpool() const { return eosio::combine_ids(cycle_num, pool_num); }
         
         EOSLIB_SERIALIZE(sincome, (pool_id)(ahost)(cycle_num)(pool_num)(liquid_power)(max)(total)(paid_to_refs)(paid_to_dacs)(paid_to_cfund)(paid_to_hfund)(paid_to_sys)(hfund_in_segments)(distributed_segments))
 
     };
     typedef eosio::multi_index<"sincome"_n, sincome,
-    indexed_by<"cyclandpool"_n, const_mem_fun<sincome, uint128_t, &sincome::cyclandpool>>
+    eosio::indexed_by<"cyclandpool"_n, eosio::const_mem_fun<sincome, uint128_t, &sincome::cyclandpool>>
     > sincome_index;
     
-    struct [[eosio::table]] currency_stats {
+    struct [[eosio::table, eosio::contract("unicore")]] currency_stats {
             asset          supply;
             asset          max_supply;
             eosio::name    issuer;
@@ -280,19 +386,19 @@ namespace eosio {
     typedef eosio::multi_index<"stat"_n, currency_stats> stats;
 
 
-    struct [[eosio::table]] userscount
+    struct [[eosio::table, eosio::contract("unicore")]] userscount
      {
          uint64_t id;
          uint64_t count;
          eosio::string subject = "registered";
-         uint64_t primary_key() const {return 0;}
+         uint64_t primary_key() const {return id;}
 
          EOSLIB_SERIALIZE(userscount, (id)(count)(subject))
      }; 
     typedef eosio::multi_index<"userscount"_n, userscount> userscount_index;
 
 
-    struct [[eosio::table]] users{
+    struct [[eosio::table, eosio::contract("unicore")]] users{
         eosio::name username;
         eosio::name referer;
         uint64_t id;
@@ -307,11 +413,11 @@ namespace eosio {
     };
 
     typedef eosio::multi_index<"users"_n, users,
-    indexed_by<"users"_n, const_mem_fun<users, uint64_t, &users::byreferer>>
+    eosio::indexed_by<"users"_n, eosio::const_mem_fun<users, uint64_t, &users::byreferer>>
     > user_index;
 
 
-    struct  [[eosio::table]] ahosts{
+    struct  [[eosio::table, eosio::contract("unicore")]] ahosts{
         eosio::name username;
         uint64_t votes;
         std::string title;
@@ -326,131 +432,10 @@ namespace eosio {
     };
 
     typedef eosio::multi_index<"ahosts"_n, ahosts,
-    indexed_by<"ahosts"_n, const_mem_fun<ahosts, uint64_t, &ahosts::by_votes>>
+    eosio::indexed_by<"ahosts"_n, eosio::const_mem_fun<ahosts, uint64_t, &ahosts::by_votes>>
     > ahosts_index;
 
 
-
-
-
-
-
-    /* ACTIONS */
-
-    struct [[eosio::action]] reg {
-        eosio::name username;
-        eosio::name referer;
-        std::string meta;
-        
-        EOSLIB_SERIALIZE( reg, (username)(referer)(meta))
-    };
-
-
-    struct [[eosio::action]] fixs {
-        eosio::name host;
-        // uint64_t pool;
-        // std::string meta;
-        
-        EOSLIB_SERIALIZE( fixs, (host))
-    };
-
-    
-    struct [[eosio::action]] convert{
-        eosio::name username;
-        eosio::name host;
-        uint64_t balance_id;
-
-        EOSLIB_SERIALIZE( convert, (username)(host)(balance_id))
-    };
-
-    
-    struct [[eosio::action]] del {
-        eosio::name username;
-        
-        EOSLIB_SERIALIZE( del, (username))
-    };
-
-   struct [[eosio::action]] profupdate {
-        eosio::name username;
-        std::string meta;
-        
-        EOSLIB_SERIALIZE( profupdate, (username)(meta))
-    };
- 
-    struct [[eosio::action]] setparams{
-        eosio::name host;
-        eosio::name chost;
-        uint64_t size_of_pool;
-        uint64_t quants_precision;
-        uint64_t overlap;
-        uint64_t profit_growth;
-        uint64_t base_rate;
-        uint64_t loss_percent;
-        uint64_t pool_limit;
-        uint64_t pool_timeout;
-        uint64_t priority_seconds;
-        EOSLIB_SERIALIZE( setparams, (host)(chost)(size_of_pool)(quants_precision)(overlap)(profit_growth)(base_rate)(loss_percent)(pool_limit)(pool_timeout)(priority_seconds))
-
-    };
-
-    
-    struct [[eosio::action]] start{
-        eosio::name host;
-        eosio::name chost;
-        EOSLIB_SERIALIZE( start, (host)(chost))
-
-    };
-
-    
-    struct [[eosio::action]] withdraw{
-        eosio::name username; 
-        eosio::name host;
-        uint64_t balance_id;
-
-        
-        EOSLIB_SERIALIZE( withdraw, (username)(host)(balance_id))
-
-
-    };
-
-    
-    struct [[eosio::action]] priorenter{
-        eosio::name username; 
-        eosio::name host;
-        uint64_t balance_id;
-
-        
-        EOSLIB_SERIALIZE( priorenter, (username)(host)(balance_id))
-
-
-    };
-    
-    struct [[eosio::action]] refreshbal{
-        eosio::name username;
-        uint64_t balance_id;
-        uint64_t partrefresh;
-        EOSLIB_SERIALIZE( refreshbal, (username)(balance_id)(partrefresh))
-    };
-
-    
-    struct [[eosio::action]] refreshst{
-        eosio::name host;
-
-        EOSLIB_SERIALIZE( refreshst, (host))
-    };
-
-    
-    struct [[eosio::action]] mstartcycle{
-        eosio::name host;
-        EOSLIB_SERIALIZE( mstartcycle, (host))
-    };
-
-
-    
-};
-
-
-
-
+}
 
 

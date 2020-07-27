@@ -1,6 +1,5 @@
-namespace eosio {
 
-  struct [[eosio::table]] storage {
+  struct [[eosio::table, eosio::contract("unicore")]] storage {
     uint64_t id;
     eosio::string name;
     eosio::string address;
@@ -15,7 +14,7 @@ namespace eosio {
   typedef eosio::multi_index<"storage"_n, storage> storage_index;
 
 
-  struct [[eosio::table]] ipfskeys{
+  struct [[eosio::table, eosio::contract("unicore")]] ipfskeys{
     uint64_t id;
     bool revoked = false;
     eosio::time_point_sec revokedAt;
@@ -30,7 +29,7 @@ namespace eosio {
   typedef eosio::multi_index<"ipfskeys"_n, ipfskeys> ipfskeys_index;
 
 
-  struct [[eosio::table]] userdatacnts
+  struct [[eosio::table, eosio::contract("unicore")]] userdatacnts
   {
     eosio::name username;
     uint64_t total_sales = 0;
@@ -49,7 +48,7 @@ namespace eosio {
 
 
 
-  struct [[eosio::table]] orbdata {
+  struct [[eosio::table, eosio::contract("unicore")]] orbdata {
     uint64_t id;
     eosio::string data;
     eosio::name root_token_contract;
@@ -71,11 +70,11 @@ namespace eosio {
 
 
 
-  struct [[eosio::table]] mydataordrs {
+  struct [[eosio::table, eosio::contract("unicore")]] mydataordrs {
     eosio::name owner;
     uint64_t order_id;
 
-    uint128_t primary_key() const { return combine_ids(owner.value, order_id); }
+    uint128_t primary_key() const { return eosio::combine_ids(owner.value, order_id); }
 
     EOSLIB_SERIALIZE(struct mydataordrs, (owner)(order_id))
   };
@@ -85,7 +84,7 @@ namespace eosio {
 
 
 
-  struct [[eosio::table]] dataorders {
+  struct [[eosio::table, eosio::contract("unicore")]] dataorders {
     uint64_t id;  
     uint64_t orbdata_id;   
     eosio::time_point_sec opened_at;
@@ -102,90 +101,15 @@ namespace eosio {
     eosio::string meta;
 
     uint64_t primary_key() const {return id;}
-    uint128_t buyerandid() const {return combine_ids(buyer.value, orbdata_id);}
+    uint128_t buyerandid() const {return eosio::combine_ids(buyer.value, orbdata_id);}
 
     EOSLIB_SERIALIZE(struct dataorders, (id)(orbdata_id)(opened_at)(expired_at)(owner)(buyer)(curator)(locked_amount)(approved)
       (key)(dispute)(meta))
   };
 
   typedef eosio::multi_index<"dataorders"_n, dataorders,
-      indexed_by<"buyerandid"_n, const_mem_fun<dataorders, uint128_t, 
+      eosio::indexed_by<"buyerandid"_n, eosio::const_mem_fun<dataorders, uint128_t, 
                               &dataorders::buyerandid>>
   > dataorders_index;
 
-
-  
-  struct [[eosio::action]] selldata
-  {
-    eosio::name username;
-    uint64_t id;
-    eosio::string data;
-    eosio::name root_token_contract;
-    eosio::asset amount;  
-
-    EOSLIB_SERIALIZE(selldata, (username)(id)(data)(root_token_contract)(amount))
-  };
-
-  struct [[eosio::action]] dataapprove
-  {
-    eosio::name username;
-    eosio::name owner;
-    eosio::name who;
-    uint64_t order_id;
-    eosio::string message; 
-
-    EOSLIB_SERIALIZE(dataapprove, (username)(owner)(who)(order_id)(message))
-  };
-
-
-
-
-  struct [[eosio::action]] datadispute
-  {
-    eosio::name username;
-    eosio::string data;
-    eosio::name root_token_contract;
-    eosio::asset amount;  
-
-    EOSLIB_SERIALIZE(datadispute, (username)(data)(root_token_contract)(amount))
-  };
-
-  struct [[eosio::action]] datarelease
-  {
-    eosio::name username;
-    eosio::string data;
-    eosio::name root_token_contract;
-    eosio::asset amount;  
-
-    EOSLIB_SERIALIZE(datarelease, (username)(data)(root_token_contract)(amount))
-  };
-
-  struct [[eosio::action]] setstorage {
-    eosio::name username;
-    uint64_t id;
-    eosio::string name;
-    eosio::string address;
-    
-    EOSLIB_SERIALIZE(setstorage, (username)(id)(name)(address))
-  };
-
-
-  struct [[eosio::action]] removeroute {
-    eosio::name username;
-    uint64_t id;
-    
-    EOSLIB_SERIALIZE(removeroute, (username)(id))
-  };
-
-
-  struct [[eosio::action]] setipfskey {
-    eosio::name username;
-    eosio::string pkey;
-    eosio::string meta;
-    
-    EOSLIB_SERIALIZE(setipfskey, (username)(pkey)(meta))
-  };
-
-
-}
 

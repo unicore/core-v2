@@ -4,31 +4,29 @@
  * Позволяет каждому сообществу использовать веб-конструктор приложений UNI. 
  */
 
-struct cms {
-
   /**
    * @brief      Метод установки языковых файлов
    *
    * @param[in]  op    The operation
    */
-  void setcontent_action(const setcontent &op){
-    require_auth(op.username);
+ [[eosio::action]] void unicore::setcontent(eosio::name username, uint64_t id, uint64_t lang_id, eosio::string content){
+    require_auth(username);
 
-    cmscontent_index contents(_self, op.username.value);
-    auto content = contents.find(op.id);
+    cmscontent_index contents(_me, username.value);
+    auto content_exst = contents.find(id);
     
-    if (content == contents.end()){
+    if (content_exst == contents.end()){
       
-      contents.emplace(op.username, [&](auto &c){
-        c.id = op.id;
-        c.lang_id = op.lang_id;
-        c.content = op.content;
+      contents.emplace(username, [&](auto &c){
+        c.id = id;
+        c.lang_id = lang_id;
+        c.content = content;
       });
 
     } else {
-      contents.modify(content, op.username, [&](auto &c){
-        c.lang_id = op.lang_id;
-        c.content = op.content;
+      contents.modify(content_exst, username, [&](auto &c){
+        c.lang_id = lang_id;
+        c.content = content;
       });
     };
   }
@@ -38,10 +36,10 @@ struct cms {
    *
    * @param[in]  op    The operation
    */
-  void rmcontent_action(const rmcontent &op){
-    require_auth(op.username);
-    cmscontent_index contents(_self, op.username.value);
-    auto content = contents.find(op.id);
+  [[eosio::action]] void unicore::rmcontent(eosio::name username, uint64_t id){
+    require_auth(username);
+    cmscontent_index contents(_me, username.value);
+    auto content = contents.find(id);
     contents.erase(content);
   }
 
@@ -51,33 +49,31 @@ struct cms {
    *
    * @param[in]  op    The operation
    */
-  void setcmsconfig_action(const setcmsconfig &op){
-    require_auth(op.username);
+  [[eosio::action]] void unicore::setcmsconfig(eosio::name username, eosio::string config){
+    require_auth(username);
 
-    cmsconfig_index cmsconfigs(_self, op.username.value);
+    cmsconfig_index cmsconfigs(_me, username.value);
     
-    account_index accounts(_self, op.username.value);  
+    account_index accounts(_me, username.value);  
 
-    auto acc = accounts.find(op.username.value);
+    auto acc = accounts.find(username.value);
     // check(acc != accounts.end(), "Host is not found");
 
 
-    auto config = cmsconfigs.find(1);
+    auto config_exist = cmsconfigs.find(1);
     
-    if (config == cmsconfigs.end()){
+    if (config_exist == cmsconfigs.end()){
       
-      cmsconfigs.emplace(op.username, [&](auto &c){
+      cmsconfigs.emplace(username, [&](auto &c){
         c.id = 1;
-        c.config = op.config;
+        c.config = config;
       });
 
     } else {
-      cmsconfigs.modify(config, op.username, [&](auto &c){
-        c.config = op.config;
+      cmsconfigs.modify(config_exist, username, [&](auto &c){
+        c.config = config;
       });
     };
   }
 
 
-
-};

@@ -1,8 +1,8 @@
 {
-  "main": "core.cpp",
-  "contract": "core",
+  "main": "main.cpp",
+  "contract": "unicore",
   "include": "",
-  "resource": "",
+  "resource": "include",
   "cdt": "v1.7.0",
   "output": "",
   "scripts": {

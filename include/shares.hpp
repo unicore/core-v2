@@ -1,6 +1,6 @@
-namespace eosio {
 	
-	struct [[eosio::table]] power{
+
+  struct [[eosio::table, eosio::contract("unicore")]] power{
 		eosio::name host;
     uint64_t power;
 		uint64_t staked;
@@ -14,7 +14,7 @@ namespace eosio {
 	typedef eosio::multi_index<"power"_n, power> power_index;
 
 
-  struct [[eosio::table]] pstats{
+  struct [[eosio::table, eosio::contract("unicore")]] pstats{
     eosio::name host;
     eosio::asset total_available_in_asset;
     uint64_t pflow_last_withdrawed_pool_id;
@@ -32,7 +32,7 @@ namespace eosio {
 
   typedef eosio::multi_index<"pstats"_n, pstats> pstats_index;
 
-  struct [[eosio::table]] plog{
+  struct [[eosio::table, eosio::contract("unicore")]] plog{
     uint64_t id;
     eosio::name host;
     uint64_t pool_id;
@@ -43,18 +43,18 @@ namespace eosio {
 
     uint64_t primary_key() const {return id;}
     
-    uint128_t hostpoolid() const { return combine_ids(host.value, pool_id); }
+    uint128_t hostpoolid() const { return eosio::combine_ids(host.value, pool_id); }
     
     EOSLIB_SERIALIZE(struct plog, (id)(host)(pool_id)(cycle_num)(pool_num)(power))
   };
 
   typedef eosio::multi_index<"plog"_n, plog,
-    indexed_by<"hostpoolid"_n, const_mem_fun<plog, uint128_t, &plog::hostpoolid>>
+    eosio::indexed_by<"hostpoolid"_n, eosio::const_mem_fun<plog, uint128_t, &plog::hostpoolid>>
   > plog_index;
 
 
 
-  struct [[eosio::table]] dlog{
+  struct [[eosio::table, eosio::contract("unicore")]] dlog{
     uint64_t id;
     eosio::name host;
     uint64_t pool_id;
@@ -70,7 +70,7 @@ namespace eosio {
   typedef eosio::multi_index<"dlog"_n, dlog> dlog_index;
 
 
-	struct [[eosio::table]] delegations{
+	struct [[eosio::table, eosio::contract("unicore")]] delegations{
 		eosio::name reciever;
 		uint64_t shares;
 
@@ -82,7 +82,7 @@ namespace eosio {
 	typedef eosio::multi_index<"delegations"_n, delegations> delegation_index;
 
 
-  struct [[eosio::table]] vesting{
+  struct [[eosio::table, eosio::contract("unicore")]] vesting{
   	uint64_t id;
     eosio::name host;
   	eosio::name owner;
@@ -99,61 +99,3 @@ namespace eosio {
 
   typedef eosio::multi_index<"vesting"_n, vesting> vesting_index;
 
-
-  struct [[eosio::action]] refreshsh {
-  	eosio::name owner;
-  	uint64_t id;
-
-  	EOSLIB_SERIALIZE(refreshsh, (owner)(id))
-
-  };
-
-  struct [[eosio::action]] withbenefit{
-    eosio::name username;
-    eosio::name host;
-
-    EOSLIB_SERIALIZE(withbenefit, (username)(host))
-  };
-
-  struct [[eosio::action]] refreshpu{
-    eosio::name username;
-    eosio::name host;
-
-    EOSLIB_SERIALIZE(refreshpu, (username)(host))
-  };
-
-  struct [[eosio::action]] withdrawsh {
-  	eosio::name owner;
-  	uint64_t id;
-   	EOSLIB_SERIALIZE(withdrawsh, (owner)(id))
-  };
-
-	
-  struct [[eosio::action]] sellshares {
-		eosio::name username;
-		eosio::name host;
-		uint64_t shares;
-		EOSLIB_SERIALIZE(sellshares, (username)(host)(shares))
-	};
-
-	
-  struct [[eosio::action]] delshares{
-		eosio::name from;
-		eosio::name reciever;
-		eosio::name host;
-		uint64_t shares;
-
-		EOSLIB_SERIALIZE(delshares, (from)(reciever)(host)(shares))
-	};
-
-	
-  struct [[eosio::action]] undelshares{
-		eosio::name from;
-		eosio::name reciever;
-		eosio::name host;
-		uint64_t shares;
-
-		EOSLIB_SERIALIZE(undelshares, (from)(reciever)(host)(shares))
-	};
-
-}

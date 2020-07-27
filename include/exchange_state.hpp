@@ -16,7 +16,7 @@ namespace eosio {
     *  side effects associated with using this API.
     */
 
-   struct [[eosio::table]] exchange_state {
+   struct [[eosio::table, eosio::contract("unicore")]] exchange_state {
       uint64_t id;
       std::string name;
       uint64_t vesting_seconds = 0;

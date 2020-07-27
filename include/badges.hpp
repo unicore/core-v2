@@ -1,8 +1,4 @@
-namespace eosio {
-	
-
-
-	struct  [[eosio::table]] badges{
+	struct  [[eosio::table, eosio::contract("unicore")]] badges{
 		uint64_t id;
 		eosio::string caption;
 		eosio::string description;
@@ -19,7 +15,7 @@ namespace eosio {
 	typedef eosio::multi_index<"badges"_n, badges> badge_index;
 
 
-	struct  [[eosio::table]] usbadges{
+	struct  [[eosio::table, eosio::contract("unicore")]] usbadges{
 		uint64_t id;
 		eosio::name host;
 		uint64_t badge_id;
@@ -38,48 +34,3 @@ namespace eosio {
 	};
 
 	typedef eosio::multi_index<"usbadges"_n, usbadges> usbadge_index;
-
-
-    struct  [[eosio::table]] setbadge {
-    	uint64_t id;
-    	eosio::name host;
-    	eosio::string caption;
-    	eosio::string description;
-    	eosio::string iurl;
-    	uint64_t total;
-    	uint64_t power;
-
-    	EOSLIB_SERIALIZE(setbadge, (id)(host)(caption)(description)(iurl)(total)(power))
-
-    };
-
-
-    // //@abi action delbadge
-    // struct delbadge {
-    // 	eosio::name host;
-    // 	uint64_t badge_id;
-    	
-    // 	EOSLIB_SERIALIZE(delbadge, (host)(badge_id))
-
-    // };
-
-    struct [[eosio::action]] giftbadge {
-    	eosio::name host;
-    	eosio::name to;
-    	uint64_t badge_id;
-    	eosio::string comment;
-
-    	EOSLIB_SERIALIZE(giftbadge, (host)(to)(badge_id)(comment))
-    };
-
-    struct [[eosio::action]] backbadge {
-    	eosio::name host;
-    	eosio::name from;
-    	uint64_t badge_id;
-    	eosio::string comment;
-
-    	EOSLIB_SERIALIZE(backbadge, (host)(from)(badge_id)(comment))
-    };
-
-
-}

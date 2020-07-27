@@ -62,13 +62,13 @@ namespace eosio {
          using open_action = eosio::action_wrapper<"open"_n, &token::open>;
          using close_action = eosio::action_wrapper<"close"_n, &token::close>;
       private:
-         struct [[eosio::table]] account {
+         struct [[eosio::table, eosio::contract("unicore")]] account {
             asset    balance;
 
             uint64_t primary_key()const { return balance.symbol.code().raw(); }
          };
 
-         struct [[eosio::table]] currency_stats {
+         struct [[eosio::table, eosio::contract("unicore")]] currency_stats {
             asset    supply;
             asset    max_supply;
             name     issuer;
