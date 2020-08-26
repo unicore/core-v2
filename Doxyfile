@@ -93,17 +93,17 @@ ALLOW_UNICODE_NAMES    = NO
 
 OUTPUT_LANGUAGE        = English
 
-# If the BRIEF_MEMBER_DESC tag is set to YES, doxygen will include brief member
+# If the BRIEF_meMBER_DESC tag is set to YES, doxygen will include brief member
 # descriptions after the members that are listed in the file and class
 # documentation (similar to Javadoc). Set to NO to disable this.
 # The default value is: YES.
 
-BRIEF_MEMBER_DESC      = YES
+BRIEF_meMBER_DESC      = YES
 
 # If the REPEAT_BRIEF tag is set to YES, doxygen will prepend the brief
 # description of a member or function before the detailed description
 #
-# Note: If both HIDE_UNDOC_MEMBERS and BRIEF_MEMBER_DESC are set to NO, the
+# Note: If both HIDE_UNDOC_meMBERS and BRIEF_meMBER_DESC are set to NO, the
 # brief descriptions will be completely suppressed.
 # The default value is: YES.
 
@@ -137,13 +137,13 @@ ABBREVIATE_BRIEF       = "The $name class" \
 
 ALWAYS_DETAILED_SEC    = NO
 
-# If the INLINE_INHERITED_MEMB tag is set to YES, doxygen will show all
+# If the INLINE_INHERITED_meMB tag is set to YES, doxygen will show all
 # inherited members of a class in the documentation of that class as if those
 # members were ordinary class members. Constructors, destructors and assignment
 # operators of the base classes will not be shown.
 # The default value is: NO.
 
-INLINE_INHERITED_MEMB  = NO
+INLINE_INHERITED_meMB  = NO
 
 # If the FULL_PATH_NAMES tag is set to YES, doxygen will prepend the full path
 # before files name in the file list and in the header files. If set to NO the
@@ -215,12 +215,12 @@ MULTILINE_CPP_IS_BRIEF = NO
 
 INHERIT_DOCS           = YES
 
-# If the SEPARATE_MEMBER_PAGES tag is set to YES then doxygen will produce a new
+# If the SEPARATE_meMBER_PAGES tag is set to YES then doxygen will produce a new
 # page for each member. If set to NO, the documentation of a member will be part
 # of the file/class/namespace that contains it.
 # The default value is: NO.
 
-SEPARATE_MEMBER_PAGES  = NO
+SEPARATE_meMBER_PAGES  = NO
 
 # The TAB_SIZE tag can be used to set the number of spaces in a tab. Doxygen
 # uses this value to replace tabs by spaces in code fragments.
@@ -385,7 +385,7 @@ SUBGROUPING            = YES
 # and RTF).
 #
 # Note that this feature does not work in combination with
-# SEPARATE_MEMBER_PAGES.
+# SEPARATE_meMBER_PAGES.
 # The default value is: NO.
 
 INLINE_GROUPED_CLASSES = NO
@@ -470,7 +470,7 @@ EXTRACT_LOCAL_CLASSES  = YES
 # included.
 # The default value is: NO.
 
-EXTRACT_LOCAL_METHODS  = NO
+EXTRACT_LOCAL_meTHODS  = NO
 
 # If this flag is set to YES, the members of anonymous namespaces will be
 # extracted and appear in the documentation as a namespace called
@@ -481,13 +481,13 @@ EXTRACT_LOCAL_METHODS  = NO
 
 EXTRACT_ANON_NSPACES   = NO
 
-# If the HIDE_UNDOC_MEMBERS tag is set to YES, doxygen will hide all
+# If the HIDE_UNDOC_meMBERS tag is set to YES, doxygen will hide all
 # undocumented members inside documented classes or files. If set to NO these
 # members will be included in the various overviews, but no documentation
 # section is generated. This option has no effect if EXTRACT_ALL is enabled.
 # The default value is: NO.
 
-HIDE_UNDOC_MEMBERS     = NO
+HIDE_UNDOC_meMBERS     = NO
 
 # If the HIDE_UNDOC_CLASSES tag is set to YES, doxygen will hide all
 # undocumented classes that are normally visible in the class hierarchy. If set
@@ -547,12 +547,12 @@ HIDE_COMPOUND_REFERENCE= NO
 
 SHOW_INCLUDE_FILES     = YES
 
-# If the SHOW_GROUPED_MEMB_INC tag is set to YES then Doxygen will add for each
+# If the SHOW_GROUPED_meMB_INC tag is set to YES then Doxygen will add for each
 # grouped member an include statement to the documentation, telling the reader
 # which file to include in order to use the member.
 # The default value is: NO.
 
-SHOW_GROUPED_MEMB_INC  = NO
+SHOW_GROUPED_meMB_INC  = NO
 
 # If the FORCE_LOCAL_INCLUDES tag is set to YES then doxygen will list include
 # files with double quotes in the documentation rather than with sharp brackets.
@@ -566,12 +566,12 @@ FORCE_LOCAL_INCLUDES   = NO
 
 INLINE_INFO            = YES
 
-# If the SORT_MEMBER_DOCS tag is set to YES then doxygen will sort the
+# If the SORT_meMBER_DOCS tag is set to YES then doxygen will sort the
 # (detailed) documentation of file and class members alphabetically by member
 # name. If set to NO, the members will appear in declaration order.
 # The default value is: YES.
 
-SORT_MEMBER_DOCS       = YES
+SORT_meMBER_DOCS       = YES
 
 # If the SORT_BRIEF_DOCS tag is set to YES then doxygen will sort the brief
 # descriptions of file, namespace and class members alphabetically by member
@@ -581,17 +581,17 @@ SORT_MEMBER_DOCS       = YES
 
 SORT_BRIEF_DOCS        = NO
 
-# If the SORT_MEMBERS_CTORS_1ST tag is set to YES then doxygen will sort the
+# If the SORT_meMBERS_CTORS_1ST tag is set to YES then doxygen will sort the
 # (brief and detailed) documentation of class members so that constructors and
 # destructors are listed first. If set to NO the constructors will appear in the
-# respective orders defined by SORT_BRIEF_DOCS and SORT_MEMBER_DOCS.
+# respective orders defined by SORT_BRIEF_DOCS and SORT_meMBER_DOCS.
 # Note: If SORT_BRIEF_DOCS is set to NO this option is ignored for sorting brief
 # member documentation.
-# Note: If SORT_MEMBER_DOCS is set to NO this option is ignored for sorting
+# Note: If SORT_meMBER_DOCS is set to NO this option is ignored for sorting
 # detailed member documentation.
 # The default value is: NO.
 
-SORT_MEMBERS_CTORS_1ST = NO
+SORT_meMBERS_CTORS_1ST = NO
 
 # If the SORT_GROUP_NAMES tag is set to YES then doxygen will sort the hierarchy
 # of group names into alphabetical order. If set to NO the group names will
@@ -1225,7 +1225,7 @@ HTML_COLORSTYLE_GAMMA  = 80
 
 HTML_TIMESTAMP         = NO
 
-# If the HTML_DYNAMIC_MENUS tag is set to YES then the generated HTML
+# If the HTML_DYNAMIC_meNUS tag is set to YES then the generated HTML
 # documentation will contain a main index with vertical navigation menus that
 # are dynamically created via Javascript. If disabled, the navigation index will
 # consists of multiple levels of tabs that are statically embedded in every HTML
@@ -1234,7 +1234,7 @@ HTML_TIMESTAMP         = NO
 # The default value is: YES.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_DYNAMIC_MENUS     = YES
+HTML_DYNAMIC_meNUS     = YES
 
 # If the HTML_DYNAMIC_SECTIONS tag is set to YES then the generated HTML
 # documentation will contain sections that can be hidden and shown after the

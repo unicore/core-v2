@@ -263,7 +263,7 @@ using namespace eosio;
 		});
 
 
-    if (acc -> sale_is_enabled == true){
+    if (acc -> sale_is_enabled == true && from != host){
       eosio::asset converted_quantity = unicore::buy_action(from, host, quantity, acc->root_token_contract, false);
       unicore::buyshares_action ( from, host, converted_quantity, acc->quote_token_contract );
     }
@@ -327,7 +327,7 @@ using namespace eosio;
       emission_index emis(_me, hostname.value);
       auto emi = emis.find(hostname.value);
       eosio::check(gtop <= 100, "Goal top should be less then 100");
-      eosio::check(percent <= 1000 * PERCENT_PRECISION, "Emission percent should be less then 100 * PERCENT_PRECISION");
+      eosio::check(percent <= 1000 * ONE_PERCENT, "Emission percent should be less then 100 * ONE_PERCENT");
       
       emis.modify(emi, hostname, [&](auto &e){
           e.percent = percent;

@@ -14,6 +14,24 @@
             ]
         },
         {
+            "name": "adddac",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "weight",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
             "name": "addhostofund",
             "base": "",
             "fields": [
@@ -33,6 +51,18 @@
             "fields": [
                 {
                     "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "website",
+                    "type": "string"
+                },
+                {
+                    "name": "hash",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "type",
                     "type": "name"
                 },
                 {
@@ -180,6 +210,14 @@
                     "type": "bool"
                 },
                 {
+                    "name": "root_percent",
+                    "type": "int64"
+                },
+                {
+                    "name": "convert_percent",
+                    "type": "int64"
+                },
+                {
                     "name": "pool_color",
                     "type": "string"
                 },
@@ -197,6 +235,10 @@
                 },
                 {
                     "name": "if_convert",
+                    "type": "asset"
+                },
+                {
+                    "name": "if_convert_to_power",
                     "type": "asset"
                 },
                 {
@@ -264,6 +306,10 @@
                 {
                     "name": "close",
                     "type": "uint64"
+                },
+                {
+                    "name": "is_white",
+                    "type": "bool"
                 }
             ]
         },
@@ -318,16 +364,12 @@
             "base": "",
             "fields": [
                 {
-                    "name": "id",
-                    "type": "uint64"
+                    "name": "type",
+                    "type": "name"
                 },
                 {
-                    "name": "lang_id",
-                    "type": "uint8"
-                },
-                {
-                    "name": "name",
-                    "type": "string"
+                    "name": "lang",
+                    "type": "name"
                 },
                 {
                     "name": "content",
@@ -478,6 +520,28 @@
                 {
                     "name": "emitted",
                     "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "dacs",
+            "base": "",
+            "fields": [
+                {
+                    "name": "dac",
+                    "type": "name"
+                },
+                {
+                    "name": "weight",
+                    "type": "uint64"
+                },
+                {
+                    "name": "income",
+                    "type": "asset"
+                },
+                {
+                    "name": "income_in_segments",
+                    "type": "uint128"
                 }
             ]
         },
@@ -1085,7 +1149,11 @@
                 },
                 {
                     "name": "type",
-                    "type": "uint64"
+                    "type": "name"
+                },
+                {
+                    "name": "chat_mode",
+                    "type": "name"
                 },
                 {
                     "name": "consensus_percent",
@@ -1128,8 +1196,8 @@
                     "type": "uint64"
                 },
                 {
-                    "name": "dacs",
-                    "type": "name[]"
+                    "name": "total_dacs_weight",
+                    "type": "uint64"
                 },
                 {
                     "name": "ahost",
@@ -1154,6 +1222,14 @@
                 {
                     "name": "asset_on_sale",
                     "type": "asset"
+                },
+                {
+                    "name": "asset_on_sale_precision",
+                    "type": "uint64"
+                },
+                {
+                    "name": "asset_on_sale_symbol",
+                    "type": "string"
                 },
                 {
                     "name": "sale_shift",
@@ -1480,12 +1556,28 @@
                     "type": "uint64"
                 },
                 {
+                    "name": "remain_quants",
+                    "type": "uint64"
+                },
+                {
                     "name": "creserved_quants",
                     "type": "uint64"
                 },
                 {
-                    "name": "remain_quants",
+                    "name": "filled",
+                    "type": "asset"
+                },
+                {
+                    "name": "remain",
+                    "type": "asset"
+                },
+                {
+                    "name": "filled_percent",
                     "type": "uint64"
+                },
+                {
+                    "name": "pool_cost",
+                    "type": "asset"
                 },
                 {
                     "name": "quant_cost",
@@ -1904,8 +1996,22 @@
                     "type": "name"
                 },
                 {
-                    "name": "id",
-                    "type": "uint64"
+                    "name": "type",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "rmdac",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "host",
+                    "type": "name"
                 }
             ]
         },
@@ -2060,12 +2166,12 @@
                     "type": "name"
                 },
                 {
-                    "name": "id",
-                    "type": "uint64"
+                    "name": "type",
+                    "type": "name"
                 },
                 {
-                    "name": "lang_id",
-                    "type": "uint64"
+                    "name": "lang",
+                    "type": "name"
                 },
                 {
                     "name": "content",
@@ -2288,6 +2394,34 @@
                 {
                     "name": "expiration",
                     "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "settype",
+            "base": "",
+            "fields": [
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "type",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "setwebsite",
+            "base": "",
+            "fields": [
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "website",
+                    "type": "string"
                 }
             ]
         },
@@ -2888,6 +3022,20 @@
             ]
         },
         {
+            "name": "withdrdacinc",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "host",
+                    "type": "name"
+                }
+            ]
+        },
+        {
             "name": "withpbenefit",
             "base": "",
             "fields": [
@@ -2917,6 +3065,11 @@
         }
     ],
     "actions": [
+        {
+            "name": "adddac",
+            "type": "adddac",
+            "ricardian_contract": ""
+        },
         {
             "name": "addhostofund",
             "type": "addhostofund",
@@ -3078,6 +3231,11 @@
             "ricardian_contract": ""
         },
         {
+            "name": "rmdac",
+            "type": "rmdac",
+            "ricardian_contract": ""
+        },
+        {
             "name": "selldata",
             "type": "selldata",
             "ricardian_contract": ""
@@ -3148,6 +3306,16 @@
             "ricardian_contract": ""
         },
         {
+            "name": "settype",
+            "type": "settype",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setwebsite",
+            "type": "setwebsite",
+            "ricardian_contract": ""
+        },
+        {
             "name": "start",
             "type": "start",
             "ricardian_contract": ""
@@ -3185,6 +3353,11 @@
         {
             "name": "withdrawsh",
             "type": "withdrawsh",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "withdrdacinc",
+            "type": "withdrdacinc",
             "ricardian_contract": ""
         },
         {
@@ -3265,6 +3438,13 @@
         {
             "name": "cycle",
             "type": "cycle",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "dacs",
+            "type": "dacs",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

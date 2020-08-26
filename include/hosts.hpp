@@ -60,7 +60,8 @@ namespace eosio {
         eosio::time_point_sec registered_at;
         eosio::name architect;
         eosio::name hoperator;
-        uint64_t type = 0;
+        eosio::name type;
+        eosio::name chat_mode;
         uint64_t consensus_percent;
         uint64_t referral_percent;
         uint64_t dacs_percent;
@@ -71,7 +72,7 @@ namespace eosio {
         std::vector<eosio::name> gsponsor_model;
         bool direct_goal_withdraw = false;
         uint64_t dac_mode;
-        std::vector<eosio::name> dacs;
+        uint64_t total_dacs_weight;
         
         eosio::name ahost;
         std::vector<eosio::name> chosts;
@@ -80,6 +81,8 @@ namespace eosio {
         uint64_t sale_mode = 0;
         eosio::name sale_token_contract;
         eosio::asset asset_on_sale;
+        uint64_t asset_on_sale_precision;
+        std::string asset_on_sale_symbol;
         int64_t sale_shift = 0;
         
         //Метод добавления хоста в фонд
@@ -129,9 +132,9 @@ namespace eosio {
         
 
 
-        EOSLIB_SERIALIZE( hosts, (username)(registered_at)(architect)(hoperator)(type)(consensus_percent)(referral_percent)
-            (dacs_percent)(cfund_percent)(hfund_percent)(sys_percent)(levels)(gsponsor_model)(direct_goal_withdraw)(dac_mode)(dacs)(ahost)(chosts)
-            (sale_is_enabled)(sale_mode)(sale_token_contract)(asset_on_sale)(sale_shift)
+        EOSLIB_SERIALIZE( hosts, (username)(registered_at)(architect)(hoperator)(type)(chat_mode)(consensus_percent)(referral_percent)
+            (dacs_percent)(cfund_percent)(hfund_percent)(sys_percent)(levels)(gsponsor_model)(direct_goal_withdraw)(dac_mode)(total_dacs_weight)(ahost)(chosts)
+            (sale_is_enabled)(sale_mode)(sale_token_contract)(asset_on_sale)(asset_on_sale_precision)(asset_on_sale_symbol)(sale_shift)
             (non_active_chost)(need_switch)(fhosts_mode)(fhosts)
             (title)(purpose)(voting_only_up)(power_market_id)(total_shares)(quote_amount)(quote_token_contract)(quote_symbol)(quote_precision)(root_token_contract)(root_token)(symbol)(precision)
             (to_pay)(payed)(cycle_start_id)(current_pool_id)
@@ -174,7 +177,22 @@ namespace eosio {
 
     typedef eosio::multi_index <"hosts"_n, hosts> account_index;
     
-    struct [[eosio::table, eosio::contract("unicore")]] emission{
+
+
+    struct [[eosio::table, eosio::contract("unicore")]] dacs {
+        eosio::name dac;
+        uint64_t weight;
+        eosio::asset income;
+        uint128_t income_in_segments;
+        uint64_t primary_key() const {return dac.value;}  
+
+        EOSLIB_SERIALIZE(dacs, (dac)(weight)(income)(income_in_segments))      
+    };
+
+    typedef eosio::multi_index <"dacs"_n, dacs> dacs_index;
+
+
+    struct [[eosio::table, eosio::contract("unicore")]] emission {
         eosio::name host;
         uint64_t percent;
         uint64_t gtop;

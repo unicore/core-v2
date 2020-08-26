@@ -2,7 +2,7 @@
 
 #include "src/shares.cpp"
 #include "src/hosts.cpp"
-#include "src/fcore.cpp"
+#include "src/core.cpp"
 #include "src/goals.cpp"
 #include "src/voting.cpp"
 #include "src/badges.cpp"
@@ -317,6 +317,16 @@ extern "C" {
                     // hosts_struct().create_chost_action(eosio::unpack_action_data<cchildhost>());
                     break;
                 };
+                case "setwebsite"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::setwebsite);
+                    // hosts_struct().upgrade_action(eosio::unpack_action_data<upgrade>());
+                    break;
+                };
+                case "settype"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::settype);
+                    // hosts_struct().upgrade_action(eosio::unpack_action_data<upgrade>());
+                    break;
+                };
 
                 //CORE
                 case "setparams"_n.value: {
@@ -513,9 +523,22 @@ extern "C" {
                     break;
                 }
 
+                case "adddac"_n.value : {
+                    execute_action(name(receiver), name(code), &unicore::adddac);
+                    break;
+                }
+                case "rmdac"_n.value : {
+                    execute_action(name(receiver), name(code), &unicore::rmdac);
+                    break;
+                }
+                
+                case "withdrdacinc"_n.value : {
+                    execute_action(name(receiver), name(code), &unicore::withdrdacinc);
+                    break;
+                }
+
                 case "fixs"_n.value : {
                     execute_action(name(receiver), name(code), &unicore::fixs);
-                    // fcore().fixs(eosio::unpack_action_data<fixs>());
                     break;
                 }
             }

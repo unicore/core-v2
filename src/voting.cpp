@@ -105,7 +105,7 @@ namespace eosio{
        	up == true ? g.total_votes = goal->total_votes + pow -> power : g.total_votes =  goal->total_votes - pow->power;
        	
        	g.voters = voters;
-       	int64_t votes_percent = g.total_votes * 100 * PERCENT_PRECISION / liquid_shares;
+       	int64_t votes_percent = g.total_votes * 100 * ONE_PERCENT / liquid_shares;
        	g.validated = votes_percent >= acc->consensus_percent && g.total_votes > 0;
 		
       });
@@ -125,7 +125,7 @@ namespace eosio{
 			goals.modify(goal, voter, [&](auto &g){
 				g.voters = voters;
 				vote->power < 0 ? g.total_votes = goal->total_votes + abs(vote->power) : g.total_votes = goal->total_votes - vote->power;
-				int64_t votes_percent = g.total_votes * PERCENT_PRECISION / liquid_shares;
+				int64_t votes_percent = g.total_votes * ONE_PERCENT / liquid_shares;
 				
 				g.validated = goal->filled ? true : votes_percent >= acc->consensus_percent / 100 && g.total_votes > 0;
 				

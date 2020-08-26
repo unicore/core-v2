@@ -1,17 +1,20 @@
 namespace eosio {
 
 struct  [[eosio::table, eosio::contract("unicore")]] cmscontent {
-    uint64_t id;
-    uint8_t lang_id;
-    eosio::string name;
+    eosio::name type;
+    eosio::name lang;
     eosio::string content;
 
-    uint64_t primary_key() const {return id;}
+    uint64_t primary_key() const {return type.value;}
+    uint64_t bylang() const {return lang.value;}
 
-    EOSLIB_SERIALIZE(struct cmscontent, (id)(lang_id)(name)(content))
+    EOSLIB_SERIALIZE(struct cmscontent, (type)(lang)(content))
   };
 
-  typedef eosio::multi_index<"cmscontent"_n, cmscontent> cmscontent_index;
+  typedef eosio::multi_index<"cmscontent"_n, cmscontent,
+    eosio::indexed_by<"bylang"_n, eosio::const_mem_fun<cmscontent, uint64_t, &cmscontent::bylang>>
+  
+  > cmscontent_index;
 
   //   typedef eosio::multi_index<"dataorders"_n, dataorders,
   //     eosio::indexed_by<"buyerandid"_n, eosio::const_mem_fun<dataorders, uint128_t, 

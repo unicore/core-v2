@@ -9,23 +9,23 @@
    *
    * @param[in]  op    The operation
    */
- [[eosio::action]] void unicore::setcontent(eosio::name username, uint64_t id, uint64_t lang_id, eosio::string content){
+ [[eosio::action]] void unicore::setcontent(eosio::name username, eosio::name type, eosio::name lang , eosio::string content){
     require_auth(username);
 
     cmscontent_index contents(_me, username.value);
-    auto content_exst = contents.find(id);
+    auto content_exst = contents.find(type.value);
     
     if (content_exst == contents.end()){
       
       contents.emplace(username, [&](auto &c){
-        c.id = id;
-        c.lang_id = lang_id;
+        c.type = type;
+        c.lang = lang;
         c.content = content;
       });
 
     } else {
       contents.modify(content_exst, username, [&](auto &c){
-        c.lang_id = lang_id;
+        c.lang = lang;
         c.content = content;
       });
     };
@@ -36,10 +36,10 @@
    *
    * @param[in]  op    The operation
    */
-  [[eosio::action]] void unicore::rmcontent(eosio::name username, uint64_t id){
+  [[eosio::action]] void unicore::rmcontent(eosio::name username, eosio::name type){
     require_auth(username);
     cmscontent_index contents(_me, username.value);
-    auto content = contents.find(id);
+    auto content = contents.find(type.value);
     contents.erase(content);
   }
 

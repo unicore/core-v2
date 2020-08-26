@@ -46,7 +46,20 @@ namespace eosio {
     };
 
 
+    [[eosio::action]] void unicore::setwebsite(eosio::name host, eosio::string website){
+        require_auth(host);
 
+        ahosts_index ahosts(_me, _me.value);
+        auto ahost = ahosts.find(host.value);
+
+        eosio::check(ahost != ahosts.end(), "Host is not found");
+
+        ahosts.modify(ahost, host, [&](auto &a){
+            a.website = website;
+            a.hash = ahost -> hashit(website);
+        });
+        
+    }
     /**
      * @brief      Метод апгрейда аккаунта до статуса сообщества
      * Принимает ряд параметров, такие как процент консенсуса, реферальный процент, уровни вознаграждений финансовых партнеров, 
@@ -72,17 +85,17 @@ namespace eosio {
         eosio::check(quote_amount.amount > 0, "Quote amount must be greater then zero");
         // eosio::check(quote_amount.symbol == _SYM, "Quote symbol for market is only CORE");
         
-        eosio::check(consensus_percent <= 100 * PERCENT_PRECISION, "consensus_percent should be between 0 and 100 * PERCENT_PRECISION (1000000)");
+        eosio::check(consensus_percent <= 100 * ONE_PERCENT, "consensus_percent should be between 0 and 100 * ONE_PERCENT (1000000)");
         
-        eosio::check(referral_percent + dacs_percent + cfund_percent + hfund_percent == 100 * PERCENT_PRECISION, "All payment percents should equal 100 * PERCENT_PRECISION (1000000)");
+        eosio::check(referral_percent + dacs_percent + cfund_percent + hfund_percent == 100 * ONE_PERCENT, "All payment percents should equal 100 * ONE_PERCENT (1000000)");
         
-        eosio::check(emission_percent <= 1000 * PERCENT_PRECISION, "emission_percent should be between 0 and 1000 * PERCENT_PRECISION (10000000)");
+        eosio::check(emission_percent <= 1000 * ONE_PERCENT, "emission_percent should be between 0 and 1000 * ONE_PERCENT (10000000)");
         eosio::check(gtop <= 100, "Goal top should be less then 100");
 
         //eosio::check for referal levels;
         uint64_t level_count = 0;
         uint64_t percent_count = 0;
-        uint64_t prev_level = 100 * PERCENT_PRECISION;
+        uint64_t prev_level = 100 * ONE_PERCENT;
 
         for (auto level : levels){
             level_count++;
@@ -92,7 +105,7 @@ namespace eosio {
             percent_count += level;
         };
 
-        eosio::check(percent_count == 100 * PERCENT_PRECISION, "Summ of all levels should be 100%");
+        eosio::check(percent_count == 100 * ONE_PERCENT, "Summ of all levels should be 100%");
         eosio::check(level_count <= _MAX_LEVELS, "Exceed the maximum number of levels");
         //END eosio::check
 
@@ -123,15 +136,20 @@ namespace eosio {
             a.username = username;
             a.architect = username;
             a.hoperator = username;
+            a.type = "tin"_n;
+            a.chat_mode = "simple"_n;
             a.activated = false;
-            a.dacs = empty_dacs;
             a.dac_mode = 0;
+            a.total_dacs_weight = 0;
             a.total_shares = total_shares;
             a.quote_amount = quote_amount;
             a.quote_symbol = quote_amount.symbol.code().to_string();
             a.quote_token_contract = quote_token_contract;
             a.quote_precision = quote_amount.symbol.precision();
             a.root_token = root_token;
+            a.asset_on_sale = asset(0, root_token.symbol);
+            a.asset_on_sale_precision = a.asset_on_sale.symbol.precision();
+            a.asset_on_sale_symbol = a.asset_on_sale.symbol.code().to_string();
             a.voting_only_up = voting_only_up;
             a.symbol = root_token.symbol.code().to_string();
             a.precision = root_token.symbol.precision();
