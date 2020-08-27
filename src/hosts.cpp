@@ -74,7 +74,7 @@ namespace eosio {
 
         //eosio::check title lenght
         // eosio::check((title.length() < 1024) && (title.length() > 0) , "Title should be more then 10 symbols and less then 1024");
-        user_index users(_me, _me.value);
+        partners_index users(_partners, _partners.value);
         auto user = users.find(username.value);
         eosio::check(user != users.end(), "User is not registered");
 
@@ -125,8 +125,7 @@ namespace eosio {
         
         auto to_pay = quote_amount;
 
-        user_index refs(_me, _me.value);
-        auto ref = refs.find(username.value);
+        auto ref = users.find(username.value);
         eosio::name referer = ref->referer;
 
         std::vector<eosio::name> empty_dacs;
@@ -177,11 +176,6 @@ namespace eosio {
             a.purpose = purpose;
             a.manifest = "";
             a.comments_is_enabled = false;
-        });
-
-
-        users.modify(user, _me, [&](auto &u){
-            u.is_host = true;
         });
 
         emission_index emis(_me, username.value);

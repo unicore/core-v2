@@ -62,7 +62,7 @@
 		usbadge_index user_badges(_me, to.value);
 
 
-		user_index users(_me, _me.value);
+		partners_index users(_partners, _partners.value);
 
 		auto user = users.find(to.value);
 		eosio::check(user != users.end(), "User is not found");

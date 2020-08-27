@@ -248,15 +248,15 @@ namespace eosio {
 
 
 
-    struct  [[eosio::table, eosio::contract("unicore")]] partners {
+    struct  [[eosio::table, eosio::contract("unicore")]] cpartners {
         eosio::name partner;
         uint64_t level = 0;
 
         uint64_t primary_key() const{return partner.value;}
-        EOSLIB_SERIALIZE(partners, (partner)(level))
+        EOSLIB_SERIALIZE(cpartners, (partner)(level))
     };
 
-    typedef eosio::multi_index<"partners"_n, partners> partners_index;
+    typedef eosio::multi_index<"cpartners"_n, cpartners> cpartners_index;
 
 
 };

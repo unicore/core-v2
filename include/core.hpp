@@ -46,13 +46,13 @@ namespace eosio {
         
     #ifdef DEBUG_ENABLED
         static constexpr eosio::name _me = "unicore"_n;
-        static constexpr eosio::name _registrator = "registrator"_n;
+        static constexpr eosio::name _partners = "part"_n;
         static constexpr eosio::name _curator = "bob.tc"_n;
         static constexpr eosio::name _saving = "eosio.saving"_n;
         static constexpr eosio::symbol _SYM     = eosio::symbol(eosio::symbol_code("FLO"), 4);
     #else
         static constexpr eosio::name _me = "core.x"_n;
-        static constexpr eosio::name _registrator = "registrator"_n;
+        static constexpr eosio::name _partners = "part"_n;
         static constexpr eosio::name _curator = "curator"_n;
         static constexpr eosio::name _saving = "eosio.saving"_n;
         static constexpr eosio::symbol _SYM     = eosio::symbol(eosio::symbol_code("UNIT"), 4);
@@ -419,23 +419,24 @@ class [[eosio::contract]] unicore : public eosio::contract {
     typedef eosio::multi_index<"userscount"_n, userscount> userscount_index;
 
 
-    struct [[eosio::table, eosio::contract("unicore")]] users{
+    struct [[eosio::table, eosio::contract("unicore")]] partners {
         eosio::name username;
         eosio::name referer;
         uint64_t id;
-        bool is_host = false;
         
         std::string meta;
         
         uint64_t primary_key() const{return username.value;}
         uint64_t byreferer() const{return referer.value;}
+        uint64_t byid() const {return id;}
 
-        EOSLIB_SERIALIZE(users, (username)(referer)(id)(is_host)(meta))
+        EOSLIB_SERIALIZE(partners, (username)(referer)(id)(meta))
     };
 
-    typedef eosio::multi_index<"users"_n, users,
-    eosio::indexed_by<"users"_n, eosio::const_mem_fun<users, uint64_t, &users::byreferer>>
-    > user_index;
+    typedef eosio::multi_index<"partners"_n, partners,
+    eosio::indexed_by<"byreferer"_n, eosio::const_mem_fun<partners, uint64_t, &partners::byreferer>>,
+    eosio::indexed_by<"byid"_n, eosio::const_mem_fun<partners, uint64_t, &partners::byid>>
+    > partners_index;
 
 
     struct  [[eosio::table, eosio::contract("unicore")]] ahosts{

@@ -164,7 +164,7 @@
 		
 		require_auth(username);
 		account_index accounts(_me, host.value);
-		user_index users(_me, _me.value);
+		partners_index users(_partners, _partners.value);
 		auto user = users.find(username.value);
 		eosio::check(user != users.end(), "User is not registered on the core");
 		

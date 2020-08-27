@@ -810,11 +810,11 @@ void next_pool( eosio::name host){
 
 
 [[eosio::action]] void unicore::del(eosio::name username){
-    require_auth(_registrator);
-    user_index refs(_me, _me.value);
+    require_auth(_partners);
+    partners_index refs(_partners, _partners.value);
     auto u = refs.find(username.value);
     refs.erase(u);
-    userscount_index usercounts(_me, _me.value);
+    userscount_index usercounts(_partners, _partners.value);
     auto usercount = usercounts.find("registered"_n.value);
     usercounts.modify(usercount, _me, [&](auto &u){
         u.count = u.count - 1;
@@ -833,12 +833,12 @@ void next_pool( eosio::name host){
 
 [[eosio::action]] void unicore::reg(eosio::name username, eosio::name referer, std::string meta){
     
-    eosio::check(has_auth(username) || has_auth(_registrator), "missing required authority");
+    eosio::check(has_auth(username) || has_auth(_partners), "missing required authority");
 
     eosio::check( is_account( username ), "User account does not exist");
     
      
-    user_index refs(_me, _me.value);
+    partners_index refs(_partners, _partners.value);
     auto ref = refs.find(username.value);
 
     eosio::check(username != referer, "You cant set the referer yourself");
@@ -879,7 +879,7 @@ void next_pool( eosio::name host){
             r.meta = meta;
         });
     } else {
-        require_auth(_registrator); //only registrator can change referer
+        require_auth(_partners); //only registrator can change referer
 
         refs.modify(ref, _me, [&](auto &r){
             r.referer = referer;
@@ -894,7 +894,7 @@ void next_pool( eosio::name host){
  */
 [[eosio::action]] void unicore::profupdate(eosio::name username, std::string meta){
     require_auth(username);
-    user_index refs(_me, _me.value);
+    partners_index refs(_partners, _partners.value);
 
     auto ref = refs.find(username.value);
     
@@ -1102,7 +1102,7 @@ void unicore::deposit ( eosio::name username, eosio::name host, eosio::asset amo
     require_auth(username);
     eosio::check( amount.is_valid(), "Rejected. Invalid quantity" );
 
-    user_index users(_me,_me.value);
+    partners_index users(_partners,_partners.value);
     auto user = users.find(username.value);
     eosio::check(user != users.end(), "User is not registered");
     
@@ -1111,7 +1111,7 @@ void unicore::deposit ( eosio::name username, eosio::name host, eosio::asset amo
         //TODO eosio::check account registration;
         users.emplace(_me, [&](auto &r){
             r.username = username;
-            r.referer = _registrator;
+            r.referer = _partners;
         });
     }
     account_index accounts(_me, host.value);
@@ -2397,7 +2397,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
             if ((bal->ref_amount).amount > 0){
                 // print("Total Pay to REF:", bal->ref_amount, " ");
                 
-                user_index refs(_me, _me.value);
+                partners_index refs(_partners, _partners.value);
                 auto ref = refs.find(username.value);
                 eosio::name referer;
 

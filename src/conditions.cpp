@@ -19,7 +19,7 @@ namespace eosio {
 
 
     void unicore::rmfromhostwl(eosio::name host, eosio::name username){
-        partners_index partners(_me, host.value);
+        cpartners_index partners(_me, host.value);
 
         auto partner = partners.find(username.value);
         if (partner != partners.end()) {
@@ -28,7 +28,7 @@ namespace eosio {
     }    
 
     void unicore::addtohostwl(eosio::name host, eosio::name username){
-        partners_index partners(_me, host.value);
+        cpartners_index partners(_me, host.value);
 
         auto partner = partners.find(username.value);
         if (partner == partners.end()) {
