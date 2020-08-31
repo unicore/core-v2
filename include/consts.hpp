@@ -14,7 +14,7 @@ namespace eosio {
   static constexpr uint64_t _TOTAL_VOTES = 7;
   static constexpr uint64_t _MAX_LEVELS = 7;
 
-  static constexpr eosio::name _me = "y.core"_n;
+  static constexpr eosio::name _me = "core.y"_n;
   static constexpr eosio::name _partners = "partners"_n;
   static constexpr eosio::name _curator = "curator"_n;
   static constexpr eosio::name _saving = "eosio.saving"_n;
