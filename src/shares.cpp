@@ -19,6 +19,8 @@ namespace eosio {
         v.host = host;
 	      v.owner = owner;
 	      v.amount = amount;
+        v.available = asset(0, amount.symbol);
+        v.withdrawed = asset(0, amount.symbol);
 	      v.startat = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
 	      v.duration = vesting_seconds;
 	    });

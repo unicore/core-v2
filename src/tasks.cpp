@@ -34,6 +34,14 @@
 		
 		uint64_t task_id = acc -> total_tasks + 1;
 		
+		badge_index badges(_me, host.value);
+
+		if (with_badge == true){
+			auto badge = badges.find(badge_id);
+			eosio::check(badge != badges.end(), "Badge with current ID is not found");
+		}
+		
+		
 		tasks.emplace(username, [&](auto &t){
 			t.creator = username;
 			t.task_id = task_id;

@@ -1087,6 +1087,7 @@ void next_pool( eosio::name host){
                 r.total_in_box = asset(total_in_box[i], root_symbol);
                 r.system_income = asset(system_income[i], root_symbol);
                 r.live_balance_for_sale = asset(live_balance_for_sale[i], root_symbol);
+                r.live_balance_for_convert = asset(0, root_symbol);
             });
     }
 
@@ -1923,10 +1924,19 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
     auto sp = spiral.find(0);
 
     auto rate = rates.begin();
+    
+    double convert_rate_prev = 0;
 
     while(rate != rates.end()) {
         
-        double convert_rate = (double)rate->sell_rate / (double)sp->base_rate * pow(10, acc -> sale_shift);
+        double convert_rate = (double)rate->sell_rate * pow(10, acc -> sale_shift) / (double)sp->base_rate ;
+        // convert_rate += sp-> overlap * convert_rate / HUNDR_PERCENT;
+        
+        if (rate -> pool_id == 0)
+            convert_rate_prev = convert_rate;
+        if (rate -> pool_id == 1)
+            convert_rate = convert_rate_prev;
+
         
         rates.modify(rate, host, [&](auto &cr){
             cr.convert_rate = convert_rate;

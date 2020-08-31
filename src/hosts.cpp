@@ -131,6 +131,11 @@ namespace eosio {
         std::vector<eosio::name> empty_dacs;
         std::vector<eosio::name> empty_fhosts;
 
+        gpercents_index gpercents(_me, _me.value);
+        auto syspercent = gpercents.find("system"_n.value);
+        eosio::check(syspercent != gpercents.end(), "Contract is not active");
+
+
         accounts.emplace(_me, [&](auto &a){
             a.username = username;
             a.architect = username;
@@ -165,7 +170,7 @@ namespace eosio {
             a.dacs_percent = dacs_percent;
             a.cfund_percent = cfund_percent;
             a.hfund_percent = hfund_percent;
-            a.sys_percent = SYS_PERCENT;
+            a.sys_percent = syspercent->value;
             a.levels= levels;
         });
 
