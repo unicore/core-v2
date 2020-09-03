@@ -1105,7 +1105,9 @@ void unicore::deposit ( eosio::name username, eosio::name host, eosio::asset amo
 
     partners_index users(_partners,_partners.value);
     auto user = users.find(username.value);
-    eosio::check(user != users.end(), "User is not registered");
+
+    
+    // eosio::check(user != users.end(), "User is not registered");
     
     if (user == users.end()){
         
