@@ -179,6 +179,7 @@ namespace eosio {
             a.username = username;
             a.title = title;
             a.purpose = purpose;
+            a.is_host = true;
             a.manifest = "";
             a.comments_is_enabled = false;
         });

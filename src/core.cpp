@@ -947,7 +947,7 @@ void next_pool( eosio::name host){
     
 
     eosio::check((overlap > 10000) && (overlap < 20000), "Overlap factor must be greater then 10000 (1.0000) and less then 20000 (2.0000)).");
-    eosio::check(profit_growth <= 20000, "Profit growth factor must be greater or equal 0 (0.0000) and less then 20000 (2.0000)).");
+    eosio::check(profit_growth <= 1000000, "Profit growth factor must be greater or equal 0 (0.0000) and less then 1000000 (100.0000)).");
     eosio::check((loss_percent > 0 ) && ( loss_percent <= 1000000), "Loss Percent must be greater then 0 (0%) and less or equal 10000 (100%)");
     eosio::check((base_rate >= 100) && (base_rate < 1000000000), "Base Rate must be greater or equal 100 and less then 1e9");
     eosio::check((size_of_pool >= 10) && (size_of_pool <= 1000000000000), "Size of Pool must be greater or equal 10 and less then 1e9");

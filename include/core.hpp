@@ -412,6 +412,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
         eosio::name username;
         eosio::string website;
         checksum256 hash;
+        bool is_host = false;
+
         eosio::name type;
         uint64_t votes;
         std::string title;
@@ -431,7 +433,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         }
           
 
-        EOSLIB_SERIALIZE(ahosts, (username)(website)(hash)(type)(votes)(title)(purpose)(manifest)(comments_is_enabled)(meta))
+        EOSLIB_SERIALIZE(ahosts, (username)(website)(hash)(is_host)(type)(votes)(title)(purpose)(manifest)(comments_is_enabled)(meta))
     };
 
     typedef eosio::multi_index<"ahosts"_n, ahosts,

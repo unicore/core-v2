@@ -62,6 +62,10 @@
                     "type": "checksum256"
                 },
                 {
+                    "name": "is_host",
+                    "type": "bool"
+                },
+                {
                     "name": "type",
                     "type": "name"
                 },
