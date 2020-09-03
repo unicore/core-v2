@@ -138,14 +138,13 @@ extern "C" {
                         break;
                     }
 
-                    case 666: {
-                        unicore::add_asset_to_fund_action(op.from, op.quantity, name(code));
+                    // case 700: {
+                    //     break;
+                    // }
 
+                    default:
                         break;
-                    }
-
-                    // default:
-                       //check(false, "Subcode is wrong");
+                       
                 }
 
             }
