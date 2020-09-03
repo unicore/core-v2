@@ -37,14 +37,11 @@ class [[eosio::contract]] unicore : public eosio::contract {
         // uint128_t unicore::combine_ids(const uint64_t &x, const uint64_t &y);
         // uint128_t unicore::combine_ids2(const uint64_t &x, const uint64_t &y);
 
-        [[eosio::action]] void reg(eosio::name username, eosio::name referer, std::string meta);
         
         static eosio::asset convert_to_power(eosio::asset quantity, eosio::name host);
         [[eosio::action]] void convert(eosio::name username, eosio::name host, uint64_t balance_id);
 
-        [[eosio::action]] void del(eosio::name username);
-        [[eosio::action]] void profupdate(eosio::name username, std::string meta);
-
+        
         [[eosio::action]] void setparams(eosio::name host, eosio::name chost, uint64_t size_of_pool,
             uint64_t quants_precision, uint64_t overlap, uint64_t profit_growth, uint64_t base_rate,
             uint64_t loss_percent, uint64_t pool_limit, uint64_t pool_timeout, uint64_t priority_seconds);

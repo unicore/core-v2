@@ -809,102 +809,6 @@ void next_pool( eosio::name host){
 }
 
 
-[[eosio::action]] void unicore::del(eosio::name username){
-    require_auth(_partners);
-    partners_index refs(_partners, _partners.value);
-    auto u = refs.find(username.value);
-    refs.erase(u);
-    userscount_index usercounts(_partners, _partners.value);
-    auto usercount = usercounts.find("registered"_n.value);
-    usercounts.modify(usercount, _me, [&](auto &u){
-        u.count = u.count - 1;
-    });
-
-}
-
-/**
- * @brief      Регистрация пользователя в системе. 
- * Характеризуется созданием профиля с ссылкой на приглашающий аккаунт. Приглашающий аккаунт используется в качестве связи для вычисления партнерских структур различного профиля.
- * 
- * TODO ввести порядковые номера  
- *
- * @param[in]  op    The operation
- */
-
-[[eosio::action]] void unicore::reg(eosio::name username, eosio::name referer, std::string meta){
-    
-    eosio::check(has_auth(username) || has_auth(_partners), "missing required authority");
-
-    eosio::check( is_account( username ), "User account does not exist");
-    
-     
-    partners_index refs(_partners, _partners.value);
-    auto ref = refs.find(username.value);
-
-    eosio::check(username != referer, "You cant set the referer yourself");
-    
-    if (username != _me){
-        eosio::check(referer.value != 0, "Registration without referer is not possible");
-        eosio::check( is_account( referer ), "Referer account does not exist");
-        auto pref = refs.find(referer.value);
-        eosio::check(pref != refs.end(), "Referer is not registered in the core");    
-    } 
-
-    
-    userscount_index usercounts(_me, _me.value);
-    auto usercount = usercounts.find("registered"_n.value);
-    uint64_t count = 1;
-
-
-    //TODO eosio::check account registration;
-    // eosio::check(ref == refs.end(), "Referer is already setted");
-    if (ref == refs.end()){
-        if (usercount == usercounts.end()){
-            usercounts.emplace(_me, [&](auto &u){
-                u.id = "registered"_n.value;
-                u.count = count;
-                u.subject = "registered";
-            });
-        } else {
-            count =  usercount -> count + 1;
-            usercounts.modify(usercount, _me, [&](auto &u){
-                u.count = count;
-            });
-        };
-
-        refs.emplace(_me, [&](auto &r){
-            r.id = count;
-            r.username = username;
-            r.referer = referer;
-            r.meta = meta;
-        });
-    } else {
-        require_auth(_partners); //only registrator can change referer
-
-        refs.modify(ref, _me, [&](auto &r){
-            r.referer = referer;
-        });
-    }
-};
-
-/**
- * @brief      Метод обновления профиля
- * Операция обновления профиля позволяет изменить мета-данные аккаунта. 
- * @param[in]  op    The operation
- */
-[[eosio::action]] void unicore::profupdate(eosio::name username, std::string meta){
-    require_auth(username);
-    partners_index refs(_partners, _partners.value);
-
-    auto ref = refs.find(username.value);
-    
-    refs.modify(ref, username, [&](auto &r){
-        r.meta = meta;
-    });
-
-};
-
-
 /**
  * @brief      Публичный метод установки параметров протокола двойной спирали
  *  Вызывается пользователем после базовой операции создания хоста и проведения оплаты. Так же вызывается при установке параметров дочернего хоста. Содержит алгоритм финансового ядра. Производит основные расчеты таблиц курсов и валидирует положительность бизнес-дохода. 
@@ -1104,19 +1008,19 @@ void unicore::deposit ( eosio::name username, eosio::name host, eosio::asset amo
     eosio::check( amount.is_valid(), "Rejected. Invalid quantity" );
 
     partners_index users(_partners,_partners.value);
-    auto user = users.find(username.value);
+    // auto user = users.find(username.value);
 
     
     // eosio::check(user != users.end(), "User is not registered");
     
-    if (user == users.end()){
+    // if (user == users.end()){
         
-        //TODO eosio::check account registration;
-        users.emplace(_me, [&](auto &r){
-            r.username = username;
-            r.referer = _partners;
-        });
-    }
+    //     //TODO eosio::check account registration;
+    //     users.emplace(_me, [&](auto &r){
+    //         r.username = username;
+    //         r.referer = _partners;
+    //     });
+    // }
     account_index accounts(_me, host.value);
     auto acc = accounts.find(host.value);
 

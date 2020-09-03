@@ -75,6 +75,7 @@ namespace eosio {
         //eosio::check title lenght
         // eosio::check((title.length() < 1024) && (title.length() > 0) , "Title should be more then 10 symbols and less then 1024");
         partners_index users(_partners, _partners.value);
+        
         auto user = users.find(username.value);
         eosio::check(user != users.end(), "User is not registered");
 

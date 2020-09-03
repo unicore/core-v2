@@ -644,16 +644,6 @@
             ]
         },
         {
-            "name": "del",
-            "base": "",
-            "fields": [
-                {
-                    "name": "username",
-                    "type": "name"
-                }
-            ]
-        },
-        {
             "name": "delegations",
             "base": "",
             "fields": [
@@ -1676,20 +1666,6 @@
             ]
         },
         {
-            "name": "profupdate",
-            "base": "",
-            "fields": [
-                {
-                    "name": "username",
-                    "type": "name"
-                },
-                {
-                    "name": "meta",
-                    "type": "string"
-                }
-            ]
-        },
-        {
             "name": "pstats",
             "base": "",
             "fields": [
@@ -1880,24 +1856,6 @@
                 {
                     "name": "host",
                     "type": "name"
-                }
-            ]
-        },
-        {
-            "name": "reg",
-            "base": "",
-            "fields": [
-                {
-                    "name": "username",
-                    "type": "name"
-                },
-                {
-                    "name": "referer",
-                    "type": "name"
-                },
-                {
-                    "name": "meta",
-                    "type": "string"
                 }
             ]
         },
@@ -3111,11 +3069,6 @@
             "ricardian_contract": ""
         },
         {
-            "name": "del",
-            "type": "del",
-            "ricardian_contract": ""
-        },
-        {
             "name": "delgoal",
             "type": "delgoal",
             "ricardian_contract": ""
@@ -3181,11 +3134,6 @@
             "ricardian_contract": ""
         },
         {
-            "name": "profupdate",
-            "type": "profupdate",
-            "ricardian_contract": ""
-        },
-        {
             "name": "refreshbal",
             "type": "refreshbal",
             "ricardian_contract": ""
@@ -3203,11 +3151,6 @@
         {
             "name": "refreshst",
             "type": "refreshst",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "reg",
-            "type": "reg",
             "ricardian_contract": ""
         },
         {

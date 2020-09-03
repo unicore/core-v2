@@ -362,21 +362,6 @@ extern "C" {
                     // fcore().withdraw_action(eosio::unpack_action_data<withdraw>());
                     break;
                 };
-                case "reg"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::reg);
-                    // fcore().reg_action(eosio::unpack_action_data<reg>());
-                    break;
-                };
-                case "del"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::del);
-                    // fcore().del_action(eosio::unpack_action_data<del>());
-                    break;
-                };
-                case "profupdate"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::profupdate);
-                    // fcore().profupdate_action(eosio::unpack_action_data<profupdate>());
-                    break;
-                };
                 case "priorenter"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::priorenter);
                     // fcore().priority_enter(eosio::unpack_action_data<priorenter>());   
