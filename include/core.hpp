@@ -166,6 +166,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
         static void give_shares_with_badge_action (eosio::name host, eosio::name reciever, uint64_t shares);
         static void back_shares_with_badge_action (eosio::name host, eosio::name from, uint64_t shares);
         static void add_sale_history(hosts acc, rate rate, spiral sp, eosio::asset amount);
+
+        static void spread_to_dacs(eosio::name host, eosio::asset amount);
 };
 
 

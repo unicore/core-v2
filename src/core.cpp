@@ -2346,31 +2346,27 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                     };
 
                     /**
-                     * Все неиспользуемые вознаграждения с вышестояющих уровней отправляются на аккаунт хоста сообщества. 
+                     * Все неиспользуемые вознаграждения с вышестояющих уровней отправляются на аккаунт корпорации 
 
                      */
                     eosio::asset back_to_host = bal->ref_amount - paid;
                     
-                    if (back_to_host.amount>0){
-                        action(
-                            permission_level{ _me, "active"_n },
-                            acc->root_token_contract, "transfer"_n,
-                            std::make_tuple( _me, host, back_to_host, std::string("RHP-" + (name{username}.to_string() + "-" + (name{host}).to_string()) ))
-                        ).send();
-                    };
+                    if (back_to_host.amount > 0){
+                        print("not used ref1: ", back_to_host);
+                        unicore::spread_to_dacs(host, back_to_host);
+                    }
 
 
                     
                 } else {
                     /**
-                     * Если рефералов у пользователя нет, то переводим все реферальные средства на аккаунт хоста.
+                     * Если рефералов у пользователя нет, то переводим все реферальные средства на корпорации.
                      */
-                    action(
-                        permission_level{ _me, "active"_n },
-                        acc->root_token_contract, "transfer"_n,
-                        std::make_tuple( _me, host, bal->ref_amount, std::string("RHP-" + (name{username}.to_string() + "-" + (name{host}).to_string()) )) 
-                    ).send();
-
+                    if (bal->ref_amount.amount > 0){
+                        print("not used ref2: ", bal->ref_amount);
+                        unicore::spread_to_dacs(host, bal->ref_amount);
+                    }
+               
                 }
 
             }
@@ -2382,34 +2378,9 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                  * 
                  
                  */
-    
-                dacs_index dacs(_me, host.value);
-                auto dac = dacs.begin();
-                if (dac != dacs.end()){
+                print("pure dac: ", bal->dac_amount);
+                unicore::spread_to_dacs(host, bal->dac_amount);
 
-                    while(dac != dacs.end()) {
-                        
-                        eosio::asset amount_for_dac = asset((bal->dac_amount).amount * dac -> weight / acc-> total_dacs_weight, root_symbol);
-                        
-                        dacs.modify(dac, _me, [&](auto &d){
-
-                            uint128_t dac_income_in_segments = amount_for_dac.amount * TOTAL_SEGMENTS;
-                            
-                            d.income = asset(uint64_t((dac ->income_in_segments + dac_income_in_segments) / TOTAL_SEGMENTS), root_symbol);
-                            d.income_in_segments += amount_for_dac.amount * TOTAL_SEGMENTS;
-                        
-                        });
-
-                        dac++;
-
-                    }
-                } else {
-                    action(
-                        permission_level{ _me, "active"_n },
-                        acc->root_token_contract, "transfer"_n,
-                        std::make_tuple( _me, host, bal->dac_amount, std::string("DAC-" + (name{username}.to_string() + "-" + (name{host}).to_string()))) 
-                    ).send();
-                }
 
 
             }
@@ -2540,6 +2511,52 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
     
     }
 };
+
+    void unicore::spread_to_dacs(eosio::name host, eosio::asset amount){
+
+        dacs_index dacs(_me, host.value);
+        account_index accounts(_me, host.value);
+        auto acc = accounts.find(host.value);
+        auto root_symbol = acc->get_root_symbol();
+
+        eosio::check(amount.symbol == root_symbol, "System error on spead to dacs");
+
+        auto dac = dacs.begin();
+        print("on spread");
+        if (dac != dacs.end()){
+            print("on spread1");
+            while(dac != dacs.end()) {
+                
+                eosio::asset amount_for_dac = asset(amount.amount * dac -> weight / acc-> total_dacs_weight, root_symbol);
+                
+                dacs.modify(dac, _me, [&](auto &d){
+
+                    uint128_t dac_income_in_segments = amount_for_dac.amount * TOTAL_SEGMENTS;
+                    
+                    d.income = asset(uint64_t((dac ->income_in_segments + dac_income_in_segments) / TOTAL_SEGMENTS), root_symbol);
+                    d.income_in_segments += amount_for_dac.amount * TOTAL_SEGMENTS;
+                
+                });
+
+                dac++;
+
+            }
+        }  else {
+
+            print("on spread2");
+            dacs.emplace(_me, [&](auto &d){
+                d.dac = host;
+                d.weight = 1;
+                d.income = amount;
+                d.income_in_segments = amount.amount * TOTAL_SEGMENTS;
+            });
+
+            accounts.modify(acc, _me, [&](auto &h){
+                h.total_dacs_weight = 1;
+            });
+        }
+
+    }
 
     void unicore::add_sale_history(hosts acc, rate rate, spiral sp, eosio::asset amount){
         sale_index sales(_me, acc.username.value);
