@@ -13,7 +13,9 @@
 #include <eosio/print.hpp>
 #include <eosio/datastream.hpp>
 
+
 #include "hosts.hpp"
+#include "ref.hpp"
 #include "shares.hpp"
 #include "goals.hpp"
 #include "voting.hpp"
@@ -123,7 +125,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         //MARKETS
         [[eosio::action]] void refreshsh (eosio::name owner, uint64_t id);
         [[eosio::action]] void withpbenefit(eosio::name username, eosio::name host);
-        [[eosio::action]] void withrbenefit(eosio::name username, eosio::name host);
+        [[eosio::action]] void withrbenefit(eosio::name username, eosio::name host, std::vector<uint64_t> ids);
         [[eosio::action]] void refreshpu(eosio::name username, eosio::name host);
         [[eosio::action]] void withdrawsh(eosio::name owner, uint64_t id);
         [[eosio::action]] void sellshares(eosio::name username, eosio::name host, uint64_t shares);
@@ -249,17 +251,6 @@ class [[eosio::contract]] unicore : public eosio::contract {
     > bwtradegraph_index;
 
     
-    struct [[eosio::table, eosio::contract("unicore")]] refbalances{
-        uint64_t id;
-        eosio::name host;
-        eosio::asset amount;
-        eosio::name from;
-        uint128_t segments;
-        uint64_t primary_key() const {return id;}
-
-        EOSLIB_SERIALIZE(refbalances, (id)(host)(amount)(from)(segments))
-    };
-    typedef eosio::multi_index<"refbalances"_n, refbalances> refbalances_index;
 
 
 

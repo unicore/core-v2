@@ -127,42 +127,14 @@ namespace eosio {
   }
 
 
-  /**
-   * @brief      Метод вывода партнерского финансового потока
-   * withdraw power quant (withpowerun)
-   * Позволяет вывести часть финансового потока, направленного на держателя силы
-  */
-  [[eosio::action]] void unicore::withrbenefit(eosio::name username, eosio::name host){
-    require_auth(username);
-    pstats_index pstats(_me, username.value);
-    auto pstat = pstats.find(host.value);
-    eosio::check(pstat != pstats.end(), "Power Stat Object is not found. Refresh your balances first.");
-    eosio::check((pstat -> ref_available_in_asset).amount > 0, "Not enough tokens for transfer");
-    account_index account(_me, host.value);
-
-    auto acc = account.find(host.value);
-    auto root_symbol = acc->get_root_symbol();
-    auto on_withdraw = pstat -> ref_available_in_asset;
-    
-    if (on_withdraw.amount > 0) {
-      action(
-          permission_level{ _me, "active"_n },
-          acc->root_token_contract, "transfer"_n,
-          std::make_tuple( _me, username, on_withdraw, std::string("RFLOW-" + (name{username}.to_string() + "-" + (name{host}).to_string()) ))
-      ).send();
 
 
-      pstats.modify(pstat, _me, [&](auto &ps){
-        
-        ps.total_available_in_asset -= on_withdraw;
-        
-        ps.ref_available_segments -= (pstat -> ref_available_in_asset).amount * TOTAL_SEGMENTS;
-        ps.ref_available_in_asset = asset(0, root_symbol);
-        ps.ref_withdrawed += pstat -> ref_available_in_asset;
-      });    
-    }
+  // [[eosio::action]] void unicore::refreshru(eosio::name username, eosio::name host){
 
-  }
+
+  // }
+
+
 
   /**
    * @brief      Метод обновления силового финансового потока
@@ -193,45 +165,7 @@ namespace eosio {
 
     
 
-    refbalances_index refbalances(_me, username.value);
-    auto refbalance = refbalances.begin();
-    uint64_t count=0;
-    while(refbalance != refbalances.end() && count < 50){
-
-    // }
-    // if (refbalance != refbalances.end()){
-      if (pstat == pstats.end()){
-
-        pstats.emplace(_me, [&](auto &ps){
-          ps.host = host;
-          ps.total_available_in_asset = refbalance->amount;
-
-          ps.pflow_last_withdrawed_pool_id = 0;
-          ps.pflow_available_segments = 0;
-          ps.pflow_available_in_asset = asset(0, root_symbol);
-          ps.pflow_withdrawed = asset(0, root_symbol);
-          
-          ps.ref_available_in_asset = refbalance->amount;
-          ps.ref_available_segments = refbalance->segments;
-          ps.ref_withdrawed = asset(0, root_symbol);
-        });
-        
-        pstat = pstats.begin();
-
-      } else {
-        pstats.modify(pstat, _me, [&](auto &ps){
-          ps.total_available_in_asset += refbalance->amount;
-          ps.ref_available_segments += refbalance->segments;
-          ps.ref_available_in_asset += refbalance->amount;
-        });          
-      }
-
-      refbalances.erase(refbalance);
-      refbalance = refbalances.begin();
-      count++;
-    }
-  
-
+   
     sincome_index sincomes(_me, host.value);
     auto sincome = sincomes.lower_bound(min_pool_id);
     

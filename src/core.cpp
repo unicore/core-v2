@@ -2334,6 +2334,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                                 rb.host = host;
                                 rb.amount = to_ref;
                                 rb.from = username;
+                                rb.level = level;
                                 rb.segments = to_ref.amount * TOTAL_SEGMENTS;
                             });
 
@@ -2346,13 +2347,12 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                     };
 
                     /**
-                     * Все неиспользуемые вознаграждения с вышестояющих уровней отправляются на аккаунт корпорации 
+                     * Все неиспользуемые вознаграждения с вышестояющих уровней отправляются на корпорации 
 
                      */
                     eosio::asset back_to_host = bal->ref_amount - paid;
                     
                     if (back_to_host.amount > 0){
-                        print("not used ref1: ", back_to_host);
                         unicore::spread_to_dacs(host, back_to_host);
                     }
 
@@ -2363,7 +2363,6 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                      * Если рефералов у пользователя нет, то переводим все реферальные средства на корпорации.
                      */
                     if (bal->ref_amount.amount > 0){
-                        print("not used ref2: ", bal->ref_amount);
                         unicore::spread_to_dacs(host, bal->ref_amount);
                     }
                
@@ -2378,7 +2377,6 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                  * 
                  
                  */
-                print("pure dac: ", bal->dac_amount);
                 unicore::spread_to_dacs(host, bal->dac_amount);
 
 

@@ -1,7 +1,9 @@
 #include "include/core.hpp"
 
+
 #include "src/shares.cpp"
 #include "src/hosts.cpp"
+#include "src/ref.cpp"
 #include "src/core.cpp"
 #include "src/goals.cpp"
 #include "src/voting.cpp"
