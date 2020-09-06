@@ -2331,7 +2331,10 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                             refbalances_index refbalances(_me, referer.value);
                             refbalances.emplace(username, [&](auto &rb){
                                 rb.id = refbalances.available_primary_key();
+                                rb.timepoint_sec = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
                                 rb.host = host;
+                                rb.refs_amount = bal->ref_amount;
+                                rb.win_amount = bal->available;
                                 rb.amount = to_ref;
                                 rb.from = username;
                                 rb.level = level;
