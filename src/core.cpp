@@ -2324,7 +2324,8 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                     /**
                      * Вычисляем размер выплаты для каждого уровня партнеров и производим выплаты.
                      */
-                
+                    uint8_t count = 1;
+
                     for (auto level : acc->levels){
                         if ((ref != refs.end()) && ((ref->referer).value != 0)){
                             eosio::asset to_ref = asset((bal->ref_amount).amount * level / 100 / ONE_PERCENT , root_symbol);
@@ -2337,7 +2338,9 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                                 rb.win_amount = bal->available;
                                 rb.amount = to_ref;
                                 rb.from = username;
-                                rb.level = level;
+                                rb.level = count;
+                                rb.lpercent = level;
+                                rb.cashback = ref->cashback;
                                 rb.segments = to_ref.amount * TOTAL_SEGMENTS;
                             });
 
@@ -2346,6 +2349,8 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                             
                             ref = refs.find(referer.value);
                             referer = ref->referer;
+                        } else {
+                            break;
                         }
                     };
 

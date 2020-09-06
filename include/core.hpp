@@ -378,25 +378,6 @@ class [[eosio::contract]] unicore : public eosio::contract {
     typedef eosio::multi_index<"userscount"_n, userscount> userscount_index;
 
 
-    struct [[eosio::table, eosio::contract("unicore")]] partners {
-        eosio::name username;
-        eosio::name referer;
-        uint64_t id;
-        
-        std::string meta;
-        
-        uint64_t primary_key() const{return username.value;}
-        uint64_t byreferer() const{return referer.value;}
-        uint64_t byid() const {return id;}
-
-        EOSLIB_SERIALIZE(partners, (username)(referer)(id)(meta))
-    };
-
-    typedef eosio::multi_index<"partners"_n, partners,
-    eosio::indexed_by<"byreferer"_n, eosio::const_mem_fun<partners, uint64_t, &partners::byreferer>>,
-    eosio::indexed_by<"byid"_n, eosio::const_mem_fun<partners, uint64_t, &partners::byid>>
-    > partners_index;
-
 
     struct  [[eosio::table, eosio::contract("unicore")]] ahosts{
         eosio::name username;

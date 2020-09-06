@@ -1,5 +1,26 @@
 namespace eosio {
 
+    struct [[eosio::table, eosio::contract("unicore")]] partners {
+        eosio::name username;
+        eosio::name referer;
+        uint64_t id;
+        uint64_t cashback;
+        std::string meta;
+        
+        uint64_t primary_key() const{return username.value;}
+        uint64_t byreferer() const{return referer.value;}
+        uint64_t byid() const {return id;}
+
+        EOSLIB_SERIALIZE(partners, (username)(referer)(id)(cashback)(meta))
+    };
+
+    typedef eosio::multi_index<"partners"_n, partners,
+    eosio::indexed_by<"byreferer"_n, eosio::const_mem_fun<partners, uint64_t, &partners::byreferer>>,
+    eosio::indexed_by<"byid"_n, eosio::const_mem_fun<partners, uint64_t, &partners::byid>>
+    > partners_index;
+
+
+
     struct [[eosio::table, eosio::contract("unicore")]] refbalances{
         uint64_t id;
         eosio::name host;
@@ -8,11 +29,13 @@ namespace eosio {
         eosio::asset win_amount;
         eosio::asset amount;
         eosio::name from;
-        uint64_t level;
+        uint64_t cashback;
+        uint8_t level;
+        uint8_t lpercent;
         uint128_t segments;
         uint64_t primary_key() const {return id;}
 
-        EOSLIB_SERIALIZE(refbalances, (id)(host)(timepoint_sec)(refs_amount)(win_amount)(amount)(from)(level)(segments))
+        EOSLIB_SERIALIZE(refbalances, (id)(host)(timepoint_sec)(refs_amount)(win_amount)(amount)(from)(cashback)(level)(lpercent)(segments))
     };
 
     typedef eosio::multi_index<"refbalances"_n, refbalances> refbalances_index;
