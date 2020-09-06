@@ -2316,7 +2316,8 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                 partners_index refs(_partners, _partners.value);
                 auto ref = refs.find(username.value);
                 eosio::name referer;
-
+                uint8_t count = 1;
+                    
                 if ((ref != refs.end()) && ((ref->referer).value != 0)){
                     referer = ref->referer;
                     eosio::asset paid = asset(0, root_symbol);
@@ -2324,7 +2325,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                     /**
                      * Вычисляем размер выплаты для каждого уровня партнеров и производим выплаты.
                      */
-                    uint8_t count = 1;
+
 
                     for (auto level : acc->levels){
                         if ((ref != refs.end()) && ((ref->referer).value != 0)){
