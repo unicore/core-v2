@@ -44,10 +44,11 @@ namespace eosio {
     struct [[eosio::table, eosio::contract("unicore")]] rstat{
         eosio::name host;
         eosio::asset withdrawed;
-        
+        double sediment;
+
         uint64_t primary_key() const {return host.value;}
 
-        EOSLIB_SERIALIZE(rstat, (host)(withdrawed))
+        EOSLIB_SERIALIZE(rstat, (host)(withdrawed)(sediment))
     };
 
     typedef eosio::multi_index<"rstat"_n, rstat> rstat_index;

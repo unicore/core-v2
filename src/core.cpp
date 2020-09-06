@@ -2329,7 +2329,9 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
 
                     for (auto level : acc->levels){
                         if ((ref != refs.end()) && ((ref->referer).value != 0)){
-                            eosio::asset to_ref = asset((bal->ref_amount).amount * level / 100 / ONE_PERCENT , root_symbol);
+                            uint128_t to_ref_segments = (bal->ref_amount).amount * TOTAL_SEGMENTS * level / 100 / ONE_PERCENT;
+
+                            eosio::asset to_ref_amount = asset(to_ref_segments / TOTAL_SEGMENTS, root_symbol);
                             refbalances_index refbalances(_me, referer.value);
                             refbalances.emplace(username, [&](auto &rb){
                                 rb.id = refbalances.available_primary_key();
@@ -2337,16 +2339,16 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                                 rb.host = host;
                                 rb.refs_amount = bal->ref_amount;
                                 rb.win_amount = bal->available;
-                                rb.amount = to_ref;
+                                rb.amount = to_ref_amount;
                                 rb.from = username;
                                 rb.level = count;
                                 rb.lpercent = level;
                                 rb.cashback = ref->cashback;
-                                rb.segments = to_ref.amount * TOTAL_SEGMENTS;
+                                rb.segments = to_ref_segments;
                             });
 
          
-                            paid += to_ref;
+                            paid += to_ref_amount;
                             
                             ref = refs.find(referer.value);
                             referer = ref->referer;

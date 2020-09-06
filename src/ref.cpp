@@ -15,12 +15,18 @@ namespace eosio {
     
     uint64_t count=0;
     uint64_t on_withdraw = 0;
+    uint128_t sediment = 0;
+
     auto id = ids.begin();
 
     while(id != ids.end()) {
 
       auto refbalance = refbalances.find(*id);
       eosio::check(refbalance != refbalances.end(), "Some ref balance is not found");
+
+      if (uint128_t(refbalance->amount.amount * TOTAL_SEGMENTS) < refbalance->segments) {
+        sediment += refbalance->segments - uint128_t(refbalance->amount.amount * TOTAL_SEGMENTS);
+      }
 
       on_withdraw += refbalance->amount.amount;
 
@@ -29,7 +35,8 @@ namespace eosio {
       id++;
      
     }
-     print("on_withdraw: ", on_withdraw);
+    
+    print("on_withdraw: ", on_withdraw);
     eosio::asset on_widthdraw_asset = asset(on_withdraw, root_symbol);
 
     if (on_withdraw > 0){
@@ -46,11 +53,13 @@ namespace eosio {
         rstats.emplace(username, [&](auto &rs){
           rs.host = host;
           rs.withdrawed = on_widthdraw_asset;
+          rs.sediment = double(sediment);
         });
 
       } else {
         rstats.modify(rstat, username, [&](auto &rs){
           rs.withdrawed += on_widthdraw_asset;
+          rs.sediment += sediment;
         });
       }
 
