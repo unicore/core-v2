@@ -125,6 +125,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
         //MARKETS
         [[eosio::action]] void refreshsh (eosio::name owner, uint64_t id);
         [[eosio::action]] void withpbenefit(eosio::name username, eosio::name host);
+        [[eosio::action]] void withrsegment(eosio::name username, eosio::name host);
+
         [[eosio::action]] void withrbenefit(eosio::name username, eosio::name host, std::vector<uint64_t> ids);
         [[eosio::action]] void refreshpu(eosio::name username, eosio::name host);
         [[eosio::action]] void withdrawsh(eosio::name owner, uint64_t id);

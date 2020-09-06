@@ -2342,9 +2342,9 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                                 rb.amount = to_ref_amount;
                                 rb.from = username;
                                 rb.level = count;
-                                rb.lpercent = level;
+                                rb.percent = level;
                                 rb.cashback = ref->cashback;
-                                rb.segments = to_ref_segments;
+                                rb.segments = (double)to_ref_segments;
                             });
 
          

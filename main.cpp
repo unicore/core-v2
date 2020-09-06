@@ -299,6 +299,11 @@ extern "C" {
                     // shares().withdraw_power_quants_action(eosio::unpack_action_data<withbenefit>());
                     break;
                 };
+                case "withrsegment"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::withrsegment);
+                    
+                    break;  
+                }
                 case "refreshpu"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::refreshpu);
                     // shares().refresh_power_quants_action(eosio::unpack_action_data<refreshpu>());

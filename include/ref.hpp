@@ -31,11 +31,11 @@ namespace eosio {
         eosio::name from;
         uint64_t cashback;
         uint8_t level;
-        uint64_t lpercent;
-        uint128_t segments;
+        uint64_t percent;
+        double segments;
         uint64_t primary_key() const {return id;}
 
-        EOSLIB_SERIALIZE(refbalances, (id)(host)(timepoint_sec)(refs_amount)(win_amount)(amount)(from)(cashback)(level)(lpercent)(segments))
+        EOSLIB_SERIALIZE(refbalances, (id)(host)(timepoint_sec)(refs_amount)(win_amount)(amount)(from)(cashback)(level)(percent)(segments))
     };
 
     typedef eosio::multi_index<"refbalances"_n, refbalances> refbalances_index;

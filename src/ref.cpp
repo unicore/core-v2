@@ -1,5 +1,47 @@
 namespace eosio {
   /**
+   * @brief      Метод вывода остатка партнерского финансового потока
+   * withdraw power quant (withpowerun)
+  */
+  [[eosio::action]] void unicore::withrsegment(eosio::name username, eosio::name host){
+    require_auth(username);
+
+    rstat_index rstats(_me, username.value);
+    account_index account(_me, host.value);
+ 
+    auto acc = account.find(host.value);
+    auto root_symbol = acc->get_root_symbol();
+   
+    auto rstat = rstats.find(host.value);
+    
+    eosio::check(rstat != rstats.end(), "Referal object for current username is not found");
+
+    uint128_t segments = (uint128_t)rstat -> sediment;
+    uint64_t amount = segments / TOTAL_SEGMENTS;
+    if (amount > 0){
+      uint128_t new_sediment = segments - amount * TOTAL_SEGMENTS;
+
+      eosio::asset amount_in_asset = asset(amount, root_symbol);
+
+      rstats.modify(rstat,  username, [&](auto &rs){
+        rs.withdrawed +=  amount_in_asset;
+        rs.sediment = double(new_sediment);
+      });
+
+      action(
+          permission_level{ _me, "active"_n },
+          acc->root_token_contract, "transfer"_n,
+          std::make_tuple( _me, username, amount_in_asset, std::string("SEDIMENT-" + (name{username}.to_string() + "-" + (name{host}).to_string()) ))
+      ).send();
+  
+    } else {
+      eosio::check(false, "Not enought segments for convertation");
+    }
+    
+
+
+  }
+  /**
    * @brief      Метод вывода партнерского финансового потока
    * withdraw power quant (withpowerun)
   */
