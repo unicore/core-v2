@@ -1,7 +1,9 @@
 #include "include/core.hpp"
 
+
 #include "src/shares.cpp"
 #include "src/hosts.cpp"
+#include "src/ref.cpp"
 #include "src/core.cpp"
 #include "src/goals.cpp"
 #include "src/voting.cpp"
@@ -138,14 +140,13 @@ extern "C" {
                         break;
                     }
 
-                    case 666: {
-                        unicore::add_asset_to_fund_action(op.from, op.quantity, name(code));
+                    // case 700: {
+                    //     break;
+                    // }
 
+                    default:
                         break;
-                    }
-
-                    // default:
-                       //check(false, "Subcode is wrong");
+                       
                 }
 
             }
@@ -298,6 +299,11 @@ extern "C" {
                     // shares().withdraw_power_quants_action(eosio::unpack_action_data<withbenefit>());
                     break;
                 };
+                case "withrsegment"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::withrsegment);
+                    
+                    break;  
+                }
                 case "refreshpu"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::refreshpu);
                     // shares().refresh_power_quants_action(eosio::unpack_action_data<refreshpu>());
@@ -361,21 +367,6 @@ extern "C" {
                 case "withdraw"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::withdraw);
                     // fcore().withdraw_action(eosio::unpack_action_data<withdraw>());
-                    break;
-                };
-                case "reg"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::reg);
-                    // fcore().reg_action(eosio::unpack_action_data<reg>());
-                    break;
-                };
-                case "del"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::del);
-                    // fcore().del_action(eosio::unpack_action_data<del>());
-                    break;
-                };
-                case "profupdate"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::profupdate);
-                    // fcore().profupdate_action(eosio::unpack_action_data<profupdate>());
                     break;
                 };
                 case "priorenter"_n.value: {

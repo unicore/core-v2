@@ -809,102 +809,6 @@ void next_pool( eosio::name host){
 }
 
 
-[[eosio::action]] void unicore::del(eosio::name username){
-    require_auth(_partners);
-    partners_index refs(_partners, _partners.value);
-    auto u = refs.find(username.value);
-    refs.erase(u);
-    userscount_index usercounts(_partners, _partners.value);
-    auto usercount = usercounts.find("registered"_n.value);
-    usercounts.modify(usercount, _me, [&](auto &u){
-        u.count = u.count - 1;
-    });
-
-}
-
-/**
- * @brief      Регистрация пользователя в системе. 
- * Характеризуется созданием профиля с ссылкой на приглашающий аккаунт. Приглашающий аккаунт используется в качестве связи для вычисления партнерских структур различного профиля.
- * 
- * TODO ввести порядковые номера  
- *
- * @param[in]  op    The operation
- */
-
-[[eosio::action]] void unicore::reg(eosio::name username, eosio::name referer, std::string meta){
-    
-    eosio::check(has_auth(username) || has_auth(_partners), "missing required authority");
-
-    eosio::check( is_account( username ), "User account does not exist");
-    
-     
-    partners_index refs(_partners, _partners.value);
-    auto ref = refs.find(username.value);
-
-    eosio::check(username != referer, "You cant set the referer yourself");
-    
-    if (username != _me){
-        eosio::check(referer.value != 0, "Registration without referer is not possible");
-        eosio::check( is_account( referer ), "Referer account does not exist");
-        auto pref = refs.find(referer.value);
-        eosio::check(pref != refs.end(), "Referer is not registered in the core");    
-    } 
-
-    
-    userscount_index usercounts(_me, _me.value);
-    auto usercount = usercounts.find("registered"_n.value);
-    uint64_t count = 1;
-
-
-    //TODO eosio::check account registration;
-    // eosio::check(ref == refs.end(), "Referer is already setted");
-    if (ref == refs.end()){
-        if (usercount == usercounts.end()){
-            usercounts.emplace(_me, [&](auto &u){
-                u.id = "registered"_n.value;
-                u.count = count;
-                u.subject = "registered";
-            });
-        } else {
-            count =  usercount -> count + 1;
-            usercounts.modify(usercount, _me, [&](auto &u){
-                u.count = count;
-            });
-        };
-
-        refs.emplace(_me, [&](auto &r){
-            r.id = count;
-            r.username = username;
-            r.referer = referer;
-            r.meta = meta;
-        });
-    } else {
-        require_auth(_partners); //only registrator can change referer
-
-        refs.modify(ref, _me, [&](auto &r){
-            r.referer = referer;
-        });
-    }
-};
-
-/**
- * @brief      Метод обновления профиля
- * Операция обновления профиля позволяет изменить мета-данные аккаунта. 
- * @param[in]  op    The operation
- */
-[[eosio::action]] void unicore::profupdate(eosio::name username, std::string meta){
-    require_auth(username);
-    partners_index refs(_partners, _partners.value);
-
-    auto ref = refs.find(username.value);
-    
-    refs.modify(ref, username, [&](auto &r){
-        r.meta = meta;
-    });
-
-};
-
-
 /**
  * @brief      Публичный метод установки параметров протокола двойной спирали
  *  Вызывается пользователем после базовой операции создания хоста и проведения оплаты. Так же вызывается при установке параметров дочернего хоста. Содержит алгоритм финансового ядра. Производит основные расчеты таблиц курсов и валидирует положительность бизнес-дохода. 
@@ -947,7 +851,7 @@ void next_pool( eosio::name host){
     
 
     eosio::check((overlap > 10000) && (overlap < 20000), "Overlap factor must be greater then 10000 (1.0000) and less then 20000 (2.0000)).");
-    eosio::check(profit_growth <= 20000, "Profit growth factor must be greater or equal 0 (0.0000) and less then 20000 (2.0000)).");
+    eosio::check(profit_growth <= 1000000, "Profit growth factor must be greater or equal 0 (0.0000) and less then 1000000 (100.0000)).");
     eosio::check((loss_percent > 0 ) && ( loss_percent <= 1000000), "Loss Percent must be greater then 0 (0%) and less or equal 10000 (100%)");
     eosio::check((base_rate >= 100) && (base_rate < 1000000000), "Base Rate must be greater or equal 100 and less then 1e9");
     eosio::check((size_of_pool >= 10) && (size_of_pool <= 1000000000000), "Size of Pool must be greater or equal 10 and less then 1e9");
@@ -1104,17 +1008,19 @@ void unicore::deposit ( eosio::name username, eosio::name host, eosio::asset amo
     eosio::check( amount.is_valid(), "Rejected. Invalid quantity" );
 
     partners_index users(_partners,_partners.value);
-    auto user = users.find(username.value);
-    eosio::check(user != users.end(), "User is not registered");
+    // auto user = users.find(username.value);
+
     
-    if (user == users.end()){
+    // eosio::check(user != users.end(), "User is not registered");
+    
+    // if (user == users.end()){
         
-        //TODO eosio::check account registration;
-        users.emplace(_me, [&](auto &r){
-            r.username = username;
-            r.referer = _partners;
-        });
-    }
+    //     //TODO eosio::check account registration;
+    //     users.emplace(_me, [&](auto &r){
+    //         r.username = username;
+    //         r.referer = _partners;
+    //     });
+    // }
     account_index accounts(_me, host.value);
     auto acc = accounts.find(host.value);
 
@@ -2410,7 +2316,8 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                 partners_index refs(_partners, _partners.value);
                 auto ref = refs.find(username.value);
                 eosio::name referer;
-
+                uint8_t count = 1;
+                    
                 if ((ref != refs.end()) && ((ref->referer).value != 0)){
                     referer = ref->referer;
                     eosio::asset paid = asset(0, root_symbol);
@@ -2418,53 +2325,58 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                     /**
                      * Вычисляем размер выплаты для каждого уровня партнеров и производим выплаты.
                      */
-                
+
+
                     for (auto level : acc->levels){
                         if ((ref != refs.end()) && ((ref->referer).value != 0)){
-                            eosio::asset to_ref = asset((bal->ref_amount).amount * level / 100 / ONE_PERCENT , root_symbol);
+                            uint128_t to_ref_segments = (bal->ref_amount).amount * TOTAL_SEGMENTS * level / 100 / ONE_PERCENT;
+
+                            eosio::asset to_ref_amount = asset(to_ref_segments / TOTAL_SEGMENTS, root_symbol);
                             refbalances_index refbalances(_me, referer.value);
                             refbalances.emplace(username, [&](auto &rb){
                                 rb.id = refbalances.available_primary_key();
+                                rb.timepoint_sec = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
                                 rb.host = host;
-                                rb.amount = to_ref;
+                                rb.refs_amount = bal->ref_amount;
+                                rb.win_amount = bal->available;
+                                rb.amount = to_ref_amount;
                                 rb.from = username;
-                                rb.segments = to_ref.amount * TOTAL_SEGMENTS;
+                                rb.level = count;
+                                rb.percent = level;
+                                rb.cashback = ref->cashback;
+                                rb.segments = (double)to_ref_segments;
                             });
 
          
-                            paid += to_ref;
+                            paid += to_ref_amount;
                             
                             ref = refs.find(referer.value);
                             referer = ref->referer;
+                        } else {
+                            break;
                         }
                     };
 
                     /**
-                     * Все неиспользуемые вознаграждения с вышестояющих уровней отправляются на аккаунт хоста сообщества. 
+                     * Все неиспользуемые вознаграждения с вышестояющих уровней отправляются на корпорации 
 
                      */
                     eosio::asset back_to_host = bal->ref_amount - paid;
                     
-                    if (back_to_host.amount>0){
-                        action(
-                            permission_level{ _me, "active"_n },
-                            acc->root_token_contract, "transfer"_n,
-                            std::make_tuple( _me, host, back_to_host, std::string("RHP-" + (name{username}.to_string() + "-" + (name{host}).to_string()) ))
-                        ).send();
-                    };
+                    if (back_to_host.amount > 0){
+                        unicore::spread_to_dacs(host, back_to_host);
+                    }
 
 
                     
                 } else {
                     /**
-                     * Если рефералов у пользователя нет, то переводим все реферальные средства на аккаунт хоста.
+                     * Если рефералов у пользователя нет, то переводим все реферальные средства на корпорации.
                      */
-                    action(
-                        permission_level{ _me, "active"_n },
-                        acc->root_token_contract, "transfer"_n,
-                        std::make_tuple( _me, host, bal->ref_amount, std::string("RHP-" + (name{username}.to_string() + "-" + (name{host}).to_string()) )) 
-                    ).send();
-
+                    if (bal->ref_amount.amount > 0){
+                        unicore::spread_to_dacs(host, bal->ref_amount);
+                    }
+               
                 }
 
             }
@@ -2476,34 +2388,8 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                  * 
                  
                  */
-    
-                dacs_index dacs(_me, host.value);
-                auto dac = dacs.begin();
-                if (dac != dacs.end()){
+                unicore::spread_to_dacs(host, bal->dac_amount);
 
-                    while(dac != dacs.end()) {
-                        
-                        eosio::asset amount_for_dac = asset((bal->dac_amount).amount * dac -> weight / acc-> total_dacs_weight, root_symbol);
-                        
-                        dacs.modify(dac, _me, [&](auto &d){
-
-                            uint128_t dac_income_in_segments = amount_for_dac.amount * TOTAL_SEGMENTS;
-                            
-                            d.income = asset(uint64_t((dac ->income_in_segments + dac_income_in_segments) / TOTAL_SEGMENTS), root_symbol);
-                            d.income_in_segments += amount_for_dac.amount * TOTAL_SEGMENTS;
-                        
-                        });
-
-                        dac++;
-
-                    }
-                } else {
-                    action(
-                        permission_level{ _me, "active"_n },
-                        acc->root_token_contract, "transfer"_n,
-                        std::make_tuple( _me, host, bal->dac_amount, std::string("DAC-" + (name{username}.to_string() + "-" + (name{host}).to_string()))) 
-                    ).send();
-                }
 
 
             }
@@ -2634,6 +2520,52 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
     
     }
 };
+
+    void unicore::spread_to_dacs(eosio::name host, eosio::asset amount){
+
+        dacs_index dacs(_me, host.value);
+        account_index accounts(_me, host.value);
+        auto acc = accounts.find(host.value);
+        auto root_symbol = acc->get_root_symbol();
+
+        eosio::check(amount.symbol == root_symbol, "System error on spead to dacs");
+
+        auto dac = dacs.begin();
+        print("on spread");
+        if (dac != dacs.end()){
+            print("on spread1");
+            while(dac != dacs.end()) {
+                
+                eosio::asset amount_for_dac = asset(amount.amount * dac -> weight / acc-> total_dacs_weight, root_symbol);
+                
+                dacs.modify(dac, _me, [&](auto &d){
+
+                    uint128_t dac_income_in_segments = amount_for_dac.amount * TOTAL_SEGMENTS;
+                    
+                    d.income = asset(uint64_t((dac ->income_in_segments + dac_income_in_segments) / TOTAL_SEGMENTS), root_symbol);
+                    d.income_in_segments += amount_for_dac.amount * TOTAL_SEGMENTS;
+                
+                });
+
+                dac++;
+
+            }
+        }  else {
+
+            print("on spread2");
+            dacs.emplace(_me, [&](auto &d){
+                d.dac = host;
+                d.weight = 1;
+                d.income = amount;
+                d.income_in_segments = amount.amount * TOTAL_SEGMENTS;
+            });
+
+            accounts.modify(acc, _me, [&](auto &h){
+                h.total_dacs_weight = 1;
+            });
+        }
+
+    }
 
     void unicore::add_sale_history(hosts acc, rate rate, spiral sp, eosio::asset amount){
         sale_index sales(_me, acc.username.value);

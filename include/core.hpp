@@ -13,7 +13,9 @@
 #include <eosio/print.hpp>
 #include <eosio/datastream.hpp>
 
+
 #include "hosts.hpp"
+#include "ref.hpp"
 #include "shares.hpp"
 #include "goals.hpp"
 #include "voting.hpp"
@@ -37,14 +39,11 @@ class [[eosio::contract]] unicore : public eosio::contract {
         // uint128_t unicore::combine_ids(const uint64_t &x, const uint64_t &y);
         // uint128_t unicore::combine_ids2(const uint64_t &x, const uint64_t &y);
 
-        [[eosio::action]] void reg(eosio::name username, eosio::name referer, std::string meta);
         
         static eosio::asset convert_to_power(eosio::asset quantity, eosio::name host);
         [[eosio::action]] void convert(eosio::name username, eosio::name host, uint64_t balance_id);
 
-        [[eosio::action]] void del(eosio::name username);
-        [[eosio::action]] void profupdate(eosio::name username, std::string meta);
-
+        
         [[eosio::action]] void setparams(eosio::name host, eosio::name chost, uint64_t size_of_pool,
             uint64_t quants_precision, uint64_t overlap, uint64_t profit_growth, uint64_t base_rate,
             uint64_t loss_percent, uint64_t pool_limit, uint64_t pool_timeout, uint64_t priority_seconds);
@@ -126,7 +125,9 @@ class [[eosio::contract]] unicore : public eosio::contract {
         //MARKETS
         [[eosio::action]] void refreshsh (eosio::name owner, uint64_t id);
         [[eosio::action]] void withpbenefit(eosio::name username, eosio::name host);
-        [[eosio::action]] void withrbenefit(eosio::name username, eosio::name host);
+        [[eosio::action]] void withrsegment(eosio::name username, eosio::name host);
+
+        [[eosio::action]] void withrbenefit(eosio::name username, eosio::name host, std::vector<uint64_t> ids);
         [[eosio::action]] void refreshpu(eosio::name username, eosio::name host);
         [[eosio::action]] void withdrawsh(eosio::name owner, uint64_t id);
         [[eosio::action]] void sellshares(eosio::name username, eosio::name host, uint64_t shares);
@@ -169,6 +170,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
         static void give_shares_with_badge_action (eosio::name host, eosio::name reciever, uint64_t shares);
         static void back_shares_with_badge_action (eosio::name host, eosio::name from, uint64_t shares);
         static void add_sale_history(hosts acc, rate rate, spiral sp, eosio::asset amount);
+
+        static void spread_to_dacs(eosio::name host, eosio::asset amount);
 };
 
 
@@ -250,17 +253,6 @@ class [[eosio::contract]] unicore : public eosio::contract {
     > bwtradegraph_index;
 
     
-    struct [[eosio::table, eosio::contract("unicore")]] refbalances{
-        uint64_t id;
-        eosio::name host;
-        eosio::asset amount;
-        eosio::name from;
-        uint128_t segments;
-        uint64_t primary_key() const {return id;}
-
-        EOSLIB_SERIALIZE(refbalances, (id)(host)(amount)(from)(segments))
-    };
-    typedef eosio::multi_index<"refbalances"_n, refbalances> refbalances_index;
 
 
 
@@ -388,30 +380,13 @@ class [[eosio::contract]] unicore : public eosio::contract {
     typedef eosio::multi_index<"userscount"_n, userscount> userscount_index;
 
 
-    struct [[eosio::table, eosio::contract("unicore")]] partners {
-        eosio::name username;
-        eosio::name referer;
-        uint64_t id;
-        
-        std::string meta;
-        
-        uint64_t primary_key() const{return username.value;}
-        uint64_t byreferer() const{return referer.value;}
-        uint64_t byid() const {return id;}
-
-        EOSLIB_SERIALIZE(partners, (username)(referer)(id)(meta))
-    };
-
-    typedef eosio::multi_index<"partners"_n, partners,
-    eosio::indexed_by<"byreferer"_n, eosio::const_mem_fun<partners, uint64_t, &partners::byreferer>>,
-    eosio::indexed_by<"byid"_n, eosio::const_mem_fun<partners, uint64_t, &partners::byid>>
-    > partners_index;
-
 
     struct  [[eosio::table, eosio::contract("unicore")]] ahosts{
         eosio::name username;
         eosio::string website;
         checksum256 hash;
+        bool is_host = false;
+
         eosio::name type;
         uint64_t votes;
         std::string title;
@@ -431,7 +406,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         }
           
 
-        EOSLIB_SERIALIZE(ahosts, (username)(website)(hash)(type)(votes)(title)(purpose)(manifest)(comments_is_enabled)(meta))
+        EOSLIB_SERIALIZE(ahosts, (username)(website)(hash)(is_host)(type)(votes)(title)(purpose)(manifest)(comments_is_enabled)(meta))
     };
 
     typedef eosio::multi_index<"ahosts"_n, ahosts,
