@@ -69,6 +69,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         static void giftbadge_action(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment);
         static void deposit ( eosio::name username, eosio::name host, eosio::asset amount, eosio::name code, std::string message );
 
+
         //CMS
         [[eosio::action]] void setcontent(eosio::name username, eosio::name type, eosio::name lang, eosio::string content);
         [[eosio::action]] void rmcontent(eosio::name username, eosio::name type);
@@ -92,8 +93,9 @@ class [[eosio::contract]] unicore : public eosio::contract {
         //POT
         [[eosio::action]] void enablesale(eosio::name host, eosio::name token_contract, eosio::asset asset_on_sale, int64_t sale_shift);
         [[eosio::action]] void addhostofund(uint64_t fund_id, eosio::name host);
-        [[eosio::action]] void createfund(eosio::name token_contract, eosio::asset fund_asset, std::string descriptor);
+        static void createfund(eosio::name token_contract, eosio::asset fund_asset, std::string descriptor);
         static eosio::asset buy_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, bool transfer);
+        [[eosio::action]] void transfromgf(eosio::name to, eosio::name token_contract, eosio::asset quantity);
 
 
         //HOST
@@ -109,7 +111,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void adddac(eosio::name username, eosio::name host, uint64_t weight);
         [[eosio::action]] void rmdac(eosio::name username, eosio::name host);
         [[eosio::action]] void withdrdacinc(eosio::name username, eosio::name host);
-        [[eosio::action]] void setwebsite(eosio::name host, eosio::string website);
+        [[eosio::action]] void setwebsite(eosio::name host, eosio::name ahostname, eosio::string website, eosio::name type);
 
         //DATA
         [[eosio::action]] void selldata(eosio::name username, uint64_t id, eosio::string data, eosio::name root_token_contract, eosio::asset amount);
@@ -322,10 +324,10 @@ class [[eosio::contract]] unicore : public eosio::contract {
         uint64_t pool_id;
         uint64_t sell_rate;
         eosio::asset solded;
-
+        eosio::asset total_solded;
         uint64_t primary_key() const {return pool_id;}
 
-        EOSLIB_SERIALIZE(sale, (pool_id)(sell_rate)(solded));
+        EOSLIB_SERIALIZE(sale, (pool_id)(sell_rate)(solded)(total_solded));
     };
 
     typedef eosio::multi_index<"sale"_n, sale> sale_index;

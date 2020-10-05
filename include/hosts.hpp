@@ -42,6 +42,7 @@ namespace eosio {
         eosio::asset delta;
         eosio::asset pool_cost;
         eosio::asset total_in_box;
+        // eosio::asset total_on_convert;
         eosio::asset payment_to_wins;
         eosio::asset payment_to_loss;
         eosio::asset system_income;
@@ -54,7 +55,7 @@ namespace eosio {
         EOSLIB_SERIALIZE(rate, (pool_id)(buy_rate)(sell_rate)(convert_rate)(quant_buy_rate)(quant_sell_rate)(quant_convert_rate)(client_income)(delta)(pool_cost)(total_in_box)(payment_to_wins)(payment_to_loss)(system_income)(live_balance_for_sale)(live_balance_for_convert))
     };
     typedef eosio::multi_index<"rate"_n, rate> rate_index;
-    
+
     struct [[eosio::table, eosio::contract("unicore")]] hosts{
         eosio::name username;
         eosio::time_point_sec registered_at;

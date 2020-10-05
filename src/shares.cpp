@@ -208,7 +208,7 @@ namespace eosio {
           uint128_t user_segments = (double)plog -> power / (double)sincome -> liquid_power * sincome -> hfund_in_segments;
           
           
-          uint64_t user_segments_64 = (uint64_t)(user_segments / TOTAL_SEGMENTS);
+          uint64_t user_segments_64 = (uint64_t)user_segments / TOTAL_SEGMENTS;
           eosio::asset segment_asset = asset(user_segments_64, root_symbol);
           
           print(" usegments: ", (double)user_segments);
@@ -505,9 +505,9 @@ namespace eosio {
 
     
     
-    market.modify( itr, _me, [&]( auto& es ) {
-      es.base.balance = asset((itr -> base).balance.amount - shares, eosio::symbol(eosio::symbol_code("POWER"), 0));
-    });
+    // market.modify( itr, _me, [&]( auto& es ) {
+    //   es.base.balance = asset((itr -> base).balance.amount - shares, eosio::symbol(eosio::symbol_code("POWER"), 0));
+    // });
 
     //Emplace or modify power object of reciever and propagate votes changes;
     if (power_to == power_to_idx.end()){
