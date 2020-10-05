@@ -51,10 +51,7 @@ extern "C" {
                 switch (subintcode){
                     case 100: {
                         //check for code param inside deposit method
-                        //auto cd = name(code.c_str());
-                        //Deposit in the Core
-
-                        //100-alice.tc-message
+                        //100-alice-message
                         
                         eosio::name host; 
                         std::string message = "";
@@ -140,6 +137,21 @@ extern "C" {
                         break;
                     }
 
+                    case 666:{
+                        // execute_action(name(receiver), name(code), &unicore::createfund);
+
+                        auto delimeter2 = parameter.find('-');
+                        std::string parameter2 = parameter.substr(delimeter2+1, parameter.length());
+                        
+                        auto descriptor = parameter2.c_str();
+                        
+
+                        unicore::createfund(name(code), op.quantity, descriptor);
+
+                        // fcore().createfund_action(eosio::unpack_action_data<createfund>());
+                        break;
+                    };
+                
                     // case 700: {
                     //     break;
                     // }
@@ -398,11 +410,6 @@ extern "C" {
                 };
 
                 //POT
-                case "createfund"_n.value:{
-                    execute_action(name(receiver), name(code), &unicore::createfund);
-                    // fcore().createfund_action(eosio::unpack_action_data<createfund>());
-                    break;
-                };
                 case "addhostofund"_n.value:{
                     execute_action(name(receiver), name(code), &unicore::addhostofund);
                     // fcore().connect_host_to_fund_action(eosio::unpack_action_data<addhostofund>());
@@ -413,7 +420,11 @@ extern "C" {
                     // fcore().enablesale_action(eosio::unpack_action_data<enablesale>());
                     break;
                 };
-
+                case "transfromgf"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::transfromgf);
+                    // fcore().enablesale_action(eosio::unpack_action_data<enablesale>());
+                    break;
+                };
             
                 //BADGES
                 case "setbadge"_n.value:{

@@ -46,18 +46,63 @@ namespace eosio {
     };
 
 
-    [[eosio::action]] void unicore::setwebsite(eosio::name host, eosio::string website){
+    [[eosio::action]] void unicore::setwebsite(eosio::name host, eosio::name ahostname, eosio::string website, eosio::name type){
         require_auth(host);
 
-        ahosts_index ahosts(_me, _me.value);
-        auto ahost = ahosts.find(host.value);
+        ahosts_index coreahosts(_me, _me.value);
+        auto corehost = coreahosts.find(ahostname.value);
 
-        eosio::check(ahost != ahosts.end(), "Host is not found");
+        eosio::check(corehost != coreahosts.end(), "Core host is not found");
+        auto hash = corehost -> hashit(website);
+        
+        auto hash_index = coreahosts.template get_index<"byuuid"_n>();
+        auto exist = hash_index.find(hash);
 
-        ahosts.modify(ahost, host, [&](auto &a){
-            a.website = website;
-            a.hash = ahost -> hashit(website);
-        });
+
+        if ( exist != hash_index.end() && exist -> username != host && exist->website != "") {
+            eosio::check(exist == hash_index.end(), "Current website is already setted to some host");
+        }
+
+        coreahosts.modify(corehost, host, [&](auto &ch){
+            ch.website = website;
+            ch.hash = hash;
+            ch.type = type;
+        });        
+
+        ahosts_index coreahostsbyusername(_me, _me.value);
+        auto coreahostbyusername = coreahostsbyusername.find(ahostname.value);
+
+        ahosts_index ahosts(_me, host.value);
+        auto ahost = ahosts.find(ahostname.value);
+        
+        if (ahost == ahosts.end()){
+            
+            ahosts.emplace(host,[&](auto &ah) {
+                ah.username = coreahostbyusername -> username;
+                ah.is_host = coreahostbyusername -> is_host;
+                ah.title = coreahostbyusername -> title;
+                ah.purpose = coreahostbyusername -> purpose;
+                ah.manifest = coreahostbyusername -> manifest;
+                ah.comments_is_enabled = coreahostbyusername->comments_is_enabled;
+                ah.meta = coreahostbyusername -> meta;
+                ah.website = website;
+                ah.hash = hash;
+                ah.type = type;
+            });
+
+        } else {
+
+            ahosts.modify(ahost, host, [&](auto &ah){
+                ah.website = website;
+                ah.hash = hash;
+                ah.type = type;
+            });            
+
+        }    
+    
+        
+
+
         
     }
     /**
