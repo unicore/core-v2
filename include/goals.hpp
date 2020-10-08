@@ -9,6 +9,8 @@
         eosio::name host;
         eosio::name benefactor;
         eosio::time_point_sec created;
+        eosio::time_point_sec start_at;
+        eosio::time_point_sec finish_at;
         std::string parent_permlink;
         std::string permlink;
         std::string title;
@@ -52,7 +54,7 @@
         uint64_t byhost() const {return host.value;}
         uint128_t by_username_and_host() const { return eosio::combine_ids(creator.value, host.value); }
         
-        EOSLIB_SERIALIZE( goals, (id)(hash)(parent_hash)(type)(creator)(host)(benefactor)(created)(parent_permlink)(permlink)(title)(description)(target)(available)(total_votes)(total_tasks)(validated)(filled)(reported)
+        EOSLIB_SERIALIZE( goals, (id)(hash)(parent_hash)(type)(creator)(host)(benefactor)(created)(start_at)(finish_at)(parent_permlink)(permlink)(title)(description)(target)(available)(total_votes)(total_tasks)(validated)(filled)(reported)
             (checked)(report)(withdrawed)(expired_at)(voters)(meta)(with_badge)(badge_id))
     };
 
