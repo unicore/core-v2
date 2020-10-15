@@ -359,11 +359,11 @@ namespace eosio {
     [[eosio::action]] void unicore::edithost(eosio::name architect, eosio::name host, eosio::string title, eosio::string purpose, eosio::string manifest, eosio::string meta){
         require_auth (architect);
 
-        account_index hosts(_me, host.value);
-        auto acc = hosts.find(host.value);
+        account_index accs(_me, host.value);
+        auto acc = accs.find(host.value);
         eosio::check(acc->architect == architect, "You are not architect of current commquanty");
 
-        eosio::check(acc != hosts.end(), "Host is not founded");
+        eosio::check(acc != accs.end(), "Host is not founded");
         
         // eosio::check(purpose.length() > 0, "Purpose should contain a symbols. Describe the idea shortly.");
 
@@ -371,11 +371,11 @@ namespace eosio {
         // eosio::check((title.length() < 1024) && (title.length() > 0) , "Title should be more then 10 symbols and less then 1024");
         
 
-        // hosts.modify(host, architect, [&](auto &h){
-        //     h.purpose = purpose;
-        //     h.meta = meta;
-        //     h.title = title;
-        // });
+        accs.modify(acc, architect, [&](auto &h){
+            h.purpose = purpose;
+            h.meta = meta;
+            h.title = title;
+        });
 
         ahosts_index ahosts(_me, _me.value);
         auto ahost = ahosts.find(host.value);

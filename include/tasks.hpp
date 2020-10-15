@@ -22,7 +22,7 @@
 		bool completed = false;
 		bool active = true;
 		eosio::time_point_sec expired_at;
-
+        std::string meta;
 		uint64_t primary_key()const { return task_id; }
 
         uint64_t bygoal() const {return goal_id; }
@@ -34,7 +34,7 @@
         uint128_t crewithtask() const { return eosio::combine_ids(creator.value, task_id); }
         uint128_t crewithgoal() const { return eosio::combine_ids(creator.value, goal_id); }
 
-	    EOSLIB_SERIALIZE( tasks, (task_id)(goal_id)(creator)(type)(priority)(period)(is_public)(title)(data)(requested)(funded)(remain)(for_each)(curator)(with_badge)(badge_id)(validated)(completed)(active)(expired_at))
+	    EOSLIB_SERIALIZE( tasks, (task_id)(goal_id)(creator)(type)(priority)(period)(is_public)(title)(data)(requested)(funded)(remain)(for_each)(curator)(with_badge)(badge_id)(validated)(completed)(active)(expired_at)(meta))
     };
 
     typedef eosio::multi_index< "tasks"_n, tasks,

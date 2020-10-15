@@ -12,6 +12,7 @@
 #include "src/ipfs.cpp"
 #include "src/cms.cpp"
 #include "src/conditions.cpp"
+#include "src/events.cpp"
 
 using namespace eosio;
 
@@ -525,6 +526,7 @@ extern "C" {
                     break;
                 }
 
+                //DACS
                 case "adddac"_n.value : {
                     execute_action(name(receiver), name(code), &unicore::adddac);
                     break;
@@ -534,10 +536,49 @@ extern "C" {
                     break;
                 }
                 
-                case "withdrdacinc"_n.value : {
+                case "withdrdacinc"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::withdrdacinc);
                     break;
                 }
+
+                //EVENTS
+                case "addevent"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::addevent);
+                    break;
+                }
+                case "rmevent"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::rmevent);
+                    break;
+                }
+                // //EVENTS
+                case "editevent"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::editevent);
+                    break;
+                }
+
+                // //EVENTS
+                case "addlocation"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::addlocation);
+                    break;
+                }
+
+                //EVENTS
+                case "rmlocation"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::rmlocation);
+                    break;
+                }
+                
+                case "addcategory"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::addcategory);
+                    break;
+                }
+                
+                case "rmcategory"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::rmcategory);
+                    break;
+                }
+                
+
 
                 case "fixs"_n.value : {
                     execute_action(name(receiver), name(code), &unicore::fixs);

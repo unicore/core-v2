@@ -26,6 +26,7 @@
 #include "crypto.hpp"
 #include "comments.hpp"
 #include "conditions.hpp"
+#include "events.hpp"
 
 #include "consts.hpp"
 
@@ -155,6 +156,21 @@ class [[eosio::contract]] unicore : public eosio::contract {
         //CONDITIONS
         [[eosio::action]] void setcondition(eosio::name host, eosio::string key, uint64_t value);
         [[eosio::action]] void rmcondition(eosio::name host, uint64_t key); 
+        
+
+        // //EVENTS
+        [[eosio::action]] void addevent(eosio::name host, eosio::name creator, eosio::name lang, eosio::string title, eosio::string permlink, eosio::string descriptor, eosio::time_point_sec start_at, eosio::time_point_sec finish_at, uint64_t category_id, bool is_regular, bool activated, uint64_t location_id, eosio::string geoposition, eosio::string location, eosio::name token_contract, eosio::asset price, eosio::string meta);
+        [[eosio::action]] void editevent(eosio::name host, eosio::name creator, uint64_t id, eosio::name lang, eosio::string title, eosio::string descriptor, eosio::time_point_sec start_at, eosio::time_point_sec finish_at, uint64_t category_id, bool is_regular, bool activated, uint64_t location_id, eosio::string geoposition, eosio::string location, eosio::name token_contract, eosio::asset price, eosio::string meta);
+        [[eosio::action]] void rmevent(eosio::name host, eosio::name creator, uint64_t id);
+        [[eosio::action]] void joinevent(eosio::name host, eosio::name username, uint64_t id);
+
+        [[eosio::action]] void addlocation(eosio::name host, eosio::name coordinator, eosio::string title, eosio::string geoposition, eosio::string meta);
+        [[eosio::action]] void rmlocation(eosio::name host, uint64_t id);
+        [[eosio::action]] void addcategory(eosio::name host, eosio::name lang, eosio::string title);
+        [[eosio::action]] void rmcategory(eosio::name host, uint64_t id);
+
+
+
         static void rmfromhostwl(eosio::name host, eosio::name username);
         static void addtohostwl(eosio::name host, eosio::name username);
         static bool checkcondition(eosio::name host, eosio::string key, uint64_t value);
