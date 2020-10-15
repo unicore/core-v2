@@ -28,7 +28,7 @@
         eosio::asset withdrawed;
 
         eosio::time_point_sec expired_at;
-
+        
         std::vector<eosio::name> voters;
         std::string meta;
         bool with_badge = false;
