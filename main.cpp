@@ -74,15 +74,15 @@ extern "C" {
                         unicore::deposit(op.from, host, op.quantity, name(code), message);
                         break;
                     }
-                    // case 110: {
-                    //     //check for code outside
-                    //     //auto cd = name(code.c_str());
-                    //     //Pay for upgrade
+                    case 110: {
+                        //check for code outside
+                        //auto cd = name(code.c_str());
+                        //Pay for upgrade
                         
-                    //     auto host = name(parameter.c_str());
-                    //     unicore::pay_for_upgrade(host, op.quantity, name(code));
-                    //     break;
-                    // }
+                        auto host = name(parameter.c_str());
+                        unicore::pay_for_upgrade(host, op.quantity, name(code));
+                        break;
+                    }
                     // case 200: {
                     //     //check for code outside
                     //     //auto cd = name(code.c_str());
@@ -152,12 +152,12 @@ extern "C" {
                         break;
                     };
                 
-                    // case 700: {
-                    //     break;
-                    // }
-
-                    default:
+                    case 700: {
                         break;
+                    }
+
+                    // default:
+                        // break;
                        
                 }
 
@@ -170,36 +170,36 @@ extern "C" {
                  }
                 
                 //GOALS
-                //  case "setgoal"_n.value: {
-                //     execute_action(name(receiver), name(code), &unicore::setgoal);
-                //     // goal().set_goal_action(eosio::unpack_action_data<setgoal>());
-                //     break;
-                //  }
-                //  case "editgoal"_n.value: {
-                //     execute_action(name(receiver), name(code), &unicore::editgoal);
-                //     // goal().edit_goal_action(eosio::unpack_action_data<editgoal>());
-                //     break;
-                //  }
-                //  case "delgoal"_n.value: {
-                //     execute_action(name(receiver), name(code), &unicore::delgoal);
-                //     // goal().del_goal_action(eosio::unpack_action_data<delgoal>());
-                //     break;
-                //  }
-                //  case "gsponsor"_n.value : {
-                //     execute_action(name(receiver), name(code), &unicore::gsponsor);
-                //     // goal().gsponsor_action(eosio::unpack_action_data<gsponsor>());
-                //     break;
-                //  }
-                //  case "report"_n.value: {
-                //     execute_action(name(receiver), name(code), &unicore::report);
-                //     // goal().report_action(eosio::unpack_action_data<report>());
-                //     break;
-                //  }
-                //  case "check"_n.value : {
-                //     execute_action(name(receiver), name(code), &unicore::check);
-                //     // goal().check_action(eosio::unpack_action_data<struct check>());
-                //     break;
-                // }
+                 case "setgoal"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::setgoal);
+                    // goal().set_goal_action(eosio::unpack_action_data<setgoal>());
+                    break;
+                 }
+                 case "editgoal"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::editgoal);
+                    // goal().edit_goal_action(eosio::unpack_action_data<editgoal>());
+                    break;
+                 }
+                 case "delgoal"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::delgoal);
+                    // goal().del_goal_action(eosio::unpack_action_data<delgoal>());
+                    break;
+                 }
+                 case "gsponsor"_n.value : {
+                    execute_action(name(receiver), name(code), &unicore::gsponsor);
+                    // goal().gsponsor_action(eosio::unpack_action_data<gsponsor>());
+                    break;
+                 }
+                 case "report"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::report);
+                    // goal().report_action(eosio::unpack_action_data<report>());
+                    break;
+                 }
+                 case "check"_n.value : {
+                    execute_action(name(receiver), name(code), &unicore::check);
+                    // goal().check_action(eosio::unpack_action_data<struct check>());
+                    break;
+                }
 
                 //CMS
                 case "setcontent"_n.value: {
