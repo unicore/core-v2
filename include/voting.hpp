@@ -1,6 +1,3 @@
-  // uint128_t unicore::combine_ids2(const uint64_t &x, const uint64_t &y) {
-  //       return (uint128_t{x} << 64) | y;
-  //   }
 
 	struct [[eosio::table, eosio::contract("unicore")]] votes{
 		uint64_t id;
@@ -12,7 +9,8 @@
 		uint64_t byhost() const {return host.value;}
 		uint128_t idwithhost() const { return eosio::combine_ids(host.value, goal_id); }
 
-	    EOSLIB_SERIALIZE( votes, (id)(goal_id)(host)(power))
+	  EOSLIB_SERIALIZE( votes, (id)(goal_id)(host)(power))
+    
     };
 
 

@@ -1,21 +1,26 @@
-
-
     struct [[eosio::table, eosio::contract("unicore")]]  goals {
         uint64_t id;
-        uint64_t hash;
-        uint64_t parent_hash;
-        uint64_t type;
+        uint64_t parent_id;
+        eosio::name type;
         eosio::name creator;
         eosio::name host;
-        eosio::name benefactor;
+        bool is_batch = false;
+        std::vector<uint64_t> batch;
+        uint64_t benefactors_weight;
         eosio::time_point_sec created;
         eosio::time_point_sec start_at;
         eosio::time_point_sec finish_at;
+        eosio::time_point_sec expired_at;
+        
         std::string parent_permlink;
         std::string permlink;
         std::string title;
         std::string description;
+        
         eosio::asset target;
+        eosio::asset target1;
+        eosio::asset target2;
+        eosio::asset target3;
         eosio::asset available;
 
         int64_t total_votes;
@@ -24,11 +29,11 @@
         bool filled = false;
         bool reported = false;
         bool checked = false;
+        bool comments_is_enabled = true;
+        eosio::name who_can_create_tasks;
         std::string report;
         eosio::asset withdrawed;
 
-        eosio::time_point_sec expired_at;
-        
         std::vector<eosio::name> voters;
         std::string meta;
         bool with_badge = false;
@@ -43,9 +48,9 @@
             return pow(2, 63) + total_votes;
         }
 
-        uint64_t byhash() const {return hash;}
+        uint64_t bytype() const {return type.value;}
 
-        uint64_t byparenthash() const {return parent_hash;}
+        uint64_t byparentid() const {return parent_id;}
 
         uint64_t byfilled() const {return filled; }
         uint64_t bycreated() const {return created.sec_since_epoch(); }
@@ -54,14 +59,14 @@
         uint64_t byhost() const {return host.value;}
         uint128_t by_username_and_host() const { return eosio::combine_ids(creator.value, host.value); }
         
-        EOSLIB_SERIALIZE( goals, (id)(hash)(parent_hash)(type)(creator)(host)(benefactor)(created)(start_at)(finish_at)(parent_permlink)(permlink)(title)(description)(target)(available)(total_votes)(total_tasks)(validated)(filled)(reported)
-            (checked)(report)(withdrawed)(expired_at)(voters)(meta)(with_badge)(badge_id))
+        EOSLIB_SERIALIZE( goals, (id)(parent_id)(type)(creator)(host)(is_batch)(batch)(benefactors_weight)(created)(start_at)(finish_at)(expired_at)(parent_permlink)(permlink)(title)(description)(target)(target1)(target2)(target3)(available)(total_votes)(total_tasks)(validated)(filled)(reported)
+            (checked)(comments_is_enabled)(who_can_create_tasks)(report)(withdrawed)(voters)(meta)(with_badge)(badge_id))
     };
 
     typedef eosio::multi_index <"goals"_n, goals,
+        eosio::indexed_by<"type"_n, eosio::const_mem_fun<goals, uint64_t, &goals::bytype>>,
         eosio::indexed_by<"votes"_n, eosio::const_mem_fun<goals, uint64_t, &goals::byvotes>>,
-        eosio::indexed_by<"hash"_n, eosio::const_mem_fun<goals, uint64_t, &goals::byhash>>,
-        eosio::indexed_by<"parenthash"_n, eosio::const_mem_fun<goals, uint64_t, &goals::byparenthash>>,
+        eosio::indexed_by<"byparentid"_n, eosio::const_mem_fun<goals, uint64_t, &goals::byparentid>>,
         eosio::indexed_by<"filled"_n, eosio::const_mem_fun<goals, uint64_t, &goals::byfilled>>,
         eosio::indexed_by<"creator"_n, eosio::const_mem_fun<goals, uint64_t, &goals::byusername>>,
         eosio::indexed_by<"host"_n, eosio::const_mem_fun<goals, uint64_t, &goals::byhost>>,
@@ -70,5 +75,51 @@
     > goals_index;
 
 
+    struct [[eosio::table, eosio::contract("unicore")]]  goalspartic {
+        uint64_t id;
+        uint64_t goal_id;
+        eosio::name username;
+        eosio::name role;
+        bool completed = false;
+        eosio::time_point_sec expiration;
+        
+        uint64_t primary_key()const { return id; }
+        uint128_t byusergoal() const { return eosio::combine_ids(username.value, goal_id); }
+        
+        uint64_t byusername()const {return username.value;}
+        uint64_t byrole() const {return role.value;}
+
+        EOSLIB_SERIALIZE( goalspartic, (id)(goal_id)(username)(role)(completed)(expiration))
+
+    };
+
+    typedef eosio::multi_index <"goalspartic"_n, goalspartic,
+        eosio::indexed_by<"byusergoal"_n, eosio::const_mem_fun<goalspartic, uint128_t, &goalspartic::byusergoal>>,
+        eosio::indexed_by<"byusername"_n, eosio::const_mem_fun<goalspartic, uint64_t, &goalspartic::byusername>>,
+        eosio::indexed_by<"byrole"_n, eosio::const_mem_fun<goalspartic, uint64_t, &goalspartic::byrole>>
+    > goalspartic_index;
+
+
+    struct [[eosio::table, eosio::contract("unicore")]] benefactors {
+        uint64_t id;
+        uint64_t goal_id;
+        eosio::name benefactor;
+        uint64_t weight;
+        eosio::asset income;
+        uint128_t income_in_segments;
+        eosio::asset withdrawed;
+        eosio::asset income_limit;
+        uint64_t primary_key() const {return id;}  
+        uint64_t bygoalid() const {return goal_id;}
+
+        uint128_t bybengoal() const { return eosio::combine_ids(benefactor.value, goal_id); }
+        
+        EOSLIB_SERIALIZE(benefactors, (id)(goal_id)(benefactor)(weight)(income)(income_in_segments)(withdrawed)(income_limit))      
+    };
+
+    typedef eosio::multi_index <"benefactors"_n, benefactors,
+    eosio::indexed_by<"bygoalid"_n, eosio::const_mem_fun<benefactors, uint64_t, &benefactors::bygoalid>>,
+    eosio::indexed_by<"bybengoal"_n, eosio::const_mem_fun<benefactors, uint128_t, &benefactors::bybengoal>>
+    > benefactors_index;
 
 

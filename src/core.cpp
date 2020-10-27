@@ -15,26 +15,58 @@ namespace eosio{
         });
     }
 
-    [[eosio::action]] void unicore::settype(eosio::name host, eosio::name type){
-        require_auth(host);
+    
 
-        unicore::settype_static(host, type);
+    [[eosio::action]] void unicore::setliqpower(eosio::name host, uint64_t liquid){
+        require_auth(_market);
 
-    }
+        sincome_index sincome(_me, host.value);
 
-    void unicore::settype_static(eosio::name host, eosio::name type){
         account_index accounts(_me, host.value);
         auto acc = accounts.find(host.value);
-        eosio::check(acc != accounts.end(), "Host is not found");
         
-        if (type == "pot"_n) {
-            eosio::check(acc-> sale_is_enabled == true, "Sale is not enabled");
-        };
+        auto sinc = sincome.find(acc->current_pool_id);
+        
+        eosio::name main_host = acc->get_ahost();
+        auto root_symbol = acc->get_root_symbol();
 
-        accounts.modify(acc, host, [&](auto &a){
-            a.type = type;
+        rate_index rates(_me, host.value);
+        auto rate = rates.find(acc->current_pool_num - 1);
+      
+        if (sinc == sincome.end()){
+            sincome.emplace(_me, [&](auto &s){
+                s.max = rate -> system_income;
+                s.pool_id = acc->current_pool_id;
+                s.ahost = main_host;
+                s.cycle_num = acc->current_cycle_num;
+                s.pool_num = acc->current_pool_num;
+                s.liquid_power = liquid;
+                s.total = asset(0, root_symbol);
+                s.paid_to_sys = asset(0, root_symbol);
+                s.paid_to_dacs = asset(0, root_symbol);
+                s.paid_to_cfund = asset(0, root_symbol);
+                s.paid_to_hfund = asset(0, root_symbol);
+                s.paid_to_refs = asset(0, root_symbol);
+                s.hfund_in_segments = 0;
+                s.distributed_segments = 0;
+            }); 
+
+        } else {
+            sincome.modify(sinc, _me, [&](auto &s){
+              s.liquid_power = liquid;
+            });
+        } 
+    }
+
+    [[eosio::action]] void unicore::incrusersegm(eosio::name host, uint64_t pool_id, uint64_t user_segments){
+        require_auth(_market);
+
+        sincome_index sincome(_me, host.value);
+        auto sinc = sincome.find(pool_id);
+
+        sincome.modify(sinc, _me, [&](auto &s){
+          s.distributed_segments += user_segments;
         });
-
     }
 
     eosio::asset unicore::convert_to_power(eosio::asset quantity, eosio::name host){
@@ -174,22 +206,26 @@ namespace eosio{
                         if (need_emit == true){
                             for (auto id : list_for_emit){
                                 auto goal_for_emit = goals.find(id);
-                                eosio::asset total_recieved = goal_for_emit->available + goal_for_emit->withdrawed;
-                                eosio::asset until_fill =  goal_for_emit->target - total_recieved;
-                                
-                                if (each_goal_amount > until_fill){
-                                        for_emit = until_fill; 
-                                        non_emitted = non_emitted + each_goal_amount - until_fill;
-                                    } else{
-                                        for_emit = each_goal_amount;
-                                    };
-                        
-                                fact_emitted += for_emit;
+                                if (goal_for_emit -> type=="goal"_n){
 
-                                goals.modify(goal_for_emit, _me, [&](auto &g){
-                                    g.available = goal_for_emit->available + for_emit;
-                                    g.filled = g.available + g.withdrawed >= g.target;
-                                });
+                                    eosio::asset total_recieved = goal_for_emit->available + goal_for_emit->withdrawed;
+                                    eosio::asset until_fill =  goal_for_emit->target - total_recieved;
+                                    
+                                    if (each_goal_amount > until_fill){
+                                            for_emit = until_fill; 
+                                            non_emitted = non_emitted + each_goal_amount - until_fill;
+                                        } else{
+                                            for_emit = each_goal_amount;
+                                        };
+                            
+                                    fact_emitted += for_emit;
+
+                                    goals.modify(goal_for_emit, _me, [&](auto &g){
+                                        g.available = goal_for_emit->available + for_emit;
+                                        g.filled = g.available + g.withdrawed >= g.target;
+                                    });    
+                                }
+                                
                             }
 
                             emis.modify(emi, _me, [&](auto &e){
@@ -771,7 +807,6 @@ void next_pool( eosio::name host){
     auto root_symbol = account -> get_root_symbol();
     eosio::check(account->parameters_setted == true, "Cannot start host without setted parameters");
     
-
     auto chosts = account->chosts;
 
     if (chosts.begin() == chosts.end()) {
@@ -2005,78 +2040,6 @@ void unicore::createfund(eosio::name token_contract, eosio::asset fund_asset, st
     });
 }
 
-[[eosio::action]] void unicore::withdrdacinc(eosio::name username, eosio::name host){
-    require_auth(username);
-    dacs_index dacs(_me, host.value);
-
-    auto dac = dacs.find(username.value);
-
-    eosio::check(dac != dacs.end(), "DAC is not found");
-    
-    account_index accounts(_me, host.value);
-    auto acc = accounts.find(host.value);
-
-    auto root_symbol = acc->get_root_symbol();
-
-    action(
-        permission_level{ _me, "active"_n },
-        acc->root_token_contract, "transfer"_n,
-        std::make_tuple( _me, username, dac->income, std::string("DAC income before remove")) 
-    ).send();
-
-    dacs.modify(dac, username, [&](auto &d){
-        d.income = asset(0, root_symbol);
-        d.income_in_segments = 0;
-    });
-
-}
-
-[[eosio::action]] void unicore::adddac(eosio::name username, eosio::name host, uint64_t weight) {
-    require_auth(host);
-    account_index accounts(_me, host.value);
-    dacs_index dacs(_me, host.value);
-
-    auto acc = accounts.find(host.value);
-    eosio::check(acc != accounts.end(), "Host is not found");
-    
-    auto root_symbol = acc->get_root_symbol();
-    
-    dacs.emplace(host, [&](auto &d){
-        d.dac = username;
-        d.weight = weight;
-        d.income = asset(0, root_symbol);
-        d.income_in_segments = 0;
-    });
-
-    accounts.modify(acc, host, [&](auto &h){
-        h.total_dacs_weight += weight;
-    });
-};
-
-[[eosio::action]] void unicore::rmdac(eosio::name username, eosio::name host) {
-    require_auth(host);
-    account_index accounts(_me, host.value);
-    dacs_index dacs(_me, host.value);
-
-    auto acc = accounts.find(host.value);
-    eosio::check(acc != accounts.end(), "Host is not found");
-    auto dac = dacs.find(username.value);
-    
-    eosio::check(dac != dacs.end(), "DAC is not found");
-
-    accounts.modify(acc, host, [&](auto &h){
-        h.total_dacs_weight -= dac->weight;
-    });
-    
-    action(
-        permission_level{ _me, "active"_n },
-        acc->root_token_contract, "transfer"_n,
-        std::make_tuple( _me, username, dac->income, std::string("DAC income before remove")) 
-    ).send();
-
-    dacs.erase(dac);
-};
-
 
 /**
  * @brief Публичный метод обмена на жетон распределения по текущему курсу из числа квантов раунда.
@@ -2112,7 +2075,15 @@ void unicore::createfund(eosio::name token_contract, eosio::asset fund_asset, st
 
     unicore::check_and_modify_sale_fund(bal-> if_convert, *acc);
 
-    unicore::buyshares_action ( username, host, bal->if_convert, acc->quote_token_contract );
+    // unicore::buyshares_action ( username, host, bal->if_convert, acc->quote_token_contract );
+    //INSTEAD:
+
+    action(
+        permission_level{ _me, "active"_n },
+        _market, "intbuyshares"_n,
+        std::make_tuple( username, host, bal->if_convert, acc->quote_token_contract ) 
+    ).send();
+      
 
     unicore::add_sale_history(*acc, *rate, *sp, bal-> if_convert);       
     unicore::add_coredhistory(host, username, acc->current_pool_id, bal-> if_convert, "convert", "");
@@ -2120,12 +2091,18 @@ void unicore::createfund(eosio::name token_contract, eosio::asset fund_asset, st
 
 }
 
+[[eosio::action]] void unicore::intbuyaction(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, bool power_auto_buy){
+    require_auth(_proj);
+
+    unicore::buy_action(username, host, quantity, code, power_auto_buy);
+}
+
 /**
  * @brief Публичный метод покупки по текущему курсу из числа квантов раунда.
  *
 */
 
-eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, bool transfer){
+eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, bool power_auto_buy){
     
     account_index accounts(_me, host.value);
     auto acc = accounts.find(host.value);
@@ -2159,7 +2136,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
 
     auto amount_in_quants = quants  /  sp->quants_precision * rate->convert_rate;
 
-    eosio::asset quants_for_user_in_asset = asset(amount_in_quants, (acc->asset_on_sale).symbol);
+    eosio::asset converted_quantity = asset(amount_in_quants, (acc->asset_on_sale).symbol);
     
     pools.modify(pool, _me, [&](auto &p){
         p.remain_quants = pool->remain_quants - quants;
@@ -2170,17 +2147,23 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
 
     });
     
-    unicore::check_and_modify_sale_fund(quants_for_user_in_asset, *acc);
+    unicore::check_and_modify_sale_fund(converted_quantity, *acc);
     
-    if (transfer == true){
+    if (power_auto_buy == false){
         action(
             permission_level{ _me, "active"_n },
             acc->sale_token_contract, "transfer"_n,
-            std::make_tuple( _me, username, quants_for_user_in_asset, std::string("Direct buy")) 
+            std::make_tuple( _me, username, converted_quantity, std::string("Direct buy")) 
+        ).send();
+    } else {
+        action(
+          permission_level{ _me, "active"_n },
+          _market, "intbuyshares"_n,
+          std::make_tuple( from, host, converted_quantity, acc->quote_token_contract )
         ).send();
     }
 
-    unicore::add_sale_history(*acc, *rate, *sp, quants_for_user_in_asset);
+    unicore::add_sale_history(*acc, *rate, *sp, converted_quantity);
     
     unicore::refresh_state(host);
        
@@ -2535,14 +2518,20 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                 
                 unicore::check_and_modify_sale_fund(bal->if_convert, *acc);
 
-                // action(
-                //     permission_level{ _me, "active"_n },
-                //     acc->sale_token_contract, "transfer"_n,
-                //     std::make_tuple( _me, username, bal->if_convert, std::string("WITHC")) 
-                // ).send();
+                action(
+                    permission_level{ _me, "active"_n },
+                    acc->sale_token_contract, "transfer"_n,
+                    std::make_tuple( _me, _market, bal->if_convert, std::string("")) 
+                ).send();
             
-                //TODO buy from market
-                unicore::buyshares_action ( username, host, bal->if_convert, acc->quote_token_contract );
+                // unicore::buyshares_action ( username, host, bal->if_convert, acc->quote_token_contract );
+                // INSTEAD:
+
+                action(
+                    permission_level{ _me, "active"_n },
+                    _market, "intbuyshares"_n,
+                    std::make_tuple( username, host, bal->if_convert, acc->quote_token_contract ) 
+                ).send();
 
                 unicore::add_sale_history(*acc, *rate, *sp, bal->if_convert);
                 unicore::add_coredhistory(host, username, last_pool -> id, bal->if_convert, "c-withdraw", "");    
@@ -2557,52 +2546,6 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
     
     }
 };
-
-    void unicore::spread_to_dacs(eosio::name host, eosio::asset amount){
-
-        dacs_index dacs(_me, host.value);
-        account_index accounts(_me, host.value);
-        auto acc = accounts.find(host.value);
-        auto root_symbol = acc->get_root_symbol();
-
-        eosio::check(amount.symbol == root_symbol, "System error on spead to dacs");
-
-        auto dac = dacs.begin();
-        print("on spread");
-        if (dac != dacs.end()){
-            while(dac != dacs.end()) {
-                
-                eosio::asset amount_for_dac = asset(amount.amount * dac -> weight / acc-> total_dacs_weight, root_symbol);
-                
-                dacs.modify(dac, _me, [&](auto &d){
-
-                    uint128_t dac_income_in_segments = amount_for_dac.amount * TOTAL_SEGMENTS;
-
-                    double income = double(dac ->income_in_segments + dac_income_in_segments) / (double)TOTAL_SEGMENTS;
-
-                    d.income = asset(uint64_t(income), root_symbol);
-                    d.income_in_segments += amount_for_dac.amount * TOTAL_SEGMENTS;
-                
-                });
-
-                dac++;
-
-            }
-        }  else {
-
-            dacs.emplace(_me, [&](auto &d){
-                d.dac = host;
-                d.weight = 1;
-                d.income = amount;
-                d.income_in_segments = amount.amount * TOTAL_SEGMENTS;
-            });
-
-            accounts.modify(acc, _me, [&](auto &h){
-                h.total_dacs_weight = 1;
-            });
-        }
-
-    }
 
     void unicore::add_sale_history(hosts acc, rate rate, spiral sp, eosio::asset amount){
         sale_index sales(_me, acc.username.value);

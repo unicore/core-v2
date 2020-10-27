@@ -3,6 +3,7 @@ namespace eosio {
    * @brief      Метод вывода остатка партнерского финансового потока
    * withdraw power quant (withpowerun)
   */
+  
   [[eosio::action]] void unicore::withrsegment(eosio::name username, eosio::name host){
     require_auth(username);
 
@@ -18,7 +19,8 @@ namespace eosio {
 
     uint128_t segments = (uint128_t)rstat -> sediment;
     uint64_t amount = segments / TOTAL_SEGMENTS;
-    if (amount > 0){
+
+    if (amount > 0) {
       uint128_t new_sediment = segments - amount * TOTAL_SEGMENTS;
 
       eosio::asset amount_in_asset = asset(amount, root_symbol);

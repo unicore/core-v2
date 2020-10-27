@@ -6,56 +6,7 @@
 #include <eosio/crypto.hpp>
 
 namespace eosio {
-   uint128_t combine_ids(const uint64_t &x, const uint64_t &y) {
-        return (uint128_t{x} << 64) | y;
-   };
-
-   struct [[eosio::table, eosio::contract("unicore")]] spiral{
-        uint64_t id;
-        uint64_t size_of_pool;
-        uint64_t quants_precision = 0;
-        uint64_t overlap;
-        uint64_t profit_growth;
-        uint64_t base_rate;
-        uint64_t loss_percent;
-        uint64_t pool_limit;
-        uint64_t pool_timeout;
-        uint64_t priority_seconds;
-
-        uint64_t primary_key() const {return id;}
-
-        EOSLIB_SERIALIZE(spiral, (id)(size_of_pool)(quants_precision)(overlap)(profit_growth)(base_rate)(loss_percent)(pool_limit)(pool_timeout)(priority_seconds))
-    };
-
-    typedef eosio::multi_index<"spiral"_n, spiral> spiral_index;
-
-
-    struct [[eosio::table, eosio::contract("unicore")]] rate {
-        uint64_t pool_id;
-        uint64_t buy_rate=0;
-        uint64_t sell_rate=0;
-        uint64_t convert_rate=0;
-        eosio::asset quant_buy_rate;
-        eosio::asset quant_sell_rate;
-        eosio::asset quant_convert_rate;
-        eosio::asset client_income;
-        eosio::asset delta;
-        eosio::asset pool_cost;
-        eosio::asset total_in_box;
-        // eosio::asset total_on_convert;
-        eosio::asset payment_to_wins;
-        eosio::asset payment_to_loss;
-        eosio::asset system_income;
-        eosio::asset live_balance_for_sale;
-        eosio::asset live_balance_for_convert;
-        
-        
-        uint64_t primary_key() const{return pool_id;}
-
-        EOSLIB_SERIALIZE(rate, (pool_id)(buy_rate)(sell_rate)(convert_rate)(quant_buy_rate)(quant_sell_rate)(quant_convert_rate)(client_income)(delta)(pool_cost)(total_in_box)(payment_to_wins)(payment_to_loss)(system_income)(live_balance_for_sale)(live_balance_for_convert))
-    };
-    typedef eosio::multi_index<"rate"_n, rate> rate_index;
-
+   
     struct [[eosio::table, eosio::contract("unicore")]] hosts{
         eosio::name username;
         eosio::time_point_sec registered_at;
@@ -179,35 +130,36 @@ namespace eosio {
     typedef eosio::multi_index <"hosts"_n, hosts> account_index;
     
 
+    // struct [[eosio::table, eosio::contract("unicore")]] dacs {
+    //     eosio::name dac;
+    //     uint64_t weight;
+    //     eosio::asset income;
+    //     uint128_t income_in_segments;
+    //     eosio::asset withdrawed;
+    //     eosio::asset income_limit;
+    //     uint64_t primary_key() const {return dac.value;}  
 
-    struct [[eosio::table, eosio::contract("unicore")]] dacs {
-        eosio::name dac;
-        uint64_t weight;
-        eosio::asset income;
-        uint128_t income_in_segments;
-        uint64_t primary_key() const {return dac.value;}  
+    //     EOSLIB_SERIALIZE(dacs, (dac)(weight)(income)(income_in_segments)(withdrawed)(income_limit))      
+    // };
 
-        EOSLIB_SERIALIZE(dacs, (dac)(weight)(income)(income_in_segments))      
-    };
-
-    typedef eosio::multi_index <"dacs"_n, dacs> dacs_index;
+    // typedef eosio::multi_index <"dacs"_n, dacs> dacs_index;
 
 
-    struct [[eosio::table, eosio::contract("unicore")]] emission {
-        eosio::name host;
-        uint64_t percent;
-        uint64_t gtop;
-        eosio::asset fund;
+    // struct [[eosio::table, eosio::contract("unicore")]] emission {
+    //     eosio::name host;
+    //     uint64_t percent;
+    //     uint64_t gtop;
+    //     eosio::asset fund;
 
-        uint64_t primary_key() const {return host.value;}
+    //     uint64_t primary_key() const {return host.value;}
         
-        EOSLIB_SERIALIZE(emission, (host)(percent)(gtop)(fund))
-    };
+    //     EOSLIB_SERIALIZE(emission, (host)(percent)(gtop)(fund))
+    // };
 
-    typedef eosio::multi_index<"emission"_n, emission> emission_index;
+    // typedef eosio::multi_index<"emission"_n, emission> emission_index;
 
 
-    struct [[eosio::table, eosio::contract("unicore")]] funds{
+    struct [[eosio::table, eosio::contract("unicore")]] funds {
         uint64_t id;
         eosio::name issuer;
         eosio::name token_contract;
@@ -230,6 +182,7 @@ namespace eosio {
                               &funds::byissuer>>
     > funds_index;
 
+
     struct [[eosio::table, eosio::contract("unicore")]] hostsonfunds{
         uint64_t id;
         uint64_t fund_id;
@@ -247,17 +200,6 @@ namespace eosio {
                               &hostsonfunds::fundandhost>>
     > hostsonfunds_index;
 
-
-
-    struct  [[eosio::table, eosio::contract("unicore")]] cpartners {
-        eosio::name partner;
-        uint64_t level = 0;
-
-        uint64_t primary_key() const{return partner.value;}
-        EOSLIB_SERIALIZE(cpartners, (partner)(level))
-    };
-
-    typedef eosio::multi_index<"cpartners"_n, cpartners> cpartners_index;
 
 
 };
