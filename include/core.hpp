@@ -140,20 +140,20 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
 
         // //MARKETS
-        [[eosio::action]] void setliqpower(eosio::name host, uint64_t liquid);
-        [[eosio::action]] void incrusersegm(eosio::name host, uint64_t pool_id, uint64_t user_segments);
+        // [[eosio::action]] void setliqpower(eosio::name host, uint64_t liquid);
+        // [[eosio::action]] void incrusersegm(eosio::name host, uint64_t pool_id, uint64_t user_segments);
         
-        // [[eosio::action]] void refreshsh (eosio::name owner, uint64_t id);
-        // [[eosio::action]] void withpbenefit(eosio::name username, eosio::name host);
-        // [[eosio::action]] void withrsegment(eosio::name username, eosio::name host);
+        [[eosio::action]] void refreshsh (eosio::name owner, uint64_t id);
+        [[eosio::action]] void withpbenefit(eosio::name username, eosio::name host);
+        [[eosio::action]] void withrsegment(eosio::name username, eosio::name host);
 
-        // [[eosio::action]] void withrbenefit(eosio::name username, eosio::name host, std::vector<uint64_t> ids);
-        // [[eosio::action]] void refreshpu(eosio::name username, eosio::name host);
-        // [[eosio::action]] void withdrawsh(eosio::name owner, uint64_t id);
-        // [[eosio::action]] void sellshares(eosio::name username, eosio::name host, uint64_t shares);
-        // [[eosio::action]] void undelshares(eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares);
-        // static void buyshares_action ( eosio::name buyer, eosio::name host, eosio::asset amount, eosio::name code );
-        // static void delegate_shares_action(eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares);
+        [[eosio::action]] void withrbenefit(eosio::name username, eosio::name host, std::vector<uint64_t> ids);
+        [[eosio::action]] void refreshpu(eosio::name username, eosio::name host);
+        [[eosio::action]] void withdrawsh(eosio::name owner, uint64_t id);
+        [[eosio::action]] void sellshares(eosio::name username, eosio::name host, uint64_t shares);
+        [[eosio::action]] void undelshares(eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares);
+        static void buyshares_action ( eosio::name buyer, eosio::name host, eosio::asset amount, eosio::name code );
+        static void delegate_shares_action(eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares);
         
         //TASKS
         [[eosio::action]] void settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id);

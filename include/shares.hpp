@@ -99,3 +99,16 @@
 
   typedef eosio::multi_index<"vesting"_n, vesting> vesting_index;
 
+
+
+    struct  [[eosio::table, eosio::contract("unicore")]] cpartners {
+        eosio::name partner;
+        eosio::name status;
+
+        uint64_t primary_key() const {return partner.value;}
+        EOSLIB_SERIALIZE(cpartners, (partner)(status))
+    };
+
+    typedef eosio::multi_index<"cpartners"_n, cpartners> cpartners_index;
+
+

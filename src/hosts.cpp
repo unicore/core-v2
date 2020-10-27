@@ -177,8 +177,7 @@ namespace eosio {
         std::vector<eosio::name> empty_dacs;
         std::vector<eosio::name> empty_fhosts;
 
-        gpercents_index gpercents(_core, _me.value);
-        
+        gpercents_index gpercents(_me, _me.value);
         auto syspercent = gpercents.find("system"_n.value);
         eosio::check(syspercent != gpercents.end(), "Contract is not active");
 
@@ -219,8 +218,6 @@ namespace eosio {
             a.hfund_percent = hfund_percent;
             a.sys_percent = syspercent->value;
             a.levels= levels;
-            a.title = title;
-            a.purpose = purpose;
         });
 
         ahosts_index ahosts(_me, _me.value);
@@ -320,13 +317,7 @@ namespace eosio {
 
         if (childs.begin() == childs.end())
     	{
-            
-        action(
-            permission_level{ _me, "active"_n },
-            _market, "createbcr"_n,
-            std::make_tuple( "POWER MARKET", 0, username, host->total_shares, host->quote_amount, host->quote_token_contract, _SHARES_VESTING_DURATION ) 
-          ).send();
-    		// unicore::create_bancor_market();
+    		unicore::create_bancor_market("POWER MARKET", 0, username, host->total_shares, host->quote_amount, host->quote_token_contract, _SHARES_VESTING_DURATION);
 		};
 
 	  
@@ -394,128 +385,6 @@ namespace eosio {
             a.purpose = purpose;
             a.manifest = manifest;
         });
-    }
-
-
-    [[eosio::action]] void unicore::withdrdacinc(eosio::name username, eosio::name host){
-        require_auth(username);
-        dacs_index dacs(_me, host.value);
-
-        auto dac = dacs.find(username.value);
-
-        eosio::check(dac != dacs.end(), "DAC is not found");
-        
-        account_index accounts(_me, host.value);
-        auto acc = accounts.find(host.value);
-
-        auto root_symbol = acc->get_root_symbol();
-        auto income = dac->income;
-        if (income.amount > 0)
-            action(
-                permission_level{ _me, "active"_n },
-                acc->root_token_contract, "transfer"_n,
-                std::make_tuple( _me, username, dac->income, std::string("DAC income before remove")) 
-            ).send();
-
-
-        dacs.modify(dac, username, [&](auto &d){
-            d.income = asset(0, root_symbol);
-            d.income_in_segments = 0;
-            d.withdrawed += income; 
-        });
-
-    }
-
-    [[eosio::action]] void unicore::adddac(eosio::name username, eosio::name host, uint64_t weight) {
-        require_auth(host);
-        account_index accounts(_me, host.value);
-        dacs_index dacs(_me, host.value);
-
-        auto acc = accounts.find(host.value);
-        eosio::check(acc != accounts.end(), "Host is not found");
-        
-        auto root_symbol = acc->get_root_symbol();
-        
-        dacs.emplace(host, [&](auto &d){
-            d.dac = username;
-            d.weight = weight;
-            d.income = asset(0, root_symbol);
-            d.income_in_segments = 0;
-            d.withdrawed = asset(0, root_symbol);
-            d.income_limit = asset(0, root_symbol);
-        });
-
-        accounts.modify(acc, host, [&](auto &h){
-            h.total_dacs_weight += weight;
-        });
-    };
-
-    [[eosio::action]] void unicore::rmdac(eosio::name username, eosio::name host) {
-        require_auth(host);
-        account_index accounts(_me, host.value);
-        dacs_index dacs(_me, host.value);
-
-        auto acc = accounts.find(host.value);
-        eosio::check(acc != accounts.end(), "Host is not found");
-        auto dac = dacs.find(username.value);
-        
-        eosio::check(dac != dacs.end(), "DAC is not found");
-
-        accounts.modify(acc, host, [&](auto &h){
-            h.total_dacs_weight -= dac->weight;
-        });
-        
-        if (dac->income.amount > 0)
-            action(
-                permission_level{ _me, "active"_n },
-                acc->root_token_contract, "transfer"_n,
-                std::make_tuple( _me, username, dac->income, std::string("DAC income before remove")) 
-            ).send();
-
-        dacs.erase(dac);
-    };
-
-
-    void unicore::spread_to_dacs(eosio::name host, eosio::asset amount){
-
-        dacs_index dacs(_me, host.value);
-        account_index accounts(_me, host.value);
-        auto acc = accounts.find(host.value);
-        auto root_symbol = acc->get_root_symbol();
-
-        eosio::check(amount.symbol == root_symbol, "System error on spead to dacs");
-
-        auto dac = dacs.begin();
-        if (dac != dacs.end()){
-            while(dac != dacs.end()) {
-                
-                eosio::asset amount_for_dac = asset(amount.amount * dac -> weight / acc-> total_dacs_weight, root_symbol);
-        
-                dacs.modify(dac, _me, [&](auto &d){
-                    uint128_t dac_income_in_segments = amount_for_dac.amount * TOTAL_SEGMENTS;
-                    double income = double(dac ->income_in_segments + dac_income_in_segments) / (double)TOTAL_SEGMENTS;
-                    d.income = asset(uint64_t(income), root_symbol);
-                    d.income_in_segments += amount_for_dac.amount * TOTAL_SEGMENTS;                
-                });
-
-                dac++;
-
-            }
-        }  else {
-            dacs.emplace(_me, [&](auto &d){
-                d.dac = host;
-                d.weight = 1;
-                d.income = amount;
-                d.income_in_segments = amount.amount * TOTAL_SEGMENTS;
-                d.withdrawed = asset(0, root_symbol);
-                d.income_limit = asset(0, root_symbol);
-            });
-
-            accounts.modify(acc, _me, [&](auto &h){
-                h.total_dacs_weight = 1;
-            });
-        }
-
     }
 
 

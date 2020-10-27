@@ -271,14 +271,14 @@ using namespace eosio;
 
       if (goal->type=="goal"_n){
         eosio::asset converted_quantity = unicore::buy_action(from, host, quantity, acc->root_token_contract, false);
-        // unicore::buyshares_action ( from, host, converted_quantity, acc->quote_token_contract );
+        unicore::buyshares_action ( from, host, converted_quantity, acc->quote_token_contract );
         //INSTEAD:
 
-        action(
-          permission_level{ _me, "active"_n },
-          _market, "intbuyshares"_n,
-          std::make_tuple( from, host, converted_quantity, acc->quote_token_contract )
-        ).send();
+        // action(
+        //   permission_level{ _me, "active"_n },
+        //   _market, "intbuyshares"_n,
+        //   std::make_tuple( from, host, converted_quantity, acc->quote_token_contract )
+        // ).send();
 
       } else if (goal->type=="marathon"_n){
         
