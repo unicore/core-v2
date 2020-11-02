@@ -12,7 +12,6 @@
 #include "src/ipfs.cpp"
 #include "src/cms.cpp"
 #include "src/conditions.cpp"
-#include "src/events.cpp"
 
 using namespace eosio;
 
@@ -37,7 +36,7 @@ extern "C" {
                 auto delimeter = op.memo[3];
                 check(delimeter == '-', "Wrong subcode format. Right format: code[3]-parameter");
                 auto parameter = op.memo.substr(4, op.memo.length());
-                uint64_t subintcode = atoi(subcode.c_str());
+                uint64_t subintcode = atoll(subcode.c_str());
                 
                 //codes:
                 //100 - deposit
@@ -99,7 +98,7 @@ extern "C" {
                         std::string parameter2 = parameter.substr(delimeter2+1, parameter.length());
                         
                         auto host = name(parameter2.c_str());
-                        uint64_t goal_id = atoi(parameter.c_str());    
+                        uint64_t goal_id = atoll(parameter.c_str()); 
                         require_auth(op.from);
 
                         unicore::donate_action(op.from, host, goal_id, op.quantity, name(code));
@@ -113,19 +112,19 @@ extern "C" {
                         break;
                     }
 
-                    case 500: {
-                        //BUY DATA
-                        auto delimeter2 = parameter.find('-');
-                        std::string parameter2 = parameter.substr(delimeter2+1, parameter.length());
+                    // case 500: {
+                    //     //BUY DATA
+                    //     auto delimeter2 = parameter.find('-');
+                    //     std::string parameter2 = parameter.substr(delimeter2+1, parameter.length());
                         
-                        auto owner = name(parameter2.c_str());
-                        auto buyer = op.from;
-                        uint64_t data_id = atoi(parameter.c_str());  
-                        require_auth(buyer);  
+                    //     auto owner = name(parameter2.c_str());
+                    //     auto buyer = op.from;
+                    //     uint64_t data_id = atoll(parameter.c_str());  
+                    //     require_auth(buyer);  
 
-                        unicore::buydata_action(owner, data_id, buyer, op.quantity, name(code));
-                        break;
-                    }
+                    //     unicore::buydata_action(owner, data_id, buyer, op.quantity, name(code));
+                    //     break;
+                    // }
                     case 600: {
                         //BUY QUANTS
                         //direct buy saled quants
@@ -153,12 +152,12 @@ extern "C" {
                         break;
                     };
                 
-                    // case 700: {
-                    //     break;
-                    // }
-
-                    default:
+                    case 700: {
                         break;
+                    }
+
+                    // default:
+                        // break;
                        
                 }
 
@@ -174,11 +173,6 @@ extern "C" {
                  case "setgoal"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::setgoal);
                     // goal().set_goal_action(eosio::unpack_action_data<setgoal>());
-                    break;
-                 }
-                 case "editgoal"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::editgoal);
-                    // goal().edit_goal_action(eosio::unpack_action_data<editgoal>());
                     break;
                  }
                  case "delgoal"_n.value: {
@@ -222,36 +216,36 @@ extern "C" {
                 }
 
 
-                //IPFS
-                case "setstorage"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::setstorage);
-                    // ipfs().setstorage_action(eosio::unpack_action_data<setstorage>());
-                    break;
-                }
+                // //IPFS
+                // case "setstorage"_n.value: {
+                //     execute_action(name(receiver), name(code), &unicore::setstorage);
+                //     // ipfs().setstorage_action(eosio::unpack_action_data<setstorage>());
+                //     break;
+                // }
 
-                case "removeroute"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::removeroute);
-                    // ipfs().removeroute_action(eosio::unpack_action_data<removeroute>());
-                    break;
-                }
+                // case "removeroute"_n.value: {
+                //     execute_action(name(receiver), name(code), &unicore::removeroute);
+                //     // ipfs().removeroute_action(eosio::unpack_action_data<removeroute>());
+                //     break;
+                // }
 
-                case "setipfskey"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::setipfskey);
-                    // ipfs().setipfskey_action(eosio::unpack_action_data<setipfskey>());
-                    break;
-                }
+                // case "setipfskey"_n.value: {
+                //     execute_action(name(receiver), name(code), &unicore::setipfskey);
+                //     // ipfs().setipfskey_action(eosio::unpack_action_data<setipfskey>());
+                //     break;
+                // }
 
-                case "selldata"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::selldata);
-                    // ipfs().selldata_action(eosio::unpack_action_data<selldata>());
-                    break;
-                }
+                // case "selldata"_n.value: {
+                //     execute_action(name(receiver), name(code), &unicore::selldata);
+                //     // ipfs().selldata_action(eosio::unpack_action_data<selldata>());
+                //     break;
+                // }
                 
-                case "dataapprove"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::dataapprove);
-                    // ipfs().orbapprove_action(eosio::unpack_action_data<dataapprove>());
-                    break;
-                }
+                // case "dataapprove"_n.value: {
+                //     execute_action(name(receiver), name(code), &unicore::dataapprove);
+                //     // ipfs().orbapprove_action(eosio::unpack_action_data<dataapprove>());
+                //     break;
+                // }
                
                 //VOTING
                  case "vote"_n.value: { 
@@ -259,6 +253,16 @@ extern "C" {
                     // voting().vote_action(eosio::unpack_action_data<vote>());
                     break;
                  }
+
+                 // case "setliqpower"_n.value: {
+                 //    execute_action(name(receiver), name(code), &unicore::setliqpower);
+                 //    break;
+                 // }
+                 // case "incrusersegm"_n.value: {
+                 //    execute_action(name(receiver), name(code), &unicore::incrusersegm);
+                 //    break;
+                 // }
+
                 //SHARES
                 case "sellshares"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::sellshares);
@@ -541,44 +545,20 @@ extern "C" {
                     break;
                 }
 
-                //EVENTS
-                case "addevent"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::addevent);
+                //BENEFACTORS
+                case "addben"_n.value : {
+                    execute_action(name(receiver), name(code), &unicore::addben);
                     break;
                 }
-                case "rmevent"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::rmevent);
-                    break;
-                }
-                // //EVENTS
-                case "editevent"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::editevent);
-                    break;
-                }
-
-                // //EVENTS
-                case "addlocation"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::addlocation);
-                    break;
-                }
-
-                //EVENTS
-                case "rmlocation"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::rmlocation);
+                case "rmben"_n.value : {
+                    execute_action(name(receiver), name(code), &unicore::rmben);
                     break;
                 }
                 
-                case "addcategory"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::addcategory);
+                case "withdrbeninc"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::withdrbeninc);
                     break;
                 }
-                
-                case "rmcategory"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::rmcategory);
-                    break;
-                }
-                
-
 
                 case "fixs"_n.value : {
                     execute_action(name(receiver), name(code), &unicore::fixs);

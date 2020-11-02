@@ -14,9 +14,10 @@
 	 *
 	 * @param[in]  op    The operation
 	 */
-	[[eosio::action]] void unicore::settask(eosio::name host, eosio::name username, uint64_t goal_id, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t expiration){
+	[[eosio::action]] void unicore::settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id, std::string meta){
 		
-		require_auth(username);
+		require_auth(creator);
+		
 		account_index accounts(_me, host.value);
 		auto acc = accounts.find(host.value);
 		eosio::check(acc != accounts.end(), "Host is not found");
@@ -29,48 +30,122 @@
 		goals_index goals(_me, host.value);
 		auto goal = goals.find(goal_id);
 		eosio::check(goal != goals.end(), "Goal is not found");
+		eosio::check(goal -> who_can_create_tasks == creator || goal->who_can_create_tasks.value == 0, "Only creator can create task for current goal");
 
+		validate_permlink(permlink);
+    
+    //check for uniq permlink
+    auto hash = hash64(permlink);
+    
+    std::vector<uint64_t> batch;
 		tasks_index tasks(_me, host.value);
 		
-		uint64_t task_id = acc -> total_tasks + 1;
-		
-		badge_index badges(_me, host.value);
-
-		if (with_badge == true){
+		if (with_badge == true) {
+			badge_index badges(_me, host.value);
 			auto badge = badges.find(badge_id);
 			eosio::check(badge != badges.end(), "Badge with current ID is not found");
 		}
-		
-		
-		tasks.emplace(username, [&](auto &t){
-			t.creator = username;
-			t.task_id = task_id;
-			t.goal_id = goal_id;
-			t.title = title;
-			t.data = data;
-			t.requested = requested;
-			t.for_each = for_each;
-			t.funded = asset(0, root_symbol);
-			t.remain = asset(0, root_symbol);
-			t.is_public  = is_public;
-			t.validated = username == acc->architect ? true : false;
-			t.with_badge = with_badge;
-			t.badge_id = badge_id;
-			t.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + expiration);
-		});
-		
-    accounts.modify(acc, username, [&](auto &a){
-      a.total_tasks = acc -> total_tasks + 1;
-    });
 
-    goals.modify(goal, username, [&](auto &g){
-    	g.total_tasks = goal -> total_tasks + 1;
-    });
+		auto exist_task = tasks.find(hash);
 
-		if (username == acc->architect) {
+		if (exist_task == tasks.end()) {
 
-			unicore::fundtask(host, task_id, requested, "fund on set by architect");
+			if (parent_batch_id != 0) {
+				auto parent_task = tasks.find(parent_batch_id);
+				eosio::check(parent_task != tasks.end(), "Parent batch is not found");
+				// eosio::check(parent_task -> is_batch == true, "Parent task is not a batch");
+
+				batch = parent_task -> batch;
+				
+				//TODO check for batch length
+				auto itr = std::find(batch.begin(), batch.end(), hash);
+				
+				if (itr == batch.end()){
+					batch.push_back(hash);
+				};
+
+				tasks.modify(parent_task, creator, [&](auto &t){
+					t.batch = batch;
+				});
+
+			};
+
+			tasks.emplace(creator, [&](auto &t){
+				t.host = host;
+				t.creator = creator;
+				t.task_id = hash;
+				t.goal_id = goal_id;
+				t.title = title;
+				t.data = data;
+				t.priority = priority;
+				t.permlink = permlink;
+				t.requested = requested;
+				t.for_each = for_each;
+				t.funded = asset(0, root_symbol);
+				t.remain = asset(0, root_symbol);
+				t.is_public  = is_public;
+				t.is_encrypted = false;
+				t.validated = creator == acc->architect ? true : false;
+				t.with_badge = with_badge;
+				t.badge_id = badge_id;
+				t.duration = duration;
+				t.is_batch = is_batch;
+				t.meta = meta;
+				t.parent_batch_id = parent_batch_id;
+				// t.batch = batch;
+				// t.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + expiration);
+				t.created_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch());
+			});
+			
+	    accounts.modify(acc, creator, [&](auto &a){
+	      a.total_tasks = acc -> total_tasks + 1;
+	    });
+
+	    goals.modify(goal, creator, [&](auto &g){
+	    	g.total_tasks = goal -> total_tasks + 1;
+	    });
+
+		} else {
+
+			tasks.modify(exist_task, creator, [&](auto &t){
+				t.title = title;
+				t.data = data;
+				t.priority = priority;
+				t.requested = requested;
+				t.for_each = for_each;
+				t.is_public = is_public;
+				t.with_badge = with_badge;
+				t.badge_id = badge_id;
+				t.batch = batch;
+				
+			});
+
+
 		}
+
+		
+
+		
+
+		// uint64_t task_id = acc -> total_tasks + 1;
+		
+		
+
+		
+    
+    // auto idx_bv = goals.template get_index<"hash"_n>();
+    // auto exist_permlink = idx_bv.find(hash);
+
+    // eosio::check(exist_task == tasks.end(), "Goal with current permlink is already exist");
+    
+    //TODO check batch for exist every task
+
+
+
+		// if (creator == acc->architect) {
+		// 	unicore::fundtask(host, task_id, requested, "fund on set by architect");
+		// }
+
 	}
 
 	/**
@@ -173,9 +248,8 @@
 		require_auth(username);
 		account_index accounts(_me, host.value);
 		partners_index users(_partners, _partners.value);
-		auto user = users.find(username.value);
-		eosio::check(user != users.end(), "User is not registered on the core");
-		
+
+
 		auto acc = accounts.find(host.value);
 		auto root_symbol = acc->get_root_symbol();
 		
@@ -188,6 +262,18 @@
 		eosio::check(task -> active == true, "Task is not active");
 		eosio::check(task -> is_public == true, "Only public tasks is accessable for now");
 	
+		goals_index goals(_me, host.value);
+		auto goal = goals.find(task-> goal_id);
+
+		if (goal -> type == "marathon"_n){
+			goalspartic_index gparticipants(_me, host.value);
+      auto users_with_id = gparticipants.template get_index<"byusergoal"_n>();
+			auto goal_ids = eosio::combine_ids(username.value, task->goal_id);
+      auto participant = users_with_id.find(goal_ids);
+
+      eosio::check(participant != users_with_id.end(), "Username not participant of the current marathon");
+		};
+		
 		reports_index reports(_me, host.value);
 		
 		auto users_with_id = reports.template get_index<"userwithtask"_n>();
@@ -208,6 +294,7 @@
 			r.balance = asset(0, root_symbol);
 			r.withdrawed = asset(0, root_symbol);
 			r.curator = host;
+			r.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + 30 * 86400);
 		});
 
     accounts.modify(acc, username, [&](auto &a){

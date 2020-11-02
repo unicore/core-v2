@@ -37,15 +37,17 @@ using namespace eosio;
    * 
    * @param[in]  op    The new value
    */
-	[[eosio::action]] void unicore::setgoal(eosio::name username, eosio::name benefactor, eosio::name host, std::string title, std::string permlink, std::string description, eosio::asset target, uint64_t expiration){
-		require_auth(username);
+	[[eosio::action]] void unicore::setgoal(eosio::name creator, eosio::name host, eosio::name type, std::string title, std::string permlink, std::string description, eosio::asset target, uint64_t duration, uint64_t cashback, bool activated, std::string meta){
+		require_auth(creator);
 		
 		goals_index goals(_me, host.value);
 		account_index accounts(_me, host.value);
 
 		partners_index users(_partners, _partners.value);
-    auto user = users.find(username.value);
+    auto user = users.find(creator.value);
     eosio::check(user != users.end(), "User is not registered");
+    
+    eosio::check(cashback <= 100 * ONE_PERCENT, "Cashback should be less or equal 1000000");
 
 		auto acc = accounts.find(host.value);
     auto root_symbol = (acc->root_token).symbol;
@@ -56,41 +58,69 @@ using namespace eosio;
     
     //check for uniq permlink
     auto hash = hash64(permlink);
-    
-    auto idx_bv = goals.template get_index<"hash"_n>();
-    auto exist_permlink = idx_bv.find(hash);
+    auto exist_goal = goals.find(hash);
+    // auto idx_bv = goals.template get_index<"hash"_n>();
+    // auto exist_permlink = idx_bv.find(hash);
 
-    eosio::check(exist_permlink == idx_bv.end(), "Goal with current permlink is already exist");
+    // eosio::check(exist_goal == goals.end(), "Goal with current permlink is already exist");
 
     eosio::check(target.symbol == root_symbol, "Wrong symbol for this host");
     
-    eosio::check(title.length() <= 100, "Short Description is a maximum 100 symbols. Describe the goal shortly");
+    eosio::check(title.length() <= 100 && title.length() > 0, "Short Description is a maximum 100 symbols. Describe the goal shortly");
+    
       auto goal_id =  acc -> total_goals + 1;
 
-      goals.emplace(username, [&](auto &g){
-        g.id = goal_id;
-        g.hash = hash;
-        g.creator = username;
-        g.benefactor = benefactor;
+    if (exist_goal == goals.end()){
+      goals.emplace(creator, [&](auto &g){
+        g.id = hash;
+        g.type = type;
+        // g.hash = hash;
+        g.creator = creator;
+        g.who_can_create_tasks = creator;
         g.created = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
         g.host = host;
         g.permlink = permlink;
+        g.cashback = cashback;
         g.title = title;
         g.description = description;
         g.target = target;
         g.withdrawed = asset(0, root_symbol);
         g.available = asset(0, root_symbol);
         g.validated = validated;
-        g.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + expiration);
+        g.duration = duration;
+        g.meta = meta;
+        g.activated = activated;
       });      
 
-      accounts.modify(acc, username, [&](auto &a){
+      accounts.modify(acc, creator, [&](auto &a){
         a.total_goals = acc -> total_goals + 1;
+      });  
+
+    } else {
+
+      goals.modify(exist_goal, creator, [&](auto &g){
+        g.who_can_create_tasks = creator;
+        g.host = host;
+        g.permlink = permlink;
+        g.cashback = cashback;
+        g.title = title;
+        g.description = description;
+        g.target = target;
+        g.validated = validated;
+        g.duration = duration;
+        g.meta = meta;
+        g.activated = activated;
       });
 
-      if (username == acc->architect) {
-        unicore::dfundgoal(username, host, goal_id, target, "autoset by architect");
-      }
+    }
+
+
+
+      // if (creator == acc->architect && type == "goal"_n) {
+      //   unicore::dfundgoal(creator, host, goal_id, target, "autoset by architect");
+      // }
+
+
 	};
 
 
@@ -122,45 +152,6 @@ using namespace eosio;
 
 
 
-
- /**
-  * @brief      Метод редактирования цели
-  *
-  * @param[in]  op    The operation
-  */
-
-	[[eosio::action]] void unicore::editgoal(uint64_t goal_id, eosio::name username, eosio::name host, eosio::name benefactor, std::string title, std::string description, eosio::asset target){
-		require_auth(username);
-		
-		goals_index goals(_me,host.value);
-    account_index accounts (_me, host.value);
-
-    auto acc = accounts.find(host.value);
-    auto root_symbol = (acc->root_token).symbol;
-    
-    eosio::check(target.symbol == root_symbol, "Wrong symbol for this host");
-
-    eosio::check(title.length() <= 100, "Short Description is a maximum 100 symbols");
-
-    auto goal = goals.find(goal_id);
-    eosio::check(goal != goals.end(), "Goal is not exist");
-    eosio::check(goal->creator == username, "Dont have permissions for edit goal");
-
-    if (goal->target != target){
-    	eosio::check(goal -> validated == false, "Impossible edit amount after validation");
-    };
-
-    goals.modify(goal, username, [&](auto &g){
-    	g.title = title;
-    	g.description = description;
-    	g.benefactor = benefactor;
-    	g.target = target;
-    });
-
-	}
-
-
-
   /**
    * @brief      Метод удаления цели
    *
@@ -186,20 +177,20 @@ using namespace eosio;
 	[[eosio::action]] void unicore::report(eosio::name username, eosio::name host, uint64_t goal_id, std::string report){
 		require_auth(username);
 		
-		goals_index goals(_me, host.value);
+		// goals_index goals(_me, host.value);
 	
-  	account_index accounts(_me, host.value);
-		auto acc = accounts.find(host.value);
-		eosio::check(acc != accounts.end(), "Host is not found");
+  // 	account_index accounts(_me, host.value);
+		// auto acc = accounts.find(host.value);
+		// eosio::check(acc != accounts.end(), "Host is not found");
 
-		auto goal = goals.find(goal_id);
+		// auto goal = goals.find(goal_id);
 
-		eosio::check(username == goal->benefactor, "Only benefactor can set report");
+		// eosio::check(username == goal->benefactor, "Only benefactor can set report");
 		
-		goals.modify(goal, username, [&](auto &g){
-			g.report = report;
-			g.reported = true;
-		});
+		// goals.modify(goal, username, [&](auto &g){
+		// 	g.report = report;
+		// 	g.reported = true;
+		// });
 	}
 
   /**
@@ -264,8 +255,47 @@ using namespace eosio;
 
 
     if (acc -> sale_is_enabled == true && from != host){
-      eosio::asset converted_quantity = unicore::buy_action(from, host, quantity, acc->root_token_contract, false);
-      unicore::buyshares_action ( from, host, converted_quantity, acc->quote_token_contract );
+
+      if (goal->type=="goal"_n){
+        
+        eosio::asset converted_quantity = unicore::buy_action(from, host, quantity, acc->root_token_contract, false);
+        unicore::buyshares_action ( from, host, converted_quantity, acc->quote_token_contract );
+        
+      } else if (goal->type=="marathon"_n){
+        
+        eosio::check(goal->target <= quantity, "Wrong quantity for join the marathon");
+
+        goalspartic_index gparticipants(_me, host.value);
+        
+        auto users_with_id = gparticipants.template get_index<"byusergoal"_n>();
+
+        auto goal_ids = eosio::combine_ids(from.value, goal_id);
+        auto participant = users_with_id.find(goal_ids);
+
+        eosio::check(participant == users_with_id.end(), "Username already participate in the current marathon");
+
+        gparticipants.emplace(_me, [&](auto &p){
+          p.id = gparticipants.available_primary_key();
+          p.goal_id = goal_id;
+          p.role = "participant"_n;
+          p.username = from;
+          p.expiration = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + 30 * 86400);
+        });
+
+        goals.modify(goal, _me, [&](auto &g){
+          g.participants_count += 1;
+        });
+
+        eosio::asset core_quantity = quantity * goal -> cashback / 100 / ONE_PERCENT;
+        eosio::asset benefactors_quantity = quantity - core_quantity;
+
+        print("core_quantity: ", core_quantity);
+        print("benefactors_quantity: ", benefactors_quantity);
+
+        unicore::spread_to_benefactors(host, benefactors_quantity, goal->id);
+        eosio::asset converted_quantity = unicore::buy_action(from, host, core_quantity, acc->root_token_contract, true);
+
+      }
     }
 
 
@@ -338,7 +368,7 @@ using namespace eosio;
 
   /**
    * @brief      Метод вывода баланса цели
-   * Выводит доступный баланс цели на аккаунт бенефактора (постановщика) цели.
+   * Выводит доступный баланс цели на аккаунт создателя цели.
    *
    * @param[in]  op    The operation
    */
@@ -358,13 +388,14 @@ using namespace eosio;
     eosio::check(acc->direct_goal_withdraw == true, "Direct withdraw from goal is prohibited.");
 		eosio::check(goal->creator == username, "You are not owner of this goal");
 		eosio::check((goal->available).amount > 0, "Cannot withdraw a zero amount");
+    eosio::check(goal->type == "goal"_n, "Only goal type can be withdrawed by this method");
 
     eosio::asset on_withdraw = goal->available;
     	
   	action(
       permission_level{ _me, "active"_n },
       acc->root_token_contract, "transfer"_n,
-      std::make_tuple( _me, goal->benefactor, on_withdraw, std::string("Goal Withdraw")) 
+      std::make_tuple( _me, goal->creator, on_withdraw, std::string("Goal Withdraw")) 
     ).send();
 
     goals.modify(goal, username, [&](auto &g){
@@ -373,3 +404,170 @@ using namespace eosio;
     });
 
 	};
+
+
+
+
+    [[eosio::action]] void unicore::withdrbeninc(eosio::name username, eosio::name host, uint64_t goal_id){
+        require_auth(username);
+        benefactors_index benefactors(_me, host.value);
+
+        // auto benefactor = benefactors.find(username.value);
+
+        auto benefactor_with_goal_id = benefactors.template get_index<"bybengoal"_n>();
+        auto benefactor_ids = eosio::combine_ids(username.value, goal_id);
+        auto benefactor = benefactor_with_goal_id.find(benefactor_ids);
+
+        eosio::check(benefactor != benefactor_with_goal_id.end(), "Benefactor is not found");
+        
+        account_index accounts(_me, host.value);
+        auto acc = accounts.find(host.value);
+
+        auto root_symbol = acc->get_root_symbol();
+        auto income = benefactor->income;
+        eosio::check(income.amount > 0, "Only positive amount can be withdrawed");
+
+        action(
+            permission_level{ _me, "active"_n },
+            acc->root_token_contract, "transfer"_n,
+            std::make_tuple( _me, username, income, std::string("benefactor income")) 
+        ).send();
+
+        benefactor_with_goal_id.modify(benefactor, username, [&](auto &d){
+            d.income = asset(0, root_symbol);
+            d.income_in_segments = 0;
+            d.withdrawed += income;
+        });
+
+    }
+
+    [[eosio::action]] void unicore::addben(eosio::name creator, eosio::name username, eosio::name host, uint64_t goal_id, uint64_t weight) {
+        require_auth(creator);
+        
+        account_index accounts(_me, host.value);
+        benefactors_index benefactors(_me, host.value);
+
+        auto benefactor_with_goal_id = benefactors.template get_index<"bybengoal"_n>();
+        auto benefactor_ids = eosio::combine_ids(username.value, goal_id);
+        auto benefactor = benefactor_with_goal_id.find(benefactor_ids);
+        eosio::check(benefactor == benefactor_with_goal_id.end(), "Benefactor is already exist");
+
+        auto acc = accounts.find(host.value);
+        eosio::check(acc != accounts.end(), "Host is not found");
+        auto root_symbol = acc->get_root_symbol();
+        
+        goals_index goals(_me, host.value);
+        auto goal = goals.find(goal_id);
+        
+        eosio::check(creator == goal->creator, "Only goal creator can modify benefactors table");
+        
+        eosio::check(goal != goals.end(), "Marathon is not found");
+
+        benefactors.emplace(creator, [&](auto &d){
+            d.id = benefactors.available_primary_key();
+            d.goal_id = goal_id;
+            d.benefactor = username;
+            d.weight = weight;
+            d.income = asset(0, root_symbol);
+            d.income_in_segments = 0;
+            d.withdrawed = asset(0, root_symbol);
+            d.income_limit = asset(0, root_symbol);
+        });
+
+        
+        goals.modify(goal, creator, [&](auto &h){
+            h.benefactors_weight += weight;
+        });
+    };
+
+    [[eosio::action]] void unicore::rmben(eosio::name creator, eosio::name username, eosio::name host, uint64_t goal_id){
+        require_auth(creator);
+        account_index accounts(_me, host.value);
+        benefactors_index benefactors(_me, host.value);
+
+        auto benefactor_with_goal_id = benefactors.template get_index<"bybengoal"_n>();
+        auto benefactor_ids = eosio::combine_ids(username.value, goal_id);
+        auto benefactor = benefactor_with_goal_id.find(benefactor_ids);
+
+        eosio::check(benefactor != benefactor_with_goal_id.end(), "Benefactor is not found");
+
+        auto acc = accounts.find(host.value);
+        eosio::check(acc != accounts.end(), "Host is not found");
+
+        goals_index goals(_me, host.value);
+        auto goal = goals.find(goal_id);
+        eosio::check(goal != goals.end(), "Marathon is not found");
+        eosio::check(goal->creator == creator, "You are not creator of the goal for set benefactors");
+        
+        goals.modify(goal, creator, [&](auto &h){
+            h.benefactors_weight -= benefactor->weight;
+        });
+        
+        if (benefactor->income.amount > 0)
+          action(
+              permission_level{ _me, "active"_n },
+              acc->root_token_contract, "transfer"_n,
+              std::make_tuple( _me, username, benefactor->income, std::string("Benefactor income before remove")) 
+          ).send();
+
+        benefactor_with_goal_id.erase(benefactor);
+    };
+
+
+    void unicore::spread_to_benefactors(eosio::name host, eosio::asset amount, uint64_t goal_id){
+
+        benefactors_index benefactors(_me, host.value);
+        account_index accounts(_me, host.value);
+        auto acc = accounts.find(host.value);
+        auto root_symbol = acc->get_root_symbol();
+
+        eosio::check(amount.symbol == root_symbol, "System error on spead to dacs");
+        
+        goals_index goals(_me, host.value);
+        auto goal = goals.find(goal_id);
+        eosio::check(goal != goals.end(), "Marathon is not found");
+
+        
+        auto benefactor_with_goal_id = benefactors.template get_index<"bygoalid"_n>();
+        auto benefactor = benefactor_with_goal_id.lower_bound(goal_id);
+        print("benefactor_id", benefactor -> id);
+
+        if (benefactor != benefactor_with_goal_id.end() && benefactor -> goal_id == goal_id){
+            while(benefactor != benefactor_with_goal_id.end() && benefactor -> goal_id == goal_id) {
+                
+                eosio::asset amount_for_benefactor = asset(amount.amount * benefactor -> weight / goal-> benefactors_weight, root_symbol);
+                
+                benefactor_with_goal_id.modify(benefactor, _me, [&](auto &d){
+
+                    uint128_t dac_income_in_segments = amount_for_benefactor.amount * TOTAL_SEGMENTS;
+
+                    double income = double(benefactor ->income_in_segments + dac_income_in_segments) / (double)TOTAL_SEGMENTS;
+
+                    d.income = asset(uint64_t(income), root_symbol);
+                    d.income_in_segments += amount_for_benefactor.amount * TOTAL_SEGMENTS;
+                
+                });
+
+                benefactor++;
+
+            }
+        }  else {
+            
+            benefactors.emplace(_me, [&](auto &d){
+                d.id = benefactors.available_primary_key();
+                d.goal_id = goal_id;
+                d.benefactor = host;
+                d.weight = 1;
+                d.income = amount;
+                d.income_in_segments = amount.amount * TOTAL_SEGMENTS;
+                d.withdrawed = asset(0, root_symbol);
+                d.income_limit = asset(0, root_symbol);
+            });
+
+            goals.modify(goal, _me, [&](auto &h){
+                h.benefactors_weight = 1;
+            });
+        }
+
+    }
+

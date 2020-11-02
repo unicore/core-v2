@@ -24,9 +24,7 @@
 #include "ipfs.hpp"
 #include "cms.hpp"
 #include "crypto.hpp"
-#include "comments.hpp"
 #include "conditions.hpp"
-#include "events.hpp"
 
 #include "consts.hpp"
 
@@ -77,8 +75,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void setcmsconfig(eosio::name username, eosio::string config);
 
         //GOALS
-        [[eosio::action]] void setgoal(eosio::name username, eosio::name benefactor, eosio::name host, std::string title, std::string permlink, std::string description, eosio::asset target, uint64_t expiration);
-        [[eosio::action]] void editgoal(uint64_t goal_id, eosio::name username, eosio::name host, eosio::name benefactor, std::string title, std::string description, eosio::asset target);
+        [[eosio::action]] void setgoal(eosio::name creator, eosio::name host, eosio::name type, std::string title, std::string permlink, std::string description, eosio::asset target, uint64_t duration, uint64_t cashback, bool activated, std::string meta);
         [[eosio::action]] void dfundgoal(eosio::name architect, eosio::name host, uint64_t goal_id, eosio::asset amount, std::string comment);
         [[eosio::action]] void delgoal(eosio::name username, eosio::name host, uint64_t goal_id);
         [[eosio::action]] void report(eosio::name username, eosio::name host, uint64_t goal_id, std::string report);
@@ -95,7 +92,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void enablesale(eosio::name host, eosio::name token_contract, eosio::asset asset_on_sale, int64_t sale_shift);
         [[eosio::action]] void addhostofund(uint64_t fund_id, eosio::name host);
         static void createfund(eosio::name token_contract, eosio::asset fund_asset, std::string descriptor);
-        static eosio::asset buy_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, bool transfer);
+        static eosio::asset buy_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, bool transfer, eosio::asset summ);
         [[eosio::action]] void transfromgf(eosio::name to, eosio::name token_contract, eosio::asset quantity);
 
 
@@ -108,24 +105,43 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void settype(eosio::name host, eosio::name type);
         static void settype_static(eosio::name host, eosio::name type);
 
+        //BENEFACTORS
+        static void spread_to_benefactors(eosio::name host, eosio::asset amount, uint64_t goal_id);
+        [[eosio::action]] void rmben(eosio::name creator, eosio::name username, eosio::name host, uint64_t goal_id);
+        [[eosio::action]] void addben(eosio::name creator, eosio::name username, eosio::name host, uint64_t goal_id, uint64_t weight);
+        [[eosio::action]] void withdrbeninc(eosio::name username, eosio::name host, uint64_t goal_id);
+        
+
         //DACS
         [[eosio::action]] void adddac(eosio::name username, eosio::name host, uint64_t weight);
         [[eosio::action]] void rmdac(eosio::name username, eosio::name host);
+        static void spread_to_dacs(eosio::name host, eosio::asset amount);
+
         [[eosio::action]] void withdrdacinc(eosio::name username, eosio::name host);
         [[eosio::action]] void setwebsite(eosio::name host, eosio::name ahostname, eosio::string website, eosio::name type);
 
-        //DATA
-        [[eosio::action]] void selldata(eosio::name username, uint64_t id, eosio::string data, eosio::name root_token_contract, eosio::asset amount);
-        [[eosio::action]] void dataapprove(eosio::name username, eosio::name owner, eosio::name who, uint64_t order_id, eosio::string message);
-        // [[eosio::action]] void datadispute(eosio::name username, eosio::string data, eosio::name root_token_contract, eosio::asset amount);
-        // [[eosio::action]] void datarelease(eosio::name username, eosio::string data, eosio::name root_token_contract, eosio::asset amount);
-        [[eosio::action]] void setstorage(eosio::name username, uint64_t id, eosio::string name, eosio::string address);
-        [[eosio::action]] void removeroute(eosio::name username, uint64_t id);
-        [[eosio::action]] void setipfskey (eosio::name username, eosio::string pkey, eosio::string meta);
-        
-        static void buydata_action(eosio::name owner, uint64_t data_id, eosio::name buyer, eosio::asset quantity, eosio::name code);
 
-        //MARKETS
+
+
+        // //DATA
+        // [[eosio::action]] void selldata(eosio::name username, uint64_t id, eosio::string data, eosio::name root_token_contract, eosio::asset amount);
+        // [[eosio::action]] void dataapprove(eosio::name username, eosio::name owner, eosio::name who, uint64_t order_id, eosio::string message);
+        // // [[eosio::action]] void datadispute(eosio::name username, eosio::string data, eosio::name root_token_contract, eosio::asset amount);
+        // // [[eosio::action]] void datarelease(eosio::name username, eosio::string data, eosio::name root_token_contract, eosio::asset amount);
+        // [[eosio::action]] void setstorage(eosio::name username, uint64_t id, eosio::string name, eosio::string address);
+        // [[eosio::action]] void removeroute(eosio::name username, uint64_t id);
+        // [[eosio::action]] void setipfskey (eosio::name username, eosio::string pkey, eosio::string meta);
+        
+        // static void buydata_action(eosio::name owner, uint64_t data_id, eosio::name buyer, eosio::asset quantity, eosio::name code);
+
+
+
+
+
+        // //MARKETS
+        // [[eosio::action]] void setliqpower(eosio::name host, uint64_t liquid);
+        // [[eosio::action]] void incrusersegm(eosio::name host, uint64_t pool_id, uint64_t user_segments);
+        
         [[eosio::action]] void refreshsh (eosio::name owner, uint64_t id);
         [[eosio::action]] void withpbenefit(eosio::name username, eosio::name host);
         [[eosio::action]] void withrsegment(eosio::name username, eosio::name host);
@@ -139,10 +155,11 @@ class [[eosio::contract]] unicore : public eosio::contract {
         static void delegate_shares_action(eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares);
         
         //TASKS
-        [[eosio::action]] void settask(eosio::name host, eosio::name username, uint64_t goal_id, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t expiration);
+        [[eosio::action]] void settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id, std::string meta);
         [[eosio::action]] void fundtask(eosio::name host, uint64_t task_id, eosio::asset amount, eosio::string comment);
         [[eosio::action]] void tactivate(eosio::name host, uint64_t task_id);
         [[eosio::action]] void tdeactivate(eosio::name host, uint64_t task_id);
+        
         [[eosio::action]] void setreport(eosio::name host, eosio::name username, uint64_t task_id, eosio::string data);
         [[eosio::action]] void editreport(eosio::name host, eosio::name username, uint64_t report_id, eosio::string data);
         [[eosio::action]] void approver(eosio::name host, uint64_t report_id, eosio::string comment); 
@@ -156,21 +173,6 @@ class [[eosio::contract]] unicore : public eosio::contract {
         //CONDITIONS
         [[eosio::action]] void setcondition(eosio::name host, eosio::string key, uint64_t value);
         [[eosio::action]] void rmcondition(eosio::name host, uint64_t key); 
-        
-
-        // //EVENTS
-        [[eosio::action]] void addevent(eosio::name host, eosio::name creator, eosio::name lang, eosio::string title, eosio::string permlink, eosio::string descriptor, eosio::time_point_sec start_at, eosio::time_point_sec finish_at, uint64_t category_id, bool is_regular, bool activated, uint64_t location_id, eosio::string geoposition, eosio::string location, eosio::name token_contract, eosio::asset price, eosio::string meta);
-        [[eosio::action]] void editevent(eosio::name host, eosio::name creator, uint64_t id, eosio::name lang, eosio::string title, eosio::string descriptor, eosio::time_point_sec start_at, eosio::time_point_sec finish_at, uint64_t category_id, bool is_regular, bool activated, uint64_t location_id, eosio::string geoposition, eosio::string location, eosio::name token_contract, eosio::asset price, eosio::string meta);
-        [[eosio::action]] void rmevent(eosio::name host, eosio::name creator, uint64_t id);
-        [[eosio::action]] void joinevent(eosio::name host, eosio::name username, uint64_t id);
-
-        [[eosio::action]] void addlocation(eosio::name host, eosio::name coordinator, eosio::string title, eosio::string geoposition, eosio::string meta);
-        [[eosio::action]] void rmlocation(eosio::name host, uint64_t id);
-        [[eosio::action]] void addcategory(eosio::name host, eosio::name lang, eosio::string title);
-        [[eosio::action]] void rmcategory(eosio::name host, uint64_t id);
-
-
-
         static void rmfromhostwl(eosio::name host, eosio::name username);
         static void addtohostwl(eosio::name host, eosio::name username);
         static bool checkcondition(eosio::name host, eosio::string key, uint64_t value);
@@ -189,7 +191,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         static void back_shares_with_badge_action (eosio::name host, eosio::name from, uint64_t shares);
         static void add_sale_history(hosts acc, rate rate, spiral sp, eosio::asset amount);
 
-        static void spread_to_dacs(eosio::name host, eosio::asset amount);
+        
 };
 
 

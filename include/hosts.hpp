@@ -179,15 +179,16 @@ namespace eosio {
     typedef eosio::multi_index <"hosts"_n, hosts> account_index;
     
 
-
     struct [[eosio::table, eosio::contract("unicore")]] dacs {
         eosio::name dac;
         uint64_t weight;
         eosio::asset income;
         uint128_t income_in_segments;
+        eosio::asset withdrawed;
+        eosio::asset income_limit;
         uint64_t primary_key() const {return dac.value;}  
 
-        EOSLIB_SERIALIZE(dacs, (dac)(weight)(income)(income_in_segments))      
+        EOSLIB_SERIALIZE(dacs, (dac)(weight)(income)(income_in_segments)(withdrawed)(income_limit))      
     };
 
     typedef eosio::multi_index <"dacs"_n, dacs> dacs_index;
@@ -247,17 +248,6 @@ namespace eosio {
                               &hostsonfunds::fundandhost>>
     > hostsonfunds_index;
 
-
-
-    struct  [[eosio::table, eosio::contract("unicore")]] cpartners {
-        eosio::name partner;
-        uint64_t level = 0;
-
-        uint64_t primary_key() const{return partner.value;}
-        EOSLIB_SERIALIZE(cpartners, (partner)(level))
-    };
-
-    typedef eosio::multi_index<"cpartners"_n, cpartners> cpartners_index;
 
 
 };

@@ -1,6 +1,6 @@
 	
 
-  struct [[eosio::table, eosio::contract("unicore")]] power{
+  struct [[eosio::table, eosio::contract("unicore")]] power {
 		eosio::name host;
     uint64_t power;
 		uint64_t staked;
@@ -14,7 +14,7 @@
 	typedef eosio::multi_index<"power"_n, power> power_index;
 
 
-  struct [[eosio::table, eosio::contract("unicore")]] pstats{
+  struct [[eosio::table, eosio::contract("unicore")]] pstats {
     eosio::name host;
     eosio::asset total_available_in_asset;
     uint64_t pflow_last_withdrawed_pool_id;
@@ -32,7 +32,7 @@
 
   typedef eosio::multi_index<"pstats"_n, pstats> pstats_index;
 
-  struct [[eosio::table, eosio::contract("unicore")]] plog{
+  struct [[eosio::table, eosio::contract("unicore")]] plog {
     uint64_t id;
     eosio::name host;
     uint64_t pool_id;
@@ -54,7 +54,7 @@
 
 
 
-  struct [[eosio::table, eosio::contract("unicore")]] dlog{
+  struct [[eosio::table, eosio::contract("unicore")]] dlog {
     uint64_t id;
     eosio::name host;
     uint64_t pool_id;
@@ -70,7 +70,7 @@
   typedef eosio::multi_index<"dlog"_n, dlog> dlog_index;
 
 
-	struct [[eosio::table, eosio::contract("unicore")]] delegations{
+	struct [[eosio::table, eosio::contract("unicore")]] delegations {
 		eosio::name reciever;
 		uint64_t shares;
 
@@ -82,7 +82,7 @@
 	typedef eosio::multi_index<"delegations"_n, delegations> delegation_index;
 
 
-  struct [[eosio::table, eosio::contract("unicore")]] vesting{
+  struct [[eosio::table, eosio::contract("unicore")]] vesting {
   	uint64_t id;
     eosio::name host;
   	eosio::name owner;
@@ -98,4 +98,17 @@
   };
 
   typedef eosio::multi_index<"vesting"_n, vesting> vesting_index;
+
+
+
+    struct  [[eosio::table, eosio::contract("unicore")]] cpartners {
+        eosio::name partner;
+        eosio::name status;
+
+        uint64_t primary_key() const {return partner.value;}
+        EOSLIB_SERIALIZE(cpartners, (partner)(status))
+    };
+
+    typedef eosio::multi_index<"cpartners"_n, cpartners> cpartners_index;
+
 

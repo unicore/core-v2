@@ -3,12 +3,14 @@
 	struct [[eosio::table, eosio::contract("unicore")]] tasks{
 		uint64_t task_id;
 		uint64_t goal_id;
+        eosio::name host;
         eosio::name creator;
-        
+        std::string permlink;
         uint64_t type;
 		uint64_t priority;
 		uint64_t period;
 		bool is_public = true;
+        eosio::name doer;
 		eosio::string title;
 		eosio::string data;
 		eosio::asset requested;
@@ -21,10 +23,19 @@
 		bool validated = false;
 		bool completed = false;
 		bool active = true;
+        eosio::time_point_sec created_at;
 		eosio::time_point_sec expired_at;
+        bool is_batch = false;
+        std::vector<uint64_t> batch;
+        uint64_t parent_batch_id;
+        uint64_t duration;
+        bool is_encrypted = false;
+        std::string public_key;
         std::string meta;
-		uint64_t primary_key()const { return task_id; }
 
+		uint64_t primary_key()const { return task_id; }
+        uint64_t bycreator() const {return creator.value;}
+        uint64_t bycurator() const {return curator.value;}
         uint64_t bygoal() const {return goal_id; }
         uint128_t goalandtask() const { return eosio::combine_ids(goal_id, task_id); }
         uint64_t bytype() const {return type; }
@@ -33,8 +44,8 @@
         uint64_t bybadge() const {return badge_id; }
         uint128_t crewithtask() const { return eosio::combine_ids(creator.value, task_id); }
         uint128_t crewithgoal() const { return eosio::combine_ids(creator.value, goal_id); }
-
-	    EOSLIB_SERIALIZE( tasks, (task_id)(goal_id)(creator)(type)(priority)(period)(is_public)(title)(data)(requested)(funded)(remain)(for_each)(curator)(with_badge)(badge_id)(validated)(completed)(active)(expired_at)(meta))
+        
+	    EOSLIB_SERIALIZE( tasks, (task_id)(goal_id)(host)(creator)(permlink)(type)(priority)(period)(is_public)(doer)(title)(data)(requested)(funded)(remain)(for_each)(curator)(with_badge)(badge_id)(validated)(completed)(active)(created_at)(expired_at)(is_batch)(batch)(parent_batch_id)(duration)(is_encrypted)(public_key)(meta))
     };
 
     typedef eosio::multi_index< "tasks"_n, tasks,
@@ -45,9 +56,9 @@
         eosio::indexed_by<"byhasbadge"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::byhasbadge>>,
         eosio::indexed_by<"bybadge"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bybadge>>,
         eosio::indexed_by<"crewithtask"_n, eosio::const_mem_fun<tasks, uint128_t, &tasks::crewithtask>>,
-        eosio::indexed_by<"crewithgoal"_n, eosio::const_mem_fun<tasks, uint128_t, &tasks::crewithgoal>>
-        
-        
+        eosio::indexed_by<"crewithgoal"_n, eosio::const_mem_fun<tasks, uint128_t, &tasks::crewithgoal>>,
+        eosio::indexed_by<"bycreator"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bycreator>>,
+        eosio::indexed_by<"bycurator"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bycurator>>
     > tasks_index;
 
 
@@ -68,13 +79,17 @@
         eosio::time_point_sec expired_at;
     	
         uint64_t primary_key() const {return report_id;}
-		
+		uint64_t byusername() const {return username.value;}
+        uint128_t userwithgoal() const { return eosio::combine_ids(username.value, goal_id); }
         uint128_t userwithtask() const { return eosio::combine_ids(username.value, task_id); }
+        
 
     	EOSLIB_SERIALIZE(reports, (report_id)(task_id)(goal_id)(type)(username)(curator)(data)(requested)(balance)(withdrawed)(need_check)(approved)(comment)(expired_at))
     };
 
     typedef eosio::multi_index< "reports"_n, reports,
-    	eosio::indexed_by<"userwithtask"_n, eosio::const_mem_fun<reports, uint128_t, 
-                              &reports::userwithtask>>
+        eosio::indexed_by<"userwithtask"_n, eosio::const_mem_fun<reports, uint128_t, &reports::userwithtask>>,
+        eosio::indexed_by<"userwithgoal"_n, eosio::const_mem_fun<reports, uint128_t, &reports::userwithgoal>>,
+        eosio::indexed_by<"byusername"_n, eosio::const_mem_fun<reports, uint64_t, &reports::byusername>>        
+        
     > reports_index;
