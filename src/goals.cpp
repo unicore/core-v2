@@ -37,7 +37,7 @@ using namespace eosio;
    * 
    * @param[in]  op    The new value
    */
-	[[eosio::action]] void unicore::setgoal(eosio::name creator, eosio::name benefactor, eosio::name host, eosio::name type, std::string title, std::string permlink, std::string description, eosio::asset target, uint64_t expiration){
+	[[eosio::action]] void unicore::setgoal(eosio::name creator, eosio::name host, eosio::name type, std::string title, std::string permlink, std::string description, eosio::asset target, uint64_t duration, uint64_t cashback, bool activated, std::string meta){
 		require_auth(creator);
 		
 		goals_index goals(_me, host.value);
@@ -46,6 +46,8 @@ using namespace eosio;
 		partners_index users(_partners, _partners.value);
     auto user = users.find(creator.value);
     eosio::check(user != users.end(), "User is not registered");
+    
+    eosio::check(cashback <= 100 * ONE_PERCENT, "Cashback should be less or equal 1000000");
 
 		auto acc = accounts.find(host.value);
     auto root_symbol = (acc->root_token).symbol;
@@ -56,11 +58,11 @@ using namespace eosio;
     
     //check for uniq permlink
     auto hash = hash64(permlink);
-    auto exist_permlink = goals.find(hash);
+    auto exist_goal = goals.find(hash);
     // auto idx_bv = goals.template get_index<"hash"_n>();
     // auto exist_permlink = idx_bv.find(hash);
 
-    eosio::check(exist_permlink == goals.end(), "Goal with current permlink is already exist");
+    // eosio::check(exist_goal == goals.end(), "Goal with current permlink is already exist");
 
     eosio::check(target.symbol == root_symbol, "Wrong symbol for this host");
     
@@ -68,6 +70,7 @@ using namespace eosio;
     
       auto goal_id =  acc -> total_goals + 1;
 
+    if (exist_goal == goals.end()){
       goals.emplace(creator, [&](auto &g){
         g.id = hash;
         g.type = type;
@@ -77,18 +80,40 @@ using namespace eosio;
         g.created = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
         g.host = host;
         g.permlink = permlink;
+        g.cashback = cashback;
         g.title = title;
         g.description = description;
         g.target = target;
         g.withdrawed = asset(0, root_symbol);
         g.available = asset(0, root_symbol);
         g.validated = validated;
-        g.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + expiration);
+        g.duration = duration;
+        g.meta = meta;
+        g.activated = activated;
       });      
 
       accounts.modify(acc, creator, [&](auto &a){
         a.total_goals = acc -> total_goals + 1;
+      });  
+
+    } else {
+
+      goals.modify(exist_goal, creator, [&](auto &g){
+        g.who_can_create_tasks = creator;
+        g.host = host;
+        g.permlink = permlink;
+        g.cashback = cashback;
+        g.title = title;
+        g.description = description;
+        g.target = target;
+        g.validated = validated;
+        g.duration = duration;
+        g.meta = meta;
+        g.activated = activated;
       });
+
+    }
+
 
 
       // if (creator == acc->architect && type == "goal"_n) {
@@ -124,44 +149,6 @@ using namespace eosio;
     });
 
 	};
-
-
-
-
- /**
-  * @brief      Метод редактирования цели
-  *
-  * @param[in]  op    The operation
-  */
-
-	[[eosio::action]] void unicore::editgoal(uint64_t goal_id, eosio::name username, eosio::name host, eosio::name benefactor, std::string title, std::string description, eosio::asset target){
-		require_auth(username);
-		
-		goals_index goals(_me,host.value);
-    account_index accounts (_me, host.value);
-
-    auto acc = accounts.find(host.value);
-    auto root_symbol = (acc->root_token).symbol;
-    
-    eosio::check(target.symbol == root_symbol, "Wrong symbol for this host");
-
-    eosio::check(title.length() <= 100, "Short Description is a maximum 100 symbols");
-
-    auto goal = goals.find(goal_id);
-    eosio::check(goal != goals.end(), "Goal is not exist");
-    eosio::check(goal->creator == username, "Dont have permissions for edit goal");
-
-    if (goal->target != target){
-    	eosio::check(goal -> validated == false, "Impossible edit amount after validation");
-    };
-
-    goals.modify(goal, username, [&](auto &g){
-    	g.title = title;
-    	g.description = description;
-    	g.target = target;
-    });
-
-	}
 
 
 
@@ -270,16 +257,10 @@ using namespace eosio;
     if (acc -> sale_is_enabled == true && from != host){
 
       if (goal->type=="goal"_n){
+        
         eosio::asset converted_quantity = unicore::buy_action(from, host, quantity, acc->root_token_contract, false);
         unicore::buyshares_action ( from, host, converted_quantity, acc->quote_token_contract );
-        //INSTEAD:
-
-        // action(
-        //   permission_level{ _me, "active"_n },
-        //   _market, "intbuyshares"_n,
-        //   std::make_tuple( from, host, converted_quantity, acc->quote_token_contract )
-        // ).send();
-
+        
       } else if (goal->type=="marathon"_n){
         
         eosio::check(goal->target <= quantity, "Wrong quantity for join the marathon");
@@ -301,7 +282,19 @@ using namespace eosio;
           p.expiration = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + 30 * 86400);
         });
 
-        unicore::spread_to_benefactors(host, quantity, goal->id);
+        goals.modify(goal, _me, [&](auto &g){
+          g.participants_count += 1;
+        });
+
+        eosio::asset core_quantity = quantity * goal -> cashback / 100 / ONE_PERCENT;
+        eosio::asset benefactors_quantity = quantity - core_quantity;
+
+        print("core_quantity: ", core_quantity);
+        print("benefactors_quantity: ", benefactors_quantity);
+
+        unicore::spread_to_benefactors(host, benefactors_quantity, goal->id);
+        eosio::asset converted_quantity = unicore::buy_action(from, host, core_quantity, acc->root_token_contract, true);
+
       }
     }
 

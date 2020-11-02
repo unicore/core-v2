@@ -11,7 +11,10 @@
         eosio::time_point_sec start_at;
         eosio::time_point_sec finish_at;
         eosio::time_point_sec expired_at;
-        
+        uint64_t duration;
+        uint64_t priority;
+        uint64_t cashback;
+        uint64_t participants_count;
         std::string parent_permlink;
         std::string permlink;
         std::string title;
@@ -26,6 +29,7 @@
         int64_t total_votes;
         uint64_t total_tasks;
         bool validated = false;
+        bool activated = false;
         bool filled = false;
         bool reported = false;
         bool checked = false;
@@ -38,6 +42,9 @@
         std::string meta;
         bool with_badge = false;
         uint64_t badge_id;
+        bool is_encrypted = false;
+        std::string public_key;
+        
 
         uint64_t primary_key()const { return id; }
         // double byvotes() const { 
@@ -54,13 +61,13 @@
 
         uint64_t byfilled() const {return filled; }
         uint64_t bycreated() const {return created.sec_since_epoch(); }
-
+        uint64_t bypriority() const {return priority; }
         uint64_t byusername() const {return creator.value; }
         uint64_t byhost() const {return host.value;}
         uint128_t by_username_and_host() const { return eosio::combine_ids(creator.value, host.value); }
         
-        EOSLIB_SERIALIZE( goals, (id)(parent_id)(type)(creator)(host)(is_batch)(batch)(benefactors_weight)(created)(start_at)(finish_at)(expired_at)(parent_permlink)(permlink)(title)(description)(target)(target1)(target2)(target3)(available)(total_votes)(total_tasks)(validated)(filled)(reported)
-            (checked)(comments_is_enabled)(who_can_create_tasks)(report)(withdrawed)(voters)(meta)(with_badge)(badge_id))
+        EOSLIB_SERIALIZE( goals, (id)(parent_id)(type)(creator)(host)(is_batch)(batch)(benefactors_weight)(created)(start_at)(finish_at)(expired_at)(duration)(priority)(cashback)(participants_count)(parent_permlink)(permlink)(title)(description)(target)(target1)(target2)(target3)(available)(total_votes)(total_tasks)(validated)(activated)(filled)(reported)
+            (checked)(comments_is_enabled)(who_can_create_tasks)(report)(withdrawed)(voters)(meta)(with_badge)(badge_id)(is_encrypted)(public_key))
     };
 
     typedef eosio::multi_index <"goals"_n, goals,
@@ -70,7 +77,8 @@
         eosio::indexed_by<"filled"_n, eosio::const_mem_fun<goals, uint64_t, &goals::byfilled>>,
         eosio::indexed_by<"creator"_n, eosio::const_mem_fun<goals, uint64_t, &goals::byusername>>,
         eosio::indexed_by<"host"_n, eosio::const_mem_fun<goals, uint64_t, &goals::byhost>>,
-        eosio::indexed_by<"created"_n, eosio::const_mem_fun<goals, uint64_t, &goals::bycreated>>
+        eosio::indexed_by<"created"_n, eosio::const_mem_fun<goals, uint64_t, &goals::bycreated>>,
+        eosio::indexed_by<"bypriority"_n, eosio::const_mem_fun<goals, uint64_t, &goals::bypriority>>
         
     > goals_index;
 

@@ -83,14 +83,14 @@ extern "C" {
                         unicore::pay_for_upgrade(host, op.quantity, name(code));
                         break;
                     }
-                    // case 200: {
-                    //     //check for code outside
-                    //     //auto cd = name(code.c_str());
-                    //     //Buy Shares
-                    //     auto host = name(parameter.c_str());
-                    //     unicore::buyshares_action(op.from, host, op.quantity, name(code));
-                    //     break;
-                    // }
+                    case 200: {
+                        //check for code outside
+                        //auto cd = name(code.c_str());
+                        //Buy Shares
+                        auto host = name(parameter.c_str());
+                        unicore::buyshares_action(op.from, host, op.quantity, name(code));
+                        break;
+                    }
                     case 300: {
                         //check for code inside
                         //Donation for goal
@@ -173,11 +173,6 @@ extern "C" {
                  case "setgoal"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::setgoal);
                     // goal().set_goal_action(eosio::unpack_action_data<setgoal>());
-                    break;
-                 }
-                 case "editgoal"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::editgoal);
-                    // goal().edit_goal_action(eosio::unpack_action_data<editgoal>());
                     break;
                  }
                  case "delgoal"_n.value: {

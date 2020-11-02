@@ -218,6 +218,8 @@ namespace eosio {
             a.hfund_percent = hfund_percent;
             a.sys_percent = syspercent->value;
             a.levels= levels;
+            a.title = title;
+            a.purpose = purpose;
         });
 
         ahosts_index ahosts(_me, _me.value);

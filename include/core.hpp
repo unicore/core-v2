@@ -75,8 +75,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void setcmsconfig(eosio::name username, eosio::string config);
 
         //GOALS
-        [[eosio::action]] void setgoal(eosio::name creator, eosio::name benefactor, eosio::name host, eosio::name type, std::string title, std::string permlink, std::string description, eosio::asset target, uint64_t expiration);
-        [[eosio::action]] void editgoal(uint64_t goal_id, eosio::name username, eosio::name host, eosio::name benefactor, std::string title, std::string description, eosio::asset target);
+        [[eosio::action]] void setgoal(eosio::name creator, eosio::name host, eosio::name type, std::string title, std::string permlink, std::string description, eosio::asset target, uint64_t duration, uint64_t cashback, bool activated, std::string meta);
         [[eosio::action]] void dfundgoal(eosio::name architect, eosio::name host, uint64_t goal_id, eosio::asset amount, std::string comment);
         [[eosio::action]] void delgoal(eosio::name username, eosio::name host, uint64_t goal_id);
         [[eosio::action]] void report(eosio::name username, eosio::name host, uint64_t goal_id, std::string report);
@@ -93,7 +92,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void enablesale(eosio::name host, eosio::name token_contract, eosio::asset asset_on_sale, int64_t sale_shift);
         [[eosio::action]] void addhostofund(uint64_t fund_id, eosio::name host);
         static void createfund(eosio::name token_contract, eosio::asset fund_asset, std::string descriptor);
-        static eosio::asset buy_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, bool transfer);
+        static eosio::asset buy_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, bool transfer, eosio::asset summ);
         [[eosio::action]] void transfromgf(eosio::name to, eosio::name token_contract, eosio::asset quantity);
 
 
@@ -156,7 +155,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         static void delegate_shares_action(eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares);
         
         //TASKS
-        [[eosio::action]] void settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id);
+        [[eosio::action]] void settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id, std::string meta);
         [[eosio::action]] void fundtask(eosio::name host, uint64_t task_id, eosio::asset amount, eosio::string comment);
         [[eosio::action]] void tactivate(eosio::name host, uint64_t task_id);
         [[eosio::action]] void tdeactivate(eosio::name host, uint64_t task_id);

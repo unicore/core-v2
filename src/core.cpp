@@ -2125,7 +2125,7 @@ void unicore::createfund(eosio::name token_contract, eosio::asset fund_asset, st
  *
 */
 
-eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, bool transfer){
+eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, bool transfer, eosio::asset summ = asset()){
     
     account_index accounts(_me, host.value);
     auto acc = accounts.find(host.value);
@@ -2153,16 +2153,26 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
     eosio::check(quantity.amount >= quant_cost.amount, "Not enought quantity for buy 1 quant");
     eosio::check(quantity.amount % quant_cost.amount == 0, "You can purchase only whole quant");
     
-    auto quants = quantity.amount * sp->quants_precision / rate->buy_rate ;
+    uint64_t quants = quantity.amount * sp->quants_precision / rate->buy_rate ;
 
-    eosio::check(pool->remain_quants >= quants, "Not enought quants in target pool");
+    //TODO make recursive and return summ of buys
+    // eosio::check(pool->remain_quants >= quants, "Not enought quants in target pool");
+    bool recursive = false;
+    uint64_t quants_for_buy;
 
-    auto amount_in_quants = quants  /  sp->quants_precision * rate->convert_rate;
+    if (pool->remain_quants < quants){
+        recursive = true;
+        quants_for_buy = pool->remain_quants;
+    } else {
+        quants_for_buy = quants;
+    }
+
+    auto amount_in_quants = quants_for_buy  /  sp->quants_precision * rate->convert_rate;
 
     eosio::asset quants_for_user_in_asset = asset(amount_in_quants, (acc->asset_on_sale).symbol);
     
     pools.modify(pool, _me, [&](auto &p){
-        p.remain_quants = pool->remain_quants - quants;
+        p.remain_quants = pool->remain_quants - quants_for_buy;
 
         p.filled = asset(( pool->total_quants - p.remain_quants) / sp -> quants_precision * pool->quant_cost.amount, root_symbol);
         p.filled_percent = (pool->total_quants - p.remain_quants) * HUNDR_PERCENT / pool->total_quants;
@@ -2183,7 +2193,19 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
     unicore::add_sale_history(*acc, *rate, *sp, quants_for_user_in_asset);
     
     unicore::refresh_state(host);
-       
+    
+    
+    if (summ.amount > 0) {
+    
+        summ = asset(summ.amount + quants_for_user_in_asset.amount, root_symbol);
+    
+    } else {
+    
+        if (recursive == true){
+            buy_action(username, host, quantity - quants_for_user_in_asset, code, transfer, quants_for_user_in_asset);  
+        }
+    
+    }
     return quants_for_user_in_asset;
 }
 

@@ -3,6 +3,7 @@
 	struct [[eosio::table, eosio::contract("unicore")]] tasks{
 		uint64_t task_id;
 		uint64_t goal_id;
+        eosio::name host;
         eosio::name creator;
         std::string permlink;
         uint64_t type;
@@ -26,8 +27,10 @@
 		eosio::time_point_sec expired_at;
         bool is_batch = false;
         std::vector<uint64_t> batch;
+        uint64_t parent_batch_id;
         uint64_t duration;
         bool is_encrypted = false;
+        std::string public_key;
         std::string meta;
 
 		uint64_t primary_key()const { return task_id; }
@@ -42,7 +45,7 @@
         uint128_t crewithtask() const { return eosio::combine_ids(creator.value, task_id); }
         uint128_t crewithgoal() const { return eosio::combine_ids(creator.value, goal_id); }
         
-	    EOSLIB_SERIALIZE( tasks, (task_id)(goal_id)(creator)(permlink)(type)(priority)(period)(is_public)(doer)(title)(data)(requested)(funded)(remain)(for_each)(curator)(with_badge)(badge_id)(validated)(completed)(active)(created_at)(expired_at)(batch)(duration)(is_encrypted)(meta))
+	    EOSLIB_SERIALIZE( tasks, (task_id)(goal_id)(host)(creator)(permlink)(type)(priority)(period)(is_public)(doer)(title)(data)(requested)(funded)(remain)(for_each)(curator)(with_badge)(badge_id)(validated)(completed)(active)(created_at)(expired_at)(is_batch)(batch)(parent_batch_id)(duration)(is_encrypted)(public_key)(meta))
     };
 
     typedef eosio::multi_index< "tasks"_n, tasks,

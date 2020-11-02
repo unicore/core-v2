@@ -12,5 +12,4 @@ namespace eosio {
       return hash64(arg.c_str(), arg.size());
   }
 
-
 }
