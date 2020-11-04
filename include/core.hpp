@@ -120,7 +120,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void withdrdacinc(eosio::name username, eosio::name host);
         [[eosio::action]] void setwebsite(eosio::name host, eosio::name ahostname, eosio::string website, eosio::name type);
 
-
+        [[eosio::action]] void rmahost(eosio::name host, eosio::name ahostname);
+        [[eosio::action]] void setahost(eosio::name host, eosio::name ahostname);
 
 
         // //DATA

@@ -345,6 +345,16 @@ extern "C" {
                     // hosts_struct().upgrade_action(eosio::unpack_action_data<upgrade>());
                     break;
                 };
+                case "setahost"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::setahost);
+                    // hosts_struct().upgrade_action(eosio::unpack_action_data<upgrade>());
+                    break;
+                };
+                case "rmahost"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::rmahost);
+                    // hosts_struct().upgrade_action(eosio::unpack_action_data<upgrade>());
+                    break;
+                };
                 case "settype"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::settype);
                     // hosts_struct().upgrade_action(eosio::unpack_action_data<upgrade>());

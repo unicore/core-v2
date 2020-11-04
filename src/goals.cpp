@@ -248,16 +248,17 @@ using namespace eosio;
 
 		bool filled = goal->available + goal->withdrawed + quantity >= goal->target;		
 		
-		goals.modify(goal, _me, [&](auto &g){
-			g.available += quantity;
-			g.filled = filled;
-		});
 
 
     if (acc -> sale_is_enabled == true && from != host){
 
       if (goal->type=="goal"_n){
         
+        goals.modify(goal, _me, [&](auto &g){
+          g.available += quantity;
+          g.filled = filled;
+        });
+
         eosio::asset converted_quantity = unicore::buy_action(from, host, quantity, acc->root_token_contract, false);
         unicore::buyshares_action ( from, host, converted_quantity, acc->quote_token_contract );
         
@@ -272,28 +273,64 @@ using namespace eosio;
         auto goal_ids = eosio::combine_ids(from.value, goal_id);
         auto participant = users_with_id.find(goal_ids);
 
-        eosio::check(participant == users_with_id.end(), "Username already participate in the current marathon");
-
-        gparticipants.emplace(_me, [&](auto &p){
-          p.id = gparticipants.available_primary_key();
-          p.goal_id = goal_id;
-          p.role = "participant"_n;
-          p.username = from;
-          p.expiration = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + 30 * 86400);
-        });
+        // eosio::check(participant == users_with_id.end(), "Username already participate in the current marathon");
+        if (participant != users_with_id.end())
+          gparticipants.emplace(_me, [&](auto &p){
+            p.id = gparticipants.available_primary_key();
+            p.goal_id = goal_id;
+            p.role = "participant"_n;
+            p.username = from;
+            p.expiration = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + 30 * 86400);
+          });
 
         goals.modify(goal, _me, [&](auto &g){
           g.participants_count += 1;
+          g.withdrawed += quantity;
         });
 
         eosio::asset core_quantity = quantity * goal -> cashback / 100 / ONE_PERCENT;
         eosio::asset benefactors_quantity = quantity - core_quantity;
 
-        print("core_quantity: ", core_quantity);
-        print("benefactors_quantity: ", benefactors_quantity);
+        pool_index pools(_me, host.value);
 
+        auto pool = pools.find(acc->current_pool_id);
+
+        print(" quantity: ", quantity);
+        print(" core_quantity: ", core_quantity);
+        print(" benefactors_quantity: ", benefactors_quantity);
+
+        if (core_quantity.amount >= pool -> quant_cost.amount){
+
+          eosio::asset converted_quantity = unicore::buy_action(from, host, core_quantity, acc->root_token_contract, false);
+          unicore::buyshares_action ( from, host, converted_quantity, acc->quote_token_contract );
+
+          print(" converted_quantity: ", converted_quantity);
+        
+        } else {
+          
+          benefactors_quantity += core_quantity;
+          core_quantity.amount = 0;
+          print(" benefactors_quantity2: ", benefactors_quantity);
+
+        }
+
+        
+        
         unicore::spread_to_benefactors(host, benefactors_quantity, goal->id);
-        eosio::asset converted_quantity = unicore::buy_action(from, host, core_quantity, acc->root_token_contract, true);
+        
+        sincome_index sincome(_me, host.value);
+        auto sinc = sincome.find(acc->current_pool_id);
+
+        //TODO IT!
+        // sincome.modify(sinc, _me, [&](auto &s) {
+        //     s.total += quantity;
+        //     s.paid_to_sys += bal->sys_amount;
+        //     s.paid_to_dacs += bal->dac_amount;
+        //     s.paid_to_cfund += bal->cfund_amount;
+        //     s.paid_to_hfund += bal->hfund_amount;
+        //     s.paid_to_refs += bal->ref_amount;
+        //     s.hfund_in_segments += (bal->hfund_amount).amount * TOTAL_SEGMENTS;
+        // }); 
 
       }
     }
