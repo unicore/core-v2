@@ -2066,11 +2066,12 @@ void unicore::createfund(eosio::name token_contract, eosio::asset fund_asset, st
         h.total_dacs_weight -= dac->weight;
     });
     
-    action(
-        permission_level{ _me, "active"_n },
-        acc->root_token_contract, "transfer"_n,
-        std::make_tuple( _me, username, dac->income, std::string("DAC income before remove")) 
-    ).send();
+    if (dac->income.amount > 0)
+        action(
+            permission_level{ _me, "active"_n },
+            acc->root_token_contract, "transfer"_n,
+            std::make_tuple( _me, username, dac->income, std::string("DAC income before remove")) 
+        ).send();
 
     dacs.erase(dac);
 };

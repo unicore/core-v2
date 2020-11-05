@@ -159,7 +159,7 @@ namespace eosio {
      *  
      * @param[in]  op    The operation
      */
-    [[eosio::action]] void unicore::upgrade(eosio::name username, std::string title, std::string purpose, uint64_t total_shares, eosio::asset quote_amount, eosio::name quote_token_contract, eosio::asset root_token, eosio::name root_token_contract, bool voting_only_up, uint64_t consensus_percent, uint64_t referral_percent, uint64_t dacs_percent, uint64_t cfund_percent, uint64_t hfund_percent, std::vector<uint64_t> levels, uint64_t emission_percent, uint64_t gtop, std::string meta){
+    [[eosio::action]] void unicore::upgrade(eosio::name username, eosio::name platform, std::string title, std::string purpose, uint64_t total_shares, eosio::asset quote_amount, eosio::name quote_token_contract, eosio::asset root_token, eosio::name root_token_contract, bool voting_only_up, uint64_t consensus_percent, uint64_t referral_percent, uint64_t dacs_percent, uint64_t cfund_percent, uint64_t hfund_percent, std::vector<uint64_t> levels, uint64_t emission_percent, uint64_t gtop, std::string meta){
         require_auth(username);
         
         // eosio::check(purpose.length() > 0, "Purpose should contain a symbols. Describe the idea shortly.");
@@ -269,8 +269,8 @@ namespace eosio {
             a.purpose = purpose;
         });
 
-        ahosts_index ahosts(_me, _me.value);
-        ahosts.emplace(username, [&](auto &a){
+        ahosts_index coreahosts(_me, _me.value);
+        coreahosts.emplace(username, [&](auto &a){
             a.username = username;
             a.title = title;
             a.purpose = purpose;
@@ -278,6 +278,19 @@ namespace eosio {
             a.manifest = "";
             a.comments_is_enabled = false;
         });
+
+        if (platform != _self){
+            ahosts_index ahosts(_me, platform.value);
+            ahosts.emplace(username, [&](auto &a){
+                a.username = username;
+                a.title = title;
+                a.purpose = purpose;
+                a.is_host = true;
+                a.manifest = "";
+                a.comments_is_enabled = false;
+            });
+        }
+        
 
         emission_index emis(_me, username.value);
         auto emi = emis.find(username.value);
@@ -426,14 +439,27 @@ namespace eosio {
             h.title = title;
         });
 
-        ahosts_index ahosts(_me, _me.value);
-        auto ahost = ahosts.find(host.value);
+        ahosts_index coreahosts(_me, _me.value);
+        auto coreahost = coreahosts.find(host.value);
+        eosio::check(coreahost != coreahosts.end(), "AHost is not found");
 
-        ahosts.modify(ahost, architect, [&](auto &a){
+        coreahosts.modify(coreahost, architect, [&](auto &a){
             a.title = title;
             a.purpose = purpose;
             a.manifest = manifest;
         });
+
+
+        ahosts_index ahosts(_me, host.value);
+        auto ahost = ahosts.find(host.value);
+        if (ahost != ahosts.end()){
+            ahosts.modify(ahost, architect, [&](auto &a){
+                a.title = title;
+                a.purpose = purpose;
+                a.manifest = manifest;
+            });
+        }
+
     }
 
 
