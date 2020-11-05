@@ -395,7 +395,7 @@ namespace eosio {
 		account_index accounts(_me, host.value);
 		partners_index users(_partners,_partners.value);
     auto user = users.find(buyer.value);
-    eosio::check(user != users.end(), "User is not registered");
+    // eosio::check(user != users.end(), "User is not registered");
 
 
 		auto exist = accounts.find(host.value);

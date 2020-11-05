@@ -98,7 +98,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
         //HOST
         [[eosio::action]] void setarch(eosio::name host, eosio::name architect);
-        [[eosio::action]] void upgrade(eosio::name username, std::string title, std::string purpose, uint64_t total_shares, eosio::asset quote_amount, eosio::name quote_token_contract, eosio::asset root_token, eosio::name root_token_contract, bool voting_only_up, uint64_t consensus_percent, uint64_t referral_percent, uint64_t dacs_percent, uint64_t cfund_percent, uint64_t hfund_percent, std::vector<uint64_t> levels, uint64_t emission_percent, uint64_t gtop, std::string meta);
+        [[eosio::action]] void upgrade(eosio::name username, eosio::name platform, std::string title, std::string purpose, uint64_t total_shares, eosio::asset quote_amount, eosio::name quote_token_contract, eosio::asset root_token, eosio::name root_token_contract, bool voting_only_up, uint64_t consensus_percent, uint64_t referral_percent, uint64_t dacs_percent, uint64_t cfund_percent, uint64_t hfund_percent, std::vector<uint64_t> levels, uint64_t emission_percent, uint64_t gtop, std::string meta);
         [[eosio::action]] void cchildhost(eosio::name parent_host, eosio::name chost);
         [[eosio::action]] void edithost(eosio::name architect, eosio::name host, eosio::string title, eosio::string purpose, eosio::string manifest, eosio::string meta);
         [[eosio::action]] void fixs(eosio::name host);
@@ -120,7 +120,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void withdrdacinc(eosio::name username, eosio::name host);
         [[eosio::action]] void setwebsite(eosio::name host, eosio::name ahostname, eosio::string website, eosio::name type);
 
-
+        [[eosio::action]] void rmahost(eosio::name host, eosio::name ahostname);
+        [[eosio::action]] void setahost(eosio::name host, eosio::name ahostname);
 
 
         // //DATA

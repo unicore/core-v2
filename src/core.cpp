@@ -1484,12 +1484,10 @@ void unicore::fill_pool(eosio::name username, eosio::name host, uint64_t quants,
                         double total_dac_sys = total_dac * syspercent -> value / HUNDR_PERCENT;
                         
 
-
                         double total_cfund = (total * (double)ref_quants / (double)sp -> quants_precision * (double)(acc->cfund_percent))    / ((double)HUNDR_PERCENT * (double)sp->size_of_pool);
                         double total_cfund_min_sys = total_cfund * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
                         double total_cfund_sys = total_cfund * syspercent -> value / HUNDR_PERCENT;
                                                 
-
 
                         double total_hfund = (total * (double)ref_quants / (double)sp -> quants_precision * (double)(acc->hfund_percent))    / ((double)HUNDR_PERCENT * (double)sp->size_of_pool);
                         double total_hfund_min_sys = total_hfund * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
@@ -2068,11 +2066,12 @@ void unicore::createfund(eosio::name token_contract, eosio::asset fund_asset, st
         h.total_dacs_weight -= dac->weight;
     });
     
-    action(
-        permission_level{ _me, "active"_n },
-        acc->root_token_contract, "transfer"_n,
-        std::make_tuple( _me, username, dac->income, std::string("DAC income before remove")) 
-    ).send();
+    if (dac->income.amount > 0)
+        action(
+            permission_level{ _me, "active"_n },
+            acc->root_token_contract, "transfer"_n,
+            std::make_tuple( _me, username, dac->income, std::string("DAC income before remove")) 
+        ).send();
 
     dacs.erase(dac);
 };
@@ -2116,6 +2115,7 @@ void unicore::createfund(eosio::name token_contract, eosio::asset fund_asset, st
 
     unicore::add_sale_history(*acc, *rate, *sp, bal-> if_convert);       
     unicore::add_coredhistory(host, username, acc->current_pool_id, bal-> if_convert, "convert", "");
+    
     balances.erase(bal);
 
 }
@@ -2149,31 +2149,33 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
     auto rate = rates.find(acc->current_pool_num - 1);
 
     auto quant_cost = pool -> quant_cost;
+
+    print("quant_cost", quant_cost);
     
     eosio::check(quantity.amount >= quant_cost.amount, "Not enought quantity for buy 1 quant");
-    eosio::check(quantity.amount % quant_cost.amount == 0, "You can purchase only whole quant");
+    // eosio::check(quantity.amount % quant_cost.amount == 0, "You can purchase only whole quant");
     
     uint64_t quants = quantity.amount * sp->quants_precision / rate->buy_rate ;
 
     //TODO make recursive and return summ of buys
     // eosio::check(pool->remain_quants >= quants, "Not enought quants in target pool");
-    bool recursive = false;
     uint64_t quants_for_buy;
+    eosio::asset remain_asset = asset(0, root_symbol);
 
     if (pool->remain_quants < quants){
-        recursive = true;
         quants_for_buy = pool->remain_quants;
+        remain_asset = quantity - pool->remain;
+        print("remain_asset: ", remain_asset);
+
     } else {
         quants_for_buy = quants;
     }
 
-    auto amount_in_quants = quants_for_buy  /  sp->quants_precision * rate->convert_rate;
-
+    auto amount_in_quants = quants_for_buy  /  sp -> quants_precision * rate -> convert_rate;
     eosio::asset quants_for_user_in_asset = asset(amount_in_quants, (acc->asset_on_sale).symbol);
     
     pools.modify(pool, _me, [&](auto &p){
         p.remain_quants = pool->remain_quants - quants_for_buy;
-
         p.filled = asset(( pool->total_quants - p.remain_quants) / sp -> quants_precision * pool->quant_cost.amount, root_symbol);
         p.filled_percent = (pool->total_quants - p.remain_quants) * HUNDR_PERCENT / pool->total_quants;
         p.remain = p.pool_cost - p.filled;
@@ -2199,14 +2201,18 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
     
         summ = asset(summ.amount + quants_for_user_in_asset.amount, root_symbol);
     
-    } else {
+    } else summ = quants_for_user_in_asset; 
     
-        if (recursive == true){
-            buy_action(username, host, quantity - quants_for_user_in_asset, code, transfer, quants_for_user_in_asset);  
-        }
-    
+
+    if ( remain_asset.amount > 0 ) {
+
+        print("on_remain: ", remain_asset);
+        buy_action(username, host, remain_asset, code, transfer, summ);  
+
     }
-    return quants_for_user_in_asset;
+    print("summ: ", summ);
+
+    return summ;
 }
 
 /**

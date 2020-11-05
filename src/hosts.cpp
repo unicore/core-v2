@@ -45,6 +45,53 @@ namespace eosio {
 
     };
 
+    [[eosio::action]] void unicore::setahost(eosio::name host, eosio::name ahostname){
+        require_auth(host);
+
+        ahosts_index coreahosts(_me, _me.value);
+        auto corehost = coreahosts.find(host.value);
+
+        eosio::check(corehost != coreahosts.end(), "Core host is not found");
+        eosio::check(corehost -> type == "platform"_n, "Host is not a platform");
+
+        ahosts_index ahosts(_me, host.value);
+        auto ahost = ahosts.find(ahostname.value);
+
+        eosio::check(ahost == ahosts.end(), "Host is already exist in a platform");
+        print("in here");
+
+        auto coreahost = coreahosts.find(ahostname.value);
+        eosio::check(coreahost != coreahosts.end(), "Core ahost is not found");
+
+        ahosts.emplace(_me, [&](auto &a){
+            a.username = ahostname;
+            a.type = coreahost -> type;
+            a.title = coreahost -> title;
+            a.purpose = coreahost -> purpose;
+            a.manifest = coreahost -> manifest;
+            a.comments_is_enabled = coreahost -> comments_is_enabled;
+            a.meta = coreahost -> meta;
+            a.is_host = coreahost -> is_host;
+        });
+    
+    }
+
+    [[eosio::action]] void unicore::rmahost(eosio::name host, eosio::name ahostname){
+        require_auth(host);
+
+        ahosts_index coreahosts(_me, _me.value);
+        auto corehost = coreahosts.find(host.value);
+
+        eosio::check(corehost != coreahosts.end(), "Core host is not found");
+        eosio::check(corehost -> type == "platform"_n, "Host is not a platform");
+
+        ahosts_index ahosts(_me, host.value);
+        auto ahost = ahosts.find(ahostname.value);
+
+        eosio::check(ahost != ahosts.end(), "AHOST is not found under platform");
+        ahosts.erase(ahost);
+
+    }
 
     [[eosio::action]] void unicore::setwebsite(eosio::name host, eosio::name ahostname, eosio::string website, eosio::name type){
         require_auth(host);
@@ -63,11 +110,13 @@ namespace eosio {
             eosio::check(exist == hash_index.end(), "Current website is already setted to some host");
         }
 
-        coreahosts.modify(corehost, host, [&](auto &ch){
-            ch.website = website;
-            ch.hash = hash;
-            ch.type = type;
-        });        
+        if (host.value == ahostname.value)
+            coreahosts.modify(corehost, host, [&](auto &ch){
+                ch.website = website;
+                ch.hash = hash;
+                ch.type = type;
+            });        
+
 
         ahosts_index coreahostsbyusername(_me, _me.value);
         auto coreahostbyusername = coreahostsbyusername.find(ahostname.value);
@@ -91,13 +140,11 @@ namespace eosio {
             });
 
         } else {
-
             ahosts.modify(ahost, host, [&](auto &ah){
                 ah.website = website;
                 ah.hash = hash;
                 ah.type = type;
             });            
-
         }    
     
         
@@ -112,7 +159,7 @@ namespace eosio {
      *  
      * @param[in]  op    The operation
      */
-    [[eosio::action]] void unicore::upgrade(eosio::name username, std::string title, std::string purpose, uint64_t total_shares, eosio::asset quote_amount, eosio::name quote_token_contract, eosio::asset root_token, eosio::name root_token_contract, bool voting_only_up, uint64_t consensus_percent, uint64_t referral_percent, uint64_t dacs_percent, uint64_t cfund_percent, uint64_t hfund_percent, std::vector<uint64_t> levels, uint64_t emission_percent, uint64_t gtop, std::string meta){
+    [[eosio::action]] void unicore::upgrade(eosio::name username, eosio::name platform, std::string title, std::string purpose, uint64_t total_shares, eosio::asset quote_amount, eosio::name quote_token_contract, eosio::asset root_token, eosio::name root_token_contract, bool voting_only_up, uint64_t consensus_percent, uint64_t referral_percent, uint64_t dacs_percent, uint64_t cfund_percent, uint64_t hfund_percent, std::vector<uint64_t> levels, uint64_t emission_percent, uint64_t gtop, std::string meta){
         require_auth(username);
         
         // eosio::check(purpose.length() > 0, "Purpose should contain a symbols. Describe the idea shortly.");
@@ -122,7 +169,7 @@ namespace eosio {
         partners_index users(_partners, _partners.value);
         
         auto user = users.find(username.value);
-        eosio::check(user != users.end(), "User is not registered");
+        // eosio::check(user != users.end(), "User is not registered");
 
 
         eosio::check(title.length() < 100, "Title is a maximum 100 symbols");
@@ -222,8 +269,8 @@ namespace eosio {
             a.purpose = purpose;
         });
 
-        ahosts_index ahosts(_me, _me.value);
-        ahosts.emplace(username, [&](auto &a){
+        ahosts_index coreahosts(_me, _me.value);
+        coreahosts.emplace(username, [&](auto &a){
             a.username = username;
             a.title = title;
             a.purpose = purpose;
@@ -231,6 +278,19 @@ namespace eosio {
             a.manifest = "";
             a.comments_is_enabled = false;
         });
+
+        if (platform != _self){
+            ahosts_index ahosts(_me, platform.value);
+            ahosts.emplace(username, [&](auto &a){
+                a.username = username;
+                a.title = title;
+                a.purpose = purpose;
+                a.is_host = true;
+                a.manifest = "";
+                a.comments_is_enabled = false;
+            });
+        }
+        
 
         emission_index emis(_me, username.value);
         auto emi = emis.find(username.value);
@@ -379,14 +439,27 @@ namespace eosio {
             h.title = title;
         });
 
-        ahosts_index ahosts(_me, _me.value);
-        auto ahost = ahosts.find(host.value);
+        ahosts_index coreahosts(_me, _me.value);
+        auto coreahost = coreahosts.find(host.value);
+        eosio::check(coreahost != coreahosts.end(), "AHost is not found");
 
-        ahosts.modify(ahost, architect, [&](auto &a){
+        coreahosts.modify(coreahost, architect, [&](auto &a){
             a.title = title;
             a.purpose = purpose;
             a.manifest = manifest;
         });
+
+
+        ahosts_index ahosts(_me, host.value);
+        auto ahost = ahosts.find(host.value);
+        if (ahost != ahosts.end()){
+            ahosts.modify(ahost, architect, [&](auto &a){
+                a.title = title;
+                a.purpose = purpose;
+                a.manifest = manifest;
+            });
+        }
+
     }
 
 
