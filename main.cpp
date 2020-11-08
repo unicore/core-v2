@@ -350,6 +350,11 @@ extern "C" {
                     // hosts_struct().upgrade_action(eosio::unpack_action_data<upgrade>());
                     break;
                 };
+                case "closeahost"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::closeahost);
+                    // hosts_struct().upgrade_action(eosio::unpack_action_data<upgrade>());
+                    break;  
+                };
                 case "rmahost"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::rmahost);
                     // hosts_struct().upgrade_action(eosio::unpack_action_data<upgrade>());

@@ -122,6 +122,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
         [[eosio::action]] void rmahost(eosio::name host, eosio::name ahostname);
         [[eosio::action]] void setahost(eosio::name host, eosio::name ahostname);
+        [[eosio::action]] void closeahost(eosio::name host);
 
 
         // //DATA
