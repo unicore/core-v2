@@ -76,6 +76,20 @@ namespace eosio {
     
     }
 
+
+    [[eosio::action]] void unicore::closeahost(eosio::name host){
+        require_auth(_self);
+
+        ahosts_index coreahosts(_me, _me.value);
+        auto corehost = coreahosts.find(host.value);
+
+        eosio::check(corehost != coreahosts.end(), "Core host is not found");
+        
+        coreahosts.erase(corehost);
+
+    }
+
+
     [[eosio::action]] void unicore::rmahost(eosio::name host, eosio::name ahostname){
         require_auth(host);
 
