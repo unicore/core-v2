@@ -61,7 +61,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void refreshst(eosio::name host);
 
         //BADGES
-        [[eosio::action]] void setbadge(uint64_t id, eosio::name host, eosio::string caption, eosio::string description, eosio::string iurl, uint64_t total, uint64_t power);
+        [[eosio::action]] void setbadge(uint64_t id, eosio::name host, eosio::string caption, eosio::string description, eosio::string iurl, eosio::string pic, uint64_t total, uint64_t power);
         // [[eosio::action]] void giftbadge(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment);
         [[eosio::action]] void backbadge(eosio::name host, eosio::name from, uint64_t badge_id, eosio::string comment);
         
@@ -85,14 +85,16 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void setemi(eosio::name host, uint64_t percent, uint64_t gtop);
         static void donate_action(eosio::name from, eosio::name host, uint64_t goal_id, eosio::asset quantity, eosio::name code);
         static eosio::asset adjust_goals_emission_pool(eosio::name hostname);
-        static void fund_emi_pool ( eosio::name username, eosio::name host, eosio::asset amount, eosio::name code );
+        static void fund_emi_pool ( eosio::name host, eosio::asset amount, eosio::name code );
         static void add_asset_to_fund_action(eosio::name username, eosio::asset quantity, eosio::name code);
 
         //POT
-        [[eosio::action]] void enablesale(eosio::name host, eosio::name token_contract, eosio::asset asset_on_sale, int64_t sale_shift);
+        [[eosio::action]] void enablesale(eosio::name host, eosio::name token_contract, eosio::asset asset_on_sale, int64_t sale_shift, eosio::name sale_mode);
         [[eosio::action]] void addhostofund(uint64_t fund_id, eosio::name host);
+        [[eosio::action]] void rmhosfrfund(uint64_t fund_id, eosio::name host);
+
         static void createfund(eosio::name token_contract, eosio::asset fund_asset, std::string descriptor);
-        static eosio::asset buy_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, bool transfer, eosio::asset summ);
+        static eosio::asset buy_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, bool transfer, bool spread_to_funds, eosio::asset summ);
         [[eosio::action]] void transfromgf(eosio::name to, eosio::name token_contract, eosio::asset quantity);
 
 
@@ -101,7 +103,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void upgrade(eosio::name username, eosio::name platform, std::string title, std::string purpose, uint64_t total_shares, eosio::asset quote_amount, eosio::name quote_token_contract, eosio::asset root_token, eosio::name root_token_contract, bool voting_only_up, uint64_t consensus_percent, uint64_t referral_percent, uint64_t dacs_percent, uint64_t cfund_percent, uint64_t hfund_percent, std::vector<uint64_t> levels, uint64_t emission_percent, uint64_t gtop, std::string meta);
         [[eosio::action]] void cchildhost(eosio::name parent_host, eosio::name chost);
         [[eosio::action]] void edithost(eosio::name architect, eosio::name host, eosio::string title, eosio::string purpose, eosio::string manifest, eosio::string meta);
-        [[eosio::action]] void fixs(eosio::name host);
+        [[eosio::action]] void fixs(eosio::name host, uint64_t pool_num);
         [[eosio::action]] void settype(eosio::name host, eosio::name type);
         static void settype_static(eosio::name host, eosio::name type);
 
@@ -117,13 +119,15 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void rmdac(eosio::name username, eosio::name host);
         static void spread_to_dacs(eosio::name host, eosio::asset amount);
 
+        static void spread_to_funds(eosio::name host, uint64_t quants);
+
         [[eosio::action]] void withdrdacinc(eosio::name username, eosio::name host);
         [[eosio::action]] void setwebsite(eosio::name host, eosio::name ahostname, eosio::string website, eosio::name type);
 
         [[eosio::action]] void rmahost(eosio::name host, eosio::name ahostname);
         [[eosio::action]] void setahost(eosio::name host, eosio::name ahostname);
         [[eosio::action]] void closeahost(eosio::name host);
-
+        [[eosio::action]] void openahost(eosio::name host);
 
         // //DATA
         // [[eosio::action]] void selldata(eosio::name username, uint64_t id, eosio::string data, eosio::name root_token_contract, eosio::asset amount);
@@ -153,7 +157,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void withdrawsh(eosio::name owner, uint64_t id);
         [[eosio::action]] void sellshares(eosio::name username, eosio::name host, uint64_t shares);
         [[eosio::action]] void undelshares(eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares);
-        static void buyshares_action ( eosio::name buyer, eosio::name host, eosio::asset amount, eosio::name code );
+        static uint64_t buyshares_action ( eosio::name buyer, eosio::name host, eosio::asset amount, eosio::name code );
         static void delegate_shares_action(eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares);
         
         //TASKS
@@ -162,6 +166,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void tactivate(eosio::name host, uint64_t task_id);
         [[eosio::action]] void tdeactivate(eosio::name host, uint64_t task_id);
         
+        [[eosio::action]] void deltask(eosio::name host, uint64_t task_id);
+
         [[eosio::action]] void setreport(eosio::name host, eosio::name username, uint64_t task_id, eosio::string data);
         [[eosio::action]] void editreport(eosio::name host, eosio::name username, uint64_t report_id, eosio::string data);
         [[eosio::action]] void approver(eosio::name host, uint64_t report_id, eosio::string comment); 
@@ -292,6 +298,19 @@ class [[eosio::contract]] unicore : public eosio::contract {
     typedef eosio::multi_index<"cycle"_n, cycle> cycle_index;
     
 
+    struct [[eosio::table, eosio::contract("unicore")]] cycle2 {
+        uint64_t id;
+        uint64_t burned_quants;
+
+        uint64_t primary_key() const {return id;}
+        
+        EOSLIB_SERIALIZE(cycle2, (id)(burned_quants))
+    };
+
+    typedef eosio::multi_index<"cycle2"_n, cycle2> cycle2_index;
+    
+
+
 
     struct [[eosio::table, eosio::contract("unicore")]] pool{
         uint64_t id;
@@ -321,7 +340,6 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
     typedef eosio::multi_index<"pool"_n, pool> pool_index;
     
-
 
     struct [[eosio::table, eosio::contract("unicore")]] coredhistory{
         uint64_t id;
@@ -353,7 +371,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
     typedef eosio::multi_index<"sale"_n, sale> sale_index;
  
 
-    struct [[eosio::table, eosio::contract("unicore")]] sincome{
+    struct [[eosio::table, eosio::contract("unicore")]] sincome {
         uint64_t pool_id;
         eosio::name ahost;
         uint64_t cycle_num;

@@ -89,6 +89,29 @@ namespace eosio {
 
     }
 
+    [[eosio::action]] void unicore::openahost(eosio::name host){
+        require_auth(_self);
+
+        ahosts_index coreahosts(_me, _me.value);
+        auto corehost = coreahosts.find(host.value);
+
+        eosio::check(corehost == coreahosts.end(), "Core host is already found");
+        account_index accounts(_me, host.value);
+        auto acc = accounts.find(host.value);
+        
+        eosio::check(acc != accounts.end(), "Host is not found");
+
+        coreahosts.emplace(_self, [&](auto &c){
+            c.username = acc -> username;
+            c.is_host = true;
+            c.title = acc -> title;
+            c.purpose = acc -> purpose;
+            c.comments_is_enabled = false;
+            c.meta = acc -> meta;
+            c.type = "simple"_n;
+        });
+
+    }
 
     [[eosio::action]] void unicore::rmahost(eosio::name host, eosio::name ahostname){
         require_auth(host);
@@ -97,7 +120,7 @@ namespace eosio {
         auto corehost = coreahosts.find(host.value);
 
         eosio::check(corehost != coreahosts.end(), "Core host is not found");
-        eosio::check(corehost -> type == "platform"_n, "Host is not a platform");
+        // eosio::check(corehost -> type == "platform"_n, "Host is not a platform");
 
         ahosts_index ahosts(_me, host.value);
         auto ahost = ahosts.find(ahostname.value);

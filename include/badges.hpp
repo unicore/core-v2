@@ -21,13 +21,13 @@
 		eosio::name host;
 		uint64_t badge_id;
 
-        eosio::string caption;
-        eosio::string description;
-        eosio::string iurl;
-        eosio::string pic;
+    eosio::string caption;
+    eosio::string description;
+    eosio::string iurl;
+    eosio::string pic;
 		eosio::string comment;
 		uint64_t power;
-        eosio::time_point_sec recieved_at;
+    eosio::time_point_sec recieved_at;
 
 		uint64_t primary_key() const {return id;}
 		uint64_t host_key() const {return host.value;}

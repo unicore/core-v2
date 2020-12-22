@@ -108,7 +108,7 @@ extern "C" {
                         //direct fund emission pool
                         
                         auto host = name(parameter.c_str());
-                        unicore::fund_emi_pool(op.from, host, op.quantity, name(code));
+                        unicore::fund_emi_pool(host, op.quantity, name(code));
                         break;
                     }
 
@@ -132,7 +132,7 @@ extern "C" {
 
                         auto host = name(parameter.c_str());
                         
-                        unicore::buy_action(op.from, host, op.quantity, name(code), true);
+                        unicore::buy_action(op.from, host, op.quantity, name(code), true, true);
 
                         break;
                     }
@@ -355,6 +355,11 @@ extern "C" {
                     // hosts_struct().upgrade_action(eosio::unpack_action_data<upgrade>());
                     break;  
                 };
+                case "openahost"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::openahost);
+                    // hosts_struct().upgrade_action(eosio::unpack_action_data<upgrade>());
+                    break;
+                };
                 case "rmahost"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::rmahost);
                     // hosts_struct().upgrade_action(eosio::unpack_action_data<upgrade>());
@@ -440,6 +445,12 @@ extern "C" {
                     // fcore().enablesale_action(eosio::unpack_action_data<enablesale>());
                     break;
                 };
+                case "rmhosfrfund"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::rmhosfrfund);
+                    // fcore().enablesale_action(eosio::unpack_action_data<enablesale>());
+                    break;
+                };
+                
                 case "transfromgf"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::transfromgf);
                     // fcore().enablesale_action(eosio::unpack_action_data<enablesale>());
@@ -483,6 +494,11 @@ extern "C" {
 
                 case "settask"_n.value:{
                     execute_action(name(receiver), name(code), &unicore::settask);
+                    // tsks().settask_action(eosio::unpack_action_data<settask>());
+                    break;
+                }
+                case "deltask"_n.value:{
+                    execute_action(name(receiver), name(code), &unicore::deltask);
                     // tsks().settask_action(eosio::unpack_action_data<settask>());
                     break;
                 }

@@ -391,7 +391,7 @@ namespace eosio {
    * @param[in]  host    The host
    * @param[in]  amount  The amount
    */
-	void unicore::buyshares_action ( eosio::name buyer, eosio::name host, eosio::asset amount, eosio::name code ){
+	uint64_t unicore::buyshares_action ( eosio::name buyer, eosio::name host, eosio::asset amount, eosio::name code ){
 		account_index accounts(_me, host.value);
 		partners_index users(_partners,_partners.value);
     auto user = users.find(buyer.value);
@@ -441,7 +441,7 @@ namespace eosio {
 
     unicore::checkminpwr(host, buyer);
 		
-
+    return shares_out;
 	};
 
 
@@ -505,9 +505,9 @@ namespace eosio {
 
     
     
-    // market.modify( itr, _me, [&]( auto& es ) {
-    //   es.base.balance = asset((itr -> base).balance.amount - shares, eosio::symbol(eosio::symbol_code("POWER"), 0));
-    // });
+    market.modify( itr, _me, [&]( auto& es ) {
+      es.base.balance = asset((itr -> base).balance.amount - shares, eosio::symbol(eosio::symbol_code("POWER"), 0));
+    });
 
     //Emplace or modify power object of reciever and propagate votes changes;
     if (power_to == power_to_idx.end()){
