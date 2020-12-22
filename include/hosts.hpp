@@ -79,7 +79,7 @@ namespace eosio {
         std::vector<eosio::name> chosts;
         
         bool sale_is_enabled = false;
-        uint64_t sale_mode = 0;
+        eosio::name sale_mode;
         eosio::name sale_token_contract;
         eosio::asset asset_on_sale;
         uint64_t asset_on_sale_precision;

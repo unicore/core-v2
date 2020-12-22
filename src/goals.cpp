@@ -44,8 +44,8 @@ using namespace eosio;
 		account_index accounts(_me, host.value);
 
 		partners_index users(_partners, _partners.value);
-    auto user = users.find(creator.value);
-    eosio::check(user != users.end(), "User is not registered");
+    // auto user = users.find(creator.value);
+    // eosio::check(user != users.end(), "User is not registered");
     
     eosio::check(cashback <= 100 * ONE_PERCENT, "Cashback should be less or equal 1000000");
 
@@ -68,7 +68,9 @@ using namespace eosio;
     
     eosio::check(title.length() <= 100 && title.length() > 0, "Short Description is a maximum 100 symbols. Describe the goal shortly");
     
-      auto goal_id =  acc -> total_goals + 1;
+    auto goal_id =  acc -> total_goals + 1;
+
+    auto targets_symbol = acc -> sale_mode == "counterpower"_n ? _POWER : acc->asset_on_sale.symbol;
 
     if (exist_goal == goals.end()){
       goals.emplace(creator, [&](auto &g){
@@ -84,6 +86,10 @@ using namespace eosio;
         g.title = title;
         g.description = description;
         g.target = target;
+        g.target1 = asset(0, targets_symbol);
+        g.target2 = asset(0, targets_symbol);
+        g.target3 = asset(0, targets_symbol);
+        
         g.withdrawed = asset(0, root_symbol);
         g.available = asset(0, root_symbol);
         g.validated = validated;
@@ -130,6 +136,7 @@ using namespace eosio;
    *
    * @param[in]  op    The operation
    */
+
 	[[eosio::action]] void unicore::dfundgoal(eosio::name architect, eosio::name host, uint64_t goal_id, eosio::asset amount, std::string comment){
 		require_auth(architect);
 
@@ -236,7 +243,12 @@ using namespace eosio;
 		goals_index goals(_me, host.value);
 		account_index accounts(_me, host.value);
 		auto acc = accounts.find(host.value);
+    spiral_index spiral(_me, host.value);
+    auto sp = spiral.find(0);
 
+    rate_index rates(_me, host.value);
+
+    auto rate = rates.find(acc -> current_pool_num -1);
 		if (code != _me) //For direct donate from fund and by architects action
 			eosio::check(acc->root_token_contract == code, "Wrong root token contract for this host");
 		
@@ -248,19 +260,33 @@ using namespace eosio;
 
 		bool filled = goal->available + goal->withdrawed + quantity >= goal->target;		
 		
+    auto root_symbol = acc->get_root_symbol();
 
+    if (acc -> sale_is_enabled == true && from != host) {
 
-    if (acc -> sale_is_enabled == true && from != host){
+      if (goal -> type=="goal"_n) {
+        eosio::asset converted_quantity = asset(0, root_symbol);
+        eosio::asset target1 = asset(0, root_symbol);
 
-      if (goal->type=="goal"_n){
-        
+        if ((acc -> sale_mode == "direct"_n)||(acc -> sale_mode == "counterunit"_n)) {
+          converted_quantity = unicore::buy_action(from, host, quantity, acc->root_token_contract, true, false);
+          
+          target1 = asset(goal->target1.amount + converted_quantity.amount, converted_quantity.symbol);
+
+        } else if (acc -> sale_mode == "counterpower"_n) {
+          converted_quantity = unicore::buy_action(from, host, quantity, acc->root_token_contract, false, false);
+          uint64_t power = unicore::buyshares_action ( from, host, converted_quantity, acc->quote_token_contract );
+          
+          target1 = eosio::asset(goal->target1.amount + power, _POWER);
+
+        }
+
         goals.modify(goal, _me, [&](auto &g){
           g.available += quantity;
           g.filled = filled;
+          g.target1 = target1;
         });
-
-        eosio::asset converted_quantity = unicore::buy_action(from, host, quantity, acc->root_token_contract, false);
-        unicore::buyshares_action ( from, host, converted_quantity, acc->quote_token_contract );
+        
         
       } else if (goal->type=="marathon"_n){
         
@@ -274,7 +300,8 @@ using namespace eosio;
         auto participant = users_with_id.find(goal_ids);
 
         // eosio::check(participant == users_with_id.end(), "Username already participate in the current marathon");
-        if (participant != users_with_id.end())
+        
+        if (participant != users_with_id.end()){
           gparticipants.emplace(_me, [&](auto &p){
             p.id = gparticipants.available_primary_key();
             p.goal_id = goal_id;
@@ -283,10 +310,11 @@ using namespace eosio;
             p.expiration = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + 30 * 86400);
           });
 
-        goals.modify(goal, _me, [&](auto &g){
-          g.participants_count += 1;
-          g.withdrawed += quantity;
-        });
+          goals.modify(goal, _me, [&](auto &g){
+            g.participants_count += 1;
+            g.withdrawed += quantity;
+          });
+        }
 
         eosio::asset core_quantity = quantity * goal -> cashback / 100 / ONE_PERCENT;
         eosio::asset benefactors_quantity = quantity - core_quantity;
@@ -301,7 +329,7 @@ using namespace eosio;
 
         if (core_quantity.amount >= pool -> quant_cost.amount){
 
-          eosio::asset converted_quantity = unicore::buy_action(from, host, core_quantity, acc->root_token_contract, false);
+          eosio::asset converted_quantity = unicore::buy_action(from, host, core_quantity, acc->root_token_contract, false, true);
           unicore::buyshares_action ( from, host, converted_quantity, acc->quote_token_contract );
 
           print(" converted_quantity: ", converted_quantity);
@@ -314,25 +342,18 @@ using namespace eosio;
 
         }
 
-        
-        
         unicore::spread_to_benefactors(host, benefactors_quantity, goal->id);
         
-        sincome_index sincome(_me, host.value);
-        auto sinc = sincome.find(acc->current_pool_id);
-
-        //TODO IT!
-        // sincome.modify(sinc, _me, [&](auto &s) {
-        //     s.total += quantity;
-        //     s.paid_to_sys += bal->sys_amount;
-        //     s.paid_to_dacs += bal->dac_amount;
-        //     s.paid_to_cfund += bal->cfund_amount;
-        //     s.paid_to_hfund += bal->hfund_amount;
-        //     s.paid_to_refs += bal->ref_amount;
-        //     s.hfund_in_segments += (bal->hfund_amount).amount * TOTAL_SEGMENTS;
-        // }); 
 
       }
+    } else {
+
+
+        goals.modify(goal, _me, [&](auto &g){
+          g.available += quantity;
+          g.filled = filled;
+        });
+
     }
 
 
@@ -349,29 +370,29 @@ using namespace eosio;
   [[eosio::action]] void unicore::gsponsor(eosio::name hoperator, eosio::name host, eosio::name reciever, uint64_t goal_id, eosio::asset amount){
     require_auth (hoperator);
 
-    account_index accounts(_me, host.value);
-    auto acc = accounts.find(host.value);
-    eosio::check(acc->hoperator == hoperator, "Wrong operator for this host");
-    goals_index goals(_me, host.value);
+    // account_index accounts(_me, host.value);
+    // auto acc = accounts.find(host.value);
+    // eosio::check(acc->hoperator == hoperator, "Wrong operator for this host");
+    // goals_index goals(_me, host.value);
 
-    auto goal = goals.find(goal_id);
-    eosio::check(goal != goals.end(), "Goal is not founded");
-    auto root_symbol = (acc->root_token).symbol;
+    // auto goal = goals.find(goal_id);
+    // eosio::check(goal != goals.end(), "Goal is not founded");
+    // auto root_symbol = (acc->root_token).symbol;
 
-    eosio::check(amount.symbol == root_symbol, "Wrong root symbol");
+    // eosio::check(amount.symbol == root_symbol, "Wrong root symbol");
 
-    eosio::check(goal->available >= amount, "Not enough tokens for sponsorhip action. ");
+    // eosio::check(goal->available >= amount, "Not enough tokens for sponsorhip action. ");
 
-    action(
-      permission_level{ _me, "active"_n },
-      acc->root_token_contract, "transfer"_n,
-      std::make_tuple( _me, reciever, amount, std::string("Sponsor")) 
-    ).send();
+    // action(
+    //   permission_level{ _me, "active"_n },
+    //   acc->root_token_contract, "transfer"_n,
+    //   std::make_tuple( _me, reciever, amount, std::string("Sponsor")) 
+    // ).send();
 
-    goals.modify(goal, hoperator, [&](auto &g){
-      g.available = g.available - amount;
-      g.withdrawed = g.withdrawed + amount;
-    });
+    // goals.modify(goal, hoperator, [&](auto &g){
+    //   g.available = g.available - amount;
+    //   g.withdrawed = g.withdrawed + amount;
+    // });
 
   }
 

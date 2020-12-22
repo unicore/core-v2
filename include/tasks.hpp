@@ -5,13 +5,17 @@
 		uint64_t goal_id;
         eosio::name host;
         eosio::name creator;
+        eosio::name suggester;
         std::string permlink;
         uint64_t type;
+        eosio::name status;
 		uint64_t priority;
 		uint64_t period;
 		bool is_public = true;
         eosio::name doer;
-		eosio::string title;
+		eosio::name role;
+        uint64_t level;
+        eosio::string title;
 		eosio::string data;
 		eosio::asset requested;
 		eosio::asset funded;
@@ -31,24 +35,37 @@
         uint64_t duration;
         bool is_encrypted = false;
         std::string public_key;
+        int64_t total_votes;
+        std::vector<eosio::name> voters;
+        
+
         std::string meta;
 
+
 		uint64_t primary_key()const { return task_id; }
+        
         uint64_t bycreator() const {return creator.value;}
         uint64_t bycurator() const {return curator.value;}
         uint64_t bygoal() const {return goal_id; }
         uint128_t goalandtask() const { return eosio::combine_ids(goal_id, task_id); }
+        uint64_t byhost() const {return host.value; }
         uint64_t bytype() const {return type; }
+        uint64_t bystatus() const {return status.value; }
         uint64_t bypriority() const {return priority; }
         uint64_t byhasbadge() const {return with_badge; }
         uint64_t bybadge() const {return badge_id; }
         uint128_t crewithtask() const { return eosio::combine_ids(creator.value, task_id); }
         uint128_t crewithgoal() const { return eosio::combine_ids(creator.value, goal_id); }
         
-	    EOSLIB_SERIALIZE( tasks, (task_id)(goal_id)(host)(creator)(permlink)(type)(priority)(period)(is_public)(doer)(title)(data)(requested)(funded)(remain)(for_each)(curator)(with_badge)(badge_id)(validated)(completed)(active)(created_at)(expired_at)(is_batch)(batch)(parent_batch_id)(duration)(is_encrypted)(public_key)(meta))
+        uint64_t byvotes() const { 
+            return pow(2, 63) + total_votes;
+        }
+
+	    EOSLIB_SERIALIZE( tasks, (task_id)(goal_id)(host)(creator)(suggester)(permlink)(type)(status)(priority)(period)(is_public)(doer)(role)(level)(title)(data)(requested)(funded)(remain)(for_each)(curator)(with_badge)(badge_id)(validated)(completed)(active)(created_at)(expired_at)(is_batch)(batch)(parent_batch_id)(duration)(is_encrypted)(public_key)(total_votes)(voters)(meta))
     };
 
     typedef eosio::multi_index< "tasks"_n, tasks,
+        eosio::indexed_by<"byhost"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::byhost>>,
         eosio::indexed_by<"bygoal"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bygoal>>,
         eosio::indexed_by<"goalandtask"_n, eosio::const_mem_fun<tasks, uint128_t, &tasks::goalandtask>>,
         eosio::indexed_by<"bytype"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bytype>>,
@@ -58,7 +75,9 @@
         eosio::indexed_by<"crewithtask"_n, eosio::const_mem_fun<tasks, uint128_t, &tasks::crewithtask>>,
         eosio::indexed_by<"crewithgoal"_n, eosio::const_mem_fun<tasks, uint128_t, &tasks::crewithgoal>>,
         eosio::indexed_by<"bycreator"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bycreator>>,
-        eosio::indexed_by<"bycurator"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bycurator>>
+        eosio::indexed_by<"bycurator"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bycurator>>,
+        eosio::indexed_by<"byvotes"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::byvotes>>,
+        eosio::indexed_by<"bystatus"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bystatus>>   
     > tasks_index;
 
 

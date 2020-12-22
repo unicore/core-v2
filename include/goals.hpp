@@ -3,7 +3,9 @@
         uint64_t parent_id;
         eosio::name type;
         eosio::name creator;
+        eosio::name benefactor;
         eosio::name host;
+        eosio::name status;
         bool is_batch = false;
         std::vector<uint64_t> batch;
         uint64_t benefactors_weight;
@@ -56,7 +58,7 @@
         }
 
         uint64_t bytype() const {return type.value;}
-
+        uint64_t bystatus() const {return status.value;}
         uint64_t byparentid() const {return parent_id;}
 
         uint64_t byfilled() const {return filled; }
@@ -66,17 +68,18 @@
         uint64_t byhost() const {return host.value;}
         uint128_t by_username_and_host() const { return eosio::combine_ids(creator.value, host.value); }
         
-        EOSLIB_SERIALIZE( goals, (id)(parent_id)(type)(creator)(host)(is_batch)(batch)(benefactors_weight)(created)(start_at)(finish_at)(expired_at)(duration)(priority)(cashback)(participants_count)(parent_permlink)(permlink)(title)(description)(target)(target1)(target2)(target3)(available)(total_votes)(total_tasks)(validated)(activated)(filled)(reported)
+        EOSLIB_SERIALIZE( goals, (id)(parent_id)(type)(creator)(benefactor)(host)(status)(is_batch)(batch)(benefactors_weight)(created)(start_at)(finish_at)(expired_at)(duration)(priority)(cashback)(participants_count)(parent_permlink)(permlink)(title)(description)(target)(target1)(target2)(target3)(available)(total_votes)(total_tasks)(validated)(activated)(filled)(reported)
             (checked)(comments_is_enabled)(who_can_create_tasks)(report)(withdrawed)(voters)(meta)(with_badge)(badge_id)(is_encrypted)(public_key))
     };
 
     typedef eosio::multi_index <"goals"_n, goals,
+        eosio::indexed_by<"byhost"_n, eosio::const_mem_fun<goals, uint64_t, &goals::byhost>>,
+        eosio::indexed_by<"bystatus"_n, eosio::const_mem_fun<goals, uint64_t, &goals::bystatus>>,
         eosio::indexed_by<"type"_n, eosio::const_mem_fun<goals, uint64_t, &goals::bytype>>,
         eosio::indexed_by<"votes"_n, eosio::const_mem_fun<goals, uint64_t, &goals::byvotes>>,
         eosio::indexed_by<"byparentid"_n, eosio::const_mem_fun<goals, uint64_t, &goals::byparentid>>,
         eosio::indexed_by<"filled"_n, eosio::const_mem_fun<goals, uint64_t, &goals::byfilled>>,
         eosio::indexed_by<"creator"_n, eosio::const_mem_fun<goals, uint64_t, &goals::byusername>>,
-        eosio::indexed_by<"host"_n, eosio::const_mem_fun<goals, uint64_t, &goals::byhost>>,
         eosio::indexed_by<"created"_n, eosio::const_mem_fun<goals, uint64_t, &goals::bycreated>>,
         eosio::indexed_by<"bypriority"_n, eosio::const_mem_fun<goals, uint64_t, &goals::bypriority>>
         

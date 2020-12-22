@@ -23,7 +23,7 @@ namespace eosio{
 
 	uint64_t count_votes(eosio::name voter, eosio::name host){
 		votes_index votes(_me, voter.value);
-		goals_index goals (_me, _me.value);
+		goals_index goals (_me, host.value);
 		// auto users_with_id = reports.template get_index<"userwithtask"_n>();
 
 		// auto idx = votes.begin();

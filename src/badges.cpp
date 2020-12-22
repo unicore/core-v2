@@ -1,6 +1,6 @@
 
 
-	[[eosio::action]] void unicore::setbadge(uint64_t id, eosio::name host, eosio::string caption, eosio::string description, eosio::string iurl, uint64_t total, uint64_t power){
+	[[eosio::action]] void unicore::setbadge(uint64_t id, eosio::name host, eosio::string caption, eosio::string description, eosio::string iurl, eosio::string pic, uint64_t total, uint64_t power){
 		require_auth(host);
 		
 		account_index accounts(_me, host.value);
@@ -18,6 +18,7 @@
 			b.caption = caption;
 			b.description = description;
 			b.iurl = iurl;
+			b.pic = pic;
 			b.total = total;
 			b.remain = total;
 			b.power = power;
@@ -29,6 +30,7 @@
 
 			badges.modify(badge, host, [&](auto &b){
 				b.caption = caption;
+				b.pic = pic;
 				b.description = description;
 				b.iurl = iurl;
 				b.total = total;
@@ -83,6 +85,7 @@
 			ub.caption = host_badge -> caption;
 			ub.description = host_badge -> description;
 			ub.iurl = host_badge -> iurl;
+			ub.pic = host_badge -> pic;
 			ub.comment = comment;
 			ub.recieved_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
 			ub.host = host;

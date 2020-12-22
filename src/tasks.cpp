@@ -29,8 +29,8 @@
 
 		goals_index goals(_me, host.value);
 		auto goal = goals.find(goal_id);
-		eosio::check(goal != goals.end(), "Goal is not found");
-		eosio::check(goal -> who_can_create_tasks == creator || goal->who_can_create_tasks.value == 0, "Only creator can create task for current goal");
+		// eosio::check(goal != goals.end(), "Goal is not found");
+		
 
 		validate_permlink(permlink);
     
@@ -70,6 +70,15 @@
 
 			};
 
+			if (goal != goals.end()){
+				eosio::check(goal -> who_can_create_tasks == creator || goal->who_can_create_tasks.value == 0, "Only creator can create task for current goal");
+
+				goals.modify(goal, creator, [&](auto &g){
+		    	g.total_tasks = goal -> total_tasks + 1;
+		    });
+			}
+
+
 			tasks.emplace(creator, [&](auto &t){
 				t.host = host;
 				t.creator = creator;
@@ -101,10 +110,8 @@
 	      a.total_tasks = acc -> total_tasks + 1;
 	    });
 
-	    goals.modify(goal, creator, [&](auto &g){
-	    	g.total_tasks = goal -> total_tasks + 1;
-	    });
 
+	    
 		} else {
 
 			tasks.modify(exist_task, creator, [&](auto &t){
@@ -187,6 +194,29 @@
 	}
 
 	/**
+	 * @brief      Метод удаления задачи
+	 * Вызывается хостом для удаления поставленной задачи. 
+	 * 
+	 * @param[in]  op    The operation
+	 */
+	[[eosio::action]] void unicore::deltask(eosio::name host, uint64_t task_id){
+		require_auth(host);
+		account_index accounts(_me, host.value);
+		auto acc = accounts.find(host.value);
+		eosio::check(acc != accounts.end(), "Host is not found");
+
+		tasks_index tasks(_me, host.value);
+
+		auto task = tasks.find(task_id);
+
+		eosio::check(task != tasks.end(), "Task is not found");
+
+		tasks.erase(task);
+
+	}
+	
+
+	/**
 	 * @brief      Метод активации задачи
 	 * Вызывается хостом для активации выполнения поставленной задачи. 
 	 * 
@@ -265,14 +295,16 @@
 		goals_index goals(_me, host.value);
 		auto goal = goals.find(task-> goal_id);
 
-		if (goal -> type == "marathon"_n){
-			goalspartic_index gparticipants(_me, host.value);
-      auto users_with_id = gparticipants.template get_index<"byusergoal"_n>();
-			auto goal_ids = eosio::combine_ids(username.value, task->goal_id);
-      auto participant = users_with_id.find(goal_ids);
 
-      eosio::check(participant != users_with_id.end(), "Username not participant of the current marathon");
-		};
+		if (goal != goals.end())
+			if (goal -> type == "marathon"_n){
+				goalspartic_index gparticipants(_me, host.value);
+	      auto users_with_id = gparticipants.template get_index<"byusergoal"_n>();
+				auto goal_ids = eosio::combine_ids(username.value, task->goal_id);
+	      auto participant = users_with_id.find(goal_ids);
+
+	      eosio::check(participant != users_with_id.end(), "Username not participant of the current marathon");
+			};
 		
 		reports_index reports(_me, host.value);
 		
