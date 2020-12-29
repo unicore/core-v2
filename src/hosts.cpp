@@ -422,32 +422,48 @@ namespace eosio {
 	  
     };
 
-    // /**
-    //  * @brief      Метод редактирования времени 
-    //  *
-    //  * @param[in]  op    The operation
-    //  */
-    // void ehosttime_action(const ehosttime &op){
-    //     require_auth (architect);
+    /**
+     * @brief      Метод редактирования времени 
+     *
+     * @param[in]  op    The operation
+     */
+    [[eosio::action]] void unicore::settiming(eosio::name host, uint64_t pool_timeout, uint64_t priority_seconds) {
+        require_auth (host);
 
-    //     account_index hosts(_me, _me);
-    //     auto host = hosts.find(host.value);
-    //     eosio::check(host->architect == architect, "You are not architect of currenty commquanty");
+        account_index hosts(_me, host.value);
+        auto acc = hosts.find(host.value);
         
-    //     eosio::check((priority_seconds < 7884000), "Pool Priority Seconds must be greater or equal then 0 sec and less then 7884000 sec");
-    //     eosio::check((pool_timeout >= 60) && (pool_timeout < 7884000),"Pool Timeout must be greater or equal then 1 sec and less then 7884000 sec");
-    
-    //     spiral_index spiral(_me, host);
-    //     auto sp = spiral.find(0);
+        eosio::check((priority_seconds < 7884000), "Pool Priority Seconds must be greater or equal then 0 sec and less then 7884000 sec");
+        eosio::check((pool_timeout >= 60) && (pool_timeout < 7884000),"Pool Timeout must be greater or equal then 1 sec and less then 7884000 sec");
+        eosio::check(acc -> current_pool_num < 3, "Timing changes only possible on the waiting mode");
 
-    //     spiral.modify(sp, architect, [&](auto &s){
-    //         s.pool_timeout = pool_timeout;
-    //         s.priority_seconds = priority_seconds;
-    //     });
-    // }
+        spiral_index spiral(_me, host.value);
+        auto sp = spiral.find(0);
+
+        spiral.modify(sp, host, [&](auto &s){
+            s.pool_timeout = pool_timeout;
+            s.priority_seconds = priority_seconds;
+        });
+    }
 
 
+    [[eosio::action]] void unicore::setflows(eosio::name host, uint64_t ref_percent, uint64_t dacs_percent, uint64_t cfund_percent, uint64_t hfund_percent){
+        require_auth (host);        
+        
+        account_index hosts(_me, host.value);
+        auto acc = hosts.find(host.value);
+        
+        eosio::check(ref_percent + dacs_percent + cfund_percent + hfund_percent == HUNDR_PERCENT, "All payment percents should equal 100 * ONE_PERCENT (1000000)");
+        eosio::check(acc -> current_pool_num < 3, "Flows changes only possible on the waiting mode");
 
+        hosts.modify(acc, host, [&](auto &h){
+            h.referral_percent = ref_percent;
+            h.dacs_percent = dacs_percent;
+            h.cfund_percent = cfund_percent;
+            h.hfund_percent = hfund_percent;
+        });
+
+    }
 
      /**
      * @brief      Метод редактирования информации о хосте

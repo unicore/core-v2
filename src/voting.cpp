@@ -51,15 +51,10 @@ namespace eosio{
     eosio::check(user != users.end(), "User is not registered");
 
 		uint64_t vote_count = count_votes(voter, host);
-
 		
 		goals_index goals(_me, host.value);
 		power_index power(_me, voter.value);
 		votes_index votes(_me, voter.value);
-
-
-
-
 
 		auto goal = goals.find(goal_id);
 		account_index accounts (_me, (goal->host).value);
@@ -71,7 +66,6 @@ namespace eosio{
 
 		// print("LIQUIDSHARES ", liquid_shares);
 
-		
 		eosio::check(goal != goals.end(), "Goal is not founded");
 
 		auto pow = power.find((goal->host).value);

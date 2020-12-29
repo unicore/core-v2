@@ -371,6 +371,17 @@ extern "C" {
                     break;
                 };
 
+
+                case "settiming"_n.value: {
+                  execute_action(name(receiver), name(code), &unicore::settiming);
+                  break;  
+                };
+
+                case "setflows"_n.value: {
+                  execute_action(name(receiver), name(code), &unicore::setflows);
+                  break;  
+                };
+
                 //CORE
                 case "setparams"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::setparams);
@@ -570,7 +581,11 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::rmdac);
                     break;
                 }
-                
+                case "suggestrole"_n.value : {
+                    execute_action(name(receiver), name(code), &unicore::suggestrole);
+                    break;
+                }
+
                 case "withdrdacinc"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::withdrdacinc);
                     break;

@@ -2122,26 +2122,83 @@ void unicore::createfund(eosio::name token_contract, eosio::asset fund_asset, st
 
 }
 
-[[eosio::action]] void unicore::adddac(eosio::name username, eosio::name host, uint64_t weight) {
+
+
+[[eosio::action]] void unicore::suggestrole(eosio::name username, std::string title, std::string descriptor) {
+    eosio::check(has_auth(username) || has_auth(_self), "missing required authority");
+    
+    roles_index roles(_me, _self.value);
+    auto payer = has_auth(username) ? username : _self;
+
+    roles.emplace(payer, [&](auto &r){
+        r.role_id = roles.available_primary_key();
+        r.title = title;
+        r.descriptor = descriptor;
+        r.suggester = has_auth(username) ? username : ""_n;
+        r.approved = has_auth(_self) ? true : false;
+    });
+
+}
+
+
+[[eosio::action]] void unicore::adddac(eosio::name username, eosio::name host, uint64_t weight, bool is_new_role, uint64_t role_id, std::string title, std::string descriptor) {
     require_auth(host);
     account_index accounts(_me, host.value);
     dacs_index dacs(_me, host.value);
+
+    eosio::check( is_account( username ), "user account does not exist");
 
     auto acc = accounts.find(host.value);
     eosio::check(acc != accounts.end(), "Host is not found");
     
     auto root_symbol = acc->get_root_symbol();
     
-    dacs.emplace(host, [&](auto &d){
-        d.dac = username;
-        d.weight = weight;
-        d.income = asset(0, root_symbol);
-        d.income_in_segments = 0;
-    });
+    auto dac = dacs.find(username.value);
 
-    accounts.modify(acc, host, [&](auto &h){
-        h.total_dacs_weight += weight;
-    });
+    roles_index roles(_me, _me.value);
+    
+    if (is_new_role == false){
+        auto role = roles.find(role_id);    
+        eosio::check(role != roles.end(), "Role is not found");
+
+    
+    } else {
+        role_id = roles.available_primary_key();
+        roles.emplace(_self, [&](auto &r){
+            r.role_id = role_id;
+            r.title = title;
+            r.descriptor = descriptor;
+            r.suggester = host;
+            r.approved = true;
+        });
+    }
+    
+
+    if (dac == dacs.end()){
+        dacs.emplace(host, [&](auto &d){
+            d.dac = username;
+            d.weight = weight;
+            d.income = asset(0, root_symbol);
+            d.income_in_segments = 0;
+            d.role_id = role_id;
+        });
+
+        accounts.modify(acc, host, [&](auto &h){
+            h.total_dacs_weight += weight;
+        });        
+    } else {
+        int64_t new_weight = weight - dac->weight;
+
+        dacs.modify(dac, host, [&](auto &d){
+            d.weight += new_weight;
+        });
+
+        accounts.modify(acc, host, [&](auto &h){
+            h.total_dacs_weight += new_weight;
+        });        
+
+    }
+
 };
 
 [[eosio::action]] void unicore::rmdac(eosio::name username, eosio::name host) {

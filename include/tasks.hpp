@@ -81,7 +81,9 @@
     > tasks_index;
 
 
-    struct [[eosio::table, eosio::contract("unicore")]] reports{
+
+
+    struct [[eosio::table, eosio::contract("unicore")]] reports {
     	uint64_t report_id;
     	uint64_t task_id; 
     	uint64_t goal_id;

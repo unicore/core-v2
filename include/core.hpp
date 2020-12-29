@@ -107,6 +107,10 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void settype(eosio::name host, eosio::name type);
         static void settype_static(eosio::name host, eosio::name type);
 
+
+        [[eosio::action]] void settiming(eosio::name host, uint64_t pool_timeout, uint64_t priority_seconds);
+        [[eosio::action]] void setflows(eosio::name host, uint64_t ref_percent, uint64_t dacs_percent, uint64_t cfund_percent, uint64_t hfund_percent);
+
         //BENEFACTORS
         static void spread_to_benefactors(eosio::name host, eosio::asset amount, uint64_t goal_id);
         [[eosio::action]] void rmben(eosio::name creator, eosio::name username, eosio::name host, uint64_t goal_id);
@@ -115,8 +119,14 @@ class [[eosio::contract]] unicore : public eosio::contract {
         
 
         //DACS
-        [[eosio::action]] void adddac(eosio::name username, eosio::name host, uint64_t weight);
+        [[eosio::action]] void adddac(eosio::name username, eosio::name host, uint64_t weight, bool is_new_role, uint64_t role_id, std::string title, std::string descriptor);
         [[eosio::action]] void rmdac(eosio::name username, eosio::name host);
+
+        [[eosio::action]] void suggestrole(eosio::name username, std::string title, std::string descriptor);
+        
+        // [[eosio::action]] void editrole(eosio::name username, eosio::name host, uint64_t weight);
+        // [[eosio::action]] void rmrole(eosio::name username, eosio::name host, uint64_t weight);
+
         static void spread_to_dacs(eosio::name host, eosio::asset amount);
 
         static void spread_to_funds(eosio::name host, uint64_t quants);
@@ -161,12 +171,13 @@ class [[eosio::contract]] unicore : public eosio::contract {
         static void delegate_shares_action(eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares);
         
         //TASKS
-        [[eosio::action]] void settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id, std::string meta);
+        [[eosio::action]] void settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id, std::string meta);
         [[eosio::action]] void fundtask(eosio::name host, uint64_t task_id, eosio::asset amount, eosio::string comment);
         [[eosio::action]] void tactivate(eosio::name host, uint64_t task_id);
         [[eosio::action]] void tdeactivate(eosio::name host, uint64_t task_id);
         
         [[eosio::action]] void deltask(eosio::name host, uint64_t task_id);
+        [[eosio::action]] void paydebt(eosio::name host, uint64_t goal_id);
 
         [[eosio::action]] void setreport(eosio::name host, eosio::name username, uint64_t task_id, eosio::string data);
         [[eosio::action]] void editreport(eosio::name host, eosio::name username, uint64_t report_id, eosio::string data);
@@ -453,6 +464,27 @@ class [[eosio::contract]] unicore : public eosio::contract {
         eosio::indexed_by<"byvotes"_n, eosio::const_mem_fun<ahosts, uint64_t, &ahosts::byvotes>>,
         eosio::indexed_by<"byuuid"_n, eosio::const_mem_fun<ahosts, checksum256, &ahosts::byuuid>>
     > ahosts_index;
+
+
+
+    struct [[eosio::table, eosio::contract("unicore")]] debts {
+        uint64_t id;
+        uint64_t goal_id;
+        eosio::name username;
+        eosio::asset amount;
+        
+        uint64_t primary_key() const {return id;}
+        uint64_t bygoal() const {return goal_id;}
+        uint64_t byusername() const {return username.value;}
+
+        EOSLIB_SERIALIZE(debts, (id)(goal_id)(username)(amount))
+    };
+
+    typedef eosio::multi_index< "debts"_n, debts,
+        eosio::indexed_by<"bygoal"_n, eosio::const_mem_fun<debts, uint64_t, &debts::bygoal>>,
+        eosio::indexed_by<"byusername"_n, eosio::const_mem_fun<debts, uint64_t, &debts::byusername>>
+    > debts_index;
+
 
 
 }
