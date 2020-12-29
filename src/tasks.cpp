@@ -14,7 +14,7 @@
 	 *
 	 * @param[in]  op    The operation
 	 */
-	[[eosio::action]] void unicore::settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id, std::string meta){
+	[[eosio::action]] void unicore::settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id, std::string meta){
 		
 		require_auth(creator);
 		
@@ -24,12 +24,17 @@
 
 
 		auto root_symbol = acc->get_root_symbol();
-		eosio::check(requested.symbol == root_symbol, "Wrong token for current host" );
-		eosio::check(for_each.symbol == root_symbol, "Wrong token for current host" );
-
+		
+		if (is_public == true) {
+			eosio::check(requested.symbol == root_symbol, "Wrong token for current host" );
+			eosio::check(for_each.symbol == root_symbol, "Wrong token for current host" );
+		} else {
+			eosio::check(for_each.amount == 0, "Wrong amount for current host and task mode" );
+		}
+		
 		goals_index goals(_me, host.value);
 		auto goal = goals.find(goal_id);
-		// eosio::check(goal != goals.end(), "Goal is not found");
+		eosio::check(goal != goals.end(), "Goal is not found");
 		
 
 		validate_permlink(permlink);
@@ -52,7 +57,7 @@
 
 			if (parent_batch_id != 0) {
 				auto parent_task = tasks.find(parent_batch_id);
-				eosio::check(parent_task != tasks.end(), "Parent batch is not found");
+				eosio::check(parent_task != tasks.end(), "Parent batch is not founded");
 				// eosio::check(parent_task -> is_batch == true, "Parent task is not a batch");
 
 				batch = parent_task -> batch;
@@ -70,12 +75,16 @@
 
 			};
 
-			if (goal != goals.end()){
+			if (goal != goals.end()) {
 				eosio::check(goal -> who_can_create_tasks == creator || goal->who_can_create_tasks.value == 0, "Only creator can create task for current goal");
+				
+				eosio::check(goal -> target.symbol == requested.symbol, "Requested symbol and goal symbol should equal");
 
 				goals.modify(goal, creator, [&](auto &g){
 		    	g.total_tasks = goal -> total_tasks + 1;
+		    	g.target += requested;
 		    });
+
 			}
 
 
@@ -93,6 +102,7 @@
 				t.funded = asset(0, root_symbol);
 				t.remain = asset(0, root_symbol);
 				t.is_public  = is_public;
+				t.doer = doer;
 				t.is_encrypted = false;
 				t.validated = creator == acc->architect ? true : false;
 				t.with_badge = with_badge;
@@ -116,6 +126,7 @@
 
 			tasks.modify(exist_task, creator, [&](auto &t){
 				t.title = title;
+				t.doer = doer;
 				t.data = data;
 				t.priority = priority;
 				t.requested = requested;
@@ -124,7 +135,6 @@
 				t.with_badge = with_badge;
 				t.badge_id = badge_id;
 				t.batch = batch;
-				
 			});
 
 
@@ -378,10 +388,8 @@
 		
 		tasks_index tasks(_me, host.value);
 		auto task = tasks.find(report->task_id);
-	
 		
-		eosio::check(report->requested <= task->remain, "Not enough funds for pay to this task");
-
+		
 		eosio::check(report->approved == false, "Task is already approved");
 		
 		reports.modify(report, host, [&](auto &r){
@@ -391,29 +399,67 @@
 			r.withdrawed = report->requested;
 		});
 
+		// eosio::check(report->requested <= task->remain, "Not enough funds for pay to this task");
 
 		if (report->requested.amount > 0){
+			if (report->requested > task->remain) {
+				
+				//if available in goal - minus it
+				//or modify goal debt which will be payed on the next donation to the debt object
+				
+				goals_index goals(_me, host.value);
+				auto goal = goals.find(task -> goal_id);
+				eosio::check(goal != goals.end(), "Goal is not found");
+
+				if (goal -> available >= report -> requested ){
+					
+					goals.modify(goal, host, [&](auto &g){
+						g.available -= report -> requested;
+						g.withdrawed += report -> requested;
+					});
+
+				} else {
+
+					goals.modify(goal, host, [&](auto &g){
+						g.available -= report -> requested;
+						g.debt_count += 1;
+					});
+					
+					debts_index debts(_me, _me.value);
+					
+					debts.emplace(host, [&](auto &d){
+						d.id = goal->debt_count;
+						d.amount = report -> requested;
+						d.goal_id = goal->id;
+						d.username = report -> username;
+					});
+				
+				}
+
+			} else {
 				action(
-		                permission_level{ _me, "active"_n },
-		                acc->root_token_contract, "transfer"_n,
-		                std::make_tuple( _me, report->username, report->requested, comment) 
+          permission_level{ _me, "active"_n },
+          acc->root_token_contract, "transfer"_n,
+          std::make_tuple( _me, report->username, report->requested, comment) 
 	      ).send();
+				
 		};
 
-		tasks.modify(task, host, [&](auto &t){
-			t.remain = task->remain - report->requested;
-		});
+			tasks.modify(task, host, [&](auto &t){
+				t.remain = task->remain - report->requested;
+			});
 
+	};
 
 		if (task -> with_badge == true){
 			unicore::giftbadge_action(host, report->username, task->badge_id, std::string("Completed task"));
 		}
 
-
     accounts.modify(acc, host, [&](auto &a){
       a.approved_reports = acc -> approved_reports + 1;
       a.completed_tasks = task->remain.amount == 0 ? acc -> completed_tasks + 1 : acc -> completed_tasks;
     });
+		
 	}
 
 	/**

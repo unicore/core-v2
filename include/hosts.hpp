@@ -99,7 +99,7 @@ namespace eosio {
         std::string title;
         std::string purpose;
         bool voting_only_up = false;
-        uint64_t power_market_id = 0;
+        eosio::name power_market_id;
         uint64_t total_shares;
         eosio::asset quote_amount;
         eosio::name quote_token_contract;
@@ -179,16 +179,41 @@ namespace eosio {
     typedef eosio::multi_index <"hosts"_n, hosts> account_index;
     
 
+    struct [[eosio::table, eosio::contract("unicore")]] roles {
+        uint64_t role_id;
+        eosio::name model;
+        eosio::name lang;
+        std::string title;
+        std::string descriptor;
+        eosio::name suggester;
+        bool approved = false;
+
+        uint64_t primary_key() const {return role_id;}  
+
+        EOSLIB_SERIALIZE(roles, (role_id)(model)(lang)(title)(descriptor)(suggester)(approved))      
+    };
+
+    typedef eosio::multi_index <"roles"_n, roles> roles_index;
+
+
     struct [[eosio::table, eosio::contract("unicore")]] dacs {
         eosio::name dac;
+        eosio::name mode;
+        eosio::name circle;
+
+        uint64_t role_id;
         uint64_t weight;
         eosio::asset income;
         uint128_t income_in_segments;
+        eosio::asset limit;
+        eosio::time_point_sec last_pay_at;
+        
         eosio::asset withdrawed;
         eosio::asset income_limit;
+        
         uint64_t primary_key() const {return dac.value;}  
 
-        EOSLIB_SERIALIZE(dacs, (dac)(weight)(income)(income_in_segments)(withdrawed)(income_limit))      
+        EOSLIB_SERIALIZE(dacs, (dac)(mode)(circle)(role_id)(weight)(income)(income_in_segments)(limit)(last_pay_at)(withdrawed)(income_limit))      
     };
 
     typedef eosio::multi_index <"dacs"_n, dacs> dacs_index;

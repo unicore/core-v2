@@ -64,6 +64,8 @@ using namespace eosio;
 
     // eosio::check(exist_goal == goals.end(), "Goal with current permlink is already exist");
 
+
+    eosio::check(target.amount == 0, "Goal target is a summ of tasks amounts");
     eosio::check(target.symbol == root_symbol, "Wrong symbol for this host");
     
     eosio::check(title.length() <= 100 && title.length() > 0, "Short Description is a maximum 100 symbols. Describe the goal shortly");
@@ -171,6 +173,7 @@ using namespace eosio;
 		auto goal = goals.find(goal_id);
 		eosio::check(goal != goals.end(), "Goal is not exist");
     eosio::check(goal->creator == username, "Wrong creator of goal");
+    eosio::check(goal->debt_count == 0, "Cannot delete goal with the debt");
 
 		goals.erase(goal);
 
@@ -268,6 +271,8 @@ using namespace eosio;
         eosio::asset converted_quantity = asset(0, root_symbol);
         eosio::asset target1 = asset(0, root_symbol);
 
+        eosio::check(goal->available + goal->withdrawed + quantity <= goal->target, "Can fund goal only until fill");
+
         if ((acc -> sale_mode == "direct"_n)||(acc -> sale_mode == "counterunit"_n)) {
           converted_quantity = unicore::buy_action(from, host, quantity, acc->root_token_contract, true, false);
           
@@ -278,8 +283,7 @@ using namespace eosio;
           uint64_t power = unicore::buyshares_action ( from, host, converted_quantity, acc->quote_token_contract );
           
           target1 = eosio::asset(goal->target1.amount + power, _POWER);
-
-        }
+        } 
 
         goals.modify(goal, _me, [&](auto &g){
           g.available += quantity;
@@ -395,6 +399,70 @@ using namespace eosio;
     // });
 
   }
+
+
+
+
+
+/**
+ * @brief Метод выплаты долга по цели из числа available в счет объектов долга
+ *       
+ *
+ * @param[in]  op    The new value
+ */
+
+  [[eosio::action]] void unicore::paydebt(eosio::name host, uint64_t goal_id){
+      require_auth(host);
+
+      goals_index goals(_me, host.value);
+      auto goal = goals.find(goal_id);
+      eosio::check(goal != goals.end(), "Goal is not found");
+
+      account_index hosts (_me, host.value);
+      auto acc = hosts.find(host.value);
+      eosio::check(acc != hosts.end(), "Host not exist");
+      
+      debts_index debts(_me, host.value);
+
+      auto idx_bv = debts.template get_index<"bygoal"_n>();
+      auto debt = idx_bv.begin();
+      
+      uint64_t count = 0;
+      uint64_t limit = 10;
+      
+      std::vector<uint64_t> list_for_delete;
+      eosio::asset available = goal -> available;
+
+      while(debt != idx_bv.end() && count != limit && debt -> goal_id == goal_id) {
+        
+        if (available >= debt -> amount ){        
+          
+          list_for_delete.push_back(debt->id);
+          available -= debt-> amount;     
+
+          action(
+            permission_level{ _me, "active"_n },
+            acc->root_token_contract, "transfer"_n,
+            std::make_tuple( _me, debt->username, debt->amount, std::string("Debt Withdraw")) 
+          ).send();   
+
+        };
+
+        count++;
+        debt++;
+
+      };
+
+      for (auto id : list_for_delete){
+        auto debt_for_delete = debts.find(id);
+
+        debts.erase(debt_for_delete);
+      };
+
+      goals.modify(goal, host, [&](auto &g){
+        g.available = available;
+      });
+  };
 
 
 /**

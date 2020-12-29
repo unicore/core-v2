@@ -23,6 +23,7 @@
         std::string description;
         
         eosio::asset target;
+        uint64_t debt_count;
         eosio::asset target1;
         eosio::asset target2;
         eosio::asset target3;
@@ -68,7 +69,7 @@
         uint64_t byhost() const {return host.value;}
         uint128_t by_username_and_host() const { return eosio::combine_ids(creator.value, host.value); }
         
-        EOSLIB_SERIALIZE( goals, (id)(parent_id)(type)(creator)(benefactor)(host)(status)(is_batch)(batch)(benefactors_weight)(created)(start_at)(finish_at)(expired_at)(duration)(priority)(cashback)(participants_count)(parent_permlink)(permlink)(title)(description)(target)(target1)(target2)(target3)(available)(total_votes)(total_tasks)(validated)(activated)(filled)(reported)
+        EOSLIB_SERIALIZE( goals, (id)(parent_id)(type)(creator)(benefactor)(host)(status)(is_batch)(batch)(benefactors_weight)(created)(start_at)(finish_at)(expired_at)(duration)(priority)(cashback)(participants_count)(parent_permlink)(permlink)(title)(description)(target)(debt_count)(target1)(target2)(target3)(available)(total_votes)(total_tasks)(validated)(activated)(filled)(reported)
             (checked)(comments_is_enabled)(who_can_create_tasks)(report)(withdrawed)(voters)(meta)(with_badge)(badge_id)(is_encrypted)(public_key))
     };
 
