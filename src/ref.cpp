@@ -1,4 +1,4 @@
-namespace eosio {
+using namespace eosio;
   /**
    * @brief      Метод вывода остатка партнерского финансового потока
    * withdraw power quant (withpowerun)
@@ -113,5 +113,3 @@ namespace eosio {
 
   }
 
-
-}

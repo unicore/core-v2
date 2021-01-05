@@ -1,3 +1,6 @@
+/*!
+    \brief Структура наградных значков хоста Двойной Спирали, их изображений, пиктограмм и предоставляемой силы.
+*/
 	struct  [[eosio::table, eosio::contract("unicore")]] badges{
 		uint64_t id;
 		eosio::string caption;
@@ -15,7 +18,9 @@
 
 	typedef eosio::multi_index<"badges"_n, badges> badge_index;
 
-
+/*!
+    \brief Структура наградных значков пользователя, полученных от разных хостов Двойной Спирали.
+*/
 	struct  [[eosio::table, eosio::contract("unicore")]] usbadges{
 		uint64_t id;
 		eosio::name host;
@@ -36,9 +41,9 @@
 
 		uint64_t primary_key() const {return id;}
 		uint64_t host_key() const {return host.value;}
-		uint128_t hostandbadge() const { return eosio::combine_ids(host.value, badge_id); }
-		uint128_t hostandtask() const { return eosio::combine_ids(host.value, task_id); }
-		uint128_t hostandgoal() const { return eosio::combine_ids(host.value, goal_id); }
+		uint128_t hostandbadge() const { return combine_ids(host.value, badge_id); }
+		uint128_t hostandtask() const { return combine_ids(host.value, task_id); }
+		uint128_t hostandgoal() const { return combine_ids(host.value, goal_id); }
 
 		EOSLIB_SERIALIZE(struct usbadges, (id)(host)(badge_id)(netted)(goal_id)(task_id)(count)(caption)(description)(iurl)(pic)(comment)(power)(first_recieved_at)(last_recieved_at))
 	};

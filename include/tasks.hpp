@@ -1,5 +1,6 @@
-
-
+/*!
+   \brief Структура задач хоста Двойной Спирали.
+*/
 	struct [[eosio::table, eosio::contract("unicore")]] tasks{
 		uint64_t task_id;
 		uint64_t goal_id;
@@ -52,15 +53,15 @@
         uint64_t bycreator() const {return creator.value;}
         uint64_t bycurator() const {return curator.value;}
         uint64_t bygoal() const {return goal_id; }
-        uint128_t goalandtask() const { return eosio::combine_ids(goal_id, task_id); }
+        uint128_t goalandtask() const { return combine_ids(goal_id, task_id); }
         uint64_t byhost() const {return host.value; }
         uint64_t bytype() const {return type.value; }
         uint64_t bystatus() const {return status.value; }
         uint64_t bypriority() const {return priority; }
         uint64_t byhasbadge() const {return with_badge; }
         uint64_t bybadge() const {return badge_id; }
-        uint128_t crewithtask() const { return eosio::combine_ids(creator.value, task_id); }
-        uint128_t crewithgoal() const { return eosio::combine_ids(creator.value, goal_id); }
+        uint128_t crewithtask() const { return combine_ids(creator.value, task_id); }
+        uint128_t crewithgoal() const { return combine_ids(creator.value, goal_id); }
         
         uint64_t byvotes() const { 
             return pow(2, 63) + total_votes;
@@ -87,7 +88,9 @@
 
 
 
-
+/*!
+   \brief Структура отчетов по задачам хоста Двойной Спирали.
+*/
     struct [[eosio::table, eosio::contract("unicore")]] reports {
     	uint64_t report_id;
     	uint64_t task_id; 
@@ -108,8 +111,8 @@
     	
         uint64_t primary_key() const {return report_id;}
 		uint64_t byusername() const {return username.value;}
-        uint128_t userwithgoal() const { return eosio::combine_ids(username.value, goal_id); }
-        uint128_t userwithtask() const { return eosio::combine_ids(username.value, task_id); }
+        uint128_t userwithgoal() const { return combine_ids(username.value, goal_id); }
+        uint128_t userwithtask() const { return combine_ids(username.value, task_id); }
         
 
     	EOSLIB_SERIALIZE(reports, (report_id)(task_id)(goal_id)(type)(username)(curator)(data)(requested)(balance)(withdrawed)(need_check)(approved)(comment)(created_at)(expired_at))

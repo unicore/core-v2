@@ -314,20 +314,23 @@
 			if (goal -> type == "marathon"_n){
 				goalspartic_index gparticipants(_me, host.value);
 	      auto users_with_id = gparticipants.template get_index<"byusergoal"_n>();
-				auto goal_ids = eosio::combine_ids(username.value, task->goal_id);
+				auto goal_ids = combine_ids(username.value, task->goal_id);
 	      auto participant = users_with_id.find(goal_ids);
 
 	      eosio::check(participant != users_with_id.end(), "Username not participant of the current marathon");
 			};
+			
 			goals.modify(goal, username, [&](auto &g){
 				g.reports_count += 1;
 			});
+
 		};
+		
 		reports_index reports(_me, host.value);
 		
 		auto users_with_id = reports.template get_index<"userwithtask"_n>();
 
-		auto report_ids = eosio::combine_ids(username.value, task_id);
+		auto report_ids = combine_ids(username.value, task_id);
 		auto user_report = users_with_id.find(report_ids);
 
 		eosio::check(user_report == users_with_id.end(), "Report for this task already exist");

@@ -5,11 +5,15 @@
 #include "../src/exchange_state.cpp"
 #include <eosio/crypto.hpp>
 
-namespace eosio {
+
    uint128_t combine_ids(const uint64_t &x, const uint64_t &y) {
         return (uint128_t{x} << 64) | y;
    };
 
+
+/*!
+   \brief Структура основных параметров конфигурации Двойной Спирали.
+*/
    struct [[eosio::table, eosio::contract("unicore")]] spiral{
         uint64_t id;
         uint64_t size_of_pool;
@@ -30,6 +34,9 @@ namespace eosio {
     typedef eosio::multi_index<"spiral"_n, spiral> spiral_index;
 
 
+/*!
+   \brief Структура курсов реализации внутренней конвертационной единицы и их возврата Протоколу.
+*/
     struct [[eosio::table, eosio::contract("unicore")]] rate {
         uint64_t pool_id;
         uint64_t buy_rate=0;
@@ -55,6 +62,11 @@ namespace eosio {
         EOSLIB_SERIALIZE(rate, (pool_id)(buy_rate)(sell_rate)(convert_rate)(quant_buy_rate)(quant_sell_rate)(quant_convert_rate)(client_income)(delta)(pool_cost)(total_in_box)(payment_to_wins)(payment_to_loss)(system_income)(live_balance_for_sale)(live_balance_for_convert))
     };
     typedef eosio::multi_index<"rate"_n, rate> rate_index;
+
+
+/*!
+   \brief Структура хоста Двойной Спирали.
+*/
 
     struct [[eosio::table, eosio::contract("unicore")]] hosts{
         eosio::name username;
@@ -179,6 +191,10 @@ namespace eosio {
     typedef eosio::multi_index <"hosts"_n, hosts> account_index;
     
 
+/*!
+   \brief Структура командных ролей протокола.
+*/
+
     struct [[eosio::table, eosio::contract("unicore")]] roles {
         uint64_t role_id;
         eosio::name model;
@@ -196,6 +212,9 @@ namespace eosio {
     typedef eosio::multi_index <"roles"_n, roles> roles_index;
 
 
+/*!
+   \brief Структура команды хоста Двойной Спирали.
+*/
     struct [[eosio::table, eosio::contract("unicore")]] dacs {
         eosio::name dac;
         eosio::name mode;
@@ -219,6 +238,9 @@ namespace eosio {
     typedef eosio::multi_index <"dacs"_n, dacs> dacs_index;
 
 
+/*!
+   \brief Структура параметров эмиссии целевого фонда хоста Двойной Спирали
+*/
     struct [[eosio::table, eosio::contract("unicore")]] emission {
         eosio::name host;
         uint64_t percent;
@@ -233,6 +255,9 @@ namespace eosio {
     typedef eosio::multi_index<"emission"_n, emission> emission_index;
 
 
+/*!
+   \brief Структура глобальных фондов владельцев жетонов, помещенных на распределение. 
+*/
     struct [[eosio::table, eosio::contract("unicore")]] funds{
         uint64_t id;
         eosio::name issuer;
@@ -242,7 +267,7 @@ namespace eosio {
         
         uint64_t primary_key()const { return id; }
         uint64_t byissuer()const { return issuer.value; }
-        uint128_t codeandsmbl() const {return eosio::combine_ids(token_contract.value, fund.symbol.code().raw());}
+        uint128_t codeandsmbl() const {return combine_ids(token_contract.value, fund.symbol.code().raw());}
         
         EOSLIB_SERIALIZE(funds, (id)(issuer)(token_contract)(fund)(descriptor))
     };
@@ -256,6 +281,9 @@ namespace eosio {
                               &funds::byissuer>>
     > funds_index;
 
+/*!
+   \brief Структура хостов Двойной Спирали, подключенных к глобальным фондам распределения.
+*/
     struct [[eosio::table, eosio::contract("unicore")]] hostsonfunds{
         uint64_t id;
         uint64_t fund_id;
@@ -263,7 +291,7 @@ namespace eosio {
         
         uint64_t primary_key()const { return id; }
         
-        uint128_t fundandhost() const {return eosio::combine_ids(fund_id, host.value);}
+        uint128_t fundandhost() const {return combine_ids(fund_id, host.value);}
         EOSLIB_SERIALIZE(hostsonfunds, (id)(fund_id)(host))
     };
 
@@ -273,6 +301,3 @@ namespace eosio {
                               &hostsonfunds::fundandhost>>
     > hostsonfunds_index;
 
-
-
-};

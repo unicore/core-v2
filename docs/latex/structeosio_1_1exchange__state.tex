@@ -1,0 +1,68 @@
+\hypertarget{structeosio_1_1exchange__state}{}\section{eosio\+:\+:exchange\+\_\+state Struct Reference}
+\label{structeosio_1_1exchange__state}\index{eosio\+::exchange\+\_\+state@{eosio\+::exchange\+\_\+state}}
+
+
+{\ttfamily \#include $<$exchange\+\_\+state.\+hpp$>$}
+
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structeosio_1_1exchange__state_1_1connector}{connector}}
+\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structeosio_1_1exchange__state_a962eb5ae2f354cf80058dc8243b3885c}\label{structeosio_1_1exchange__state_a962eb5ae2f354cf80058dc8243b3885c}} 
+uint64\+\_\+t {\bfseries primary\+\_\+key} () const
+\item 
+\mbox{\Hypertarget{structeosio_1_1exchange__state_af3a668c9edcd39bf67d3d46e300a81e0}\label{structeosio_1_1exchange__state_af3a668c9edcd39bf67d3d46e300a81e0}} 
+asset {\bfseries convert\+\_\+to\+\_\+exchange} (\mbox{\hyperlink{structeosio_1_1exchange__state_1_1connector}{connector}} \&reserve, const asset \&payment)
+\item 
+\mbox{\Hypertarget{structeosio_1_1exchange__state_a2bb928e02fe7af628f0ac4c147ea9670}\label{structeosio_1_1exchange__state_a2bb928e02fe7af628f0ac4c147ea9670}} 
+asset {\bfseries convert\+\_\+from\+\_\+exchange} (\mbox{\hyperlink{structeosio_1_1exchange__state_1_1connector}{connector}} \&reserve, const asset \&tokens)
+\item 
+\mbox{\Hypertarget{structeosio_1_1exchange__state_a7167fc8ee89d6d0ce1d0b8db2813a96f}\label{structeosio_1_1exchange__state_a7167fc8ee89d6d0ce1d0b8db2813a96f}} 
+asset {\bfseries convert} (const asset \&from, const symbol \&to)
+\item 
+\mbox{\Hypertarget{structeosio_1_1exchange__state_a818976baaa188d24ce61d63e8754e741}\label{structeosio_1_1exchange__state_a818976baaa188d24ce61d63e8754e741}} 
+asset {\bfseries direct\+\_\+convert} (const asset \&from, const symbol \&to)
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structeosio_1_1exchange__state_a0e72bc9a390597473b2b4dffe1b1c0c7}\label{structeosio_1_1exchange__state_a0e72bc9a390597473b2b4dffe1b1c0c7}} 
+static int64\+\_\+t {\bfseries get\+\_\+bancor\+\_\+output} (int64\+\_\+t inp\+\_\+reserve, int64\+\_\+t out\+\_\+reserve, int64\+\_\+t inp)
+\item 
+\mbox{\Hypertarget{structeosio_1_1exchange__state_ad3d84959d40c58254006e1899d457936}\label{structeosio_1_1exchange__state_ad3d84959d40c58254006e1899d457936}} 
+static int64\+\_\+t {\bfseries get\+\_\+bancor\+\_\+input} (int64\+\_\+t out\+\_\+reserve, int64\+\_\+t inp\+\_\+reserve, int64\+\_\+t out)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structeosio_1_1exchange__state_a4d35841f45023da1581009f2c31e5554}\label{structeosio_1_1exchange__state_a4d35841f45023da1581009f2c31e5554}} 
+uint64\+\_\+t {\bfseries id}
+\item 
+\mbox{\Hypertarget{structeosio_1_1exchange__state_ae17e71b1667a49752fb5b61794ffc915}\label{structeosio_1_1exchange__state_ae17e71b1667a49752fb5b61794ffc915}} 
+std\+::string {\bfseries name}
+\item 
+\mbox{\Hypertarget{structeosio_1_1exchange__state_a22bcaa59ba37c0ede7270f05bedd8f27}\label{structeosio_1_1exchange__state_a22bcaa59ba37c0ede7270f05bedd8f27}} 
+uint64\+\_\+t {\bfseries vesting\+\_\+seconds} = 0
+\item 
+\mbox{\Hypertarget{structeosio_1_1exchange__state_a008ffaf59e6747087b39d58ad4d1907d}\label{structeosio_1_1exchange__state_a008ffaf59e6747087b39d58ad4d1907d}} 
+asset {\bfseries supply}
+\item 
+\mbox{\Hypertarget{structeosio_1_1exchange__state_ab6fc4150a3d9c76cf0c8b80f2f307141}\label{structeosio_1_1exchange__state_ab6fc4150a3d9c76cf0c8b80f2f307141}} 
+\mbox{\hyperlink{structeosio_1_1exchange__state_1_1connector}{connector}} {\bfseries base}
+\item 
+\mbox{\Hypertarget{structeosio_1_1exchange__state_a113d14fa6ef420fbcb91cff8f67633ef}\label{structeosio_1_1exchange__state_a113d14fa6ef420fbcb91cff8f67633ef}} 
+\mbox{\hyperlink{structeosio_1_1exchange__state_1_1connector}{connector}} {\bfseries quote}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Uses Bancor math to create a 50/50 relay between two asset types. The state of the bancor exchange is entirely contained within this struct. There are no external side effects associated with using this A\+PI. 
+
+The documentation for this struct was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/exchange\+\_\+state.\+hpp\item 
+src/exchange\+\_\+state.\+cpp\end{DoxyCompactItemize}

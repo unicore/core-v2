@@ -74,7 +74,7 @@
   //   eosio::name owner;
   //   uint64_t order_id;
 
-  //   uint128_t primary_key() const { return eosio::combine_ids(owner.value, order_id); }
+  //   uint128_t primary_key() const { return combine_ids(owner.value, order_id); }
 
   //   EOSLIB_SERIALIZE(struct mydataordrs, (owner)(order_id))
   // };
@@ -101,7 +101,7 @@
   //   eosio::string meta;
 
   //   uint64_t primary_key() const {return id;}
-  //   uint128_t buyerandid() const {return eosio::combine_ids(buyer.value, orbdata_id);}
+  //   uint128_t buyerandid() const {return combine_ids(buyer.value, orbdata_id);}
 
   //   EOSLIB_SERIALIZE(struct dataorders, (id)(orbdata_id)(opened_at)(expired_at)(owner)(buyer)(curator)(locked_amount)(approved)
   //     (key)(dispute)(meta))

@@ -1,0 +1,109 @@
+\hypertarget{structbalance}{}\section{balance Struct Reference}
+\label{structbalance}\index{balance@{balance}}
+
+
+Структура балансов пользователя у всех хостов Двойной Спирали  
+
+
+
+
+{\ttfamily \#include $<$core.\+hpp$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structbalance_a748ad87c69d0195c26a690857b427cc9}\label{structbalance_a748ad87c69d0195c26a690857b427cc9}} 
+uint64\+\_\+t {\bfseries primary\+\_\+key} () const
+\item 
+\mbox{\Hypertarget{structbalance_a728c8bb1d05ff085aca6d4f3d4ee3e02}\label{structbalance_a728c8bb1d05ff085aca6d4f3d4ee3e02}} 
+uint64\+\_\+t {\bfseries byhost} () const
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structbalance_a3077d63cadc45e37ad1c5dcc5e94ccfd}\label{structbalance_a3077d63cadc45e37ad1c5dcc5e94ccfd}} 
+uint64\+\_\+t {\bfseries id}
+\item 
+\mbox{\Hypertarget{structbalance_aa1b6b2cbd5b9d70037404e5a2ad5dda0}\label{structbalance_aa1b6b2cbd5b9d70037404e5a2ad5dda0}} 
+eosio\+::name {\bfseries host}
+\item 
+\mbox{\Hypertarget{structbalance_a5ec1543098c124fe30f27c214cb8160e}\label{structbalance_a5ec1543098c124fe30f27c214cb8160e}} 
+eosio\+::name {\bfseries chost}
+\item 
+\mbox{\Hypertarget{structbalance_ad2ed41f1dfbf60f812a7ac023345930e}\label{structbalance_ad2ed41f1dfbf60f812a7ac023345930e}} 
+uint64\+\_\+t {\bfseries cycle\+\_\+num}
+\item 
+\mbox{\Hypertarget{structbalance_aca9b81261b5367beeaa6fe6e294205ca}\label{structbalance_aca9b81261b5367beeaa6fe6e294205ca}} 
+uint64\+\_\+t {\bfseries pool\+\_\+num}
+\item 
+\mbox{\Hypertarget{structbalance_a3d37c261621463b5391b79c5db5e1dce}\label{structbalance_a3d37c261621463b5391b79c5db5e1dce}} 
+uint64\+\_\+t {\bfseries global\+\_\+pool\+\_\+id}
+\item 
+\mbox{\Hypertarget{structbalance_abbddf497106a7fc59dcce1a0541c657b}\label{structbalance_abbddf497106a7fc59dcce1a0541c657b}} 
+uint64\+\_\+t {\bfseries quants\+\_\+for\+\_\+sale}
+\item 
+\mbox{\Hypertarget{structbalance_aa6c36478cc488c615624e25f53197901}\label{structbalance_aa6c36478cc488c615624e25f53197901}} 
+uint64\+\_\+t {\bfseries next\+\_\+quants\+\_\+for\+\_\+sale}
+\item 
+\mbox{\Hypertarget{structbalance_ad3d998acc801aa7e732e0d4c49fc0040}\label{structbalance_ad3d998acc801aa7e732e0d4c49fc0040}} 
+uint64\+\_\+t {\bfseries last\+\_\+recalculated\+\_\+win\+\_\+pool\+\_\+id} = 1
+\item 
+\mbox{\Hypertarget{structbalance_aeacfdfcdb555b1bc12109466764fb21f}\label{structbalance_aeacfdfcdb555b1bc12109466764fb21f}} 
+bool {\bfseries win} = false
+\item 
+\mbox{\Hypertarget{structbalance_a43060a5a2d2870df3223afdede2a1902}\label{structbalance_a43060a5a2d2870df3223afdede2a1902}} 
+int64\+\_\+t {\bfseries root\+\_\+percent}
+\item 
+\mbox{\Hypertarget{structbalance_ae340e646db87513680649541b7d67127}\label{structbalance_ae340e646db87513680649541b7d67127}} 
+int64\+\_\+t {\bfseries convert\+\_\+percent}
+\item 
+\mbox{\Hypertarget{structbalance_a0044db0c6aa47669ec4a0be274cb5240}\label{structbalance_a0044db0c6aa47669ec4a0be274cb5240}} 
+std\+::string {\bfseries pool\+\_\+color}
+\item 
+\mbox{\Hypertarget{structbalance_a2ebfdee4e226a44574200d72cef62b36}\label{structbalance_a2ebfdee4e226a44574200d72cef62b36}} 
+eosio\+::asset {\bfseries available}
+\item 
+\mbox{\Hypertarget{structbalance_abf8ce9c9100af8a509f46ea113d69b0a}\label{structbalance_abf8ce9c9100af8a509f46ea113d69b0a}} 
+eosio\+::asset {\bfseries purchase\+\_\+amount}
+\item 
+\mbox{\Hypertarget{structbalance_a59fe98e51b77617aefe83d7e41caa7b7}\label{structbalance_a59fe98e51b77617aefe83d7e41caa7b7}} 
+eosio\+::asset {\bfseries start\+\_\+convert\+\_\+amount}
+\item 
+\mbox{\Hypertarget{structbalance_a541a27b55aeabff4adcc9140b066205c}\label{structbalance_a541a27b55aeabff4adcc9140b066205c}} 
+eosio\+::asset {\bfseries if\+\_\+convert}
+\item 
+\mbox{\Hypertarget{structbalance_a3cf5ede49ed606a3174a69d27367da00}\label{structbalance_a3cf5ede49ed606a3174a69d27367da00}} 
+eosio\+::asset {\bfseries if\+\_\+convert\+\_\+to\+\_\+power}
+\item 
+\mbox{\Hypertarget{structbalance_abe1f4b170794344c8096d5acbbcd7ef2}\label{structbalance_abe1f4b170794344c8096d5acbbcd7ef2}} 
+bool {\bfseries withdrawed} = false
+\item 
+\mbox{\Hypertarget{structbalance_a05925ffe786d40f4563c8ce1451d55e6}\label{structbalance_a05925ffe786d40f4563c8ce1451d55e6}} 
+std\+::vector$<$ eosio\+::asset $>$ {\bfseries forecasts}
+\item 
+\mbox{\Hypertarget{structbalance_a2a13b04bd7da3263b966014b5cf46eda}\label{structbalance_a2a13b04bd7da3263b966014b5cf46eda}} 
+eosio\+::asset {\bfseries ref\+\_\+amount}
+\item 
+\mbox{\Hypertarget{structbalance_ac3e370ea791c5b18846bc914f8cf599a}\label{structbalance_ac3e370ea791c5b18846bc914f8cf599a}} 
+eosio\+::asset {\bfseries dac\+\_\+amount}
+\item 
+\mbox{\Hypertarget{structbalance_aa114410afa216d60a712fb677231ce0b}\label{structbalance_aa114410afa216d60a712fb677231ce0b}} 
+eosio\+::asset {\bfseries cfund\+\_\+amount}
+\item 
+\mbox{\Hypertarget{structbalance_ac149b98afd086a41b24b2deb1894b8ea}\label{structbalance_ac149b98afd086a41b24b2deb1894b8ea}} 
+eosio\+::asset {\bfseries hfund\+\_\+amount}
+\item 
+\mbox{\Hypertarget{structbalance_a050e60d399f399ed44f19793778fd487}\label{structbalance_a050e60d399f399ed44f19793778fd487}} 
+eosio\+::asset {\bfseries sys\+\_\+amount}
+\item 
+\mbox{\Hypertarget{structbalance_a70f30d92f79649b752878f9dcc61f7cf}\label{structbalance_a70f30d92f79649b752878f9dcc61f7cf}} 
+eosio\+::string {\bfseries meta}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Структура балансов пользователя у всех хостов Двойной Спирали 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/core.\+hpp\end{DoxyCompactItemize}

@@ -1,4 +1,4 @@
-namespace eosio{
+using namespace eosio;
 
     [[eosio::action]] void unicore::init(uint64_t system_income){
         require_auth(_me);
@@ -38,7 +38,7 @@ namespace eosio{
     }
 
     eosio::asset unicore::convert_to_power(eosio::asset quantity, eosio::name host){
-        powermarket markets(_me, host.value);
+        market_index markets(_me, host.value);
         auto market = markets.find(0);
         auto tmp = *market;
         account_index accounts(_me, host.value);
@@ -630,7 +630,7 @@ void next_pool( eosio::name host){
             
         //     auto sincome_bycycle_and_pool = sincome.template get_index<"cyclandpool"_n>();
 
-        //     auto sincome_bycycle_and_pool_ids = eosio::combine_ids(acc->current_cycle_num, acc -> current_pool_num);
+        //     auto sincome_bycycle_and_pool_ids = combine_ids(acc->current_cycle_num, acc -> current_pool_num);
             
         //     auto sinc = sincome_bycycle_and_pool.find(sincome_bycycle_and_pool_ids);
 
@@ -1848,7 +1848,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
     funds_index funds(_me, _me.value);
     auto by_contract_and_symbol = funds.template get_index<"codeandsmbl"_n>();
 
-    auto by_contract_and_symbol_ids = eosio::combine_ids(token_contract.value, quantity.symbol.code().raw());
+    auto by_contract_and_symbol_ids = combine_ids(token_contract.value, quantity.symbol.code().raw());
     
     auto fund = by_contract_and_symbol.find(by_contract_and_symbol_ids);
 
@@ -1885,7 +1885,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
     funds_index funds(_me, _me.value);
     auto by_contract_and_symbol = funds.template get_index<"codeandsmbl"_n>();
 
-    auto by_contract_and_symbol_ids = eosio::combine_ids(token_contract.value, asset_on_sale.symbol.code().raw());    
+    auto by_contract_and_symbol_ids = combine_ids(token_contract.value, asset_on_sale.symbol.code().raw());    
     auto fund = by_contract_and_symbol.find(by_contract_and_symbol_ids);
     
     account_index accounts(_me, host.value);
@@ -1904,7 +1904,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
 
     auto by_fund_and_host = hostsonfunds.template get_index<"fundandhost"_n>();
 
-    auto by_fund_and_host_ids = eosio::combine_ids(fund->id, host.value);
+    auto by_fund_and_host_ids = combine_ids(fund->id, host.value);
     
     auto host_on_fund = by_fund_and_host.find(by_fund_and_host_ids);
     
@@ -1981,7 +1981,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
     hostsonfunds_index hostsonfunds(_me, _me.value);
     auto by_fund_and_host = hostsonfunds.template get_index<"fundandhost"_n>();
 
-    auto by_fund_and_host_ids = eosio::combine_ids(fund_id, host.value);
+    auto by_fund_and_host_ids = combine_ids(fund_id, host.value);
     
     auto host_on_fund = by_fund_and_host.find(by_fund_and_host_ids);
 
@@ -2020,7 +2020,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
     hostsonfunds_index hostsonfunds(_me, _me.value);
     auto by_fund_and_host = hostsonfunds.template get_index<"fundandhost"_n>();
 
-    auto by_fund_and_host_ids = eosio::combine_ids(fund_id, host.value);
+    auto by_fund_and_host_ids = combine_ids(fund_id, host.value);
     
     auto host_on_fund = by_fund_and_host.find(by_fund_and_host_ids);
 
@@ -2048,7 +2048,7 @@ void unicore::add_asset_to_fund_action(eosio::name username, eosio::asset quanti
 
     auto by_contract_and_symbol = funds.template get_index<"codeandsmbl"_n>();
 
-    auto by_contract_and_symbol_ids = eosio::combine_ids(code.value, quantity.symbol.code().raw());
+    auto by_contract_and_symbol_ids = combine_ids(code.value, quantity.symbol.code().raw());
     
     auto fund = by_contract_and_symbol.find(by_contract_and_symbol_ids);
 
@@ -2080,7 +2080,7 @@ void unicore::createfund(eosio::name token_contract, eosio::asset fund_asset, st
 
     auto by_contract_and_symbol = funds.template get_index<"codeandsmbl"_n>();
 
-    auto by_contract_and_symbol_ids = eosio::combine_ids(token_contract.value, fund_asset.symbol.code().raw());
+    auto by_contract_and_symbol_ids = combine_ids(token_contract.value, fund_asset.symbol.code().raw());
     
     auto fund = by_contract_and_symbol.find(by_contract_and_symbol_ids);
 
@@ -2669,7 +2669,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
             //TODO may be corrent max with total prev element
             //(if payed before, max should decrease)
     
-            powermarket market(_me, host.value);
+            market_index market(_me, host.value);
             auto itr = market.find(0);
             auto liquid_power = acc->total_shares - itr->base.balance.amount;
 
@@ -2861,7 +2861,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         
         
         //HFUND
-        powermarket market(_me, host.value);
+        market_index market(_me, host.value);
         auto itr = market.find(0);
         auto liquid_power = acc->total_shares - itr->base.balance.amount;
         
@@ -2985,7 +2985,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
 
         auto funds_by_contract_and_symbol = funds.template get_index<"codeandsmbl"_n>();
 
-        auto fund_by_contract_and_symbol_ids = eosio::combine_ids(acc.sale_token_contract.value, (acc.asset_on_sale).symbol.code().raw());
+        auto fund_by_contract_and_symbol_ids = combine_ids(acc.sale_token_contract.value, (acc.asset_on_sale).symbol.code().raw());
         
         auto fund = funds_by_contract_and_symbol.find(fund_by_contract_and_symbol_ids);
 
@@ -2997,5 +2997,3 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         });
 
     }
-
-};

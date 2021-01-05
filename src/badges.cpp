@@ -83,7 +83,7 @@
 		});
 
 		auto hostandbadge_idx = user_badges.template get_index<"hostandbadge"_n>();
-		auto badge_ids = eosio::combine_ids(host.value, badge_id);
+		auto badge_ids = combine_ids(host.value, badge_id);
 		
 		auto user_badge = hostandbadge_idx.find(badge_ids);
 

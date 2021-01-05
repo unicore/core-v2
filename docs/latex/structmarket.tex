@@ -1,0 +1,75 @@
+\hypertarget{structmarket}{}\section{market Struct Reference}
+\label{structmarket}\index{market@{market}}
+
+
+Структура взамодействия с рынками торгового робота Bancor.  
+
+
+
+
+{\ttfamily \#include $<$exchange\+\_\+state.\+hpp$>$}
+
+\subsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structmarket_1_1connector}{connector}}
+\begin{DoxyCompactList}\small\item\em Структура коннектора рынка торгового робота Bancor. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structmarket_a927be547fb7499a82fc5a717e133a7b4}\label{structmarket_a927be547fb7499a82fc5a717e133a7b4}} 
+uint64\+\_\+t {\bfseries primary\+\_\+key} () const
+\item 
+\mbox{\Hypertarget{structmarket_a0f2926879c20545177fe18c177420bdb}\label{structmarket_a0f2926879c20545177fe18c177420bdb}} 
+asset {\bfseries convert\+\_\+to\+\_\+exchange} (\mbox{\hyperlink{structmarket_1_1connector}{connector}} \&reserve, const asset \&payment)
+\item 
+\mbox{\Hypertarget{structmarket_a868ca81f6e115b7c6d3f3894cc6bc971}\label{structmarket_a868ca81f6e115b7c6d3f3894cc6bc971}} 
+asset {\bfseries convert\+\_\+from\+\_\+exchange} (\mbox{\hyperlink{structmarket_1_1connector}{connector}} \&reserve, const asset \&tokens)
+\item 
+\mbox{\Hypertarget{structmarket_ab329c1ef0f3b4569b0d1786736cc3794}\label{structmarket_ab329c1ef0f3b4569b0d1786736cc3794}} 
+asset {\bfseries convert} (const asset \&from, const symbol \&to)
+\item 
+\mbox{\Hypertarget{structmarket_a5d5041e0aaf2cb29bad70644d264d579}\label{structmarket_a5d5041e0aaf2cb29bad70644d264d579}} 
+asset {\bfseries direct\+\_\+convert} (const asset \&from, const symbol \&to)
+\end{DoxyCompactItemize}
+\subsection*{Static Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structmarket_a57e03026f8a9da98b890121865ce38c2}\label{structmarket_a57e03026f8a9da98b890121865ce38c2}} 
+static int64\+\_\+t {\bfseries get\+\_\+bancor\+\_\+output} (int64\+\_\+t inp\+\_\+reserve, int64\+\_\+t out\+\_\+reserve, int64\+\_\+t inp)
+\item 
+\mbox{\Hypertarget{structmarket_a531f0fd74c1d598da86ac45c50c9f800}\label{structmarket_a531f0fd74c1d598da86ac45c50c9f800}} 
+static int64\+\_\+t {\bfseries get\+\_\+bancor\+\_\+input} (int64\+\_\+t out\+\_\+reserve, int64\+\_\+t inp\+\_\+reserve, int64\+\_\+t out)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structmarket_ae532d3fe0cf32f7ce146ac8dc471193d}\label{structmarket_ae532d3fe0cf32f7ce146ac8dc471193d}} 
+uint64\+\_\+t {\bfseries id}
+\item 
+\mbox{\Hypertarget{structmarket_a193ab300909085d98571159a2ac0f525}\label{structmarket_a193ab300909085d98571159a2ac0f525}} 
+std\+::string {\bfseries name}
+\item 
+\mbox{\Hypertarget{structmarket_a14276e13986dd8f9467e4f46cbe36f74}\label{structmarket_a14276e13986dd8f9467e4f46cbe36f74}} 
+uint64\+\_\+t {\bfseries vesting\+\_\+seconds} = 0
+\item 
+\mbox{\Hypertarget{structmarket_a43fd06e1fccaf87a936e0cbf98e4d6a6}\label{structmarket_a43fd06e1fccaf87a936e0cbf98e4d6a6}} 
+eosio\+::asset {\bfseries supply}
+\item 
+\mbox{\Hypertarget{structmarket_a2c729f8f225ad991298224c1b5b8afee}\label{structmarket_a2c729f8f225ad991298224c1b5b8afee}} 
+\mbox{\hyperlink{structmarket_1_1connector}{connector}} {\bfseries base}
+\item 
+\mbox{\Hypertarget{structmarket_a7328f8895180f466a1354c2e3110a54b}\label{structmarket_a7328f8895180f466a1354c2e3110a54b}} 
+\mbox{\hyperlink{structmarket_1_1connector}{connector}} {\bfseries quote}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Структура взамодействия с рынками торгового робота Bancor. 
+
+Uses Bancor math to create a 50/50 relay between two asset types. The state of the bancor exchange is entirely contained within this struct. There are no external side effects associated with using this A\+PI. 
+
+The documentation for this struct was generated from the following files\+:\begin{DoxyCompactItemize}
+\item 
+include/exchange\+\_\+state.\+hpp\item 
+src/exchange\+\_\+state.\+cpp\end{DoxyCompactItemize}

@@ -37,7 +37,7 @@ using namespace eosio;
    * 
    * @param[in]  op    The new value
    */
-	[[eosio::action]] void unicore::setgoal(eosio::name creator, eosio::name host, eosio::name type, std::string title, std::string permlink, std::string description, eosio::asset target, uint64_t duration, uint64_t cashback, bool activated, std::string meta){
+	[[eosio::action]] void unicore::setgoal(eosio::name creator, eosio::name host, eosio::name type, std::string title, std::string permlink, std::string description, eosio::asset target, uint64_t duration, uint64_t cashback, bool activated, bool is_batch, uint64_t parent_batch_id, std::string meta){
 		require_auth(creator);
 		
 		goals_index goals(_me, host.value);
@@ -300,7 +300,7 @@ using namespace eosio;
         
         auto users_with_id = gparticipants.template get_index<"byusergoal"_n>();
 
-        auto goal_ids = eosio::combine_ids(from.value, goal_id);
+        auto goal_ids = combine_ids(from.value, goal_id);
         auto participant = users_with_id.find(goal_ids);
 
         // eosio::check(participant == users_with_id.end(), "Username already participate in the current marathon");
@@ -541,7 +541,7 @@ using namespace eosio;
         // auto benefactor = benefactors.find(username.value);
 
         auto benefactor_with_goal_id = benefactors.template get_index<"bybengoal"_n>();
-        auto benefactor_ids = eosio::combine_ids(username.value, goal_id);
+        auto benefactor_ids = combine_ids(username.value, goal_id);
         auto benefactor = benefactor_with_goal_id.find(benefactor_ids);
 
         eosio::check(benefactor != benefactor_with_goal_id.end(), "Benefactor is not found");
@@ -574,7 +574,7 @@ using namespace eosio;
         benefactors_index benefactors(_me, host.value);
 
         auto benefactor_with_goal_id = benefactors.template get_index<"bybengoal"_n>();
-        auto benefactor_ids = eosio::combine_ids(username.value, goal_id);
+        auto benefactor_ids = combine_ids(username.value, goal_id);
         auto benefactor = benefactor_with_goal_id.find(benefactor_ids);
         eosio::check(benefactor == benefactor_with_goal_id.end(), "Benefactor is already exist");
 
@@ -612,7 +612,7 @@ using namespace eosio;
         benefactors_index benefactors(_me, host.value);
 
         auto benefactor_with_goal_id = benefactors.template get_index<"bybengoal"_n>();
-        auto benefactor_ids = eosio::combine_ids(username.value, goal_id);
+        auto benefactor_ids = combine_ids(username.value, goal_id);
         auto benefactor = benefactor_with_goal_id.find(benefactor_ids);
 
         eosio::check(benefactor != benefactor_with_goal_id.end(), "Benefactor is not found");

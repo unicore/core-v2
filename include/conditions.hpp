@@ -1,4 +1,6 @@
-
+/*!
+    \brief Структура хранилища универсального набора условий, относящихся к хосту, платформе или протоколу.
+*/
     struct  [[eosio::table, eosio::contract("unicore")]] conditions {
         uint64_t key;
         eosio::string key_string;

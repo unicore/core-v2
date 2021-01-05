@@ -1,7 +1,6 @@
 
 
-namespace eosio {
-
+using namespace eosio;
 /**
  * @brief      Структура хоста
  */
@@ -517,4 +516,4 @@ namespace eosio {
     }
 
 
-}
+// }

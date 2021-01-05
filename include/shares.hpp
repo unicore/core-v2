@@ -1,4 +1,7 @@
 	
+/*!
+   \brief Структура силы пользователя у хоста Двойной Спирали.
+*/
 
   struct [[eosio::table, eosio::contract("unicore")]] power {
 		eosio::name host;
@@ -13,6 +16,10 @@
 
 	typedef eosio::multi_index<"power"_n, power> power_index;
 
+
+/*!
+   \brief Структура статистики распределения безусловного потока жетонов хоста Двойной Спирали. 
+*/
 
   struct [[eosio::table, eosio::contract("unicore")]] pstats {
     eosio::name host;
@@ -32,6 +39,11 @@
 
   typedef eosio::multi_index<"pstats"_n, pstats> pstats_index;
 
+
+/*!
+   \brief Структура истории преобретения силы пользователем у хоста Двойной Спирали.
+*/
+
   struct [[eosio::table, eosio::contract("unicore")]] plog {
     uint64_t id;
     eosio::name host;
@@ -43,7 +55,7 @@
 
     uint64_t primary_key() const {return id;}
     
-    uint128_t hostpoolid() const { return eosio::combine_ids(host.value, pool_id); }
+    uint128_t hostpoolid() const { return combine_ids(host.value, pool_id); }
     
     EOSLIB_SERIALIZE(struct plog, (id)(host)(pool_id)(cycle_num)(pool_num)(power))
   };
@@ -53,6 +65,9 @@
   > plog_index;
 
 
+/*!
+   \brief Структура истории получения безусловного потока жетонов пользователем у хоста Двойной Спирали.
+*/
 
   struct [[eosio::table, eosio::contract("unicore")]] dlog {
     uint64_t id;
@@ -69,6 +84,9 @@
 
   typedef eosio::multi_index<"dlog"_n, dlog> dlog_index;
 
+/*!
+   \brief Структура учёта делегированной силы от пользователя к пользователю.
+*/
 
 	struct [[eosio::table, eosio::contract("unicore")]] delegations {
 		eosio::name reciever;
@@ -81,6 +99,10 @@
 
 	typedef eosio::multi_index<"delegations"_n, delegations> delegation_index;
 
+
+/*!
+   \brief Структура учёта вестинг-балансов пользователей при возврате силы хосту Двойной Спирали.
+*/
 
   struct [[eosio::table, eosio::contract("unicore")]] vesting {
   	uint64_t id;
@@ -100,7 +122,9 @@
   typedef eosio::multi_index<"vesting"_n, vesting> vesting_index;
 
 
-
+/*!
+   \brief Структура учёта партнёров и их статусов у хоста Двойной Спирали.
+*/
     struct  [[eosio::table, eosio::contract("unicore")]] cpartners {
         eosio::name partner;
         eosio::name status;

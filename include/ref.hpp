@@ -1,4 +1,6 @@
-namespace eosio {
+/*!
+   \brief Структура партнёров и их партнёров.
+*/
 
     struct [[eosio::table, eosio::contract("unicore")]] partners {
         eosio::name username;
@@ -20,6 +22,9 @@ namespace eosio {
     > partners_index;
 
 
+/*!
+   \brief Структура полученных реферальных балансов от партнёров на партнёра.
+*/
 
     struct [[eosio::table, eosio::contract("unicore")]] refbalances{
         uint64_t id;
@@ -41,6 +46,9 @@ namespace eosio {
     typedef eosio::multi_index<"refbalances"_n, refbalances> refbalances_index;
 
 
+/*!
+   \brief Структура статистики реферальных балансов и осадок, доступный на получение по мере накопления.
+*/
     struct [[eosio::table, eosio::contract("unicore")]] rstat{
         eosio::name host;
         eosio::asset withdrawed;
@@ -53,6 +61,3 @@ namespace eosio {
 
     typedef eosio::multi_index<"rstat"_n, rstat> rstat_index;
 
-
-
-}
