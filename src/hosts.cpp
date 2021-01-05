@@ -304,6 +304,7 @@ namespace eosio {
             a.levels= levels;
             a.title = title;
             a.purpose = purpose;
+            a.power_market_id = "marketandbad"_n;
         });
 
         ahosts_index coreahosts(_me, _me.value);

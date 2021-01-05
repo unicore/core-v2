@@ -28,6 +28,16 @@
 
 #include "consts.hpp"
 
+
+/*!
+    \brief Родительский класс, не несущий никакой смысловой нагрузки
+
+    Данный класс имеет только одну простую цель: проиллюстрировать то,
+    как Doxygen документирует наследование 
+*/
+
+
+
 namespace eosio {
 
 class [[eosio::contract]] unicore : public eosio::contract {
@@ -62,12 +72,11 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
         //BADGES
         [[eosio::action]] void setbadge(uint64_t id, eosio::name host, eosio::string caption, eosio::string description, eosio::string iurl, eosio::string pic, uint64_t total, uint64_t power);
-        // [[eosio::action]] void giftbadge(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment);
-        [[eosio::action]] void backbadge(eosio::name host, eosio::name from, uint64_t badge_id, eosio::string comment);
+        [[eosio::action]] void giftbadge(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment, bool netted, uint64_t goal_id, uint64_t task_id);
+        [[eosio::action]] void backbadge(eosio::name host, eosio::name from, uint64_t usbadge_id, eosio::string comment);
         
-        static void giftbadge_action(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment);
+        static void giftbadge_action(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment, bool netted, uint64_t goal_id, uint64_t task_id);
         static void deposit ( eosio::name username, eosio::name host, eosio::asset amount, eosio::name code, std::string message );
-
 
         //CMS
         [[eosio::action]] void setcontent(eosio::name username, eosio::name type, eosio::name lang, eosio::string content);

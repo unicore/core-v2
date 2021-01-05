@@ -4,6 +4,7 @@
 #include <eosio/datastream.hpp>
 #include <eosio/serialize.hpp>
 
+
 namespace eosio {
    using eosio::asset;
    using eosio::symbol;

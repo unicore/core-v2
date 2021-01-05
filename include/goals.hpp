@@ -43,11 +43,11 @@
 
         std::vector<eosio::name> voters;
         std::string meta;
-        bool with_badge = false;
-        uint64_t badge_id;
+        uint64_t gifted_badges = 0;
+        uint64_t gifted_power = 0;
+        uint64_t reports_count = 0;
         bool is_encrypted = false;
         std::string public_key;
-        
 
         uint64_t primary_key()const { return id; }
         // double byvotes() const { 
@@ -70,7 +70,7 @@
         uint128_t by_username_and_host() const { return eosio::combine_ids(creator.value, host.value); }
         
         EOSLIB_SERIALIZE( goals, (id)(parent_id)(type)(creator)(benefactor)(host)(status)(is_batch)(batch)(benefactors_weight)(created)(start_at)(finish_at)(expired_at)(duration)(priority)(cashback)(participants_count)(parent_permlink)(permlink)(title)(description)(target)(debt_count)(target1)(target2)(target3)(available)(total_votes)(total_tasks)(validated)(activated)(filled)(reported)
-            (checked)(comments_is_enabled)(who_can_create_tasks)(report)(withdrawed)(voters)(meta)(with_badge)(badge_id)(is_encrypted)(public_key))
+            (checked)(comments_is_enabled)(who_can_create_tasks)(report)(withdrawed)(voters)(meta)(gifted_badges)(gifted_power)(reports_count)(is_encrypted)(public_key))
     };
 
     typedef eosio::multi_index <"goals"_n, goals,

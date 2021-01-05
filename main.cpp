@@ -16,6 +16,7 @@
 using namespace eosio;
 
 
+
 extern "C" {
 
    void apply( uint64_t receiver, uint64_t code, uint64_t action ) {
@@ -479,20 +480,7 @@ extern "C" {
                 //     break;
                 // }
                 case "giftbadge"_n.value: {
-
-                    struct giftbadge_struct {
-                        eosio::name host;
-                        eosio::name to;
-                        uint64_t badge_id;
-                        eosio::string comment;
-                    };
-
-                    auto op = eosio::unpack_action_data<giftbadge_struct>();
-
-                    require_auth(op.host);
-
-                    unicore::giftbadge_action(op.host, op.to, op.badge_id, op.comment);
-
+                    execute_action(name(receiver), name(code), &unicore::giftbadge);
                     break;
                 }
                 case "backbadge"_n.value: {

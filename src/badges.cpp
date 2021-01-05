@@ -42,9 +42,12 @@
 
 	};
 
-	// [[eosio::action]] void unicore::giftbadge(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment){
-
-	// }
+	[[eosio::action]] void unicore::giftbadge(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment, bool netted = false, uint64_t goal_id = 0, uint64_t task_id = 0){
+		
+		require_auth(host);
+		
+		unicore::giftbadge_action(host, to, badge_id, comment, netted, goal_id, task_id);
+	}
 
 	/**
 	 * @brief      Метод передачи значка награждаемому
@@ -55,7 +58,8 @@
 	 * @param[in]  comment   The comment
 	 * @param[in]  op    The operation
 	 */
-	void unicore::giftbadge_action(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment){
+	void unicore::giftbadge_action(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment, bool netted = false, uint64_t goal_id = 0, uint64_t task_id = 0){
+		
 		account_index accounts(_me, host.value);
 		auto acc = accounts.find(host.value);
 
@@ -78,23 +82,60 @@
 			b.remain = b.remain - 1;
 		});
 
-
-		user_badges.emplace(_me, [&](auto &ub){
-			ub.id = user_badges.available_primary_key();
-			ub.badge_id = badge_id;
-			ub.caption = host_badge -> caption;
-			ub.description = host_badge -> description;
-			ub.iurl = host_badge -> iurl;
-			ub.pic = host_badge -> pic;
-			ub.comment = comment;
-			ub.recieved_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
-			ub.host = host;
-			ub.power = host_badge -> power;
-		});
-
+		auto hostandbadge_idx = user_badges.template get_index<"hostandbadge"_n>();
+		auto badge_ids = eosio::combine_ids(host.value, badge_id);
+		
+		auto user_badge = hostandbadge_idx.find(badge_ids);
 
 		unicore::give_shares_with_badge_action(host, to, host_badge->power);
+		
+		if (netted == true){
+			eosio::check(goal_id != 0 && task_id != 0, "Netted badge should have a goal and task ids");
+			
+			//modify goal and task to increse badge_count
+			goals_index goals(_me, host.value);
+			auto goal = goals.find(goal_id);
+			goals.modify(goal, _me, [&](auto &g){
+				g.gifted_badges += 1;
+				g.gifted_power = host_badge -> power;
+			});
 
+			tasks_index tasks(_me, host.value);
+			auto task = tasks.find(task_id);
+			tasks.modify(task, _me, [&](auto &t){
+				t.gifted_badges += 1;
+				t.gifted_power = host_badge -> power;
+			});
+		}
+
+		if (user_badge == hostandbadge_idx.end()){
+
+			user_badges.emplace(_me, [&](auto &ub){
+				ub.id = user_badges.available_primary_key();
+				ub.badge_id = badge_id;
+				ub.caption = host_badge -> caption;
+				ub.description = host_badge -> description;
+				ub.iurl = host_badge -> iurl;
+				ub.pic = host_badge -> pic;
+				ub.comment = comment;
+				ub.first_recieved_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+				ub.last_recieved_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+				ub.host = host;
+				ub.power = host_badge -> power;
+				ub.netted = netted;
+				ub.goal_id = goal_id;
+				ub.task_id = task_id;
+			});			
+
+		} else {
+			eosio::check(user_badge -> netted == netted, "Cannot add not netted badge to netted");
+
+			hostandbadge_idx.modify(user_badge, _me, [&](auto &ub){
+				ub.count += 1;
+				ub.last_recieved_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+			});
+
+		}
 	};
 
 	/**
@@ -103,7 +144,7 @@
 	 *
 	 * @param[in]  op    The operation
 	 */
-	[[eosio::action]] void unicore::backbadge(eosio::name host, eosio::name from, uint64_t badge_id, eosio::string comment){
+	[[eosio::action]] void unicore::backbadge(eosio::name host, eosio::name from, uint64_t usbadge_id, eosio::string comment) {
 
 		require_auth(host);
 		account_index accounts(_me, host.value);
@@ -112,7 +153,7 @@
 		badge_index badges(_me, host.value);
 		usbadge_index user_badges(_me, from.value);
 
-		auto usbadge = user_badges.find(badge_id);
+		auto usbadge = user_badges.find(usbadge_id);
 		eosio::check(usbadge != user_badges.end(), "Badge is not found");
 		auto badge = badges.find(usbadge->badge_id);
 		
@@ -122,7 +163,33 @@
 		
 		unicore::back_shares_with_badge_action(host, from, badge->power);
 		
-		user_badges.erase(usbadge);
+		if (usbadge -> netted == true){
+			//modify goal and task to increse badge_count
+			goals_index goals(_me, host.value);
+			auto goal = goals.find(usbadge -> goal_id);
+			goals.modify(goal, _me, [&](auto &g){
+				g.gifted_badges -= 1;
+				g.gifted_power -= usbadge -> power;
+			});
+
+			tasks_index tasks(_me, host.value);
+			auto task = tasks.find(usbadge -> task_id);
+			tasks.modify(task, _me, [&](auto &t){
+				t.gifted_badges -= 1;
+				t.gifted_power -= usbadge -> power;
+			});
+		}
+
+		if (usbadge -> count > 1) {
+			
+			user_badges.modify(usbadge, _self, [&](auto &ub){
+				ub.count -= 1;
+			});
+
+		} else {
+			user_badges.erase(usbadge);	
+		}
+		
 
 	}
 

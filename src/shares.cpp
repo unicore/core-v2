@@ -107,6 +107,7 @@ namespace eosio {
     auto on_withdraw = pstat -> pflow_available_in_asset;
     
     if (on_withdraw.amount > 0){
+
       action(
           permission_level{ _me, "active"_n },
           acc->root_token_contract, "transfer"_n,
@@ -402,7 +403,8 @@ namespace eosio {
 		eosio::check(exist != accounts.end(), "Host is not founded");
 		eosio::check(exist -> quote_token_contract == code, "Wrong quote token contract");
     eosio::check(exist -> quote_amount.symbol == amount.symbol, "Wrong quote token symbol");
-		
+		eosio::check(exist -> power_market_id != ""_n, "Can buy shares only when power market is enabled");
+
     powermarket market(_me, host.value);
 		auto itr = market.find(0);
 		auto tmp = *itr;
