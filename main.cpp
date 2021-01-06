@@ -75,9 +75,6 @@ extern "C" {
                 
                 switch (subintcode){
                     case 100: {
-                        //check for code param inside deposit method
-                        //100-alice-message
-                        
                         eosio::name host; 
                         std::string message = "";
 
