@@ -1,4 +1,7 @@
 var searchData=
 [
-  ['pool',['pool',['../structeosio_1_1pool.html',1,'eosio']]]
+  ['dacs',['dacs',['../structdacs.html',1,'']]],
+  ['debts',['debts',['../structdebts.html',1,'']]],
+  ['delegations',['delegations',['../structdelegations.html',1,'']]],
+  ['dlog',['dlog',['../structdlog.html',1,'']]]
 ];

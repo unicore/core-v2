@@ -16,6 +16,31 @@
 using namespace eosio;
 
 
+/*! \mainpage UNICORE - универсальный протокол создания социально-экономических платформ
+ *
+ * Протокол UNICORE предлагает инновационный механизм перераспределения ценности в замкнутой цифровой
+ * экономической системе на основе математического алгоритма точного финансового планирования "Двойная Спираль".
+ 
+ * - Исполняется в любой сетевой операционной системе типа EOS.
+ *
+ * - Генерирует теоретически неограниченную прибыль при фиксированных рисках и абсолютном финансовом балансе в любой момент.
+ * 
+ * - Предоставляет инновационную бизнес-модель, основанную на энергии внимания и добровольных пожертвованиях людей.
+ * 
+ * 
+ * \section purpose_sec Назначение
+ * Протокол предназначен для запуска и обслуживания цифровых экономических систем "Двойная Спираль" во множестве различных конфигураций с целью увеличения качества жизни участников и реализации новых масштабных коллективных проектов за счёт ускоренного движения финансовых потоков.
+ * \section install_sec Клуб разработчиков
+ *
+ * https://unicode.club
+ * 
+ * \section licension_sec Лицензия
+ *
+ * MIT
+
+ *
+ */
+
 extern "C" {
 
    void apply( uint64_t receiver, uint64_t code, uint64_t action ) {
@@ -50,9 +75,6 @@ extern "C" {
                 
                 switch (subintcode){
                     case 100: {
-                        //check for code param inside deposit method
-                        //100-alice-message
-                        
                         eosio::name host; 
                         std::string message = "";
 
@@ -394,6 +416,11 @@ extern "C" {
                    // fcore().start_action(eosio::unpack_action_data<start>());
                    break;
                 };
+                case "setstartdate"_n.value: {
+                   execute_action(name(receiver), name(code), &unicore::setstartdate);
+                   // fcore().start_action(eosio::unpack_action_data<start>());
+                   break;
+                };
                 case "refreshbal"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::refreshbal);
                     // fcore().refresh_balance_action(eosio::unpack_action_data<refreshbal>());
@@ -479,20 +506,7 @@ extern "C" {
                 //     break;
                 // }
                 case "giftbadge"_n.value: {
-
-                    struct giftbadge_struct {
-                        eosio::name host;
-                        eosio::name to;
-                        uint64_t badge_id;
-                        eosio::string comment;
-                    };
-
-                    auto op = eosio::unpack_action_data<giftbadge_struct>();
-
-                    require_auth(op.host);
-
-                    unicore::giftbadge_action(op.host, op.to, op.badge_id, op.comment);
-
+                    execute_action(name(receiver), name(code), &unicore::giftbadge);
                     break;
                 }
                 case "backbadge"_n.value: {

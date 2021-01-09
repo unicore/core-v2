@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['fill_5fpool',['fill_pool',['../classeosio_1_1unicore.html#a81f044d8edee706d224c4569581df805',1,'eosio::unicore']]],
-  ['fund_5femi_5fpool',['fund_emi_pool',['../classeosio_1_1unicore.html#a2653f17a11b610846184d325a26cb158',1,'eosio::unicore']]]
+  ['edithost',['edithost',['../classunicore.html#a286cd81b9f3e28d9a49aaa7969e21ee7',1,'unicore']]],
+  ['editreport',['editreport',['../classunicore.html#ad041a75ade13b77f67f54c99f7ca7d29',1,'unicore']]],
+  ['enablesale',['enablesale',['../classunicore.html#ad1ca7dd3eab26146ed184e3bda67f5b1',1,'unicore']]]
 ];

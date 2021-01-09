@@ -1,8 +1,9 @@
 var searchData=
 [
-  ['setbadge',['setbadge',['../classeosio_1_1unicore.html#a73365cd3dd38b15b4732405beb6165c9',1,'eosio::unicore']]],
-  ['setcmsconfig',['setcmsconfig',['../classeosio_1_1unicore.html#ad0188feae42e22b52afbb6e3c3f70c86',1,'eosio::unicore']]],
-  ['setcontent',['setcontent',['../classeosio_1_1unicore.html#ae3b83d27102e45c0c4b095f8e33a3680',1,'eosio::unicore']]],
-  ['setparams',['setparams',['../classeosio_1_1unicore.html#ac4def2358ff27c9454fcbbb71163f300',1,'eosio::unicore']]],
-  ['start',['start',['../classeosio_1_1unicore.html#a6d49834320bcf0133e9399a3b45ac3e5',1,'eosio::unicore']]]
+  ['refreshbal',['refreshbal',['../classunicore.html#abb1a56452f7d8819475e04e5ad10fe54',1,'unicore']]],
+  ['refreshpu',['refreshpu',['../classunicore.html#a00ca80d8fa12bd41448d55cd82c5cd60',1,'unicore']]],
+  ['refreshsh',['refreshsh',['../classunicore.html#a790c1a22331df2bd9e7f9b9094de7dfb',1,'unicore']]],
+  ['refreshst',['refreshst',['../classunicore.html#a2a410729955a5bc11fe3b3051f10a4c9',1,'unicore']]],
+  ['report',['report',['../classunicore.html#ac0e6bf94b8bfd28e08c364631a357d91',1,'unicore']]],
+  ['rmcontent',['rmcontent',['../classunicore.html#af6aac321d5880fcb577ba00abea5c38f',1,'unicore']]]
 ];

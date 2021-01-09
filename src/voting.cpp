@@ -1,5 +1,4 @@
-namespace eosio{
-
+using namespace eosio;
 
 	void clear_old_votes_action (eosio::name voter, eosio::name host){
 		votes_index votes(_me, voter.value);
@@ -60,7 +59,7 @@ namespace eosio{
 		account_index accounts (_me, (goal->host).value);
 		auto acc = accounts.find((goal->host).value);
 
-		powermarket market(_me, host.value);
+		market_index market(_me, host.value);
 		auto itr = market.find(0);
 		auto liquid_shares = acc->total_shares - itr->base.balance.amount;
 
@@ -77,7 +76,7 @@ namespace eosio{
 
 		// auto vote = votes.find(goal->id);
 		auto goal_idwithhost_idx = votes.template get_index<"idwithhost"_n>();
-		auto votes_ids = eosio::combine_ids(host.value, goal->id);
+		auto votes_ids = combine_ids(host.value, goal->id);
 		
 		auto vote = goal_idwithhost_idx.find(votes_ids);
 
@@ -132,6 +131,4 @@ namespace eosio{
 		
 	}
 
-		
-
-};
+	

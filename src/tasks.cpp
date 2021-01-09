@@ -302,25 +302,35 @@
 		eosio::check(task -> active == true, "Task is not active");
 		eosio::check(task -> is_public == true, "Only public tasks is accessable for now");
 	
+
+		tasks.modify(task, username, [&](auto &t){
+			t.reports_count += 1;
+		});
+
 		goals_index goals(_me, host.value);
 		auto goal = goals.find(task-> goal_id);
 
-
-		if (goal != goals.end())
+		if (goal != goals.end()){
 			if (goal -> type == "marathon"_n){
 				goalspartic_index gparticipants(_me, host.value);
 	      auto users_with_id = gparticipants.template get_index<"byusergoal"_n>();
-				auto goal_ids = eosio::combine_ids(username.value, task->goal_id);
+				auto goal_ids = combine_ids(username.value, task->goal_id);
 	      auto participant = users_with_id.find(goal_ids);
 
 	      eosio::check(participant != users_with_id.end(), "Username not participant of the current marathon");
 			};
+			
+			goals.modify(goal, username, [&](auto &g){
+				g.reports_count += 1;
+			});
+
+		};
 		
 		reports_index reports(_me, host.value);
 		
 		auto users_with_id = reports.template get_index<"userwithtask"_n>();
 
-		auto report_ids = eosio::combine_ids(username.value, task_id);
+		auto report_ids = combine_ids(username.value, task_id);
 		auto user_report = users_with_id.find(report_ids);
 
 		eosio::check(user_report == users_with_id.end(), "Report for this task already exist");
@@ -337,6 +347,7 @@
 			r.withdrawed = asset(0, root_symbol);
 			r.curator = host;
 			r.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + 30 * 86400);
+			r.created_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch());
 		});
 
     accounts.modify(acc, username, [&](auto &a){

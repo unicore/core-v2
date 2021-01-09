@@ -1,5 +1,6 @@
-namespace eosio {
-
+/*!
+    \brief Структура хранилища контента и оформления платформ. 
+*/
 struct  [[eosio::table, eosio::contract("unicore")]] cmscontent {
     eosio::name type;
     eosio::name lang;
@@ -16,13 +17,9 @@ struct  [[eosio::table, eosio::contract("unicore")]] cmscontent {
   
   > cmscontent_index;
 
-  //   typedef eosio::multi_index<"dataorders"_n, dataorders,
-  //     eosio::indexed_by<"buyerandid"_n, eosio::const_mem_fun<dataorders, uint128_t, 
-  //                             &dataorders::buyerandid>>
-  // > dataorders_index;
-
-
-
+/*!
+    \brief Структура конфигурации платформы.
+*/
   struct  [[eosio::table, eosio::contract("unicore")]] cmsconfig {
     uint64_t id;
     eosio::string config;
@@ -33,4 +30,3 @@ struct  [[eosio::table, eosio::contract("unicore")]] cmscontent {
   };
 
   typedef eosio::multi_index<"cmsconfig"_n, cmsconfig> cmsconfig_index;
-}

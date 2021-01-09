@@ -1,0 +1,85 @@
+\hypertarget{structusbadges}{}\section{usbadges Struct Reference}
+\label{structusbadges}\index{usbadges@{usbadges}}
+
+
+Структура наградных значков пользователя, полученных от разных хостов Двойной Спирали.  
+
+
+
+
+{\ttfamily \#include $<$badges.\+hpp$>$}
+
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structusbadges_aa4163106e97fb9771586b4c8677df30d}\label{structusbadges_aa4163106e97fb9771586b4c8677df30d}} 
+uint64\+\_\+t {\bfseries primary\+\_\+key} () const
+\item 
+\mbox{\Hypertarget{structusbadges_a042bdd252b5cf0b75f9c4decc0e6fda5}\label{structusbadges_a042bdd252b5cf0b75f9c4decc0e6fda5}} 
+uint64\+\_\+t {\bfseries host\+\_\+key} () const
+\item 
+\mbox{\Hypertarget{structusbadges_a7a6853ea93075e7c8bfc5d511e327b77}\label{structusbadges_a7a6853ea93075e7c8bfc5d511e327b77}} 
+uint128\+\_\+t {\bfseries hostandbadge} () const
+\item 
+\mbox{\Hypertarget{structusbadges_af2c4980c5cab23010df77daba94da40d}\label{structusbadges_af2c4980c5cab23010df77daba94da40d}} 
+uint128\+\_\+t {\bfseries hostandtask} () const
+\item 
+\mbox{\Hypertarget{structusbadges_a4228dc6da303415539b37f62b3f50065}\label{structusbadges_a4228dc6da303415539b37f62b3f50065}} 
+uint128\+\_\+t {\bfseries hostandgoal} () const
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{structusbadges_af54953d38c419d67ad3ed188b9b66705}\label{structusbadges_af54953d38c419d67ad3ed188b9b66705}} 
+uint64\+\_\+t {\bfseries id}
+\item 
+\mbox{\Hypertarget{structusbadges_a96cbc9f435656fae107dd40d58a43ad8}\label{structusbadges_a96cbc9f435656fae107dd40d58a43ad8}} 
+eosio\+::name {\bfseries host}
+\item 
+\mbox{\Hypertarget{structusbadges_ab4c257049a4e56ca60beeab27abc86a3}\label{structusbadges_ab4c257049a4e56ca60beeab27abc86a3}} 
+uint64\+\_\+t {\bfseries badge\+\_\+id}
+\item 
+\mbox{\Hypertarget{structusbadges_ab2da4322f23274e587cfd0f87a3e4bd9}\label{structusbadges_ab2da4322f23274e587cfd0f87a3e4bd9}} 
+bool {\bfseries netted} = false
+\item 
+\mbox{\Hypertarget{structusbadges_af4f915da566922adcee14bec0d72e854}\label{structusbadges_af4f915da566922adcee14bec0d72e854}} 
+uint64\+\_\+t {\bfseries goal\+\_\+id}
+\item 
+\mbox{\Hypertarget{structusbadges_a3f7e9a3188d66b4fa9df7eb3efaa20ea}\label{structusbadges_a3f7e9a3188d66b4fa9df7eb3efaa20ea}} 
+uint64\+\_\+t {\bfseries task\+\_\+id}
+\item 
+\mbox{\Hypertarget{structusbadges_ade0ebec9ad5433895f53ebf5455df2de}\label{structusbadges_ade0ebec9ad5433895f53ebf5455df2de}} 
+uint64\+\_\+t {\bfseries count} = 1
+\item 
+\mbox{\Hypertarget{structusbadges_ae9da4cbbdc410fdf486d507cead73978}\label{structusbadges_ae9da4cbbdc410fdf486d507cead73978}} 
+eosio\+::string {\bfseries caption}
+\item 
+\mbox{\Hypertarget{structusbadges_a3a11a564db4b1572573f68fa7733842e}\label{structusbadges_a3a11a564db4b1572573f68fa7733842e}} 
+eosio\+::string {\bfseries description}
+\item 
+\mbox{\Hypertarget{structusbadges_ae1ccf8b187bd1286e0e611a5af1efabd}\label{structusbadges_ae1ccf8b187bd1286e0e611a5af1efabd}} 
+eosio\+::string {\bfseries iurl}
+\item 
+\mbox{\Hypertarget{structusbadges_a2b8c2a9315f92a498808043539fa572f}\label{structusbadges_a2b8c2a9315f92a498808043539fa572f}} 
+eosio\+::string {\bfseries pic}
+\item 
+\mbox{\Hypertarget{structusbadges_ac570f50eaa4fd0cc045c7fc81e92b291}\label{structusbadges_ac570f50eaa4fd0cc045c7fc81e92b291}} 
+eosio\+::string {\bfseries comment}
+\item 
+\mbox{\Hypertarget{structusbadges_a8b27ed20b270269c5e228dd6b8284bfa}\label{structusbadges_a8b27ed20b270269c5e228dd6b8284bfa}} 
+uint64\+\_\+t {\bfseries power}
+\item 
+\mbox{\Hypertarget{structusbadges_a1c3a798d3506940e9528deb4d90a54f5}\label{structusbadges_a1c3a798d3506940e9528deb4d90a54f5}} 
+eosio\+::time\+\_\+point\+\_\+sec {\bfseries first\+\_\+recieved\+\_\+at}
+\item 
+\mbox{\Hypertarget{structusbadges_a8981791289d1c3e1b5e2047770e83de4}\label{structusbadges_a8981791289d1c3e1b5e2047770e83de4}} 
+eosio\+::time\+\_\+point\+\_\+sec {\bfseries last\+\_\+recieved\+\_\+at}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Структура наградных значков пользователя, полученных от разных хостов Двойной Спирали. 
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+include/badges.\+hpp\end{DoxyCompactItemize}

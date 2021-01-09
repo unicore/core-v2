@@ -84,7 +84,7 @@
 
 //     auto buyers_with_data_id = oorders.template get_index<"buyerandid"_n>();
 
-//     auto buyers_with_data_id_ids = eosio::combine_ids(buyer.value, data->id);
+//     auto buyers_with_data_id_ids = combine_ids(buyer.value, data->id);
     
 //     auto exist = buyers_with_data_id.find(buyers_with_data_id_ids);
 
@@ -105,7 +105,7 @@
 
 //       mydataordrs_index mydataordrs (_me, buyer.value);
 
-//       auto seller_with_order_id_idx = eosio::combine_ids(owner.value, id);
+//       auto seller_with_order_id_idx = combine_ids(owner.value, id);
 
 //       mydataordrs.emplace(_me, [&](auto &ml){
 //         ml.owner = owner;
@@ -155,7 +155,7 @@
       
 //       mydataordrs_index mydataordrs (_me, (order->buyer).value);
 
-//       auto seller_with_order_id_idx = eosio::combine_ids((order->owner).value, order-> id);
+//       auto seller_with_order_id_idx = combine_ids((order->owner).value, order-> id);
 
 //       auto sellers_with_my_order = mydataordrs.find(seller_with_order_id_idx);
 

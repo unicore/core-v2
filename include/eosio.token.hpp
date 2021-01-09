@@ -9,9 +9,16 @@ namespace eosiosystem {
    class system_contract;
 }
 
+/*!
+    \brief Класс структур и методов контрактов операционной системы EOSIO. 
+*/
 namespace eosio {
 
    using std::string;
+   
+   /*!
+       \brief Класс взаимодействия с жетонами операционной системы.
+   */
 
    class [[eosio::contract("eosio.token")]] token : public contract {
       public:

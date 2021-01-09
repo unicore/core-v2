@@ -4,11 +4,14 @@
 #include <eosio/datastream.hpp>
 #include <eosio/serialize.hpp>
 
-namespace eosio {
+
    using eosio::asset;
    using eosio::symbol;
 
    typedef double real_type;
+   /*!
+       \brief Структура взамодействия с рынками торгового робота Bancor. 
+   */
 
    /**
     *  Uses Bancor math to create a 50/50 relay between two asset types. The state of the
@@ -16,15 +19,17 @@ namespace eosio {
     *  side effects associated with using this API.
     */
 
-   struct [[eosio::table, eosio::contract("unicore")]] exchange_state {
+   struct [[eosio::table, eosio::contract("unicore")]] market {
       uint64_t id;
       std::string name;
       uint64_t vesting_seconds = 0;
-      asset    supply;
+      eosio::asset    supply;
 
-
+   /*!
+       \brief Структура коннектора рынка торгового робота Bancor.
+   */      
       struct connector {
-         asset balance;
+         eosio::asset balance;
          double weight = 1;
          eosio::name contract;
          
@@ -49,9 +54,9 @@ namespace eosio {
                                        int64_t inp_reserve,
                                        int64_t out );
 
-      EOSLIB_SERIALIZE( exchange_state, (id)(name)(vesting_seconds)(supply)(base)(quote) )
+      EOSLIB_SERIALIZE( market, (id)(name)(vesting_seconds)(supply)(base)(quote) )
    };
 
-   typedef eosio::multi_index<"powermarket"_n, exchange_state> powermarket;
+   typedef eosio::multi_index<"powermarket"_n, market> market_index;
 
-} /// namespace eosiosystem
+ /// namespace eosiosystem

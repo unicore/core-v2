@@ -1,5 +1,7 @@
 var searchData=
 [
-  ['balance',['balance',['../structeosio_1_1balance.html',1,'eosio']]],
-  ['bwtradegraph',['bwtradegraph',['../structeosio_1_1bwtradegraph.html',1,'eosio']]]
+  ['badges',['badges',['../structbadges.html',1,'']]],
+  ['balance',['balance',['../structbalance.html',1,'']]],
+  ['benefactors',['benefactors',['../structbenefactors.html',1,'']]],
+  ['bwtradegraph',['bwtradegraph',['../structbwtradegraph.html',1,'']]]
 ];

@@ -1,6 +1,7 @@
 
-namespace eosio {
-    asset exchange_state::convert_to_exchange( connector& reserve, const asset& payment )
+using namespace eosio;
+
+    asset market::convert_to_exchange( connector& reserve, const asset& payment )
    {
       const double S0 = supply.amount;
       const double R0 = reserve.balance.amount;
@@ -14,7 +15,7 @@ namespace eosio {
       return asset( int64_t(dS), supply.symbol );
    }
 
-   asset exchange_state::convert_from_exchange( connector& reserve, const asset& tokens )
+   asset market::convert_from_exchange( connector& reserve, const asset& tokens )
    {
       const double R0 = reserve.balance.amount;
       const double S0 = supply.amount;
@@ -28,7 +29,7 @@ namespace eosio {
       return asset( int64_t(-dR), reserve.balance.symbol );
    }
 
-   asset exchange_state::convert( const asset& from, const symbol& to )
+   asset market::convert( const asset& from, const symbol& to )
    {
       const auto& sell_symbol  = from.symbol;
       const auto& base_symbol  = base.balance.symbol;
@@ -48,7 +49,7 @@ namespace eosio {
       return out;
    }
 
-   asset exchange_state::direct_convert( const asset& from, const symbol& to )
+   asset market::direct_convert( const asset& from, const symbol& to )
    {
       const auto& sell_symbol  = from.symbol;
       const auto& base_symbol  = base.balance.symbol;
@@ -70,7 +71,7 @@ namespace eosio {
       return out;
    }
 
-   int64_t exchange_state::get_bancor_output( int64_t inp_reserve,
+   int64_t market::get_bancor_output( int64_t inp_reserve,
                                               int64_t out_reserve,
                                               int64_t inp )
    {
@@ -85,7 +86,7 @@ namespace eosio {
       return out;
    }
 
-   int64_t exchange_state::get_bancor_input( int64_t out_reserve,
+   int64_t market::get_bancor_input( int64_t out_reserve,
                                              int64_t inp_reserve,
                                              int64_t out )
    {
@@ -99,4 +100,4 @@ namespace eosio {
       return inp;
    }
 
-} /// namespace eosiosystem
+ /// namespace eosiosystem

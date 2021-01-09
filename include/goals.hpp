@@ -1,3 +1,8 @@
+
+/*!
+   \brief Структура целей хоста Двойной Спирали.
+*/
+
     struct [[eosio::table, eosio::contract("unicore")]]  goals {
         uint64_t id;
         uint64_t parent_id;
@@ -43,11 +48,11 @@
 
         std::vector<eosio::name> voters;
         std::string meta;
-        bool with_badge = false;
-        uint64_t badge_id;
+        uint64_t gifted_badges = 0;
+        uint64_t gifted_power = 0;
+        uint64_t reports_count = 0;
         bool is_encrypted = false;
         std::string public_key;
-        
 
         uint64_t primary_key()const { return id; }
         // double byvotes() const { 
@@ -67,10 +72,10 @@
         uint64_t bypriority() const {return priority; }
         uint64_t byusername() const {return creator.value; }
         uint64_t byhost() const {return host.value;}
-        uint128_t by_username_and_host() const { return eosio::combine_ids(creator.value, host.value); }
+        uint128_t by_username_and_host() const { return combine_ids(creator.value, host.value); }
         
         EOSLIB_SERIALIZE( goals, (id)(parent_id)(type)(creator)(benefactor)(host)(status)(is_batch)(batch)(benefactors_weight)(created)(start_at)(finish_at)(expired_at)(duration)(priority)(cashback)(participants_count)(parent_permlink)(permlink)(title)(description)(target)(debt_count)(target1)(target2)(target3)(available)(total_votes)(total_tasks)(validated)(activated)(filled)(reported)
-            (checked)(comments_is_enabled)(who_can_create_tasks)(report)(withdrawed)(voters)(meta)(with_badge)(badge_id)(is_encrypted)(public_key))
+            (checked)(comments_is_enabled)(who_can_create_tasks)(report)(withdrawed)(voters)(meta)(gifted_badges)(gifted_power)(reports_count)(is_encrypted)(public_key))
     };
 
     typedef eosio::multi_index <"goals"_n, goals,
@@ -87,6 +92,10 @@
     > goals_index;
 
 
+/*!
+   \brief Структура участников цели хоста Двойной Спирали
+*/
+
     struct [[eosio::table, eosio::contract("unicore")]]  goalspartic {
         uint64_t id;
         uint64_t goal_id;
@@ -96,7 +105,7 @@
         eosio::time_point_sec expiration;
         
         uint64_t primary_key()const { return id; }
-        uint128_t byusergoal() const { return eosio::combine_ids(username.value, goal_id); }
+        uint128_t byusergoal() const { return combine_ids(username.value, goal_id); }
         
         uint64_t byusername()const {return username.value;}
         uint64_t byrole() const {return role.value;}
@@ -112,6 +121,10 @@
     > goalspartic_index;
 
 
+/*!
+   \brief Структура бенефакторов цели хоста Двойной Спирали
+*/
+
     struct [[eosio::table, eosio::contract("unicore")]] benefactors {
         uint64_t id;
         uint64_t goal_id;
@@ -124,7 +137,7 @@
         uint64_t primary_key() const {return id;}  
         uint64_t bygoalid() const {return goal_id;}
 
-        uint128_t bybengoal() const { return eosio::combine_ids(benefactor.value, goal_id); }
+        uint128_t bybengoal() const { return combine_ids(benefactor.value, goal_id); }
         
         EOSLIB_SERIALIZE(benefactors, (id)(goal_id)(benefactor)(weight)(income)(income_in_segments)(withdrawed)(income_limit))      
     };

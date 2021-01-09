@@ -28,7 +28,14 @@
 
 #include "consts.hpp"
 
-namespace eosio {
+
+/*!
+    \brief Содержит все доступные действия, публичные и приватные методы протокола.
+*/
+
+
+
+// namespace eosio {
 
 class [[eosio::contract]] unicore : public eosio::contract {
     public:
@@ -52,6 +59,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void priorenter(eosio::name username, eosio::name host, uint64_t balance_id);
         [[eosio::action]] void refreshbal(eosio::name username, uint64_t balance_id, uint64_t partrefresh);
         
+        [[eosio::action]] void setstartdate(eosio::name host, eosio::time_point_sec start_at); 
+
         static void pay_for_upgrade(eosio::name username, eosio::asset amount, eosio::name code);
         
         static void refresh_state(eosio::name host);
@@ -62,12 +71,11 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
         //BADGES
         [[eosio::action]] void setbadge(uint64_t id, eosio::name host, eosio::string caption, eosio::string description, eosio::string iurl, eosio::string pic, uint64_t total, uint64_t power);
-        // [[eosio::action]] void giftbadge(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment);
-        [[eosio::action]] void backbadge(eosio::name host, eosio::name from, uint64_t badge_id, eosio::string comment);
+        [[eosio::action]] void giftbadge(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment, bool netted, uint64_t goal_id, uint64_t task_id);
+        [[eosio::action]] void backbadge(eosio::name host, eosio::name from, uint64_t usbadge_id, eosio::string comment);
         
-        static void giftbadge_action(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment);
+        static void giftbadge_action(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment, bool netted, uint64_t goal_id, uint64_t task_id);
         static void deposit ( eosio::name username, eosio::name host, eosio::asset amount, eosio::name code, std::string message );
-
 
         //CMS
         [[eosio::action]] void setcontent(eosio::name username, eosio::name type, eosio::name lang, eosio::string content);
@@ -75,7 +83,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void setcmsconfig(eosio::name username, eosio::string config);
 
         //GOALS
-        [[eosio::action]] void setgoal(eosio::name creator, eosio::name host, eosio::name type, std::string title, std::string permlink, std::string description, eosio::asset target, uint64_t duration, uint64_t cashback, bool activated, std::string meta);
+        [[eosio::action]] void setgoal(eosio::name creator, eosio::name host, eosio::name type, std::string title, std::string permlink, std::string description, eosio::asset target, uint64_t duration, uint64_t cashback, bool activated, bool is_batch, uint64_t parent_batch_id, std::string meta);
         [[eosio::action]] void dfundgoal(eosio::name architect, eosio::name host, uint64_t goal_id, eosio::asset amount, std::string comment);
         [[eosio::action]] void delgoal(eosio::name username, eosio::name host, uint64_t goal_id);
         [[eosio::action]] void report(eosio::name username, eosio::name host, uint64_t goal_id, std::string report);
@@ -213,6 +221,12 @@ class [[eosio::contract]] unicore : public eosio::contract {
         
 };
 
+// }
+
+
+/*!
+   \brief Структура системного процента, изымаего протокол из обращения при каждом полу-обороте Двойной Спирали каждого хоста.
+*/
 
     struct [[eosio::table, eosio::contract("unicore")]] gpercents {
         eosio::name key;
@@ -224,6 +238,9 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
     typedef eosio::multi_index<"gpercents"_n, gpercents> gpercents_index;
 
+/*!
+   \brief Структура балансов пользователя у всех хостов Двойной Спирали
+*/
     
     struct [[eosio::table, eosio::contract("unicore")]] balance{
         uint64_t id;
@@ -272,6 +289,10 @@ class [[eosio::contract]] unicore : public eosio::contract {
     > balance_index;
 
 
+/*!
+   \brief Структура для отображения Двойной Спирали в виде торгового графика типа BLACK-AND-WHITE.
+*/
+
     struct [[eosio::table, eosio::contract("unicore")]] bwtradegraph{
         uint64_t pool_id;
         uint64_t cycle_num;
@@ -294,6 +315,9 @@ class [[eosio::contract]] unicore : public eosio::contract {
     
 
 
+/*!
+   \brief Структура для учёта развития циклов хоста Двойной Спирали.
+*/
 
     struct [[eosio::table, eosio::contract("unicore")]] cycle{
         uint64_t id;
@@ -309,6 +333,9 @@ class [[eosio::contract]] unicore : public eosio::contract {
     typedef eosio::multi_index<"cycle"_n, cycle> cycle_index;
     
 
+/*!
+   \brief Структура для учёта сжигания внутренней конвертационной единицы.
+*/
     struct [[eosio::table, eosio::contract("unicore")]] cycle2 {
         uint64_t id;
         uint64_t burned_quants;
@@ -322,7 +349,9 @@ class [[eosio::contract]] unicore : public eosio::contract {
     
 
 
-
+/*!
+   \brief Структура для учёта распределения бассейнов внутренней учетной единицы хоста Двойной Спирали.
+*/
     struct [[eosio::table, eosio::contract("unicore")]] pool{
         uint64_t id;
         eosio::name ahost;
@@ -352,6 +381,9 @@ class [[eosio::contract]] unicore : public eosio::contract {
     typedef eosio::multi_index<"pool"_n, pool> pool_index;
     
 
+/*!
+   \brief Структура для хранения сообщений в режиме чата ограниченной длинны от спонсоров хоста Двойной Спирали.
+*/
     struct [[eosio::table, eosio::contract("unicore")]] coredhistory{
         uint64_t id;
         uint64_t pool_id;
@@ -368,7 +400,9 @@ class [[eosio::contract]] unicore : public eosio::contract {
     typedef eosio::multi_index<"coredhistory"_n, coredhistory> coredhistory_index;
     
 
-
+/*!
+   \brief Структура истории движения жетона распределения хоста Двойной Спирали.
+*/
     struct [[eosio::table, eosio::contract("unicore")]] sale{
         uint64_t pool_id;
         uint64_t sell_rate;
@@ -381,7 +415,9 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
     typedef eosio::multi_index<"sale"_n, sale> sale_index;
  
-
+/*!
+   \brief Структура учёта системного дохода фондов хоста Двойной Спирали.
+*/
     struct [[eosio::table, eosio::contract("unicore")]] sincome {
         uint64_t pool_id;
         eosio::name ahost;
@@ -399,7 +435,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         uint128_t distributed_segments;
 
         uint64_t primary_key() const {return pool_id;}
-        uint128_t cyclandpool() const { return eosio::combine_ids(cycle_num, pool_num); }
+        uint128_t cyclandpool() const { return combine_ids(cycle_num, pool_num); }
         
         EOSLIB_SERIALIZE(sincome, (pool_id)(ahost)(cycle_num)(pool_num)(liquid_power)(max)(total)(paid_to_refs)(paid_to_dacs)(paid_to_cfund)(paid_to_hfund)(paid_to_sys)(hfund_in_segments)(distributed_segments))
 
@@ -408,9 +444,14 @@ class [[eosio::contract]] unicore : public eosio::contract {
     eosio::indexed_by<"cyclandpool"_n, eosio::const_mem_fun<sincome, uint128_t, &sincome::cyclandpool>>
     > sincome_index;
     
+
+/*!
+   \brief Структура статистики жетонов в обороте
+*/
+
     struct [[eosio::table, eosio::contract("unicore")]] currency_stats {
-            asset          supply;
-            asset          max_supply;
+            eosio::asset          supply;
+            eosio::asset          max_supply;
             eosio::name    issuer;
 
             uint64_t primary_key()const { return supply.symbol.code().raw(); }
@@ -418,6 +459,9 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
     typedef eosio::multi_index<"stat"_n, currency_stats> stats;
 
+/*!
+   \brief Структура статистики количества зарегистрированных пользователей
+*/
 
     struct [[eosio::table, eosio::contract("unicore")]] userscount
      {
@@ -431,11 +475,14 @@ class [[eosio::contract]] unicore : public eosio::contract {
     typedef eosio::multi_index<"userscount"_n, userscount> userscount_index;
 
 
+/*!
+   \brief Структура хостов, платформ и их сайтов. 
+*/
 
     struct  [[eosio::table, eosio::contract("unicore")]] ahosts{
         eosio::name username;
         eosio::string website;
-        checksum256 hash;
+        eosio::checksum256 hash;
         bool is_host = false;
 
         eosio::name type;
@@ -449,11 +496,11 @@ class [[eosio::contract]] unicore : public eosio::contract {
         uint64_t primary_key() const{return username.value;}
         uint64_t byvotes() const {return votes;}
 
-        checksum256 byuuid() const { return hash; }
+        eosio::checksum256 byuuid() const { return hash; }
         
-        checksum256 hashit(std::string str) const
+        eosio::checksum256 hashit(std::string str) const
         {
-            return sha256(const_cast<char*>(str.c_str()), str.size());
+            return eosio::sha256(const_cast<char*>(str.c_str()), str.size());
         }
           
 
@@ -462,10 +509,13 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
     typedef eosio::multi_index<"ahosts"_n, ahosts,
         eosio::indexed_by<"byvotes"_n, eosio::const_mem_fun<ahosts, uint64_t, &ahosts::byvotes>>,
-        eosio::indexed_by<"byuuid"_n, eosio::const_mem_fun<ahosts, checksum256, &ahosts::byuuid>>
+        eosio::indexed_by<"byuuid"_n, eosio::const_mem_fun<ahosts, eosio::checksum256, &ahosts::byuuid>>
     > ahosts_index;
 
 
+/*!
+   \brief Структура целевого долга хоста Двойной Спирали. 
+*/
 
     struct [[eosio::table, eosio::contract("unicore")]] debts {
         uint64_t id;
@@ -487,6 +537,6 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
 
 
-}
+
 
 

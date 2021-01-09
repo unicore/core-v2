@@ -1,4 +1,4 @@
-namespace eosio{
+using namespace eosio;
 
     [[eosio::action]] void unicore::init(uint64_t system_income){
         require_auth(_me);
@@ -38,7 +38,7 @@ namespace eosio{
     }
 
     eosio::asset unicore::convert_to_power(eosio::asset quantity, eosio::name host){
-        powermarket markets(_me, host.value);
+        market_index markets(_me, host.value);
         auto market = markets.find(0);
         auto tmp = *market;
         account_index accounts(_me, host.value);
@@ -417,7 +417,7 @@ void improve_params_of_new_cycle (eosio::name host, eosio::name main_host){
  * @param[in]  root_symbol  The root symbol
  */
 
-void emplace_first_pools(eosio::name parent_host, eosio::name main_host, eosio::symbol root_symbol){
+void emplace_first_pools(eosio::name parent_host, eosio::name main_host, eosio::symbol root_symbol, eosio::time_point_sec start_at){
     
     spiral_index spiral(_me, main_host.value);
     auto sp = spiral.find(0);
@@ -456,7 +456,7 @@ void emplace_first_pools(eosio::name parent_host, eosio::name main_host, eosio::
         p.total_loss_withdraw = asset(0, root_symbol);
         p.pool_num = 1;
         p.cycle_num = acc->current_cycle_num;
-        p.pool_started_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+        p.pool_started_at = start_at;
         p.priority_until = acc->current_cycle_num == 1 ? eosio::time_point_sec(0) : eosio::time_point_sec(eosio::current_time_point().sec_since_epoch()+ sp->priority_seconds);
         p.pool_expired_at = eosio::time_point_sec (-1);
         p.color = "white";
@@ -482,7 +482,7 @@ void emplace_first_pools(eosio::name parent_host, eosio::name main_host, eosio::
         p.color = "black";
         p.cycle_num = acc->current_cycle_num;
         p.pool_num = 2;
-        p.pool_started_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+        p.pool_started_at = start_at;
         p.priority_until = acc->current_cycle_num == 1 ? eosio::time_point_sec(0) : eosio::time_point_sec(eosio::current_time_point().sec_since_epoch()+ sp->priority_seconds);
         p.pool_expired_at = eosio::time_point_sec (-1);
         p.total_win_withdraw = asset(0, root_symbol);
@@ -551,7 +551,8 @@ void start_new_cycle ( eosio::name host ) {
     eosio::name last_ahost = acc->ahost;
             
     auto root_symbol = acc->get_root_symbol();
-        
+    eosio::time_point_sec start_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+
     if (acc->need_switch) {
 
         main_host = (acc->chosts).back();
@@ -563,7 +564,7 @@ void start_new_cycle ( eosio::name host ) {
 
         improve_params_of_new_cycle(host, main_host);
 
-        emplace_first_pools(host, main_host, root_symbol);
+        emplace_first_pools(host, main_host, root_symbol, start_at);
 
     } else {
         rate_index rates(_me, main_host.value);
@@ -578,7 +579,7 @@ void start_new_cycle ( eosio::name host ) {
         uint64_t available_id = pools.available_primary_key();
         improve_params_of_new_cycle(host, main_host);
         
-        emplace_first_pools(host, main_host, root_symbol);
+        emplace_first_pools(host, main_host, root_symbol, start_at);
 
     }
         
@@ -630,7 +631,7 @@ void next_pool( eosio::name host){
             
         //     auto sincome_bycycle_and_pool = sincome.template get_index<"cyclandpool"_n>();
 
-        //     auto sincome_bycycle_and_pool_ids = eosio::combine_ids(acc->current_cycle_num, acc -> current_pool_num);
+        //     auto sincome_bycycle_and_pool_ids = combine_ids(acc->current_cycle_num, acc -> current_pool_num);
             
         //     auto sinc = sincome_bycycle_and_pool.find(sincome_bycycle_and_pool_ids);
 
@@ -783,13 +784,36 @@ void next_pool( eosio::name host){
     // }    
 
 }
+
+
+[[eosio::action]] void unicore::setstartdate(eosio::name host, eosio::time_point_sec start_at){
+    require_auth(host);
+
+    account_index hosts(_me, host.value);
+    pool_index pools(_me, host.value);
+
+    auto acc = hosts.find(host.value);
+    
+    eosio::check(acc -> current_pool_num == 1, "Only on the first pool start date can be changed");
+    auto pool1 = pools.find(acc -> current_pool_id);
+    auto pool2 = pools.find(acc-> current_pool_id + 1);
+
+    pools.modify(pool1, host, [&](auto &p){
+        p.pool_started_at = start_at;
+    });
+
+    pools.modify(pool2, host, [&](auto &p){
+        p.pool_started_at = start_at;
+    });
+}
+
 /**
  * @brief      Публичный метод запуска хоста
  * Метод необходимо вызвать для запуска хоста после установки параметров хоста. Добавляет первый цикл, два пула, переключает демонастративный флаг запуска и создает статистические объекты. Подписывается аккаунтом хоста.  
  * 
  * @param[in]  op    The operation 
  */
-[[eosio::action]] void unicore::start(eosio::name host, eosio::name chost){
+[[eosio::action]] void unicore::start(eosio::name host, eosio::name chost) {
     if (host == chost)
         require_auth(host);
     else 
@@ -814,7 +838,8 @@ void next_pool( eosio::name host){
     auto root_symbol = account -> get_root_symbol();
     eosio::check(account->parameters_setted == true, "Cannot start host without setted parameters");
     
-
+    eosio::time_point_sec start_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+    
     auto chosts = account->chosts;
 
     if (chosts.begin() == chosts.end()) {
@@ -833,7 +858,7 @@ void next_pool( eosio::name host){
             c.emitted = asset(0, root_symbol);
         });
 
-        emplace_first_pools(host, main_host, root_symbol);
+        emplace_first_pools(host, main_host, root_symbol, start_at);
         
 
 
@@ -1080,6 +1105,8 @@ void unicore::deposit ( eosio::name username, eosio::name host, eosio::asset amo
 
     if (pool -> pool_num > 2){
         eosio::check ( pool -> pool_expired_at > eosio::time_point_sec(eosio::current_time_point().sec_since_epoch()), "Pool is Expired");
+    } else {
+        eosio::check( pool -> pool_started_at < eosio::time_point_sec(eosio::current_time_point().sec_since_epoch()), "Pool is not started yet");
     };
 
     auto rate = rates.find( pool-> pool_num - 1 );
@@ -1848,7 +1875,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
     funds_index funds(_me, _me.value);
     auto by_contract_and_symbol = funds.template get_index<"codeandsmbl"_n>();
 
-    auto by_contract_and_symbol_ids = eosio::combine_ids(token_contract.value, quantity.symbol.code().raw());
+    auto by_contract_and_symbol_ids = combine_ids(token_contract.value, quantity.symbol.code().raw());
     
     auto fund = by_contract_and_symbol.find(by_contract_and_symbol_ids);
 
@@ -1885,7 +1912,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
     funds_index funds(_me, _me.value);
     auto by_contract_and_symbol = funds.template get_index<"codeandsmbl"_n>();
 
-    auto by_contract_and_symbol_ids = eosio::combine_ids(token_contract.value, asset_on_sale.symbol.code().raw());    
+    auto by_contract_and_symbol_ids = combine_ids(token_contract.value, asset_on_sale.symbol.code().raw());    
     auto fund = by_contract_and_symbol.find(by_contract_and_symbol_ids);
     
     account_index accounts(_me, host.value);
@@ -1904,7 +1931,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
 
     auto by_fund_and_host = hostsonfunds.template get_index<"fundandhost"_n>();
 
-    auto by_fund_and_host_ids = eosio::combine_ids(fund->id, host.value);
+    auto by_fund_and_host_ids = combine_ids(fund->id, host.value);
     
     auto host_on_fund = by_fund_and_host.find(by_fund_and_host_ids);
     
@@ -1981,7 +2008,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
     hostsonfunds_index hostsonfunds(_me, _me.value);
     auto by_fund_and_host = hostsonfunds.template get_index<"fundandhost"_n>();
 
-    auto by_fund_and_host_ids = eosio::combine_ids(fund_id, host.value);
+    auto by_fund_and_host_ids = combine_ids(fund_id, host.value);
     
     auto host_on_fund = by_fund_and_host.find(by_fund_and_host_ids);
 
@@ -2020,7 +2047,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
     hostsonfunds_index hostsonfunds(_me, _me.value);
     auto by_fund_and_host = hostsonfunds.template get_index<"fundandhost"_n>();
 
-    auto by_fund_and_host_ids = eosio::combine_ids(fund_id, host.value);
+    auto by_fund_and_host_ids = combine_ids(fund_id, host.value);
     
     auto host_on_fund = by_fund_and_host.find(by_fund_and_host_ids);
 
@@ -2048,7 +2075,7 @@ void unicore::add_asset_to_fund_action(eosio::name username, eosio::asset quanti
 
     auto by_contract_and_symbol = funds.template get_index<"codeandsmbl"_n>();
 
-    auto by_contract_and_symbol_ids = eosio::combine_ids(code.value, quantity.symbol.code().raw());
+    auto by_contract_and_symbol_ids = combine_ids(code.value, quantity.symbol.code().raw());
     
     auto fund = by_contract_and_symbol.find(by_contract_and_symbol_ids);
 
@@ -2080,7 +2107,7 @@ void unicore::createfund(eosio::name token_contract, eosio::asset fund_asset, st
 
     auto by_contract_and_symbol = funds.template get_index<"codeandsmbl"_n>();
 
-    auto by_contract_and_symbol_ids = eosio::combine_ids(token_contract.value, fund_asset.symbol.code().raw());
+    auto by_contract_and_symbol_ids = combine_ids(token_contract.value, fund_asset.symbol.code().raw());
     
     auto fund = by_contract_and_symbol.find(by_contract_and_symbol_ids);
 
@@ -2669,7 +2696,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
             //TODO may be corrent max with total prev element
             //(if payed before, max should decrease)
     
-            powermarket market(_me, host.value);
+            market_index market(_me, host.value);
             auto itr = market.find(0);
             auto liquid_power = acc->total_shares - itr->base.balance.amount;
 
@@ -2861,7 +2888,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         
         
         //HFUND
-        powermarket market(_me, host.value);
+        market_index market(_me, host.value);
         auto itr = market.find(0);
         auto liquid_power = acc->total_shares - itr->base.balance.amount;
         
@@ -2985,7 +3012,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
 
         auto funds_by_contract_and_symbol = funds.template get_index<"codeandsmbl"_n>();
 
-        auto fund_by_contract_and_symbol_ids = eosio::combine_ids(acc.sale_token_contract.value, (acc.asset_on_sale).symbol.code().raw());
+        auto fund_by_contract_and_symbol_ids = combine_ids(acc.sale_token_contract.value, (acc.asset_on_sale).symbol.code().raw());
         
         auto fund = funds_by_contract_and_symbol.find(fund_by_contract_and_symbol_ids);
 
@@ -2997,5 +3024,3 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         });
 
     }
-
-};

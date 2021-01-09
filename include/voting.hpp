@@ -1,3 +1,6 @@
+/*!
+   \brief Структура голосов за цели хоста Двойной Спирали.
+*/
 
 	struct [[eosio::table, eosio::contract("unicore")]] votes{
 		uint64_t id;
@@ -7,7 +10,7 @@
 
 		uint64_t primary_key()const { return id; }
 		uint64_t byhost() const {return host.value;}
-		uint128_t idwithhost() const { return eosio::combine_ids(host.value, goal_id); }
+		uint128_t idwithhost() const { return combine_ids(host.value, goal_id); }
 
 	  EOSLIB_SERIALIZE( votes, (id)(goal_id)(host)(power))
     

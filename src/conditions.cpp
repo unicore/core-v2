@@ -1,4 +1,4 @@
-namespace eosio {
+using namespace eosio;
 
     //add to AWL
 
@@ -86,5 +86,3 @@ namespace eosio {
             conditions.erase(condition);
         }
     }
-
-}

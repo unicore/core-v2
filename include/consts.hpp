@@ -1,4 +1,4 @@
-namespace eosio {
+// namespace eosio {
   #define QUARKS_IN_QUANTS 1000000
   #define ONE_PERCENT 10000
   #define HUNDR_PERCENT 1000000
@@ -19,4 +19,4 @@ namespace eosio {
   static constexpr eosio::name _curator = "curator"_n;
   static constexpr eosio::name _saving = "eosio.saving"_n;
   
-}
+// }

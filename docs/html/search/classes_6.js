@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['unicore',['unicore',['../classeosio_1_1unicore.html',1,'eosio']]],
-  ['users',['users',['../structeosio_1_1users.html',1,'eosio']]],
-  ['userscount',['userscount',['../structeosio_1_1userscount.html',1,'eosio']]]
+  ['goals',['goals',['../structgoals.html',1,'']]],
+  ['goalspartic',['goalspartic',['../structgoalspartic.html',1,'']]],
+  ['gpercents',['gpercents',['../structgpercents.html',1,'']]]
 ];

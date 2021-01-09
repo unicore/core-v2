@@ -1,5 +1,5 @@
-
-namespace eosio {
+using namespace eosio;
+// namespace eosio {
   /**
    * @brief      Создание вестинг-баланса
    * Внутренний метод, используемый при обратном обмене силы сообщества на котировочный токен. 
@@ -107,6 +107,7 @@ namespace eosio {
     auto on_withdraw = pstat -> pflow_available_in_asset;
     
     if (on_withdraw.amount > 0){
+
       action(
           permission_level{ _me, "active"_n },
           acc->root_token_contract, "transfer"_n,
@@ -349,7 +350,7 @@ namespace eosio {
       eosio::name main_host = acc->get_ahost();
       auto root_symbol = acc->get_root_symbol();
 
-      powermarket market(_me, host.value);
+      market_index market(_me, host.value);
       auto itr = market.find(0);
       auto liquid_power = acc->total_shares - itr->base.balance.amount;
 
@@ -402,8 +403,9 @@ namespace eosio {
 		eosio::check(exist != accounts.end(), "Host is not founded");
 		eosio::check(exist -> quote_token_contract == code, "Wrong quote token contract");
     eosio::check(exist -> quote_amount.symbol == amount.symbol, "Wrong quote token symbol");
-		
-    powermarket market(_me, host.value);
+		eosio::check(exist -> power_market_id != ""_n, "Can buy shares only when power market is enabled");
+
+    market_index market(_me, host.value);
 		auto itr = market.find(0);
 		auto tmp = *itr;
 		uint64_t shares_out;
@@ -470,7 +472,7 @@ namespace eosio {
       pt.with_badges -= shares; 
     });
 
-    powermarket market(_me, host.value);
+    market_index market(_me, host.value);
     auto itr = market.find(0);
     
     market.modify( itr, _me, [&]( auto& es ) {
@@ -497,7 +499,7 @@ namespace eosio {
     power_index power_to_idx (_me, reciever.value);
     auto power_to = power_to_idx.find(host.value);
     
-    powermarket market(_me, host.value);
+    market_index market(_me, host.value);
 
     auto itr = market.find(0);
     
@@ -713,7 +715,7 @@ namespace eosio {
 		auto upower = (userpower->staked);
 		eosio::check(upower >= shares, "Not enought power available for sell");
 
-		powermarket market(_me, host.value);
+		market_index market(_me, host.value);
 		auto itr = market.find(0);
 		auto tmp = *itr;
 
@@ -746,7 +748,7 @@ namespace eosio {
    * @param[in]  quote_amount  The quote amount
    */
 	void unicore::create_bancor_market(std::string name, uint64_t id, eosio::name host, uint64_t total_shares, eosio::asset quote_amount, eosio::name quote_token_contract, uint64_t vesting_seconds){
-		powermarket market(_me, host.value);
+		market_index market(_me, host.value);
 		auto itr = market.find(id);
 		if (itr == market.end()){
 			itr = market.emplace( _me, [&]( auto& m ) {
@@ -765,4 +767,4 @@ namespace eosio {
 		} else 
 			eosio::check(false, "Market already created");
 	};
-};
+// };
