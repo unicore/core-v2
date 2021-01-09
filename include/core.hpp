@@ -59,6 +59,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void priorenter(eosio::name username, eosio::name host, uint64_t balance_id);
         [[eosio::action]] void refreshbal(eosio::name username, uint64_t balance_id, uint64_t partrefresh);
         
+        [[eosio::action]] void setstartdate(eosio::name host, eosio::time_point_sec start_at); 
+
         static void pay_for_upgrade(eosio::name username, eosio::asset amount, eosio::name code);
         
         static void refresh_state(eosio::name host);

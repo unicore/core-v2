@@ -416,6 +416,11 @@ extern "C" {
                    // fcore().start_action(eosio::unpack_action_data<start>());
                    break;
                 };
+                case "setstartdate"_n.value: {
+                   execute_action(name(receiver), name(code), &unicore::setstartdate);
+                   // fcore().start_action(eosio::unpack_action_data<start>());
+                   break;
+                };
                 case "refreshbal"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::refreshbal);
                     // fcore().refresh_balance_action(eosio::unpack_action_data<refreshbal>());
