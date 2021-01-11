@@ -34,6 +34,7 @@ using namespace eosio;
         if (partner == partners.end()) {
             partners.emplace(_me, [&](auto &p){
                 p.partner = username;
+                p.status = "partner"_n;
             });
         }
     }    
@@ -45,7 +46,7 @@ using namespace eosio;
         auto condition = conditions.find(keyname.value);
 
         if (condition != conditions.end()){
-            if (value >= condition -> value)
+            if (value >= condition -> value && condition -> value != 0)
                 return true;
             else return false;
         } 
