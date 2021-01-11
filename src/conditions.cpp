@@ -34,6 +34,7 @@ using namespace eosio;
         if (partner == partners.end()) {
             partners.emplace(_me, [&](auto &p){
                 p.partner = username;
+                p.status = "partner"_n;
             });
         }
     }    
