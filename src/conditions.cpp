@@ -45,7 +45,7 @@ using namespace eosio;
         auto condition = conditions.find(keyname.value);
 
         if (condition != conditions.end()){
-            if (value >= condition -> value)
+            if (value >= condition -> value && condition -> value != 0)
                 return true;
             else return false;
         } 
