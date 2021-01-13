@@ -336,16 +336,18 @@ class [[eosio::contract]] unicore : public eosio::contract {
 /*!
    \brief Структура для учёта сжигания внутренней конвертационной единицы.
 */
-    struct [[eosio::table, eosio::contract("unicore")]] cycle2 {
+    struct [[eosio::table, eosio::contract("unicore")]] cycle3 {
         uint64_t id;
         uint64_t burned_quants;
+        uint64_t black_burned_quants;
+        uint64_t white_burned_quants;
 
         uint64_t primary_key() const {return id;}
         
-        EOSLIB_SERIALIZE(cycle2, (id)(burned_quants))
+        EOSLIB_SERIALIZE(cycle3, (id)(burned_quants)(black_burned_quants)(white_burned_quants))
     };
 
-    typedef eosio::multi_index<"cycle2"_n, cycle2> cycle2_index;
+    typedef eosio::multi_index<"cycle3"_n, cycle3> cycle3_index;
     
 
 
