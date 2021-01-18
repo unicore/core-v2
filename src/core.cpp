@@ -285,7 +285,8 @@ using namespace eosio;
      auto second_pool_rate = rates.find(1);
 
      auto cycle = cycles.find(acc-> current_cycle_num - 2);
-     eosio::check(acc->sale_mode == "direct"_n, "Priority enter available only on a simple sale mode");
+     eosio::check(acc -> sale_is_enabled == false, "Priority enter available only on disabled sale mode");
+     // eosio::check(acc->sale_mode == "direct"_n, "Priority enter available only on a simple sale mode");
      eosio::check(acc->current_pool_num < 2, "Priority Enter is available only for first 2 rounds in cycle");
      eosio::check(acc->priority_flag == true, "Priority Enter is available only when priority_flag is enabled");
     
