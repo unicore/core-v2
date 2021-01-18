@@ -33,7 +33,8 @@ using namespace eosio;
  * \section install_sec Клуб разработчиков
  *
  * https://unicode.club
- * 
+ * \section club_sec Открытый код
+ * https://github.com/dacom-core/unicore
  * \section licension_sec Лицензия
  *
  * MIT
@@ -194,46 +195,38 @@ extern "C" {
                 //GOALS
                  case "setgoal"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::setgoal);
-                    // goal().set_goal_action(eosio::unpack_action_data<setgoal>());
                     break;
                  }
                  case "delgoal"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::delgoal);
-                    // goal().del_goal_action(eosio::unpack_action_data<delgoal>());
                     break;
                  }
                  case "gsponsor"_n.value : {
                     execute_action(name(receiver), name(code), &unicore::gsponsor);
-                    // goal().gsponsor_action(eosio::unpack_action_data<gsponsor>());
                     break;
                  }
                  case "report"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::report);
-                    // goal().report_action(eosio::unpack_action_data<report>());
                     break;
                  }
                  case "check"_n.value : {
                     execute_action(name(receiver), name(code), &unicore::check);
-                    // goal().check_action(eosio::unpack_action_data<struct check>());
                     break;
                 }
 
                 //CMS
                 case "setcontent"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::setcontent);
-                    // cms().setcontent_action(eosio::unpack_action_data<setcontent>());
                     break;
                 }
 
                 case "rmcontent"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::rmcontent);
-                    // cms().rmcontent_action(eosio::unpack_action_data<rmcontent>());
                     break;
                 }
 
                 case "setcmsconfig"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::setcmsconfig);
-                    // cms().setcmsconfig_action(eosio::unpack_action_data<setcmsconfig>());
                     break;
                 }
 
@@ -288,7 +281,6 @@ extern "C" {
                 //SHARES
                 case "sellshares"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::sellshares);
-                    // shares().sellshares_action(eosio::unpack_action_data<sellshares>());
                     break;
                 };
                 case "delshares"_n.value: {
@@ -305,47 +297,38 @@ extern "C" {
                     
                     require_auth(op.from);
 
-                    // execute_action(name(receiver), name(code), &unicore::delshares);
                     unicore::delegate_shares_action(op.from, op.reciever, op.host, op.shares);
 
-                    // shares().delegate_shares_action(op);
                     break;
                 };
                 case "undelshares"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::undelshares);
-                    // shares().undelegate_shares_action(eosio::unpack_action_data<undelshares>());
                     break;
                 };
                 case "refreshsh"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::refreshsh);
-                    // shares().refresh_action(eosio::unpack_action_data<refreshsh>());
                     break;
                 };
 
                 case "withdrawsh"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::withdrawsh);
-                    // shares().withdraw_action(eosio::unpack_action_data<withdrawsh>());
                     break;
                 };
 
                 case "withpbenefit"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::withpbenefit);
-                    // shares().withdraw_power_quants_action(eosio::unpack_action_data<withbenefit>());
                     break;
                 };
                 case "withrbenefit"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::withrbenefit);
-                    // shares().withdraw_power_quants_action(eosio::unpack_action_data<withbenefit>());
                     break;
                 };
                 case "withrsegment"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::withrsegment);
-                    
                     break;  
                 }
                 case "refreshpu"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::refreshpu);
-                    // shares().refresh_power_quants_action(eosio::unpack_action_data<refreshpu>());
                     break;
                 };
                 
@@ -354,42 +337,34 @@ extern "C" {
                 //HOSTS
                 case "upgrade"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::upgrade);
-                    // hosts_struct().upgrade_action(eosio::unpack_action_data<upgrade>());
                     break;
                 };
                 case "cchildhost"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::cchildhost);
-                    // hosts_struct().create_chost_action(eosio::unpack_action_data<cchildhost>());
                     break;
                 };
                 case "setwebsite"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::setwebsite);
-                    // hosts_struct().upgrade_action(eosio::unpack_action_data<upgrade>());
                     break;
                 };
                 case "setahost"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::setahost);
-                    // hosts_struct().upgrade_action(eosio::unpack_action_data<upgrade>());
                     break;
                 };
                 case "closeahost"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::closeahost);
-                    // hosts_struct().upgrade_action(eosio::unpack_action_data<upgrade>());
                     break;  
                 };
                 case "openahost"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::openahost);
-                    // hosts_struct().upgrade_action(eosio::unpack_action_data<upgrade>());
                     break;
                 };
                 case "rmahost"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::rmahost);
-                    // hosts_struct().upgrade_action(eosio::unpack_action_data<upgrade>());
                     break;
                 };
                 case "settype"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::settype);
-                    // hosts_struct().upgrade_action(eosio::unpack_action_data<upgrade>());
                     break;
                 };
 
@@ -407,28 +382,21 @@ extern "C" {
                 //CORE
                 case "setparams"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::setparams);
-
-                    // fcore().setparams_action(eosio::unpack_action_data<setparams>());
                     break;
                 };
                 case "start"_n.value: {
                    execute_action(name(receiver), name(code), &unicore::start);
-                   // fcore().start_action(eosio::unpack_action_data<start>());
                    break;
                 };
                 case "setstartdate"_n.value: {
                    execute_action(name(receiver), name(code), &unicore::setstartdate);
-                   // fcore().start_action(eosio::unpack_action_data<start>());
                    break;
                 };
                 case "refreshbal"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::refreshbal);
-                    // fcore().refresh_balance_action(eosio::unpack_action_data<refreshbal>());
                     break;
                 };
                 case "refreshst"_n.value: {
-                    // execute_action(name(receiver), name(code), &unicore::refreshst);
-                    
                     struct refreshstruct {
                         eosio::name host;
                     };
@@ -441,64 +409,53 @@ extern "C" {
                 
                 case "withdraw"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::withdraw);
-                    // fcore().withdraw_action(eosio::unpack_action_data<withdraw>());
                     break;
                 };
                 case "priorenter"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::priorenter);
-                    // fcore().priority_enter(eosio::unpack_action_data<priorenter>());   
                     break;
                 };
                 case "gwithdraw"_n.value:{
                     execute_action(name(receiver), name(code), &unicore::gwithdraw);
-                    // goal().gwithdraw_action(eosio::unpack_action_data<gwithdraw>());
                     break;
                 };
                 case "setemi"_n.value:{
                     execute_action(name(receiver), name(code), &unicore::setemi);
-                    // goal().set_emission_action(eosio::unpack_action_data<setemi>());
                     break;
                 };
 
                 case "edithost"_n.value:{
                     execute_action(name(receiver), name(code), &unicore::edithost);
-                    // hosts_struct().edithost_action(eosio::unpack_action_data<edithost>());
                     break;
                 };
 
                 case "setcondition"_n.value:{
                     execute_action(name(receiver), name(code), &unicore::setcondition);
-                    // hosts_struct().edithost_action(eosio::unpack_action_data<edithost>());
                     break;
                 };
 
                 //POT
                 case "addhostofund"_n.value:{
                     execute_action(name(receiver), name(code), &unicore::addhostofund);
-                    // fcore().connect_host_to_fund_action(eosio::unpack_action_data<addhostofund>());
                     break;
                 };
                 case "enablesale"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::enablesale);
-                    // fcore().enablesale_action(eosio::unpack_action_data<enablesale>());
                     break;
                 };
                 case "rmhosfrfund"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::rmhosfrfund);
-                    // fcore().enablesale_action(eosio::unpack_action_data<enablesale>());
                     break;
                 };
                 
                 case "transfromgf"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::transfromgf);
-                    // fcore().enablesale_action(eosio::unpack_action_data<enablesale>());
                     break;
                 };
             
                 //BADGES
                 case "setbadge"_n.value:{
                     execute_action(name(receiver), name(code), &unicore::setbadge);
-                    // badge_struct().setbadge_action(eosio::unpack_action_data<setbadge>());
                     break;
                 }
                 // case name(delbadge):{
@@ -511,7 +468,6 @@ extern "C" {
                 }
                 case "backbadge"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::backbadge);
-                    // badge_struct().backbadge_action(eosio::unpack_action_data<backbadge>());
                     break;
                 }
 
@@ -519,41 +475,34 @@ extern "C" {
 
                 case "settask"_n.value:{
                     execute_action(name(receiver), name(code), &unicore::settask);
-                    // tsks().settask_action(eosio::unpack_action_data<settask>());
                     break;
                 }
                 case "deltask"_n.value:{
                     execute_action(name(receiver), name(code), &unicore::deltask);
-                    // tsks().settask_action(eosio::unpack_action_data<settask>());
                     break;
                 }
 
                 case "tactivate"_n.value:{
                     execute_action(name(receiver), name(code), &unicore::tactivate);
-                    // tsks().tactivate_action(eosio::unpack_action_data<tactivate>());
                     break;
                 }
                 case "tdeactivate"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::tdeactivate);
-                    // tsks().tdeactivate_action(eosio::unpack_action_data<tdeactivate>());
                     break;
                 }
                 case "setreport"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::setreport);
-                    // tsks().setreport_action(eosio::unpack_action_data<setreport>());
                     break;
                 }
 
 
                 case "editreport"_n.value:{
                     execute_action(name(receiver), name(code), &unicore::editreport);
-                    // tsks().editreport_action(eosio::unpack_action_data<editreport>());
                     break;
                 }
 
                 case "approver"_n.value:{
                     execute_action(name(receiver), name(code), &unicore::approver);
-                    // tsks().approver_action(eosio::unpack_action_data<approver>());
                     break;
                 }
 
@@ -564,25 +513,21 @@ extern "C" {
 
                 case "fundtask"_n.value : {
                     execute_action(name(receiver), name(code), &unicore::fundtask);
-                    // tsks().fundtask_action(eosio::unpack_action_data<fundtask>());
                     break;
                 }
 
                 case "setarch"_n.value : {
                     execute_action(name(receiver), name(code), &unicore::setarch);
-                    // hosts_struct().set_architect_action(eosio::unpack_action_data<setarch>());
                     break;
                 }
 
                 case "dfundgoal"_n.value : {
                     execute_action(name(receiver), name(code), &unicore::dfundgoal);
-                    // goal().fund_goal_action(eosio::unpack_action_data<dfundgoal>());
                     break;
                 }
 
                 case "convert"_n.value : {
                     execute_action(name(receiver), name(code), &unicore::convert);
-                    // fcore().convert_action(eosio::unpack_action_data<convert>());
                     break;
                 }
 

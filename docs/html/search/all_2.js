@@ -14,5 +14,5 @@ var searchData=
   ['createfund',['createfund',['../classunicore.html#a2439f37a892708018e3474efa938d778',1,'unicore']]],
   ['currency_5fstats',['currency_stats',['../structcurrency__stats.html',1,'']]],
   ['cycle',['cycle',['../structcycle.html',1,'']]],
-  ['cycle2',['cycle2',['../structcycle2.html',1,'']]]
+  ['cycle3',['cycle3',['../structcycle3.html',1,'']]]
 ];

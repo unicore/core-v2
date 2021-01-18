@@ -285,7 +285,8 @@ using namespace eosio;
      auto second_pool_rate = rates.find(1);
 
      auto cycle = cycles.find(acc-> current_cycle_num - 2);
-     eosio::check(acc->sale_mode == "direct"_n, "Priority enter available only on a simple sale mode");
+     eosio::check(acc -> sale_is_enabled == false, "Priority enter available only on disabled sale mode");
+     // eosio::check(acc->sale_mode == "direct"_n, "Priority enter available only on a simple sale mode");
      eosio::check(acc->current_pool_num < 2, "Priority Enter is available only for first 2 rounds in cycle");
      eosio::check(acc->priority_flag == true, "Priority Enter is available only when priority_flag is enabled");
     
@@ -674,14 +675,14 @@ void next_pool( eosio::name host){
 
         reserved_quants = uint64_t(dreserved_quants);
 
-
-
+        // double creserved_quants = prev_prev_pool -> creserved_quants * rate -> sell_rate / rate -> buy_rate;
+        double creserved_quants = 0;
 
         pools.emplace(_me, [&](auto &p){
             p.id = pools.available_primary_key();
             p.ahost = main_host;
             p.total_quants = sp->size_of_pool * sp -> quants_precision;
-            p.creserved_quants = prev_prev_pool -> creserved_quants;
+            p.creserved_quants = uint64_t(creserved_quants);
             p.remain_quants = p.total_quants - reserved_quants;
             p.quant_cost = asset(rate->buy_rate, root_symbol);
             p.color = prev_prev_pool -> color; 
@@ -1295,7 +1296,7 @@ void unicore::fill_pool(eosio::name username, eosio::name host, uint64_t quants,
     pools.modify(pool, _me, [&](auto &p){
         p.remain_quants = remain_quants;
 
-        double filled = ( pool->total_quants - p.remain_quants) / sp -> quants_precision * pool->quant_cost.amount;
+        uint128_t filled = (pool->total_quants / sp -> quants_precision - p.remain_quants / sp -> quants_precision) * pool->quant_cost.amount;
 
         p.filled = asset(uint64_t(filled), root_symbol);
         p.remain = p.pool_cost - p.filled;
@@ -2380,6 +2381,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         p.filled = asset(( pool -> total_quants - p.remain_quants) / sp -> quants_precision * pool->quant_cost.amount, root_symbol);
         p.filled_percent = (pool -> total_quants - p.remain_quants) * HUNDR_PERCENT / pool->total_quants;
         p.remain = p.pool_cost - p.filled;
+        // p.creserved_quants += quants_for_buy; 
     });
     
 
@@ -2417,6 +2419,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         buy_action(username, host, remain_asset, code, transfer, spread_to_funds, summ);  
 
     }
+
     
     
     return summ;
@@ -2741,10 +2744,9 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                 p.total_win_withdraw = last_pool -> total_win_withdraw + amount;
                 p.remain_quants = remain_quants;
 
-                p.filled = asset(( last_pool->total_quants - p.remain_quants) / sp -> quants_precision * last_pool->quant_cost.amount, root_symbol);
+                p.filled = asset( (last_pool->total_quants / sp -> quants_precision - p.remain_quants / sp -> quants_precision) * last_pool->quant_cost.amount, root_symbol);
                 p.filled_percent = (last_pool->total_quants - p.remain_quants) * HUNDR_PERCENT / last_pool->total_quants ;
-                p.remain = p.pool_cost - p.filled;                
-
+                p.remain = p.pool_cost - p.filled;   
             });
             // print("on end; ");
             // if (acc -> type== "bw"_n){
@@ -2757,25 +2759,9 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
             // РАЗДАЕМ токен по текущему курсу (автоматическая покупка токенов по текущему курсу)
             pools.modify(last_pool, _me, [&](auto &p){
                  p.total_loss_withdraw = last_pool -> total_loss_withdraw + amount;
+               
             });
             
-
-            //Сжигаем кванты на выводе проигрыша и делаем отметку об этом
-            cycle2_index cycles2(_self, host.value);
-            auto cycle2 = cycles2.find(last_pool -> cycle_num - 1);
-
-            if (cycle2 == cycles2.end()){
-                cycles2.emplace(_me, [&](auto &p){
-                    p.id = last_pool -> cycle_num - 1;
-                    p.burned_quants = bal -> quants_for_sale;
-                });
-            } else {
-                cycles2.modify(cycle2, _me, [&](auto &p){
-                    p.burned_quants += bal -> quants_for_sale;
-                });
-            };
-            
-
 
             if (acc -> sale_is_enabled == true) {
                 //CONVERT ONLY IF NOT DIRECT BUY
