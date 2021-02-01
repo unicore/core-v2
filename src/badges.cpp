@@ -89,7 +89,7 @@
 
 		unicore::give_shares_with_badge_action(host, to, host_badge->power);
 		
-		if (netted == true){
+		if (netted == true) {
 			eosio::check(goal_id != 0 && task_id != 0, "Netted badge should have a goal and task ids");
 			
 			//modify goal and task to increse badge_count
@@ -97,14 +97,22 @@
 			auto goal = goals.find(goal_id);
 			goals.modify(goal, _me, [&](auto &g){
 				g.gifted_badges += 1;
-				g.gifted_power = host_badge -> power;
+				g.gifted_power += host_badge -> power;
 			});
+
+			if (goal -> parent_id != 0){
+				auto parent_goal = goals.find(goal->parent_id);
+				goals.modify(parent_goal, _me, [&](auto &pg){
+					pg.gifted_badges += 1;
+					pg.gifted_power += host_badge -> power;
+				});
+			}
 
 			tasks_index tasks(_me, host.value);
 			auto task = tasks.find(task_id);
 			tasks.modify(task, _me, [&](auto &t){
 				t.gifted_badges += 1;
-				t.gifted_power = host_badge -> power;
+				t.gifted_power += host_badge -> power;
 			});
 		}
 
@@ -128,6 +136,7 @@
 			});			
 
 		} else {
+
 			eosio::check(user_badge -> netted == netted, "Cannot add not netted badge to netted");
 
 			hostandbadge_idx.modify(user_badge, _me, [&](auto &ub){

@@ -14,7 +14,7 @@
 	 *
 	 * @param[in]  op    The operation
 	 */
-	[[eosio::action]] void unicore::settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id, std::string meta){
+	[[eosio::action]] void unicore::settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, uint64_t expiration, bool is_batch, uint64_t parent_batch_id, bool is_regular, std::vector<uint64_t> calendar, eosio::time_point_sec start_at, std::string meta){
 		
 		require_auth(creator);
 		
@@ -87,6 +87,7 @@
 
 			}
 
+			//todo check calendar for 7 days
 
 			tasks.emplace(creator, [&](auto &t){
 				t.host = host;
@@ -111,9 +112,11 @@
 				t.is_batch = is_batch;
 				t.meta = meta;
 				t.parent_batch_id = parent_batch_id;
-				// t.batch = batch;
-				// t.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + expiration);
+				t.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + expiration);
 				t.created_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch());
+				t.start_at = start_at;
+				t.is_regular = is_regular;
+				t.calendar = calendar;
 			});
 			
 	    accounts.modify(acc, creator, [&](auto &a){
@@ -135,6 +138,9 @@
 				t.with_badge = with_badge;
 				t.badge_id = badge_id;
 				t.batch = batch;
+				t.calendar = calendar;
+				t.is_regular = is_regular;
+				t.start_at = start_at;
 			});
 
 
@@ -213,12 +219,12 @@
 		require_auth(host);
 		account_index accounts(_me, host.value);
 		auto acc = accounts.find(host.value);
-		eosio::check(acc != accounts.end(), "Host is not found");
+		eosio::check(acc != accounts.end(), "Host is not found ");
 
 		tasks_index tasks(_me, host.value);
 
 		auto task = tasks.find(task_id);
-
+		eosio::check(task -> reports_count == 0, "Cannot delete task with reports. Delete all reports firstly");
 		eosio::check(task != tasks.end(), "Task is not found");
 
 		tasks.erase(task);
@@ -300,31 +306,25 @@
 		auto task = tasks.find(task_id);
 		eosio::check(task != tasks.end(), "Task is not found");
 		eosio::check(task -> active == true, "Task is not active");
-		eosio::check(task -> is_public == true, "Only public tasks is accessable for now");
+		// eosio::check(task -> is_public == true, "Only public tasks is accessable for now");
 	
-
-		tasks.modify(task, username, [&](auto &t){
-			t.reports_count += 1;
-		});
+		if (task -> is_public == false){
+			eosio::check(task -> doer == username, "Wrong doer for the private task");
+		};
 
 		goals_index goals(_me, host.value);
 		auto goal = goals.find(task-> goal_id);
+		eosio::check(goal != goals.end(), "Goal is not found");
 
-		if (goal != goals.end()){
-			if (goal -> type == "marathon"_n){
-				goalspartic_index gparticipants(_me, host.value);
-	      auto users_with_id = gparticipants.template get_index<"byusergoal"_n>();
-				auto goal_ids = combine_ids(username.value, task->goal_id);
-	      auto participant = users_with_id.find(goal_ids);
+		if (goal -> type == "marathon"_n) {
+			goalspartic_index gparticipants(_me, host.value);
+      auto users_with_id = gparticipants.template get_index<"byusergoal"_n>();
+			auto goal_ids = combine_ids(username.value, task->goal_id);
+      auto participant = users_with_id.find(goal_ids);
 
-	      eosio::check(participant != users_with_id.end(), "Username not participant of the current marathon");
-			};
-			
-			goals.modify(goal, username, [&](auto &g){
-				g.reports_count += 1;
-			});
-
+      eosio::check(participant != users_with_id.end(), "Username not participant of the current marathon");
 		};
+
 		
 		reports_index reports(_me, host.value);
 		
@@ -333,26 +333,60 @@
 		auto report_ids = combine_ids(username.value, task_id);
 		auto user_report = users_with_id.find(report_ids);
 
-		eosio::check(user_report == users_with_id.end(), "Report for this task already exist");
+		// eosio::check(user_report == users_with_id.end(), "Report for this task already exist");
+		
+		bool need_check = username == host ? false : true;
+		uint64_t report_id;
 
-		reports.emplace(username, [&](auto &r){
-			r.report_id = acc->total_reports + 1;
-			r.task_id = task_id;
-			r.goal_id = task->goal_id;
-			r.username = username;
-			r.data = data;
-			r.need_check = true;
-			r.requested = task->for_each;
-			r.balance = asset(0, root_symbol);
-			r.withdrawed = asset(0, root_symbol);
-			r.curator = host;
-			r.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + 30 * 86400);
-			r.created_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch());
-		});
 
-    accounts.modify(acc, username, [&](auto &a){
-      a.total_reports = acc -> total_reports + 1;
-    });
+		if (user_report == users_with_id.end()){
+			report_id = acc->total_reports + 1;
+			reports.emplace(username, [&](auto &r) {
+				r.report_id = report_id;
+				r.task_id = task_id;
+				r.goal_id = task->goal_id;
+				r.count = 1;
+				r.username = username;
+				r.data = data;
+				r.need_check = need_check;
+				r.requested = task->for_each;
+				r.balance = asset(0, root_symbol);
+				r.withdrawed = asset(0, root_symbol);
+				r.curator = host;
+				r.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + 30 * 86400);
+				r.created_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch());
+			});
+
+			accounts.modify(acc, username, [&](auto &a){
+	      a.total_reports = acc -> total_reports + 1;
+	    });
+
+			goals.modify(goal, username, [&](auto &g){
+				g.reports_count += 1;
+			});
+
+	    tasks.modify(task, username, [&](auto &t){
+				t.reports_count += 1;
+			});
+
+		} else {
+			eosio::check(task -> is_regular == true, "Task is not regular, but report is exist");
+			eosio::check(user_report -> need_check == false, "Previous report is not checked yet");
+			report_id = user_report -> report_id;
+
+			users_with_id.modify(user_report, username, [&](auto &r){
+				r.count += 1;
+				r.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + 30 * 86400);
+				r.created_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch());
+				
+			});
+		}
+
+    if (need_check == false) {
+    	unicore::approver(host, report_id, "");
+		};
+
+		
 	}
 
 	/**
@@ -400,9 +434,9 @@
 		tasks_index tasks(_me, host.value);
 		auto task = tasks.find(report->task_id);
 		
-		
-		eosio::check(report->approved == false, "Task is already approved");
-		
+		if (report -> username != host)
+			eosio::check(report->approved == false, "Task is already approved");
+
 		reports.modify(report, host, [&](auto &r){
 			r.need_check = false;
 			r.comment = comment;
@@ -463,12 +497,12 @@
 	};
 
 		if (task -> with_badge == true){
-			unicore::giftbadge_action(host, report->username, task->badge_id, std::string("Completed task"));
+			unicore::giftbadge_action(host, report->username, task->badge_id, std::string("Completed task"), true, report->goal_id, report->task_id);
 		}
 
     accounts.modify(acc, host, [&](auto &a){
       a.approved_reports = acc -> approved_reports + 1;
-      a.completed_tasks = task->remain.amount == 0 ? acc -> completed_tasks + 1 : acc -> completed_tasks;
+      // a.completed_tasks = task->remain.amount == 0 ? acc -> completed_tasks + 1 : acc -> completed_tasks;
     });
 		
 	}

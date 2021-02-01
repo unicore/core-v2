@@ -723,27 +723,27 @@ void next_pool( eosio::name host){
 
 [[eosio::action]] void unicore::fixs(eosio::name host, uint64_t pool_num){
     require_auth(_me);
-    spiral_index spiral(_me, host.value);
-    auto sp = spiral.find(0);
+    // spiral_index spiral(_me, host.value);
+    // auto sp = spiral.find(0);
 
-    uint64_t total_quants = sp->size_of_pool * sp -> quants_precision;
+    // uint64_t total_quants = sp->size_of_pool * sp -> quants_precision;
 
 
-    pool_index pools(_me, host.value);
+    // pool_index pools(_me, host.value);
     
-    auto pool = pools.find(pool_num - 1);
+    // auto pool = pools.find(pool_num - 1);
 
 
-    rate_index rates(_me, host.value);
+    // rate_index rates(_me, host.value);
     
-    auto rate = rates.find(pool_num - 1);
-    auto next_rate = rates.find(pool_num);
+    // auto rate = rates.find(pool_num - 1);
+    // auto next_rate = rates.find(pool_num);
 
-    bwtradegraph_index bwtradegraph(_me, host.value);
-    auto bwtr = bwtradegraph.find(pool_num - 1);
-    bwtradegraph.erase(bwtr);
+    // bwtradegraph_index bwtradegraph(_me, host.value);
+    // auto bwtr = bwtradegraph.find(pool_num - 1);
+    // bwtradegraph.erase(bwtr);
 
-    unicore::change_bw_trade_graph(host, pool_num - 1, 1, pool_num, rate->buy_rate, next_rate->buy_rate, total_quants, total_quants, pool->color);
+    // unicore::change_bw_trade_graph(host, pool_num - 1, 1, pool_num, rate->buy_rate, next_rate->buy_rate, total_quants, total_quants, pool->color);
     
     
 
@@ -752,6 +752,11 @@ void next_pool( eosio::name host){
 
     // account_index accounts(_me, host.value);
     // auto acc = accounts.find(host.value);
+    
+    // accounts.modify(acc, _me,[&](auto &a){
+    //     a.power_market_id = "self"_n;
+    // });
+
     // // accounts.erase(acc);
    
     // accounts.modify(acc, _me, [&](auto &a){
@@ -1473,9 +1478,9 @@ void unicore::fill_pool(eosio::name username, eosio::name host, uint64_t quants,
                 auto prev_win_rate = rates.find(look_pool -> pool_num - 3);
                 auto middle_rate = rates.find(look_pool -> pool_num - 2);
 
-                if (pool_start -> color == look_pool -> color){
+                if (pool_start -> color == look_pool -> color) {
                     //WIN
-                    if (look_pool -> pool_num - pool_start -> pool_num <= 2){
+                    if (look_pool -> pool_num - pool_start -> pool_num <= 2) {
                         
                         new_reduced_quants = bal -> quants_for_sale * rate -> sell_rate / rate -> buy_rate;
                         new_quants_for_sale = bal -> quants_for_sale;
@@ -1580,7 +1585,7 @@ void unicore::fill_pool(eosio::name username, eosio::name host, uint64_t quants,
                             b.next_quants_for_sale = new_reduced_quants;
                             b.available = available;
                             b.win = true;
-                            b.if_convert = asset(0,root_symbol);
+                            b.if_convert = asset(0,(acc->asset_on_sale).symbol);
                             b.if_convert_to_power = asset(0, _POWER);
                             b.forecasts = forecasts;
 

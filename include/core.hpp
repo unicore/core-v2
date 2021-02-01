@@ -110,7 +110,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void setarch(eosio::name host, eosio::name architect);
         [[eosio::action]] void upgrade(eosio::name username, eosio::name platform, std::string title, std::string purpose, uint64_t total_shares, eosio::asset quote_amount, eosio::name quote_token_contract, eosio::asset root_token, eosio::name root_token_contract, bool voting_only_up, uint64_t consensus_percent, uint64_t referral_percent, uint64_t dacs_percent, uint64_t cfund_percent, uint64_t hfund_percent, std::vector<uint64_t> levels, uint64_t emission_percent, uint64_t gtop, std::string meta);
         [[eosio::action]] void cchildhost(eosio::name parent_host, eosio::name chost);
-        [[eosio::action]] void edithost(eosio::name architect, eosio::name host, eosio::string title, eosio::string purpose, eosio::string manifest, eosio::string meta);
+        [[eosio::action]] void edithost(eosio::name architect, eosio::name host, eosio::string title, eosio::string purpose, eosio::string manifest, eosio::name power_market_id, eosio::string meta);
         [[eosio::action]] void fixs(eosio::name host, uint64_t pool_num);
         [[eosio::action]] void settype(eosio::name host, eosio::name type);
         static void settype_static(eosio::name host, eosio::name type);
@@ -179,7 +179,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         static void delegate_shares_action(eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares);
         
         //TASKS
-        [[eosio::action]] void settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id, std::string meta);
+        [[eosio::action]] void settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, uint64_t expiration, bool is_batch, uint64_t parent_batch_id, bool is_regular, std::vector<uint64_t> calendar, eosio::time_point_sec start_at, std::string meta);
         [[eosio::action]] void fundtask(eosio::name host, uint64_t task_id, eosio::asset amount, eosio::string comment);
         [[eosio::action]] void tactivate(eosio::name host, uint64_t task_id);
         [[eosio::action]] void tdeactivate(eosio::name host, uint64_t task_id);

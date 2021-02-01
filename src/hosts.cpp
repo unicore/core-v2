@@ -303,7 +303,7 @@ using namespace eosio;
             a.levels= levels;
             a.title = title;
             a.purpose = purpose;
-            a.power_market_id = "marketandbad"_n;
+            a.power_market_id = username;
         });
 
         ahosts_index coreahosts(_me, _me.value);
@@ -471,7 +471,7 @@ using namespace eosio;
      * @param[in]  op    The operation
      */
 
-    [[eosio::action]] void unicore::edithost(eosio::name architect, eosio::name host, eosio::string title, eosio::string purpose, eosio::string manifest, eosio::string meta){
+    [[eosio::action]] void unicore::edithost(eosio::name architect, eosio::name host, eosio::string title, eosio::string purpose, eosio::string manifest, eosio::name power_market_id, eosio::string meta){
         require_auth (architect);
 
         account_index accs(_me, host.value);
@@ -490,6 +490,7 @@ using namespace eosio;
             h.purpose = purpose;
             h.meta = meta;
             h.title = title;
+            h.power_market_id = power_market_id;
         });
 
         ahosts_index coreahosts(_me, _me.value);
