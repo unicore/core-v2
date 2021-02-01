@@ -499,17 +499,16 @@ using namespace eosio;
     power_index power_to_idx (_me, reciever.value);
     auto power_to = power_to_idx.find(host.value);
     
-    market_index market(_me, host.value);
+    //SEPARATE BADGES AND MARKET
+    // market_index market(_me, host.value);
 
-    auto itr = market.find(0);
+    // auto itr = market.find(0);
     
-    eosio::check((itr->base).balance.amount >= shares, "Not enought shares on market");
-
+    // eosio::check((itr->base).balance.amount >= shares, "Not enought shares on market");    
     
-    
-    market.modify( itr, _me, [&]( auto& es ) {
-      es.base.balance = asset((itr -> base).balance.amount - shares, eosio::symbol(eosio::symbol_code("POWER"), 0));
-    });
+    // market.modify( itr, _me, [&]( auto& es ) {
+    //   es.base.balance = asset((itr -> base).balance.amount - shares, eosio::symbol(eosio::symbol_code("POWER"), 0));
+    // });
 
     //Emplace or modify power object of reciever and propagate votes changes;
     if (power_to == power_to_idx.end()){

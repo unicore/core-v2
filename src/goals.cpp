@@ -75,6 +75,25 @@ using namespace eosio;
     auto targets_symbol = acc -> sale_mode == "counterpower"_n ? _POWER : acc->asset_on_sale.symbol;
 
     if (exist_goal == goals.end()){
+
+      if (parent_batch_id != 0) {
+        auto parent_goal = goals.find(parent_batch_id);
+        eosio::check(parent_goal != goals.end(), "Parent batch is not founded");
+        std::vector<uint64_t> batch = parent_goal -> batch;
+        
+        //TODO check for batch length
+        auto itr = std::find(batch.begin(), batch.end(), hash);
+        
+        if (itr == batch.end()){
+          batch.push_back(hash);
+        };
+
+        goals.modify(parent_goal, creator, [&](auto &t){
+          t.batch = batch;
+        });
+      };
+
+
       goals.emplace(creator, [&](auto &g){
         g.id = hash;
         g.type = type;
@@ -98,6 +117,8 @@ using namespace eosio;
         g.duration = duration;
         g.meta = meta;
         g.activated = activated;
+        g.is_batch = is_batch;
+        g.parent_id = parent_batch_id;
       });      
 
       accounts.modify(acc, creator, [&](auto &a){

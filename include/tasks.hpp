@@ -1,7 +1,7 @@
 /*!
    \brief Структура задач хоста Двойной Спирали.
 */
-	struct [[eosio::table, eosio::contract("unicore")]] tasks{
+	struct [[eosio::table, eosio::contract("unicore")]] tasks {
 		uint64_t task_id;
 		uint64_t goal_id;
         eosio::name host;
@@ -11,7 +11,7 @@
         eosio::name type;
         eosio::name status;
 		uint64_t priority;
-		uint64_t period;
+		bool is_regular;
         std::vector<uint64_t> calendar;
 		bool is_public = true;
         eosio::name doer;
@@ -67,7 +67,7 @@
             return pow(2, 63) + total_votes;
         }
 
-	    EOSLIB_SERIALIZE( tasks, (task_id)(goal_id)(host)(creator)(suggester)(permlink)(type)(status)(priority)(period)(calendar)(is_public)(doer)(role)(level)(title)(data)(requested)(funded)(remain)(for_each)(curator)(gifted_badges)(gifted_power)(reports_count)(with_badge)(badge_id)(validated)(completed)(active)(created_at)(start_at)(expired_at)(is_batch)(batch)(parent_batch_id)(duration)(is_encrypted)(public_key)(total_votes)(voters)(meta))
+	    EOSLIB_SERIALIZE( tasks, (task_id)(goal_id)(host)(creator)(suggester)(permlink)(type)(status)(priority)(is_regular)(calendar)(is_public)(doer)(role)(level)(title)(data)(requested)(funded)(remain)(for_each)(curator)(gifted_badges)(gifted_power)(reports_count)(with_badge)(badge_id)(validated)(completed)(active)(created_at)(start_at)(expired_at)(is_batch)(batch)(parent_batch_id)(duration)(is_encrypted)(public_key)(total_votes)(voters)(meta))
     };
 
     typedef eosio::multi_index< "tasks"_n, tasks,
@@ -96,6 +96,7 @@
     	uint64_t task_id; 
     	uint64_t goal_id;
         uint64_t type;
+        uint64_t count;
     	eosio::name username;
     	eosio::name curator;
     	eosio::string data;
@@ -115,7 +116,7 @@
         uint128_t userwithtask() const { return combine_ids(username.value, task_id); }
         
 
-    	EOSLIB_SERIALIZE(reports, (report_id)(task_id)(goal_id)(type)(username)(curator)(data)(requested)(balance)(withdrawed)(need_check)(approved)(comment)(created_at)(expired_at))
+    	EOSLIB_SERIALIZE(reports, (report_id)(task_id)(goal_id)(type)(count)(username)(curator)(data)(requested)(balance)(withdrawed)(need_check)(approved)(comment)(created_at)(expired_at))
     };
 
     typedef eosio::multi_index< "reports"_n, reports,
