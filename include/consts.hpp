@@ -16,6 +16,9 @@
 
   static constexpr eosio::name _me = "unicore"_n;
   static constexpr eosio::name _partners = "part"_n;
+  static constexpr eosio::name _registrator = "registrator"_n;
+  static constexpr eosio::name _gateway = "gateway"_n;
+  
   static constexpr eosio::name _curator = "bob.tc"_n;
   static constexpr eosio::name _saving = "eosio.saving"_n;
   

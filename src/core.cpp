@@ -503,18 +503,10 @@ void unicore::change_bw_trade_graph(eosio::name host, uint64_t pool_id, uint64_t
     uint64_t open = buy_rate; 
     uint64_t low = buy_rate;
     uint64_t high = next_buy_rate;
-
-    print(" remain_quants: ", remain_quants);
-    print(" total_quants: ", total_quants);
-    print(" high: ", high);
-    print(" low: ", low);
-    print(" open: ", open);
-    
     
     double close = open + (total_quants - remain_quants) / (double)total_quants * (high - low);
     
     auto bwtrade_obj = bwtradegraph.find(pool_id);
-    print(" close: ", (uint64_t)close);
 
     if (bwtrade_obj == bwtradegraph.end()){
         bwtradegraph.emplace(_me, [&](auto &bw){
@@ -534,7 +526,6 @@ void unicore::change_bw_trade_graph(eosio::name host, uint64_t pool_id, uint64_t
         });
 
     }
-    print("2");
 }
 
 /**
@@ -2324,6 +2315,45 @@ void unicore::createfund(eosio::name token_contract, eosio::asset fund_asset, st
 
 }
 
+
+/**
+ * @brief Публичный метод покупки статуса участника для аккаунта (выкуп гостевого аккаунта у регистратора)
+ *
+*/
+
+void unicore::buy_account(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code){
+
+
+    eosio::asset units = unicore::buy_action(username, host, quantity, name(code), false, true, asset());
+
+    guests_index guests(_registrator, _registrator.value);
+    auto guest = guests.find(username.value);
+    
+    eosio::check(guest != guests.end(), "Account is not guest");
+
+    eosio::asset remain = units - guest -> to_pay;
+
+    action(
+        permission_level{ _me, "active"_n },
+        "eosio.token"_n, "transfer"_n,
+        std::make_tuple( _me, _registrator, guest -> to_pay, (name{_registrator}.to_string())) 
+    ).send();
+
+    action(
+        permission_level{ _me, "active"_n },
+        "eosio.token"_n, "transfer"_n,
+        std::make_tuple( _me, username, remain, std::string("")) 
+    ).send();
+
+    action(
+        permission_level{ _me, "active"_n },
+        _registrator, "payforguest"_n,
+        std::make_tuple( _me, username, guest -> to_pay) 
+    ).send();
+
+    
+}
+
 /**
  * @brief Публичный метод покупки по текущему курсу из числа квантов раунда.
  *
@@ -2355,7 +2385,6 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
 
     auto quant_cost = pool -> quant_cost;
 
-    print("quant_cost", quant_cost);
     
     eosio::check(quantity.amount >= quant_cost.amount, "Not enought quantity for buy 1 quant");
     // eosio::check(quantity.amount % quant_cost.amount == 0, "You can purchase only whole quant");
@@ -2425,7 +2454,8 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
 
     }
 
-    
+    //ATTENTION! This used by registrator
+    print(summ);
     
     return summ;
 }
@@ -2933,7 +2963,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         eosio::check(amount.symbol == root_symbol, "System error on spead to dacs");
 
         auto dac = dacs.begin();
-        print("on spread");
+        
         if (dac != dacs.end()){
             while(dac != dacs.end()) {
                 
