@@ -103,6 +103,11 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
         static void createfund(eosio::name token_contract, eosio::asset fund_asset, std::string descriptor);
         static eosio::asset buy_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, bool transfer, bool spread_to_funds, eosio::asset summ);
+
+        static void buy_account(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code);
+        
+        
+
         [[eosio::action]] void transfromgf(eosio::name to, eosio::name token_contract, eosio::asset quantity);
 
 
@@ -538,6 +543,30 @@ class [[eosio::contract]] unicore : public eosio::contract {
     > debts_index;
 
 
+
+
+    struct [[eosio::table]] guests {
+        eosio::name username;
+        
+        eosio::name registrator;
+        eosio::public_key public_key;
+        eosio::asset cpu;
+        eosio::asset net;
+        bool set_referer = false;
+        eosio::time_point_sec expiration;
+
+        eosio::asset to_pay;
+        
+        uint64_t primary_key() const {return username.value;}
+        uint64_t byexpr() const {return expiration.sec_since_epoch();}
+
+        EOSLIB_SERIALIZE(guests, (username)(registrator)(public_key)(cpu)(net)(set_referer)(expiration)(to_pay))
+    };
+
+    typedef eosio::multi_index<"guests"_n, guests,
+       eosio::indexed_by< "byexpr"_n, eosio::const_mem_fun<guests, uint64_t, 
+                      &guests::byexpr>>
+    > guests_index;
 
 
 

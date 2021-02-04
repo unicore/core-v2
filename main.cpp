@@ -175,6 +175,24 @@ extern "C" {
                         break;
                     };
                 
+                    case 650: {
+                        //TODO check guest status and if guest - pay
+                        require_auth(_gateway);
+                        
+                        auto delimeter2 = parameter.find('-');
+                
+                        auto host_string = op.memo.substr(4, delimeter2);
+                        
+                        auto host = name(host_string.c_str());
+                        
+                        auto username_string = parameter.substr(delimeter2+1, parameter.length());
+                        auto username = name(username_string.c_str());
+
+                        unicore::buy_account(username, host, op.quantity, name(code));
+
+                        break;
+                    };
+
                     case 700: {
                         break;
                     }
