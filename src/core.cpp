@@ -1070,7 +1070,7 @@ void next_pool( eosio::name host){
 
 
 void unicore::deposit ( eosio::name username, eosio::name host, eosio::asset amount, eosio::name code, std::string message ){
-    require_auth(username);
+    
     eosio::check( amount.is_valid(), "Rejected. Invalid quantity" );
 
     partners_index users(_partners,_partners.value);
@@ -2321,17 +2321,62 @@ void unicore::createfund(eosio::name token_contract, eosio::asset fund_asset, st
  *
 */
 
-void unicore::buy_account(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code){
+void unicore::buy_account(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, eosio::name status){
 
+    //TODO выкупить из ядра
 
-    eosio::asset units = unicore::buy_action(username, host, quantity, name(code), false, true, asset());
+    eosio::asset to_core = quantity * 10 / 100;
+    eosio::asset to_buy =  quantity * 90 / 100 ;
+
+    eosio::asset units = unicore::buy_action(username, host, to_buy, name(code), false, true, asset());
+    
+    unicore::deposit(username, host, to_core, code, "");
+
+    static constexpr eosio::symbol _RAM     = eosio::symbol(eosio::symbol_code("RAM"), 0);
+    static constexpr eosio::symbol _RAMCORE     = eosio::symbol(eosio::symbol_code("RAMCORE"), 4);
+
+    rammarket _rammarket("eosio"_n, "eosio"_n.value);
+    
+    auto itr = _rammarket.find(_RAMCORE.raw());
+    eosio::check(itr != _rammarket.end(), "RAM market is not found");
+
+    auto tmp = *itr;
+    
+    eosio::asset to_ram;
+
+    
+    if (status == "participant"_n) {
+        uint64_t bytes = 24 * 1024;
+        to_ram = tmp.convert( asset(bytes, _RAM), _SYM );
+        // _rammarket.modify( itr, _me, [&]( auto &es ) {
+        //     to_ram = (es.convert(asset(32 * 1024, _RAM), _SYM ));
+        // });
+
+    } else if (status == "partner"_n) {
+        uint64_t bytes = 120 * 1024;
+
+        to_ram = tmp.convert( asset(bytes, _RAM), _SYM );
+        // _rammarket.modify( itr, _me, [&]( auto &es ) {
+        //     to_ram = (es.convert(asset(128 * 1024, _RAM), _SYM ));
+        // });
+    
+    } else {
+        eosio::check(false, "Only participant or partner status is accepted");
+    }
 
     guests_index guests(_registrator, _registrator.value);
     auto guest = guests.find(username.value);
     
     eosio::check(guest != guests.end(), "Account is not guest");
+    eosio::check(units >= guest -> to_pay + to_ram, "Not enought funds for buy accout");
 
-    eosio::asset remain = units - guest -> to_pay;
+    eosio::asset remain = units - guest -> to_pay - to_ram;
+
+    action(
+        permission_level{ _me, "active"_n },
+        "eosio"_n, "buyram"_n,
+        std::make_tuple( _me, username, to_ram) 
+    ).send();
 
     action(
         permission_level{ _me, "active"_n },
