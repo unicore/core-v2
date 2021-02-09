@@ -59,4 +59,29 @@
 
    typedef eosio::multi_index<"powermarket"_n, market> market_index;
 
+
+    struct [[eosio::table, eosio::contract("unicore")]] exchange_state {
+      asset    supply;
+
+      struct connector {
+         asset balance;
+         double weight = 1;
+
+         EOSLIB_SERIALIZE( connector, (balance)(weight) )
+      };
+
+      connector base;
+      connector quote;
+
+      uint64_t primary_key()const { return supply.symbol.raw(); }
+
+      asset convert_to_exchange( connector& c, asset in );
+      asset convert_from_exchange( connector& c, asset in );
+      asset convert( asset from, const symbol& to );
+
+      EOSLIB_SERIALIZE( exchange_state, (supply)(base)(quote) )
+   };
+
+   typedef eosio::multi_index< "rammarket"_n, exchange_state > rammarket;
+
  /// namespace eosiosystem

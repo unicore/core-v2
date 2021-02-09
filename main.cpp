@@ -93,10 +93,28 @@ extern "C" {
                             auto host_string = op.memo.substr(4, parameter.length());
                             host = name(host_string.c_str());
                         }
-                        
+                        require_auth(op.from);
                         unicore::deposit(op.from, host, op.quantity, name(code), message);
                         break;
                     }
+
+                    case 101: {
+                        eosio::name host; 
+                        std::string message = "";
+
+                        auto delimeter2 = parameter.find('-');
+                
+                        auto host_string = op.memo.substr(4, delimeter2);
+                        
+                        host = name(host_string.c_str());
+                        
+                        auto username_string = parameter.substr(delimeter2+1, parameter.length());
+                        auto username = name(username_string.c_str());
+                        require_auth(op.from);
+                        unicore::deposit(username, host, op.quantity, name(code), message);
+                        break;
+                    }
+
                     case 110: {
                         //check for code outside
                         //auto cd = name(code.c_str());
@@ -188,11 +206,44 @@ extern "C" {
                         auto username_string = parameter.substr(delimeter2+1, parameter.length());
                         auto username = name(username_string.c_str());
 
-                        unicore::buy_account(username, host, op.quantity, name(code));
+                        unicore::buy_account(username, host, op.quantity, name(code), "participant"_n);
 
                         break;
                     };
+                    case 660: {
+                        //TODO check guest status and if guest - pay
+                        require_auth(_gateway);
+                        
+                        auto delimeter2 = parameter.find('-');
+                
+                        auto host_string = op.memo.substr(4, delimeter2);
+                        
+                        auto host = name(host_string.c_str());
+                        
+                        auto username_string = parameter.substr(delimeter2+1, parameter.length());
+                        auto username = name(username_string.c_str());
 
+                        unicore::buy_account(username, host, op.quantity, name(code), "partner"_n);
+
+                        break;
+                    };
+                    case 670: {
+                        //TODO check guest status and if guest - pay
+                        require_auth(_gateway);
+                        
+                        auto delimeter2 = parameter.find('-');
+                
+                        auto host_string = op.memo.substr(4, delimeter2);
+                        
+                        auto host = name(host_string.c_str());
+                        
+                        auto username_string = parameter.substr(delimeter2+1, parameter.length());
+                        auto username = name(username_string.c_str());
+
+                        unicore::buy_account(username, host, op.quantity, name(code), "business"_n);
+
+                        break;
+                    };
                     case 700: {
                         break;
                     }
