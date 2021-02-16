@@ -49,6 +49,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
         static eosio::asset convert_to_power(eosio::asset quantity, eosio::name host);
         [[eosio::action]] void convert(eosio::name username, eosio::name host, uint64_t balance_id);
 
+        static eosio::asset calculate_asset_from_power(eosio::asset quantity, eosio::name host);
+
         
         [[eosio::action]] void setparams(eosio::name host, eosio::name chost, uint64_t size_of_pool,
             uint64_t quants_precision, uint64_t overlap, uint64_t profit_growth, uint64_t base_rate,
@@ -142,7 +144,9 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
         static void spread_to_dacs(eosio::name host, eosio::asset amount);
 
-        static void spread_to_funds(eosio::name host, uint64_t quants);
+        static void spread_to_funds(eosio::name host, uint64_t quants, eosio::name referal);
+
+        static void spread_to_refs(eosio::name host, eosio::name username, eosio::asset spread_amount, eosio::asset from_amount);
 
         [[eosio::action]] void withdrdacinc(eosio::name username, eosio::name host);
         [[eosio::action]] void setwebsite(eosio::name host, eosio::name ahostname, eosio::string website, eosio::name type);
@@ -207,6 +211,9 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void setcondition(eosio::name host, eosio::string key, uint64_t value);
         [[eosio::action]] void rmcondition(eosio::name host, uint64_t key); 
         static void rmfromhostwl(eosio::name host, eosio::name username);
+        
+        static uint64_t getcondition(eosio::name host, eosio::string key);
+
         static void addtohostwl(eosio::name host, eosio::name username);
         static bool checkcondition(eosio::name host, eosio::string key, uint64_t value);
         static void checkminpwr(eosio::name host, eosio::name username);

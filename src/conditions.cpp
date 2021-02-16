@@ -54,6 +54,21 @@ using namespace eosio;
         return false;
     }
 
+    uint64_t unicore::getcondition(eosio::name host, eosio::string key){
+        conditions_index conditions(_me, host.value);
+        eosio::name keyname = name(key);
+
+        auto condition = conditions.find(keyname.value);
+        uint64_t result;
+
+        if (condition != conditions.end()){
+            result = condition -> value;
+        };
+
+        return result;
+    }
+
+
     [[eosio::action]] void unicore::setcondition(eosio::name host, eosio::string key, uint64_t value){
         require_auth (host);
 
