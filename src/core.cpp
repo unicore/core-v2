@@ -55,6 +55,24 @@ using namespace eosio;
         return shares_out;
     }
 
+
+    eosio::asset unicore::calculate_asset_from_power(eosio::asset quantity, eosio::name host){
+        market_index markets(_me, host.value);
+        auto market = markets.find(0);
+        auto tmp = *market;
+        account_index accounts(_me, host.value);
+        eosio::asset asset_in;
+
+        auto acc = accounts.find(host.value);
+        
+        if (acc->sale_is_enabled == true){
+            asset_in = tmp.convert( quantity, acc -> quote_amount.symbol);    
+        } else {
+            asset_in = asset(0, acc -> quote_amount.symbol); 
+        };
+        
+        return asset_in;
+    }
     /**
      * @brief Метод ручного пополнения целевого фонда сообщества. Жетоны, попадающие в целевой фонд сообщества, подлежат распределению на цели с помощью голосования участников по установленным правилам консенсуса.  
      * 
@@ -2343,23 +2361,29 @@ void unicore::buy_account(eosio::name username, eosio::name host, eosio::asset q
     auto tmp = *itr;
     
     eosio::asset to_ram;
+    eosio::asset to_power;
 
     
     if (status == "participant"_n) {
-        uint64_t bytes = 24 * 1024;
+        uint64_t bytes = 16 * 1024;
         to_ram = tmp.convert( asset(bytes, _RAM), _SYM );
-        // _rammarket.modify( itr, _me, [&]( auto &es ) {
-        //     to_ram = (es.convert(asset(32 * 1024, _RAM), _SYM ));
-        // });
-
+        
     } else if (status == "partner"_n) {
-        uint64_t bytes = 120 * 1024;
+        uint64_t bytes = 112 * 1024;
 
         to_ram = tmp.convert( asset(bytes, _RAM), _SYM );
-        // _rammarket.modify( itr, _me, [&]( auto &es ) {
-        //     to_ram = (es.convert(asset(128 * 1024, _RAM), _SYM ));
-        // });
-    
+        
+        uint64_t minpower = unicore::getcondition(host, "minpower") + 1;
+        eosio::asset asset_minpower = eosio::asset(minpower, _POWER);
+        print("asset_minpower: ", asset_minpower);
+        eosio::asset power_buy_for = unicore::calculate_asset_from_power(asset_minpower, host);
+        
+        account_index accounts(_me, host.value);
+        auto acc = accounts.find(host.value);
+
+        uint64_t asset_minpower2 = buyshares_action (username, host, power_buy_for, acc -> quote_token_contract );
+        print("asset_minpower2: ", asset_minpower2);
+
     } else {
         eosio::check(false, "Only participant or partner status is accepted");
     }
@@ -2409,6 +2433,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
     account_index accounts(_me, host.value);
     auto acc = accounts.find(host.value);
     
+    eosio::check(acc != accounts.end(), "Host is not found");
     eosio::check(acc -> sale_is_enabled == true, "Sale is disabled");
 
     eosio::name main_host = acc->get_ahost();
@@ -2482,7 +2507,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
     //spread amount calculated from quants for buy and part of system income:
 
     if (spread_to_funds == true){
-        unicore::spread_to_funds(host, quants);
+        unicore::spread_to_funds(host, quants, username);
     }
 
     unicore::refresh_state(host);
@@ -2669,72 +2694,8 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
            
             if ((bal->ref_amount).amount > 0){
                 // print("Total Pay to REF:", bal->ref_amount, " ");
+                unicore::spread_to_refs(host, username, bal->ref_amount, bal->available);
                 
-                partners_index refs(_partners, _partners.value);
-                auto ref = refs.find(username.value);
-                eosio::name referer;
-                uint8_t count = 1;
-                    
-                if ((ref != refs.end()) && ((ref->referer).value != 0)){
-                    referer = ref->referer;
-                    eosio::asset paid = asset(0, root_symbol);
-                
-                    /**
-                     * Вычисляем размер выплаты для каждого уровня партнеров и производим выплаты.
-                     */
-
-                    for (auto level : acc->levels){
-                        if ((ref != refs.end()) && ((ref->referer).value != 0)){
-                            uint128_t to_ref_segments = (bal->ref_amount).amount * TOTAL_SEGMENTS * level / 100 / ONE_PERCENT;
-
-                            eosio::asset to_ref_amount = asset(to_ref_segments / TOTAL_SEGMENTS, root_symbol);
-                            refbalances_index refbalances(_me, referer.value);
-                            refbalances.emplace(username, [&](auto &rb){
-                                rb.id = refbalances.available_primary_key();
-                                rb.timepoint_sec = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
-                                rb.host = host;
-                                rb.refs_amount = bal->ref_amount;
-                                rb.win_amount = bal->available;
-                                rb.amount = to_ref_amount;
-                                rb.from = username;
-                                rb.level = count;
-                                rb.percent = level;
-                                rb.cashback = ref->cashback;
-                                rb.segments = (double)to_ref_segments;
-                            });
-
-         
-                            paid += to_ref_amount;
-                            
-                            ref = refs.find(referer.value);
-                            referer = ref->referer;
-                        } else {
-                            break;
-                        }
-                    };
-
-                    /**
-                     * Все неиспользуемые вознаграждения с вышестояющих уровней отправляются на корпорации 
-
-                     */
-                    eosio::asset back_to_host = bal->ref_amount - paid;
-                    
-                    if (back_to_host.amount > 0){
-                        unicore::spread_to_dacs(host, back_to_host);
-                    }
-
-
-                    
-                } else {
-                    /**
-                     * Если рефералов у пользователя нет, то переводим все реферальные средства на корпорации.
-                     */
-                    if (bal->ref_amount.amount > 0){
-                        unicore::spread_to_dacs(host, bal->ref_amount);
-                    }
-               
-                }
-
             }
 
             if((bal->dac_amount).amount > 0){
@@ -2881,8 +2842,79 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
     }
 };
 
+    void unicore::spread_to_refs(eosio::name host, eosio::name username, eosio::asset spread_amount, eosio::asset from_amount){
+        partners_index refs(_partners, _partners.value);
+        auto ref = refs.find(username.value);
 
-    void unicore::spread_to_funds(eosio::name host, uint64_t quants) {
+        account_index accounts(_me, host.value);
+        auto acc = accounts.find(host.value);
+
+        eosio::name referer;
+        uint8_t count = 1;
+            
+        if ((ref != refs.end()) && ((ref->referer).value != 0)){
+            referer = ref->referer;
+            eosio::asset paid = asset(0, spread_amount.symbol);
+        
+            /**
+             * Вычисляем размер выплаты для каждого уровня партнеров и производим выплаты.
+             */
+
+            for (auto level : acc->levels) {
+                if ((ref != refs.end()) && ((ref->referer).value != 0)) {
+                    uint128_t to_ref_segments = spread_amount.amount * TOTAL_SEGMENTS * level / 100 / ONE_PERCENT;
+
+                    eosio::asset to_ref_amount = asset(to_ref_segments / TOTAL_SEGMENTS, spread_amount.symbol);
+                    refbalances_index refbalances(_me, referer.value);
+                    refbalances.emplace(_me, [&](auto &rb){
+                        rb.id = refbalances.available_primary_key();
+                        rb.timepoint_sec = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+                        rb.host = host;
+                        rb.refs_amount = spread_amount;
+                        rb.win_amount = from_amount;
+                        rb.amount = to_ref_amount;
+                        rb.from = username;
+                        rb.level = count;
+                        rb.percent = level;
+                        rb.cashback = ref->cashback;
+                        rb.segments = (double)to_ref_segments;
+                    });
+
+ 
+                    paid += to_ref_amount;
+                    
+                    ref = refs.find(referer.value);
+                    referer = ref->referer;
+                } else {
+                    break;
+                }
+            };
+
+            /**
+             * Все неиспользуемые вознаграждения с вышестояющих уровней отправляются на корпорации 
+
+             */
+            eosio::asset back_to_host = spread_amount - paid;
+            
+            if (back_to_host.amount > 0){
+                unicore::spread_to_dacs(host, back_to_host);
+            }
+
+
+            
+        } else {
+            /**
+             * Если рефералов у пользователя нет, то переводим все реферальные средства на корпорации.
+             */
+            if (spread_amount.amount > 0){
+                unicore::spread_to_dacs(host, spread_amount);
+            }
+       
+        }
+
+    };
+
+    void unicore::spread_to_funds(eosio::name host, uint64_t quants, eosio::name referal) {
         gpercents_index gpercents(_me, _me.value);
         auto syspercent = gpercents.find("system"_n.value);
         eosio::check(syspercent != gpercents.end(), "Contract is not active");
@@ -2900,26 +2932,25 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         auto middle_rate = rates.find(acc -> current_pool_num);
         auto finish_rate = rates.find(acc -> current_pool_num + 1);
 
-        uint64_t total = uint64_t((double)quants  / (double)sp -> quants_precision * (double)start_rate -> sell_rate);
+        uint64_t total = uint64_t((double)quants * (double)start_rate -> buy_rate / (double)sp -> quants_precision);
         
         eosio::asset total_asset = asset(total, root_symbol);
+        
+        print("on spread to funds: ", total_asset);
 
-        double total_ref =   (total * (double)quants / (double)sp -> quants_precision * (double)(acc->referral_percent)) / ((double)HUNDR_PERCENT * (double)sp->size_of_pool);
+        double total_ref = (total * (double)(acc->referral_percent)) / ((double)HUNDR_PERCENT);
         double total_ref_min_sys = total_ref * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
         double total_ref_sys = total_ref * syspercent -> value / HUNDR_PERCENT;
 
-
-        double total_dac =   (total * (double)quants / (double)sp -> quants_precision * (double)(acc->dacs_percent))     / ((double)HUNDR_PERCENT * (double)sp->size_of_pool);
+        double total_dac =   (total * (double)(acc->dacs_percent))  / ((double)HUNDR_PERCENT);
         double total_dac_min_sys = total_dac * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
         double total_dac_sys = total_dac * syspercent -> value / HUNDR_PERCENT;
         
-
-        double total_cfund = (total * (double)quants / (double)sp -> quants_precision * (double)(acc->cfund_percent))    / ((double)HUNDR_PERCENT * (double)sp->size_of_pool);
+        double total_cfund = (total * (double)(acc->cfund_percent))    / ((double)HUNDR_PERCENT);
         double total_cfund_min_sys = total_cfund * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
         double total_cfund_sys = total_cfund * syspercent -> value / HUNDR_PERCENT;
                                 
-
-        double total_hfund = (total * (double)quants / (double)sp -> quants_precision * (double)(acc->hfund_percent))    / ((double)HUNDR_PERCENT * (double)sp->size_of_pool);
+        double total_hfund = (total * (double)(acc->hfund_percent))    / ((double)HUNDR_PERCENT);
         double total_hfund_min_sys = total_hfund * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
         double total_hfund_sys = total_hfund * syspercent -> value / HUNDR_PERCENT;
                                 
@@ -2932,6 +2963,10 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         eosio::asset asset_cfund_amount = asset((uint64_t)total_cfund_min_sys, root_symbol); 
         eosio::asset asset_hfund_amount = asset((uint64_t)total_hfund_min_sys, root_symbol);
 
+        print("ref_amount: ", asset_ref_amount);
+        print("dac_amount: ", asset_dac_amount);
+        print("cfund_amount: ", asset_cfund_amount);
+        print("hfund_amount: ", asset_hfund_amount);
 
         // //CFUND
         unicore::fund_emi_pool (host, asset_cfund_amount, acc->root_token_contract );
@@ -2939,9 +2974,8 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         //DACS
         unicore::spread_to_dacs(host, asset_dac_amount);
         
-        //WHAT TO DO WITH REF AMOUNT?!
-        // transfer to ???
-
+        //REFS
+        unicore::spread_to_refs(host, referal, asset_ref_amount, total_asset);
 
         //SYS
         if(asset_sys_amount.amount > 0){
