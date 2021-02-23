@@ -290,31 +290,36 @@ using namespace eosio;
 
       if (goal -> type=="goal"_n) {
         // BONUS UNITS
+        eosio::asset target1;
+
+        if (code != _me){
+          eosio::asset bonus = asset(0, acc->asset_on_sale.symbol);
+          pool_index pools(_me, host.value);
+          auto pool = pools.find(acc->current_pool_id);
+          
+          rate_index rates(_me, host.value);
+          auto rate = rates.find(acc->current_pool_id);
+          
+          double dbonus = 2 * quantity.amount * rate -> convert_rate / rate -> buy_rate;
+
+          bonus = asset(uint64_t(dbonus), acc->asset_on_sale.symbol);
+
+          unicore::check_and_modify_sale_fund(bonus, *acc);
+
+          print("on distribution: ", bonus);
+
+          action(
+            permission_level{ _me, "active"_n },
+            acc->root_token_contract, "transfer"_n,
+            std::make_tuple( _me, from, bonus, std::string("bonus")) 
+          ).send();  
+          
+          target1 = asset(goal->target1.amount + bonus.amount, acc->asset_on_sale.symbol);
         
-        eosio::asset bonus = asset(0, acc->asset_on_sale.symbol);
-        pool_index pools(_me, host.value);
-        auto pool = pools.find(acc->current_pool_id);
-        
-        rate_index rates(_me, host.value);
-        auto rate = rates.find(acc->current_pool_id);
-        
-        double dbonus = 2 * quantity.amount * rate -> convert_rate / rate -> buy_rate;
+        } else {
+          target1 = asset(goal->target1);
+        };
 
-        bonus = asset(uint64_t(dbonus), acc->asset_on_sale.symbol);
-
-        unicore::check_and_modify_sale_fund(bonus, *acc);
-
-        print("on distribution: ", bonus);
-
-        action(
-          permission_level{ _me, "active"_n },
-          acc->root_token_contract, "transfer"_n,
-          std::make_tuple( _me, from, bonus, std::string("bonus")) 
-        ).send();  
-
-
-        eosio::asset target1 = asset(goal->target1.amount + bonus.amount, acc->asset_on_sale.symbol);
-        
 
         goals.modify(goal, _me, [&](auto &g){
           g.available += quantity;
