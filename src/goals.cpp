@@ -289,22 +289,32 @@ using namespace eosio;
     if (acc -> sale_is_enabled == true && from != host) {
 
       if (goal -> type=="goal"_n) {
-        eosio::asset converted_quantity = asset(0, root_symbol);
-        eosio::asset target1 = asset(0, root_symbol);
+        // BONUS UNITS
+        
+        eosio::asset bonus = asset(0, acc->asset_on_sale.symbol);
+        pool_index pools(_me, host.value);
+        auto pool = pools.find(acc->current_pool_id);
+        
+        rate_index rates(_me, host.value);
+        auto rate = rates.find(acc->current_pool_id);
+        
+        double dbonus = 2 * quantity.amount * rate -> convert_rate / rate -> buy_rate;
 
-        eosio::check(goal->available + goal->withdrawed + quantity <= goal->target, "Can fund goal only until fill");
+        bonus = asset(uint64_t(dbonus), acc->asset_on_sale.symbol);
 
-        if ((acc -> sale_mode == "direct"_n)||(acc -> sale_mode == "counterunit"_n)) {
-          converted_quantity = unicore::buy_action(from, host, quantity, acc->root_token_contract, true, false);
-          
-          target1 = asset(goal->target1.amount + converted_quantity.amount, converted_quantity.symbol);
+        unicore::check_and_modify_sale_fund(bonus, *acc);
 
-        } else if (acc -> sale_mode == "counterpower"_n) {
-          converted_quantity = unicore::buy_action(from, host, quantity, acc->root_token_contract, false, false);
-          uint64_t power = unicore::buyshares_action ( from, host, converted_quantity, acc->quote_token_contract );
-          
-          target1 = eosio::asset(goal->target1.amount + power, _POWER);
-        } 
+        print("on distribution: ", bonus);
+
+        action(
+          permission_level{ _me, "active"_n },
+          acc->root_token_contract, "transfer"_n,
+          std::make_tuple( _me, from, bonus, std::string("bonus")) 
+        ).send();  
+
+
+        eosio::asset target1 = asset(goal->target1.amount + bonus.amount, acc->asset_on_sale.symbol);
+        
 
         goals.modify(goal, _me, [&](auto &g){
           g.available += quantity;

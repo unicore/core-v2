@@ -1491,7 +1491,7 @@ void unicore::fill_pool(eosio::name username, eosio::name host, uint64_t quants,
                     //WIN
                     if (look_pool -> pool_num - pool_start -> pool_num <= 2) {
                         
-                        new_reduced_quants = bal -> quants_for_sale * rate -> sell_rate / rate -> buy_rate;
+                        new_reduced_quants = bal -> quants_for_sale * rate -> sell_rate / rate -> buy_rate / sp->quants_precision * sp->quants_precision;
                         new_quants_for_sale = bal -> quants_for_sale;
                         
                         if (new_reduced_quants == 0)
@@ -1503,8 +1503,8 @@ void unicore::fill_pool(eosio::name username, eosio::name host, uint64_t quants,
                         // forecasts.erase(forecasts.begin());
                     } else {
 
-                        new_quants_for_sale = bal -> quants_for_sale * prev_win_rate -> sell_rate / prev_win_rate -> buy_rate;
-                        new_reduced_quants = new_quants_for_sale * rate -> sell_rate / rate -> buy_rate;
+                        new_quants_for_sale = bal -> quants_for_sale * prev_win_rate -> sell_rate / prev_win_rate -> buy_rate / sp->quants_precision * sp->quants_precision;
+                        new_reduced_quants = new_quants_for_sale * rate -> sell_rate / rate -> buy_rate / sp->quants_precision * sp->quants_precision;
                         
                         if (new_reduced_quants == 0)
                             new_reduced_quants = new_quants_for_sale;
@@ -2523,9 +2523,6 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         buy_action(username, host, remain_asset, code, transfer, spread_to_funds, summ);  
 
     }
-
-    //ATTENTION! This used by registrator
-    print(summ);
     
     return summ;
 }
