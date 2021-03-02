@@ -139,6 +139,7 @@ using namespace eosio;
         g.duration = duration;
         g.meta = meta;
         g.activated = activated;
+        g.filled = exist_goal->available + exist_goal->withdrawed >= target; 
       });
 
     }
