@@ -94,7 +94,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void gsponsor(eosio::name hoperator, eosio::name host, eosio::name reciever, uint64_t goal_id, eosio::asset amount);
         [[eosio::action]] void setemi(eosio::name host, uint64_t percent, uint64_t gtop);
         static void donate_action(eosio::name from, eosio::name host, uint64_t goal_id, eosio::asset quantity, eosio::name code);
-        static eosio::asset adjust_goals_emission_pool(eosio::name hostname);
+        static eosio::asset adjust_goals_emission_pool(eosio::name hostname, eosio::asset host_income);
         static void fund_emi_pool ( eosio::name host, eosio::asset amount, eosio::name code );
         static void add_asset_to_fund_action(eosio::name username, eosio::asset quantity, eosio::name code);
 

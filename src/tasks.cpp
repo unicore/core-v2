@@ -83,6 +83,7 @@
 				goals.modify(goal, creator, [&](auto &g){
 		    	g.total_tasks = goal -> total_tasks + 1;
 		    	g.target += requested;
+		    	g.filled = goal -> available + goal -> withdrawed > goal -> target + requested;		
 		    });
 
 			}

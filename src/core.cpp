@@ -121,30 +121,132 @@ using namespace eosio;
      * @param[in]  host  The host - имя аккаунта хоста
      */
 
-    void emission(eosio::name host){
-        
+    void emission(eosio::name host, eosio::asset host_income, eosio::asset max_income){
+        account_index accounts(_me, host.value);
+        auto acc = accounts.find(host.value);
+        auto root_symbol = acc->get_root_symbol();
+
+        eosio::name ahost = acc->get_ahost();
+            
         emission_index emis(_me, host.value);
         auto emi = emis.find(host.value);
+        eosio::asset emi_fund = emi -> fund;
 
+        auto main_host = acc->get_ahost();
+        print("on emission");
+        // calculate sincome 
+        if (host_income.amount > 0) {
+            
+            gpercents_index gpercents(_me, _me.value);
+            uint64_t syspercent = gpercents.find("system"_n.value) -> value;
+
+            // system_income = asset(host_income * syspercent / HUNDR_PERCENT);
+            // host_income = host_income - system_income;
+
+            // eosio::asset total_to_dacs = asset(host_income.amount * acc -> dacs_percent / HUNDR_PERCENT, root_symbol);
+            // eosio::asset total_to_cfund = asset(host_income.amount * acc -> cfund_percent / HUNDR_PERCENT, root_symbol);
+
+            double total_dac = (double)host_income.amount * (double)(acc->dacs_percent) / (double)HUNDR_PERCENT;
+            
+            double total_dac_min_sys = total_dac * (HUNDR_PERCENT - syspercent) / HUNDR_PERCENT;
+            double total_dac_sys = total_dac * syspercent / HUNDR_PERCENT;
+        
+
+            double total_cfund = (double)host_income.amount * (double)(acc->cfund_percent) / ((double)HUNDR_PERCENT);
+
+            double total_cfund_min_sys = total_cfund * (HUNDR_PERCENT - syspercent) / HUNDR_PERCENT;
+            double total_cfund_sys = total_cfund * syspercent / HUNDR_PERCENT;
+      
+            double total_sys = total_dac_sys + total_cfund_sys;
+
+            eosio::asset total_dac_asset = asset((uint64_t)total_dac_min_sys, root_symbol);
+            eosio::asset total_cfund_asset = asset((uint64_t)total_cfund_min_sys, root_symbol);
+            eosio::asset total_sys_asset = asset((uint64_t)total_sys, root_symbol);
+            print("on emission: ");
+            print("on total_dac_asset: ", total_dac_asset);
+            print("on total_cfund_asset: ", total_cfund_asset);
+            print("on total_sys_asset: ", total_sys_asset);
+
+            print("here 1");
+            if (total_dac_asset.amount > 0) {
+                unicore::spread_to_dacs(host, total_dac_asset);
+            }
+            print("here 2");
+            if (total_cfund_asset.amount > 0) {
+                emis.modify(emi, _me, [&](auto &e) {
+                    emi_fund = emi_fund + total_cfund_asset;
+                    e.fund = emi_fund;
+                });
+            }
+            print("here 3");
+            if (total_sys_asset.amount > 0) {
+
+                action(
+                    permission_level{ _me, "active"_n },
+                    acc->root_token_contract, "transfer"_n,
+                    std::make_tuple( _me, _saving, total_sys_asset, std::string("")) 
+                ).send();
+
+            };
+
+            sincome_index sincome(_me, host.value);
+            print("try to modify sincome with ID: ", acc->current_pool_id);
+
+            auto sinc = sincome.find(acc->current_pool_id );
+            
+            if (sinc != sincome.end()){
+                sincome.modify(sinc, _me, [&](auto &s){
+                    s.total += total_sys_asset + total_dac_asset + total_cfund_asset;
+                    s.paid_to_sys += total_sys_asset;
+                    s.paid_to_dacs += total_dac_asset;
+                    s.paid_to_cfund += total_cfund_asset;
+                });    
+            } else {
+
+                market_index market(_me, host.value);
+                auto itr = market.find(0);
+                auto liquid_power = acc->total_shares - itr->base.balance.amount;
+
+                sincome.emplace(_me, [&](auto &s){
+                    s.max = max_income;
+                    s.pool_id = acc->current_pool_id;
+                    s.ahost = main_host;
+                    s.cycle_num = acc->current_cycle_num;
+                    s.pool_num = acc->current_pool_num;
+                    s.liquid_power = liquid_power;
+                    s.total = total_sys_asset + total_dac_asset + total_cfund_asset;
+                    
+                    s.paid_to_sys = total_sys_asset;
+                    s.paid_to_dacs = total_dac_asset;
+                    s.paid_to_cfund = total_cfund_asset;
+
+                    s.paid_to_hfund = asset(0, root_symbol);
+                    s.paid_to_refs = asset(0, root_symbol);
+                    s.hfund_in_segments = 0;
+                    s.distributed_segments = 0;
+                }); 
+            }
+            
+        };
+
+
+
+        //SPREAD TO GOALS        
+        
         if (emi->percent > 0){
             goals_index goals(_me, host.value);
-            account_index accounts(_me, host.value);
-            auto acc = accounts.find(host.value);
-            auto root_symbol = acc->get_root_symbol();
-
-            eosio::name ahost = acc->get_ahost();
             
-            eosio::asset em = unicore::adjust_goals_emission_pool(host);  
+            eosio::asset em = unicore::adjust_goals_emission_pool(host, host_income);  
             eosio::asset on_emission;
-            
 
-            if (emi->fund <= em){
-                on_emission = emi->fund;
+            print("on_emission0: ", em);
+            if (emi_fund <= em){
+                on_emission = emi_fund;
             } else {
                 on_emission = em;
             }
 
-            print("on_emission: ", on_emission);
+            print("on_emission1: ", on_emission);
 
 
             if (on_emission.amount > 0){
@@ -189,20 +291,18 @@ using namespace eosio;
                         
                         
                         eosio::asset for_emit;
-                        eosio::asset non_emitted = asset(0, root_symbol);
-
+                        
                         if (need_emit == true){
                             for (auto id : list_for_emit){
                                 auto goal_for_emit = goals.find(id);
                                 eosio::asset total_recieved = goal_for_emit->available + goal_for_emit->withdrawed;
-                                eosio::asset until_fill =  goal_for_emit->target - total_recieved;
+                                eosio::asset until_fill = goal_for_emit->target - total_recieved;
                                 
-                                if (each_goal_amount > until_fill){
-                                        for_emit = until_fill; 
-                                        non_emitted = non_emitted + each_goal_amount - until_fill;
-                                    } else{
-                                        for_emit = each_goal_amount;
-                                    };
+                                if ((each_goal_amount > until_fill) && (until_fill.amount > 0)) {
+                                    for_emit = until_fill; 
+                                } else {
+                                    for_emit = each_goal_amount;
+                                };
                         
                                 fact_emitted += for_emit;
 
@@ -211,9 +311,12 @@ using namespace eosio;
                                     g.filled = g.available + g.withdrawed >= g.target;
                                 });
                             }
-
+                            
+                        
+                            eosio::check(emi_fund >= fact_emitted, "Error on emission");
+                            
                             emis.modify(emi, _me, [&](auto &e){
-                                e.fund = emi->fund - fact_emitted;
+                                e.fund = emi_fund - fact_emitted;
                             });
 
                       
@@ -242,7 +345,7 @@ using namespace eosio;
  * @return     { description_of_the_return_value }
  */
 
-    eosio::asset unicore::adjust_goals_emission_pool(eosio::name hostname){
+    eosio::asset unicore::adjust_goals_emission_pool(eosio::name hostname, eosio::asset host_income){
         account_index hosts(_me, hostname.value);
         emission_index emis(_me, hostname.value);
         cycle_index cycles(_me, hostname.value);
@@ -253,13 +356,13 @@ using namespace eosio;
 
         rate_index rates(_me, ahost.value);
         
-        auto last_cycle = cycles.find(host->current_cycle_num - 1); //2 for emission by cycles
+        auto last_cycle = cycles.find(host->current_cycle_num - 1);
         auto pool = pools.find(last_cycle -> finish_at_global_pool_id);
         auto rate = rates.find(pool->pool_num-1);
         auto em = emis.find(hostname.value);
         eosio::asset for_emit;
 
-        for_emit = asset((rate->live_balance_for_sale).amount * em->percent / 100 / ONE_PERCENT, (rate->live_balance_for_sale).symbol );    
+        for_emit = asset(host_income.amount * em->percent / HUNDR_PERCENT, host_income.symbol );    
         
         return for_emit;
  };
@@ -632,39 +735,21 @@ void next_pool( eosio::name host){
     //не все участники воспользовались приоритетным входом, и пул добавлять не нужно. 
 
     if (acc -> current_pool_num > 1) {
-
-        // if (pool->pool_num < sp->pool_limit ){
-            
-
-        //     lpower_index lpower(_me, host);
-        //     powermarket market(_me, host.value);
-            
-        //     auto sincome_bycycle_and_pool = sincome.template get_index<"cyclandpool"_n>();
-
-        //     auto sincome_bycycle_and_pool_ids = combine_ids(acc->current_cycle_num, acc -> current_pool_num);
-            
-        //     auto sinc = sincome_bycycle_and_pool.find(sincome_bycycle_and_pool_ids);
-
-
-        //     if (sinc != sincome_bycycle_and_pool.end()){
-                
-        //         auto itr = market.find(0);
-        //         auto liquid_power = acc->total_shares - itr->base.balance.amount;
-
-        //         lpower.emplace(_me, [&](auto &l){
-        //             l.pool_id = acc->current_pool_id;
-        //             l.liquid_power = liquid_power;
-        //             l.on_distribution = sinc -> paid_to_cfund; //CORRECT IT WITH SPREAD PARAMETER
-        //             l.distributed = asset(0, root_symbol);
-        //             l.pool_num = acc -> current_pool_num;
-        //             l.cycle_num = acc -> current_cycle_num;
-        //         });
-
-        //     } 
-        // }
-
+        auto ratem1 = rates.find(acc-> current_pool_num - 1);
         auto rate = rates.find(acc-> current_pool_num);
         auto ratep1 = rates.find(acc-> current_pool_num + 1);
+
+        eosio::asset host_income = asset(0, root_symbol);
+        eosio::asset system_income = asset(0, root_symbol);
+
+        if (ratep1 -> system_income > rate -> system_income) {
+
+            host_income = rate -> system_income - ratem1 -> system_income;
+            
+        }
+
+        print("host_income: ", host_income);
+        print("system_income: ", system_income);
         //Если это обычный пул, то добавляем по 1
 
         
@@ -715,7 +800,7 @@ void next_pool( eosio::name host){
         });
 
 
-         emission(host);
+         emission(host, host_income, rate -> system_income);
     
     } else {
         //Если это стартовые пулы, то только смещаем указатель
@@ -726,7 +811,7 @@ void next_pool( eosio::name host){
            a.current_pool_id  = pool -> id + 1;
            a.priority_flag = false;     
         });
-        emission(host);
+        // emission(host, host_income);
     }        
 };
 
@@ -1491,7 +1576,7 @@ void unicore::fill_pool(eosio::name username, eosio::name host, uint64_t quants,
                     //WIN
                     if (look_pool -> pool_num - pool_start -> pool_num <= 2) {
                         
-                        new_reduced_quants = bal -> quants_for_sale * rate -> sell_rate / rate -> buy_rate;
+                        new_reduced_quants = bal -> quants_for_sale * rate -> sell_rate / rate -> buy_rate / sp->quants_precision * sp->quants_precision;
                         new_quants_for_sale = bal -> quants_for_sale;
                         
                         if (new_reduced_quants == 0)
@@ -1503,8 +1588,8 @@ void unicore::fill_pool(eosio::name username, eosio::name host, uint64_t quants,
                         // forecasts.erase(forecasts.begin());
                     } else {
 
-                        new_quants_for_sale = bal -> quants_for_sale * prev_win_rate -> sell_rate / prev_win_rate -> buy_rate;
-                        new_reduced_quants = new_quants_for_sale * rate -> sell_rate / rate -> buy_rate;
+                        new_quants_for_sale = bal -> quants_for_sale * prev_win_rate -> sell_rate / prev_win_rate -> buy_rate / sp->quants_precision * sp->quants_precision;
+                        new_reduced_quants = new_quants_for_sale * rate -> sell_rate / rate -> buy_rate / sp->quants_precision * sp->quants_precision;
                         
                         if (new_reduced_quants == 0)
                             new_reduced_quants = new_quants_for_sale;
@@ -1554,15 +1639,23 @@ void unicore::fill_pool(eosio::name username, eosio::name host, uint64_t quants,
                         double total_ref_min_sys = total_ref * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
                         double total_ref_sys = total_ref * syspercent -> value / HUNDR_PERCENT;
 
-
-                        double total_dac =   (total * (double)ref_quants / (double)sp -> quants_precision * (double)(acc->dacs_percent))     / ((double)HUNDR_PERCENT * (double)sp->size_of_pool);
-                        double total_dac_min_sys = total_dac * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
-                        double total_dac_sys = total_dac * syspercent -> value / HUNDR_PERCENT;
+                        double total_dac = 0;
+                        double total_dac_min_sys = 0;
+                        double total_dac_sys = 0;
                         
 
-                        double total_cfund = (total * (double)ref_quants / (double)sp -> quants_precision * (double)(acc->cfund_percent))    / ((double)HUNDR_PERCENT * (double)sp->size_of_pool);
-                        double total_cfund_min_sys = total_cfund * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
-                        double total_cfund_sys = total_cfund * syspercent -> value / HUNDR_PERCENT;
+                        double total_cfund = 0;
+                        double total_cfund_min_sys = 0;
+                        double total_cfund_sys = 0;
+               
+                        // double total_dac =   (total * (double)ref_quants / (double)sp -> quants_precision * (double)(acc->dacs_percent))     / ((double)HUNDR_PERCENT * (double)sp->size_of_pool);
+                        // double total_dac_min_sys = total_dac * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
+                        // double total_dac_sys = total_dac * syspercent -> value / HUNDR_PERCENT;
+                        
+
+                        // double total_cfund = (total * (double)ref_quants / (double)sp -> quants_precision * (double)(acc->cfund_percent))    / ((double)HUNDR_PERCENT * (double)sp->size_of_pool);
+                        // double total_cfund_min_sys = total_cfund * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
+                        // double total_cfund_sys = total_cfund * syspercent -> value / HUNDR_PERCENT;
                                                 
 
                         double total_hfund = (total * (double)ref_quants / (double)sp -> quants_precision * (double)(acc->hfund_percent))    / ((double)HUNDR_PERCENT * (double)sp->size_of_pool);
@@ -1571,7 +1664,7 @@ void unicore::fill_pool(eosio::name username, eosio::name host, uint64_t quants,
                                                 
 
 
-                        double total_sys = total_ref_sys + total_dac_sys + total_cfund_sys + total_hfund_sys;
+                        double total_sys = total_ref_sys + total_hfund_sys + total_dac_sys + total_cfund_sys;
 
                         asset_ref_amount = asset((uint64_t)total_ref_min_sys, root_symbol);
                         asset_dac_amount = asset((uint64_t)total_dac_min_sys, root_symbol);
@@ -2523,9 +2616,6 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         buy_action(username, host, remain_asset, code, transfer, spread_to_funds, summ);  
 
     }
-
-    //ATTENTION! This used by registrator
-    print(summ);
     
     return summ;
 }
@@ -2698,31 +2788,24 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                 
             }
 
-            if((bal->dac_amount).amount > 0){
-                /**
-                 * Выплаты на управляющие аккаунты. В первом приближении для выплат используем единственный аккаунт хоста. Позже можем использовать массив управляющих аккаунтов и условия распределеления согласно любой модели (акции, равенство, и т.д.). 
-                 * 
-                 
-                 */
-                unicore::spread_to_dacs(host, bal->dac_amount);
+            // if((bal->dac_amount).amount > 0) {                 
+            //     unicore::spread_to_dacs(host, bal->dac_amount);
 
-
-
-            }
+            // }
             
-            if((bal->cfund_amount).amount > 0){
-                /**
-                 * Выплаты в целевой фонд сообщества
-                 */
+            // if((bal->cfund_amount).amount > 0){
+            //     /**
+            //      * Выплаты в целевой фонд сообщества
+            //      */
 
-                emission_index emis(_me, host.value);
-                auto emi = emis.find(host.value);
+            //     emission_index emis(_me, host.value);
+            //     auto emi = emis.find(host.value);
 
-                emis.modify(emi, username, [&](auto &e){
-                    e.fund = emi->fund + bal->cfund_amount;
-                });
+            //     emis.modify(emi, username, [&](auto &e){
+            //         e.fund = emi->fund + bal->cfund_amount;
+            //     });
 
-            }
+            // }
             
             if((bal->sys_amount).amount > 0){
                 // Выплаты на системный аккаунт сообщества. 
