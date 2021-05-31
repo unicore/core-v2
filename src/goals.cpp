@@ -43,7 +43,7 @@ using namespace eosio;
 		goals_index goals(_me, host.value);
 		account_index accounts(_me, host.value);
 
-		partners_index users(_partners, _partners.value);
+		partners2_index users(_partners, _partners.value);
     // auto user = users.find(creator.value);
     // eosio::check(user != users.end(), "User is not registered");
     
@@ -65,17 +65,17 @@ using namespace eosio;
     // eosio::check(exist_goal == goals.end(), "Goal with current permlink is already exist");
 
 
-    eosio::check(target.amount == 0, "Goal target is a summ of tasks amounts");
     eosio::check(target.symbol == root_symbol, "Wrong symbol for this host");
     
-    eosio::check(title.length() <= 100 && title.length() > 0, "Short Description is a maximum 100 symbols. Describe the goal shortly");
+    eosio::check(title.length() <= 300 && title.length() > 0, "Short Description is a maximum 100 symbols. Describe the goal shortly");
     
     auto goal_id =  acc -> total_goals + 1;
 
     auto targets_symbol = acc -> sale_mode == "counterpower"_n ? _POWER : acc->asset_on_sale.symbol;
 
     if (exist_goal == goals.end()){
-
+      // eosio::check(target.amount == 0, "Goal target is a summ of tasks amounts");
+    
       if (parent_batch_id != 0) {
         auto parent_goal = goals.find(parent_batch_id);
         eosio::check(parent_goal != goals.end(), "Parent batch is not founded");
@@ -101,6 +101,7 @@ using namespace eosio;
         g.creator = creator;
         g.who_can_create_tasks = creator;
         g.created = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+        g.finish_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + duration);
         g.host = host;
         g.permlink = permlink;
         g.cashback = cashback;
@@ -110,7 +111,7 @@ using namespace eosio;
         g.target1 = asset(0, targets_symbol);
         g.target2 = asset(0, targets_symbol);
         g.target3 = asset(0, targets_symbol);
-        
+        g.debt_amount = asset(0, root_symbol);
         g.withdrawed = asset(0, root_symbol);
         g.available = asset(0, root_symbol);
         g.validated = validated;
@@ -182,6 +183,56 @@ using namespace eosio;
 	};
 
 
+  /**
+   * @brief      Метод прямого финансирования родительской цели
+   * Используется архитектором для наполнения дочерней цели за счет баланса родительской цели
+   *
+   * @param[in]  op    The operation
+   */
+
+  [[eosio::action]] void unicore::fundchildgoa(eosio::name architect, eosio::name host, uint64_t goal_id, eosio::asset amount){
+    require_auth(architect);
+
+    account_index accounts(_me, host.value);
+    auto acc = accounts.find(host.value);
+    eosio::check(acc->architect == architect, "Only architect can direct fund the goal");
+
+    goals_index goals(_me, host.value);
+    auto child_goal = goals.find(goal_id);
+    auto parent_goal = goals.find(child_goal -> parent_id);
+    eosio::check(parent_goal != goals.end(), "Parent goal is not found");
+    eosio::check(parent_goal -> available >= amount, "Not enough parent balance for fund");
+
+    goals.modify(parent_goal, architect, [&](auto &gp){
+      gp.available -= amount;
+      gp.withdrawed += amount;
+    });
+
+    goals.modify(child_goal, architect, [&](auto &gc){
+      gc.available += amount;
+    });
+
+  };
+
+
+
+ 
+  [[eosio::action]] void unicore::setgcreator(eosio::name oldcreator, eosio::name newcreator, eosio::name host, uint64_t goal_id){
+    require_auth(oldcreator);
+    goals_index goals(_me, host.value);
+    
+    auto goal = goals.find(goal_id);
+    eosio::check(goal != goals.end(), "Goal is not exist");
+    eosio::check(goal->creator == oldcreator, "Wrong creator of goal");
+    
+    goals.modify(goal, oldcreator, [&](auto &g){
+      g.creator = newcreator;
+      g.who_can_create_tasks = newcreator;
+    });
+
+  }
+
+
 
   /**
    * @brief      Метод удаления цели
@@ -194,6 +245,7 @@ using namespace eosio;
     
 		auto goal = goals.find(goal_id);
 		eosio::check(goal != goals.end(), "Goal is not exist");
+    eosio::check(goal -> total_tasks == 0, "Impossible to delete goal with tasks. Clear tasks first");
     eosio::check(goal->creator == username, "Wrong creator of goal");
     eosio::check(goal->debt_count == 0, "Cannot delete goal with the debt");
 
@@ -293,39 +345,9 @@ using namespace eosio;
         // BONUS UNITS
         eosio::asset target1;
 
-        if (code != _me){
-          eosio::asset bonus = asset(0, acc->asset_on_sale.symbol);
-          pool_index pools(_me, host.value);
-          auto pool = pools.find(acc->current_pool_id);
-          
-          rate_index rates(_me, host.value);
-          auto rate = rates.find(acc->current_pool_id);
-          
-          double dbonus = 2 * quantity.amount * rate -> convert_rate / rate -> buy_rate;
-
-          bonus = asset(uint64_t(dbonus), acc->asset_on_sale.symbol);
-
-          unicore::check_and_modify_sale_fund(bonus, *acc);
-
-          print("on distribution: ", bonus);
-
-          action(
-            permission_level{ _me, "active"_n },
-            acc->root_token_contract, "transfer"_n,
-            std::make_tuple( _me, from, bonus, std::string("bonus")) 
-          ).send();  
-          
-          target1 = asset(goal->target1.amount + bonus.amount, acc->asset_on_sale.symbol);
-        
-        } else {
-          target1 = asset(goal->target1);
-        };
-
-
         goals.modify(goal, _me, [&](auto &g){
           g.available += quantity;
           g.filled = filled;
-          g.target1 = target1;
         });
         
         
@@ -469,13 +491,15 @@ using namespace eosio;
       
       std::vector<uint64_t> list_for_delete;
       eosio::asset available = goal -> available;
-
+      eosio::asset debt_amount = goal -> debt_amount;
+      print("imher1");
       while(debt != idx_bv.end() && count != limit && debt -> goal_id == goal_id) {
-        
+        print("imher2");
         if (available >= debt -> amount ){        
-          
+          print("imher3");
           list_for_delete.push_back(debt->id);
           available -= debt-> amount;     
+          debt_amount -= debt -> amount;
 
           action(
             permission_level{ _me, "active"_n },
@@ -498,6 +522,7 @@ using namespace eosio;
 
       goals.modify(goal, host, [&](auto &g){
         g.available = available;
+        g.debt_amount = debt_amount;
       });
   };
 

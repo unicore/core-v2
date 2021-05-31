@@ -6,6 +6,7 @@
 		uint64_t goal_id;
         eosio::name host;
         eosio::name creator;
+        eosio::name benefactor;
         eosio::name suggester;
         std::string permlink;
         eosio::name type;
@@ -43,7 +44,6 @@
         std::string public_key;
         int64_t total_votes;
         std::vector<eosio::name> voters;
-        
 
         std::string meta;
 
@@ -52,6 +52,7 @@
         
         uint64_t bycreator() const {return creator.value;}
         uint64_t bycurator() const {return curator.value;}
+        uint64_t bybenefactor() const {return benefactor.value;}
         uint64_t bygoal() const {return goal_id; }
         uint128_t goalandtask() const { return combine_ids(goal_id, task_id); }
         uint64_t byhost() const {return host.value; }
@@ -67,7 +68,7 @@
             return pow(2, 63) + total_votes;
         }
 
-	    EOSLIB_SERIALIZE( tasks, (task_id)(goal_id)(host)(creator)(suggester)(permlink)(type)(status)(priority)(is_regular)(calendar)(is_public)(doer)(role)(level)(title)(data)(requested)(funded)(remain)(for_each)(curator)(gifted_badges)(gifted_power)(reports_count)(with_badge)(badge_id)(validated)(completed)(active)(created_at)(start_at)(expired_at)(is_batch)(batch)(parent_batch_id)(duration)(is_encrypted)(public_key)(total_votes)(voters)(meta))
+	    EOSLIB_SERIALIZE( tasks, (task_id)(goal_id)(host)(creator)(benefactor)(suggester)(permlink)(type)(status)(priority)(is_regular)(calendar)(is_public)(doer)(role)(level)(title)(data)(requested)(funded)(remain)(for_each)(curator)(gifted_badges)(gifted_power)(reports_count)(with_badge)(badge_id)(validated)(completed)(active)(created_at)(start_at)(expired_at)(is_batch)(batch)(parent_batch_id)(duration)(is_encrypted)(public_key)(total_votes)(voters)(meta))
     };
 
     typedef eosio::multi_index< "tasks"_n, tasks,
@@ -83,7 +84,7 @@
         eosio::indexed_by<"bycreator"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bycreator>>,
         eosio::indexed_by<"bycurator"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bycurator>>,
         eosio::indexed_by<"byvotes"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::byvotes>>,
-        eosio::indexed_by<"bystatus"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bystatus>>   
+        eosio::indexed_by<"bystatus"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bystatus>>
     > tasks_index;
 
 
@@ -125,3 +126,51 @@
         eosio::indexed_by<"byusername"_n, eosio::const_mem_fun<reports, uint64_t, &reports::byusername>>        
         
     > reports_index;
+
+
+
+/*!
+   \brief Структура деятелей по задаче.
+*/
+    struct [[eosio::table, eosio::contract("unicore")]] doers {
+        uint64_t id;
+        uint64_t task_id; 
+        eosio::name doer;
+        bool is_host;
+        uint64_t doer_goal_id;
+        uint64_t doer_badge_id;
+        std::string comment;
+        
+        uint64_t primary_key() const {return id;}
+        uint64_t byusername() const {return doer.value;}
+        uint128_t doerwithtask() const { return combine_ids(doer.value, task_id); }
+
+        EOSLIB_SERIALIZE(doers, (id)(task_id)(doer)(is_host)(doer_goal_id)(doer_badge_id)(comment))
+    };
+
+    typedef eosio::multi_index< "doers"_n, doers,
+        eosio::indexed_by<"byusername"_n, eosio::const_mem_fun<doers, uint64_t, &doers::byusername>>,        
+        eosio::indexed_by<"doerwithtask"_n, eosio::const_mem_fun<doers, uint128_t, &doers::doerwithtask>>
+        
+    > doers_index;
+
+
+/*!
+   \brief Структура задач, где аккаунт деятель.
+*/
+    struct [[eosio::table, eosio::contract("unicore")]] iamdoer {
+        uint64_t id;
+        eosio::name host;
+        uint64_t task_id; 
+        
+        uint64_t primary_key() const {return id;}
+        uint64_t byhost() const {return host.value;}
+        uint128_t byhosttask() const { return combine_ids(host.value, task_id); }
+
+        EOSLIB_SERIALIZE(iamdoer, (id)(host)(task_id))
+    };
+
+    typedef eosio::multi_index< "iamdoer"_n, iamdoer,
+        eosio::indexed_by<"byhost"_n, eosio::const_mem_fun<iamdoer, uint64_t, &iamdoer::byhost>>,
+        eosio::indexed_by<"byhosttask"_n, eosio::const_mem_fun<iamdoer, uint128_t, &iamdoer::byhosttask>>
+    > iamdoer_index;

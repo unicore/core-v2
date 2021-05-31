@@ -33,7 +33,7 @@
         eosio::asset target2;
         eosio::asset target3;
         eosio::asset available;
-
+        eosio::asset debt_amount;
         int64_t total_votes;
         uint64_t total_tasks;
         bool validated = false;
@@ -59,9 +59,14 @@
         //     return (double)total_votes; 
         // }
         
+        // uint64_t byvotes() const { 
+        //     return pow(2, 63) + total_votes;
+        // }
+
         uint64_t byvotes() const { 
-            return pow(2, 63) + total_votes;
+            return total_votes;
         }
+
 
         uint64_t bytype() const {return type.value;}
         uint64_t bystatus() const {return status.value;}
@@ -74,7 +79,7 @@
         uint64_t byhost() const {return host.value;}
         uint128_t by_username_and_host() const { return combine_ids(creator.value, host.value); }
         
-        EOSLIB_SERIALIZE( goals, (id)(parent_id)(type)(creator)(benefactor)(host)(status)(is_batch)(batch)(benefactors_weight)(created)(start_at)(finish_at)(expired_at)(duration)(priority)(cashback)(participants_count)(parent_permlink)(permlink)(title)(description)(target)(debt_count)(target1)(target2)(target3)(available)(total_votes)(total_tasks)(validated)(activated)(filled)(reported)
+        EOSLIB_SERIALIZE( goals, (id)(parent_id)(type)(creator)(benefactor)(host)(status)(is_batch)(batch)(benefactors_weight)(created)(start_at)(finish_at)(expired_at)(duration)(priority)(cashback)(participants_count)(parent_permlink)(permlink)(title)(description)(target)(debt_count)(target1)(target2)(target3)(available)(debt_amount)(total_votes)(total_tasks)(validated)(activated)(filled)(reported)
             (checked)(comments_is_enabled)(who_can_create_tasks)(report)(withdrawed)(voters)(meta)(gifted_badges)(gifted_power)(reports_count)(is_encrypted)(public_key))
     };
 

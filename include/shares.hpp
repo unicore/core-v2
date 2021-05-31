@@ -133,6 +133,6 @@
         EOSLIB_SERIALIZE(cpartners, (partner)(status))
     };
 
-    typedef eosio::multi_index<"cpartners"_n, cpartners> cpartners_index;
+    typedef eosio::multi_index<"cpartners"_n, cpartners> cpartners2_index;
 
 

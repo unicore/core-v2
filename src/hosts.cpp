@@ -129,7 +129,7 @@ using namespace eosio;
 
     }
 
-    [[eosio::action]] void unicore::setwebsite(eosio::name host, eosio::name ahostname, eosio::string website, eosio::name type){
+    [[eosio::action]] void unicore::setwebsite(eosio::name host, eosio::name ahostname, eosio::string website, eosio::name type, std::string meta){
         require_auth(host);
 
         ahosts_index coreahosts(_me, _me.value);
@@ -146,13 +146,14 @@ using namespace eosio;
             eosio::check(exist == hash_index.end(), "Current website is already setted to some host");
         }
 
-        if (host.value == ahostname.value)
+        if (host.value == ahostname.value) {
             coreahosts.modify(corehost, host, [&](auto &ch){
                 ch.website = website;
                 ch.hash = hash;
                 ch.type = type;
+                ch.meta = meta;
             });        
-
+        };
 
         ahosts_index coreahostsbyusername(_me, _me.value);
         auto coreahostbyusername = coreahostsbyusername.find(ahostname.value);
@@ -176,11 +177,14 @@ using namespace eosio;
             });
 
         } else {
+            
             ahosts.modify(ahost, host, [&](auto &ah){
                 ah.website = website;
                 ah.hash = hash;
                 ah.type = type;
-            });            
+                ah.meta = meta;
+            }); 
+
         }    
     
         
@@ -202,7 +206,7 @@ using namespace eosio;
 
         //eosio::check title lenght
         // eosio::check((title.length() < 1024) && (title.length() > 0) , "Title should be more then 10 symbols and less then 1024");
-        partners_index users(_partners, _partners.value);
+        partners2_index users(_partners, _partners.value);
         
         auto user = users.find(username.value);
         // eosio::check(user != users.end(), "User is not registered");
@@ -252,7 +256,8 @@ using namespace eosio;
         auto failure_if_root_not_exist2   = eosio::token::get_supply(quote_token_contract, quote_amount.symbol.code() );
 
         
-        auto to_pay = quote_amount;
+        // auto to_pay = quote_amount;
+        eosio::asset to_pay = asset(0, quote_amount.symbol);
 
         auto ref = users.find(username.value);
         eosio::name referer = ref->referer;
@@ -289,7 +294,7 @@ using namespace eosio;
             a.root_token_contract = root_token_contract;
             a.meta = meta;
             a.registered_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
-            a.payed = false;
+            a.payed = to_pay.amount == 0 ? true : false;
             a.to_pay = to_pay;
             a.ahost = username;
             a.fhosts = empty_fhosts;
@@ -307,18 +312,13 @@ using namespace eosio;
         });
 
         ahosts_index coreahosts(_me, _me.value);
-        coreahosts.emplace(username, [&](auto &a){
-            a.username = username;
-            a.title = title;
-            a.purpose = purpose;
-            a.is_host = true;
-            a.manifest = "";
-            a.comments_is_enabled = false;
-        });
 
-        if (platform != _self){
-            ahosts_index ahosts(_me, platform.value);
-            ahosts.emplace(username, [&](auto &a){
+        auto coreahost = coreahosts.find(username.value);
+
+        if (coreahost == coreahosts.end()){
+
+
+            coreahosts.emplace(username, [&](auto &a){
                 a.username = username;
                 a.title = title;
                 a.purpose = purpose;
@@ -326,20 +326,32 @@ using namespace eosio;
                 a.manifest = "";
                 a.comments_is_enabled = false;
             });
+
+            if (platform != _self){
+                ahosts_index ahosts(_me, platform.value);
+                ahosts.emplace(username, [&](auto &a){
+                    a.username = username;
+                    a.title = title;
+                    a.purpose = purpose;
+                    a.is_host = true;
+                    a.manifest = "";
+                    a.comments_is_enabled = false;
+                });
+            }
         }
-        
 
         emission_index emis(_me, username.value);
         auto emi = emis.find(username.value);
-        eosio::check(emi == emis.end(), "Emission object already created");
-
-        emis.emplace(username, [&](auto &e){
-            e.host = username;
-            e.gtop = gtop;
-            e.percent = emission_percent;
-            e.fund = asset(0, root_token.symbol);
-        });
-
+        // eosio::check(emi == emis.end(), "Emission object already created");
+        if (emi == emis.end()){
+            emis.emplace(username, [&](auto &e){
+                e.host = username;
+                e.gtop = gtop;
+                e.percent = emission_percent;
+                e.fund = asset(0, root_token.symbol);
+            });
+        }
+        unicore::create_bancor_market("POWER MARKET", 0, username, total_shares, quote_amount, quote_token_contract, _SHARES_VESTING_DURATION);
 
     }
 
@@ -433,7 +445,7 @@ using namespace eosio;
         account_index hosts(_me, host.value);
         auto acc = hosts.find(host.value);
         
-        eosio::check((priority_seconds < 7884000), "Pool Priority Seconds must be greater or equal then 0 sec and less then 7884000 sec");
+        eosio::check((priority_seconds <= 315400000), "Pool Priority Seconds must be greater or equal then 0 sec and less then 315400000 sec");
         eosio::check((pool_timeout >= 60) && (pool_timeout < 7884000),"Pool Timeout must be greater or equal then 1 sec and less then 7884000 sec");
         eosio::check(acc -> current_pool_num < 3, "Timing changes only possible on the waiting mode");
 
@@ -471,7 +483,7 @@ using namespace eosio;
      * @param[in]  op    The operation
      */
 
-    [[eosio::action]] void unicore::edithost(eosio::name architect, eosio::name host, eosio::string title, eosio::string purpose, eosio::string manifest, eosio::name power_market_id, eosio::string meta){
+    [[eosio::action]] void unicore::edithost(eosio::name architect, eosio::name host, eosio::name platform, eosio::string title, eosio::string purpose, eosio::string manifest, eosio::name power_market_id, eosio::string meta){
         require_auth (architect);
 
         account_index accs(_me, host.value);
@@ -484,7 +496,6 @@ using namespace eosio;
 
         //eosio::check title lenght
         // eosio::check((title.length() < 1024) && (title.length() > 0) , "Title should be more then 10 symbols and less then 1024");
-        
 
         accs.modify(acc, architect, [&](auto &h){
             h.purpose = purpose;
@@ -503,6 +514,32 @@ using namespace eosio;
             a.manifest = manifest;
         });
 
+        ahosts_index platformahosts(_me, platform.value);
+        auto platformahost = platformahosts.find(host.value);
+
+        if (platformahost == platformahosts.end()){
+            platformahosts.emplace(_me, [&](auto &a){
+                a.username = host;
+                a.type = coreahost -> type;
+                a.title = coreahost -> title;
+                a.purpose = coreahost -> purpose;
+                a.manifest = coreahost -> manifest;
+                a.comments_is_enabled = coreahost -> comments_is_enabled;
+                a.meta = coreahost -> meta;
+                a.is_host = coreahost -> is_host;
+            });  
+        } else {
+            platformahosts.modify(platformahost, architect, [&](auto &a){
+                a.title = coreahost -> title;
+                a.purpose = coreahost -> purpose;
+                a.manifest = coreahost -> manifest;
+                a.comments_is_enabled = coreahost -> comments_is_enabled;
+                a.meta = coreahost -> meta;
+                a.is_host = coreahost -> is_host;
+            }); 
+        };
+
+    
 
         ahosts_index ahosts(_me, host.value);
         auto ahost = ahosts.find(host.value);

@@ -60,199 +60,213 @@ extern "C" {
             if (op.from != _me){
                 auto subcode = op.memo.substr(0,3);
                 auto delimeter = op.memo[3];
-                check(delimeter == '-', "Wrong subcode format. Right format: code[3]-parameter");
-                auto parameter = op.memo.substr(4, op.memo.length());
-                uint64_t subintcode = atoll(subcode.c_str());
-                
-                //codes:
-                //100 - deposit
-                //110 - pay for host
-                //200 - buyshares
-                //300 - goal activate action
-                //400 - direct fund emission pool
-                //500 - buy data
-                //600 - direct buy quants
-                //666 - direct fund commquanty fund balance for some purposes
-                
-                switch (subintcode){
-                    case 100: {
-                        eosio::name host; 
-                        std::string message = "";
+                if (delimeter == '-'){
+
+                    auto parameter = op.memo.substr(4, op.memo.length());
+                    uint64_t subintcode = atoll(subcode.c_str());
+                    
+                    //codes:
+                    //100 - deposit
+                    //110 - pay for host
+                    //200 - buyshares
+                    //300 - goal activate action
+                    //400 - direct fund emission pool
+                    //500 - buy data
+                    //600 - direct buy quants
+                    //666 - direct fund commquanty fund balance for some purposes
+                    
+                    switch (subintcode){
+                        case 100: {
+                            eosio::name host; 
+                            std::string message = "";
 
 
-                        auto delimeter2 = parameter.find('-');
-                
-                        if (delimeter2 != -1){
+                            auto delimeter2 = parameter.find('-');
+                    
+                            if (delimeter2 != -1){
+                                auto host_string = op.memo.substr(4, delimeter2);
+                                
+                                host = name(host_string.c_str());
+                                
+                                message = parameter.substr(delimeter2+1, parameter.length());
+                        
+                            } else {
+                                auto host_string = op.memo.substr(4, parameter.length());
+                                host = name(host_string.c_str());
+                            }
+                            require_auth(op.from);
+                            unicore::deposit(op.from, host, op.quantity, name(code), message);
+                            break;
+                        }
+
+                        case 101: {
+                            eosio::name host; 
+                            std::string message = "";
+
+                            auto delimeter2 = parameter.find('-');
+                    
                             auto host_string = op.memo.substr(4, delimeter2);
                             
                             host = name(host_string.c_str());
                             
-                            message = parameter.substr(delimeter2+1, parameter.length());
-                    
-                        } else {
-                            auto host_string = op.memo.substr(4, parameter.length());
-                            host = name(host_string.c_str());
+                            auto username_string = parameter.substr(delimeter2+1, parameter.length());
+                            auto username = name(username_string.c_str());
+                            require_auth(op.from);
+                            unicore::deposit(username, host, op.quantity, name(code), message);
+                            break;
                         }
-                        require_auth(op.from);
-                        unicore::deposit(op.from, host, op.quantity, name(code), message);
-                        break;
+
+                        case 110: {
+                            //check for code outside
+                            //auto cd = name(code.c_str());
+                            //Pay for upgrade
+                            
+                            auto host = name(parameter.c_str());
+                            unicore::pay_for_upgrade(host, op.quantity, name(code));
+                            break;
+                        }
+                        case 200: {
+                            //check for code outside
+                            //auto cd = name(code.c_str());
+                            //Buy Shares
+                            auto host = name(parameter.c_str());
+                            unicore::buyshares_action(op.from, host, op.quantity, name(code));
+                            break;
+                        }
+                        case 300: {
+                            //check for code inside
+                            //Donation for goal
+                            auto delimeter2 = parameter.find('-');
+                            std::string parameter2 = parameter.substr(delimeter2+1, parameter.length());
+                            
+                            auto host = name(parameter2.c_str());
+                            uint64_t goal_id = atoll(parameter.c_str()); 
+                            require_auth(op.from);
+
+                            unicore::donate_action(op.from, host, goal_id, op.quantity, name(code));
+                            break;
+                        }
+                        case 400: {
+                            //direct fund emission pool
+                            
+                            auto host = name(parameter.c_str());
+                            unicore::fund_emi_pool(host, op.quantity, name(code));
+                            break;
+                        }
+
+                        // case 500: {
+                        //     //BUY DATA
+                        //     auto delimeter2 = parameter.find('-');
+                        //     std::string parameter2 = parameter.substr(delimeter2+1, parameter.length());
+                            
+                        //     auto owner = name(parameter2.c_str());
+                        //     auto buyer = op.from;
+                        //     uint64_t data_id = atoll(parameter.c_str());  
+                        //     require_auth(buyer);  
+
+                        //     unicore::buydata_action(owner, data_id, buyer, op.quantity, name(code));
+                        //     break;
+                        // }
+                        case 600: {
+                            //BUY QUANTS
+                            //direct buy saled quants
+                            require_auth(op.from);
+
+                            auto host = name(parameter.c_str());
+                            
+                            unicore::buy_action(op.from, host, op.quantity, name(code), true, true);
+
+                            break;
+                        }
+
+                        case 666:{
+                            // execute_action(name(receiver), name(code), &unicore::createfund);
+
+                            auto delimeter2 = parameter.find('-');
+                            std::string parameter2 = parameter.substr(delimeter2+1, parameter.length());
+                            
+                            auto descriptor = parameter2.c_str();
+                            
+
+                            unicore::createfund(name(code), op.quantity, descriptor);
+
+                            // fcore().createfund_action(eosio::unpack_action_data<createfund>());
+                            break;
+                        };
+                    
+                        case 650: {
+                            //TODO check guest status and if guest - pay
+                            require_auth(_gateway);
+                            
+                            auto delimeter2 = parameter.find('-');
+                    
+                            auto host_string = op.memo.substr(4, delimeter2);
+                            
+                            auto host = name(host_string.c_str());
+                            
+                            auto username_string = parameter.substr(delimeter2+1, parameter.length());
+                            auto username = name(username_string.c_str());
+
+                            unicore::buy_account(username, host, op.quantity, name(code), "participant"_n);
+
+                            break;
+                        };
+                        case 660: {
+                            //TODO check guest status and if guest - pay
+                            require_auth(_gateway);
+                            
+                            auto delimeter2 = parameter.find('-');
+                    
+                            auto host_string = op.memo.substr(4, delimeter2);
+                            
+                            auto host = name(host_string.c_str());
+                            
+                            auto username_string = parameter.substr(delimeter2+1, parameter.length());
+                            auto username = name(username_string.c_str());
+
+                            unicore::buy_account(username, host, op.quantity, name(code), "partner"_n);
+
+                            break;
+                        };
+                        case 670: {
+                            //TODO check guest status and if guest - pay
+                            require_auth(_gateway);
+                            
+                            auto delimeter2 = parameter.find('-');
+                    
+                            auto host_string = op.memo.substr(4, delimeter2);
+                            
+                            auto host = name(host_string.c_str());
+                            
+                            auto username_string = parameter.substr(delimeter2+1, parameter.length());
+                            auto username = name(username_string.c_str());
+
+                            unicore::buy_account(username, host, op.quantity, name(code), "business"_n);
+
+                            break;
+                        };
+                        case 800: {
+                            //BUY QUANTS
+                            
+                            //direct buy saled quants
+                            require_auth(op.from);
+
+                            auto host = name(parameter.c_str());
+                            
+                            unicore::burn_action(op.from, host, op.quantity, name(code));
+
+                            break;
+                        }
+                        case 700: {
+                            break;
+                        }
+
+                        // default:
+                            // break;
+                           
                     }
-
-                    case 101: {
-                        eosio::name host; 
-                        std::string message = "";
-
-                        auto delimeter2 = parameter.find('-');
-                
-                        auto host_string = op.memo.substr(4, delimeter2);
-                        
-                        host = name(host_string.c_str());
-                        
-                        auto username_string = parameter.substr(delimeter2+1, parameter.length());
-                        auto username = name(username_string.c_str());
-                        require_auth(op.from);
-                        unicore::deposit(username, host, op.quantity, name(code), message);
-                        break;
-                    }
-
-                    case 110: {
-                        //check for code outside
-                        //auto cd = name(code.c_str());
-                        //Pay for upgrade
-                        
-                        auto host = name(parameter.c_str());
-                        unicore::pay_for_upgrade(host, op.quantity, name(code));
-                        break;
-                    }
-                    case 200: {
-                        //check for code outside
-                        //auto cd = name(code.c_str());
-                        //Buy Shares
-                        auto host = name(parameter.c_str());
-                        unicore::buyshares_action(op.from, host, op.quantity, name(code));
-                        break;
-                    }
-                    case 300: {
-                        //check for code inside
-                        //Donation for goal
-                        auto delimeter2 = parameter.find('-');
-                        std::string parameter2 = parameter.substr(delimeter2+1, parameter.length());
-                        
-                        auto host = name(parameter2.c_str());
-                        uint64_t goal_id = atoll(parameter.c_str()); 
-                        require_auth(op.from);
-
-                        unicore::donate_action(op.from, host, goal_id, op.quantity, name(code));
-                        break;
-                    }
-                    case 400: {
-                        //direct fund emission pool
-                        
-                        auto host = name(parameter.c_str());
-                        unicore::fund_emi_pool(host, op.quantity, name(code));
-                        break;
-                    }
-
-                    // case 500: {
-                    //     //BUY DATA
-                    //     auto delimeter2 = parameter.find('-');
-                    //     std::string parameter2 = parameter.substr(delimeter2+1, parameter.length());
-                        
-                    //     auto owner = name(parameter2.c_str());
-                    //     auto buyer = op.from;
-                    //     uint64_t data_id = atoll(parameter.c_str());  
-                    //     require_auth(buyer);  
-
-                    //     unicore::buydata_action(owner, data_id, buyer, op.quantity, name(code));
-                    //     break;
-                    // }
-                    case 600: {
-                        //BUY QUANTS
-                        //direct buy saled quants
-                        require_auth(op.from);
-
-                        auto host = name(parameter.c_str());
-                        
-                        unicore::buy_action(op.from, host, op.quantity, name(code), true, true);
-
-                        break;
-                    }
-
-                    case 666:{
-                        // execute_action(name(receiver), name(code), &unicore::createfund);
-
-                        auto delimeter2 = parameter.find('-');
-                        std::string parameter2 = parameter.substr(delimeter2+1, parameter.length());
-                        
-                        auto descriptor = parameter2.c_str();
-                        
-
-                        unicore::createfund(name(code), op.quantity, descriptor);
-
-                        // fcore().createfund_action(eosio::unpack_action_data<createfund>());
-                        break;
-                    };
-                
-                    case 650: {
-                        //TODO check guest status and if guest - pay
-                        require_auth(_gateway);
-                        
-                        auto delimeter2 = parameter.find('-');
-                
-                        auto host_string = op.memo.substr(4, delimeter2);
-                        
-                        auto host = name(host_string.c_str());
-                        
-                        auto username_string = parameter.substr(delimeter2+1, parameter.length());
-                        auto username = name(username_string.c_str());
-
-                        unicore::buy_account(username, host, op.quantity, name(code), "participant"_n);
-
-                        break;
-                    };
-                    case 660: {
-                        //TODO check guest status and if guest - pay
-                        require_auth(_gateway);
-                        
-                        auto delimeter2 = parameter.find('-');
-                
-                        auto host_string = op.memo.substr(4, delimeter2);
-                        
-                        auto host = name(host_string.c_str());
-                        
-                        auto username_string = parameter.substr(delimeter2+1, parameter.length());
-                        auto username = name(username_string.c_str());
-
-                        unicore::buy_account(username, host, op.quantity, name(code), "partner"_n);
-
-                        break;
-                    };
-                    case 670: {
-                        //TODO check guest status and if guest - pay
-                        require_auth(_gateway);
-                        
-                        auto delimeter2 = parameter.find('-');
-                
-                        auto host_string = op.memo.substr(4, delimeter2);
-                        
-                        auto host = name(host_string.c_str());
-                        
-                        auto username_string = parameter.substr(delimeter2+1, parameter.length());
-                        auto username = name(username_string.c_str());
-
-                        unicore::buy_account(username, host, op.quantity, name(code), "business"_n);
-
-                        break;
-                    };
-                    case 700: {
-                        break;
-                    }
-
-                    // default:
-                        // break;
-                       
                 }
-
+                
             }
         } else if (code == _me.value){
             switch (action){
@@ -264,6 +278,15 @@ extern "C" {
                 //GOALS
                  case "setgoal"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::setgoal);
+                    break;
+                 }
+                 case "setgcreator"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::setgcreator);
+                    break;
+                 }
+
+                 case "paydebt"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::paydebt);
                     break;
                  }
                  case "delgoal"_n.value: {
@@ -559,6 +582,31 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::tdeactivate);
                     break;
                 }
+                case "setpgoal"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::setpgoal);
+                    break;
+                }
+                case "setdoer"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::setdoer);
+                    break;
+                }
+                case "validate"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::validate);
+                    break;
+                }
+                case "jointask"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::jointask);
+                    break;
+                }
+                case "canceljtask"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::canceljtask);
+                    break;
+                }
+                case "settaskmeta"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::settaskmeta);
+                    break;
+                }
+
                 case "setreport"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::setreport);
                     break;
@@ -594,7 +642,10 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::dfundgoal);
                     break;
                 }
-
+                case "fundchildgoa"_n.value : {
+                    execute_action(name(receiver), name(code), &unicore::fundchildgoa);
+                    break;
+                }
                 case "convert"_n.value : {
                     execute_action(name(receiver), name(code), &unicore::convert);
                     break;
