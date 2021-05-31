@@ -1,4 +1,22 @@
 
+ void unicore::set_imdoer(eosio::name doer, eosio::name host, uint64_t task_id){
+ 	iamdoer_index imdoer(_me, doer.value);
+
+ 	auto host_with_task_index = imdoer.template get_index<"byhosttask"_n>();
+	auto task_idx = combine_ids(host.value, task_id);
+	auto is_exist = host_with_task_index.find(task_idx);
+
+	if (is_exist == host_with_task_index.end()){
+		imdoer.emplace(_me, [&](auto &d){
+			d.id = imdoer.available_primary_key();
+			d.host = host;
+			d.task_id = task_id;
+		});
+	}
+
+ }
+
+
 /**
  * @brief      Модуль задач
  * Задачи есть составляющие части достижения любой цели. 
@@ -32,11 +50,6 @@
 			eosio::check(for_each.amount == 0, "Wrong amount for current host and task mode" );
 		}
 		
-		goals_index goals(_me, host.value);
-		auto goal = goals.find(goal_id);
-		eosio::check(goal != goals.end(), "Goal is not found");
-		
-
 		validate_permlink(permlink);
     
     //check for uniq permlink
@@ -75,8 +88,14 @@
 
 			};
 
-			if (goal != goals.end()) {
-				eosio::check(goal -> who_can_create_tasks == creator || goal->who_can_create_tasks.value == 0, "Only creator can create task for current goal");
+			goals_index goals(_me, host.value);
+			auto goal = goals.find(goal_id);
+			// eosio::check(goal != goals.end(), "Goal is not found");
+			
+
+
+			if (goal != goals.end()){
+				// eosio::check(goal -> who_can_create_tasks == creator || goal->who_can_create_tasks.value == 0, "Only creator can create task for current goal");
 				
 				eosio::check(goal -> target.symbol == requested.symbol, "Requested symbol and goal symbol should equal");
 
@@ -86,10 +105,51 @@
 		    	g.filled = goal -> available + goal -> withdrawed > goal -> target + requested;		
 		    });
 
+			} 
+
+			bool validated = false;
+
+			if (doer != ""_n) {
+
+				auto doer_host = accounts.find(doer.value);
+				bool doer_is_host = doer_host == accounts.end() ? false: true;
+
+				doers_index doers(_me, host.value);
+				auto doers_with_tasks_index = doers.template get_index<"doerwithtask"_n>();
+				auto task_ids = combine_ids(doer.value, hash);
+				auto is_exist = doers_with_tasks_index.find(task_ids);
+
+				if (is_exist == doers_with_tasks_index.end()){
+					
+					doers.emplace(doer,[&](auto &d){
+						d.id = doers.available_primary_key();
+						d.task_id = hash;
+						d.doer = doer;
+						d.is_host = doer_is_host;
+						d.doer_goal_id = 0;
+						d.doer_badge_id = 0;
+						d.comment = "";
+					});
+
+				} else {
+
+					doers_with_tasks_index.modify(is_exist, doer, [&](auto &d){
+						d.doer = doer;
+						d.is_host = doer_is_host;
+					});
+
+				}
 			}
 
-			//todo check calendar for 7 days
+			
+			validated = creator == acc->architect ? true : false;	
+			
+			if (goal_id == 0)
+				validated = false;
 
+			
+			//todo check calendar for 7 days
+			
 			tasks.emplace(creator, [&](auto &t){
 				t.host = host;
 				t.creator = creator;
@@ -106,7 +166,7 @@
 				t.is_public  = is_public;
 				t.doer = doer;
 				t.is_encrypted = false;
-				t.validated = creator == acc->architect ? true : false;
+				t.validated = validated;
 				t.with_badge = with_badge;
 				t.badge_id = badge_id;
 				t.duration = duration;
@@ -233,6 +293,201 @@
 	}
 	
 
+
+	/**
+	 * @brief      Метод установки родительской цели
+	 * 
+	 * 
+	 * @param[in]  op    The operation
+	 */
+	[[eosio::action]] void unicore::setpgoal(eosio::name host, uint64_t task_id, uint64_t goal_id){
+		require_auth(host);
+		account_index accounts(_me, host.value);
+		auto acc = accounts.find(host.value);
+		eosio::check(acc != accounts.end(), "Host is not found");
+
+		tasks_index tasks(_me, host.value);
+
+		auto task = tasks.find(task_id);
+
+		eosio::check(task != tasks.end(), "Task is not found");
+		
+		goals_index goals(_me, host.value);
+		auto goal = goals.find(goal_id);
+		eosio::check(goal != goals.end(), "Goal is not found");
+
+		eosio::check(task -> requested.symbol == goal -> target.symbol, "Symbol is not equal");
+
+		tasks.modify(task, host, [&](auto &t){
+			t.goal_id = goal_id;
+		});
+	}
+
+
+	/**
+	 * @brief      Метод установки исполнителя
+	 * 
+	 * 
+	 * @param[in]  op    The operation
+	 */
+	[[eosio::action]] void unicore::setdoer(eosio::name host, uint64_t task_id, eosio::name doer){
+		require_auth(host);
+		account_index accounts(_me, host.value);
+		auto acc = accounts.find(host.value);
+		eosio::check(acc != accounts.end(), "Host is not found");
+
+		tasks_index tasks(_me, host.value);
+
+		auto task = tasks.find(task_id);
+
+		eosio::check(task != tasks.end(), "Task is not found");
+		eosio::check( is_account( doer ), "user account does not exist");
+		eosio::check(task -> is_public == false, "Can set doer only for a private tasks");
+		
+		tasks.modify(task, host, [&](auto &t){
+			t.doer = doer;
+		});
+
+		set_imdoer(doer, host, task_id);
+	}
+
+
+	/**
+	 * @brief      Метод предложения отклонения заявки деятеля
+	 * 
+	 * 
+	 * @param[in]  op    The operation
+	 */
+	[[eosio::action]] void unicore::canceljtask(eosio::name host, uint64_t task_id, eosio::name doer){
+		eosio::check(has_auth(doer) || has_auth(host), "missing required authority");
+		eosio::name payer = has_auth(doer) ? doer : host;
+
+		account_index accounts(_me, host.value);
+		auto acc = accounts.find(host.value);
+		eosio::check(acc != accounts.end(), "Host is not found");
+
+		auto doer_host = accounts.find(doer.value);
+		bool doer_is_host = doer_host == accounts.end() ? false: true;
+
+		tasks_index tasks(_me, host.value);
+
+		auto task = tasks.find(task_id);
+		eosio::check(task != tasks.end(), "Task is not found");
+
+		if (task -> doer == doer) {
+			tasks.modify(task, payer, [&](auto &t){
+				t.doer = ""_n;
+			});
+		}
+
+		doers_index doers(_me, host.value);
+		auto doers_with_tasks_index = doers.template get_index<"doerwithtask"_n>();
+		auto task_ids = combine_ids(doer.value, task->task_id);
+		auto is_exist = doers_with_tasks_index.find(task_ids);
+		eosio::check(is_exist != doers_with_tasks_index.end(), "Doer is not found");
+		
+		auto d = doers.find(is_exist -> id);
+		doers.erase(d);
+
+	}
+
+	/**
+	 * @brief      Метод предложения себя как исполнителя задачи
+	 * 
+	 * 
+	 * @param[in]  op    The operation
+	 */
+	[[eosio::action]] void unicore::jointask(eosio::name host, uint64_t task_id, eosio::name doer, std::string comment){
+		require_auth(doer);
+		account_index accounts(_me, host.value);
+		auto acc = accounts.find(host.value);
+		eosio::check(acc != accounts.end(), "Host is not found");
+
+		auto doer_host = accounts.find(doer.value);
+		bool doer_is_host = doer_host == accounts.end() ? false: true;
+
+
+		tasks_index tasks(_me, host.value);
+
+		auto task = tasks.find(task_id);
+
+		eosio::check(task != tasks.end(), "Task is not found");
+
+		eosio::check(task -> is_public == false, "Doers is available only in a private tasks");
+
+		doers_index doers(_me, host.value);
+		auto doers_with_tasks_index = doers.template get_index<"doerwithtask"_n>();
+		auto task_ids = combine_ids(doer.value, task->task_id);
+		auto is_exist = doers_with_tasks_index.find(task_ids);
+
+		if (is_exist == doers_with_tasks_index.end()){
+			doers.emplace(doer,[&](auto &d){
+				d.id = doers.available_primary_key();
+				d.task_id = task_id;
+				d.doer = doer;
+				d.is_host = doer_is_host;
+				d.doer_goal_id = 0;
+				d.doer_badge_id = 0;
+				d.comment = comment;
+			});
+		} else {
+			doers_with_tasks_index.modify(is_exist, doer, [&](auto &d){
+				d.comment = comment;
+			});
+		}
+	}
+
+	/**
+	 * @brief      Метод ручной валидации задачи
+	 * 
+	 * 
+	 * @param[in]  op    The operation
+	 */
+	[[eosio::action]] void unicore::settaskmeta(eosio::name host, uint64_t task_id, std::string meta){
+		require_auth(host);
+		account_index accounts(_me, host.value);
+		auto acc = accounts.find(host.value);
+		eosio::check(acc != accounts.end(), "Host is not found");
+
+		tasks_index tasks(_me, host.value);
+
+		auto task = tasks.find(task_id);
+
+		eosio::check(task != tasks.end(), "Task is not found");
+
+		tasks.modify(task, host, [&](auto &t){
+			t.meta = meta;	
+		});
+
+	}
+
+	/**
+	 * @brief      Метод ручной валидации задачи
+	 * 
+	 * 
+	 * @param[in]  op    The operation
+	 */
+	[[eosio::action]] void unicore::validate(eosio::name host, uint64_t task_id, uint64_t goal_id, eosio::name doer){
+		require_auth(host);
+		account_index accounts(_me, host.value);
+		auto acc = accounts.find(host.value);
+		eosio::check(acc != accounts.end(), "Host is not found");
+
+		tasks_index tasks(_me, host.value);
+
+		auto task = tasks.find(task_id);
+
+		eosio::check(task != tasks.end(), "Task is not found");
+
+		eosio::check(goal_id != 0, "Parent goal is not setted");
+
+		tasks.modify(task, host, [&](auto &t){
+			t.validated = true;	
+			t.goal_id = goal_id;
+		});
+
+	}
+
 	/**
 	 * @brief      Метод активации задачи
 	 * Вызывается хостом для активации выполнения поставленной задачи. 
@@ -294,7 +549,7 @@
 		
 		require_auth(username);
 		account_index accounts(_me, host.value);
-		partners_index users(_partners, _partners.value);
+		partners2_index users(_partners, _partners.value);
 
 
 		auto acc = accounts.find(host.value);
@@ -315,15 +570,14 @@
 
 		goals_index goals(_me, host.value);
 		auto goal = goals.find(task-> goal_id);
-		eosio::check(goal != goals.end(), "Goal is not found");
-
+		
 		if (goal -> type == "marathon"_n) {
 			goalspartic_index gparticipants(_me, host.value);
       auto users_with_id = gparticipants.template get_index<"byusergoal"_n>();
 			auto goal_ids = combine_ids(username.value, task->goal_id);
       auto participant = users_with_id.find(goal_ids);
 
-      eosio::check(participant != users_with_id.end(), "Username not participant of the current marathon");
+      // eosio::check(participant != users_with_id.end(), "Username not participant of the current marathon");
 		};
 
 		
@@ -341,6 +595,9 @@
 
 
 		if (user_report == users_with_id.end()){
+			
+			eosio::asset requested = task -> is_public == false ? task->requested : task->for_each;
+
 			report_id = acc->total_reports + 1;
 			reports.emplace(username, [&](auto &r) {
 				r.report_id = report_id;
@@ -350,7 +607,7 @@
 				r.username = username;
 				r.data = data;
 				r.need_check = need_check;
-				r.requested = task->for_each;
+				r.requested = requested;
 				r.balance = asset(0, root_symbol);
 				r.withdrawed = asset(0, root_symbol);
 				r.curator = host;
@@ -362,10 +619,12 @@
 	      a.total_reports = acc -> total_reports + 1;
 	    });
 
-			goals.modify(goal, username, [&](auto &g){
-				g.reports_count += 1;
-			});
-
+			if (goal != goals.end()){
+				goals.modify(goal, username, [&](auto &g){
+					g.reports_count += 1;
+				});
+			}
+			
 	    tasks.modify(task, username, [&](auto &t){
 				t.reports_count += 1;
 			});
@@ -446,10 +705,9 @@
 		});
 
 		// eosio::check(report->requested <= task->remain, "Not enough funds for pay to this task");
-
+		
 		if (report->requested.amount > 0){
 			if (report->requested > task->remain) {
-				
 				//if available in goal - minus it
 				//or modify goal debt which will be payed on the next donation to the debt object
 				
@@ -464,14 +722,21 @@
 						g.withdrawed += report -> requested;
 					});
 
+					action(
+	          permission_level{ _me, "active"_n },
+	          acc->root_token_contract, "transfer"_n,
+	          std::make_tuple( _me, report->username, report->requested, comment) 
+		      ).send();
+
 				} else {
 
 					goals.modify(goal, host, [&](auto &g){
-						g.available -= report -> requested;
+						// g.available -= report -> requested;
 						g.debt_count += 1;
+						g.debt_amount += report -> requested;
 					});
 					
-					debts_index debts(_me, _me.value);
+					debts_index debts(_me, host.value);
 					
 					debts.emplace(host, [&](auto &d){
 						d.id = goal->debt_count;
@@ -483,6 +748,11 @@
 				}
 
 			} else {
+				print("imhere2");
+				tasks.modify(task, host, [&](auto &t){
+					t.remain = task -> remain - report->requested;
+				});
+
 				action(
           permission_level{ _me, "active"_n },
           acc->root_token_contract, "transfer"_n,
@@ -491,13 +761,9 @@
 				
 		};
 
-			tasks.modify(task, host, [&](auto &t){
-				t.remain = task->remain - report->requested;
-			});
-
 	};
 
-		if (task -> with_badge == true){
+		if (task -> with_badge == true) {
 			unicore::giftbadge_action(host, report->username, task->badge_id, std::string("Completed task"), true, report->goal_id, report->task_id);
 		}
 

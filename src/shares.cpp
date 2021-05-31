@@ -394,8 +394,9 @@ using namespace eosio;
    */
 	uint64_t unicore::buyshares_action ( eosio::name buyer, eosio::name host, eosio::asset amount, eosio::name code ){
 		account_index accounts(_me, host.value);
-		partners_index users(_partners,_partners.value);
+		partners2_index users(_partners,_partners.value);
     auto user = users.find(buyer.value);
+    print("buyer is: ", user->username);
     // eosio::check(user != users.end(), "User is not registered");
 
 
@@ -467,6 +468,10 @@ using namespace eosio;
     unicore::propagate_votes_changes(host, from, power_to->power, power_to->power - shares);
     log_event_with_shares(from, host, power_to->power - shares);
 
+    accounts.modify(acc, _me, [&](auto &a){
+      a.total_shares -= shares;
+    });
+
     power_to_idx.modify(power_to, _me, [&](auto &pt){
       pt.power -= shares;
       pt.with_badges -= shares; 
@@ -475,9 +480,9 @@ using namespace eosio;
     market_index market(_me, host.value);
     auto itr = market.find(0);
     
-    market.modify( itr, _me, [&]( auto& es ) {
-      es.base.balance = asset((itr -> base).balance.amount + shares, eosio::symbol(eosio::symbol_code("POWER"), 0));
-    });
+    // market.modify( itr, _me, [&]( auto& es ) {
+    //   es.base.balance = asset((itr -> base).balance.amount + shares, eosio::symbol(eosio::symbol_code("POWER"), 0));
+    // });
 
     unicore::checkminpwr(host, from);
 
@@ -498,6 +503,14 @@ using namespace eosio;
     
     power_index power_to_idx (_me, reciever.value);
     auto power_to = power_to_idx.find(host.value);
+    
+    if (shares > 0){
+
+      accounts.modify(acc, _me, [&](auto &a){
+        a.total_shares += shares;
+      }); 
+
+    }
     
     //SEPARATE BADGES AND MARKET
     // market_index market(_me, host.value);
@@ -763,7 +776,8 @@ using namespace eosio;
                m.quote.balance.symbol = quote_amount.symbol;
                m.quote.contract = quote_token_contract;
             });
-		} else 
-			eosio::check(false, "Market already created");
+		} else {
+			// eosio::check(false, "Market already created");
+    }
 	};
 // };

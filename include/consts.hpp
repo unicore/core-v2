@@ -21,5 +21,6 @@
   
   static constexpr eosio::name _curator = "bob.tc"_n;
   static constexpr eosio::name _saving = "eosio.saving"_n;
-  
+  static constexpr eosio::name _core_host = "community"_n;
+
 // }

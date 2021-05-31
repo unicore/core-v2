@@ -67,11 +67,11 @@
 		badge_index badges(_me, host.value);
 		usbadge_index user_badges(_me, to.value);
 
+		
+		// partners2_index users(_partners, _partners.value);
 
-		partners_index users(_partners, _partners.value);
-
-		auto user = users.find(to.value);
-		eosio::check(user != users.end(), "User is not found");
+		// auto user = users.find(to.value);
+		// eosio::check(user != users.end(), "User is not found");
 		
 		//TODO check annd change badge count
 
@@ -87,7 +87,10 @@
 		
 		auto user_badge = hostandbadge_idx.find(badge_ids);
 
-		unicore::give_shares_with_badge_action(host, to, host_badge->power);
+		if (host_badge -> power > 0){
+			unicore::give_shares_with_badge_action(host, to, host_badge->power);
+		}
+		
 		
 		if (netted == true) {
 			eosio::check(goal_id != 0 && task_id != 0, "Netted badge should have a goal and task ids");

@@ -45,7 +45,7 @@ using namespace eosio;
 	[[eosio::action]] void unicore::vote(eosio::name voter, eosio::name host, uint64_t goal_id, bool up){
 		require_auth(voter);
 		
-		partners_index users(_partners,_partners.value);
+		partners2_index users(_partners,_partners.value);
     auto user = users.find(voter.value);
     eosio::check(user != users.end(), "User is not registered");
 

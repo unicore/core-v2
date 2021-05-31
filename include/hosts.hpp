@@ -35,6 +35,21 @@
 
 
 /*!
+   \brief Структура компенсационных параметров конфигурации Двойной Спирали.
+*/
+   struct [[eosio::table, eosio::contract("unicore")]] spiral2 {
+        uint64_t id;
+        uint64_t compensator_percent;
+        
+        uint64_t primary_key() const {return id;}
+
+        EOSLIB_SERIALIZE(spiral2, (id)(compensator_percent))
+    };
+
+    typedef eosio::multi_index<"spiral2"_n, spiral2> spiral2_index;
+
+
+/*!
    \brief Структура курсов реализации внутренней конвертационной единицы и их возврата Протоколу.
 */
     struct [[eosio::table, eosio::contract("unicore")]] rate {
@@ -217,22 +232,23 @@
 */
     struct [[eosio::table, eosio::contract("unicore")]] dacs {
         eosio::name dac;
-        eosio::name mode;
-        eosio::name circle;
-
-        uint64_t role_id;
+        eosio::name limit_type;
+        
         uint64_t weight;
         eosio::asset income;
         uint128_t income_in_segments;
-        eosio::asset limit;
-        eosio::time_point_sec last_pay_at;
-        
         eosio::asset withdrawed;
         eosio::asset income_limit;
+        eosio::time_point_sec last_pay_at;
+        eosio::time_point_sec created_at;
+        std::string role;
+        std::string description;
         
-        uint64_t primary_key() const {return dac.value;}  
 
-        EOSLIB_SERIALIZE(dacs, (dac)(mode)(circle)(role_id)(weight)(income)(income_in_segments)(limit)(last_pay_at)(withdrawed)(income_limit))      
+        uint64_t primary_key() const {return dac.value;}  
+        uint64_t bylimittype() const {return limit_type.value;}  
+
+        EOSLIB_SERIALIZE(dacs, (dac)(limit_type)(weight)(income)(income_in_segments)(withdrawed)(income_limit)(last_pay_at)(created_at)(role)(description))      
     };
 
     typedef eosio::multi_index <"dacs"_n, dacs> dacs_index;
@@ -281,6 +297,19 @@
                               &funds::byissuer>>
     > funds_index;
 
+
+    // struct [[eosio::table, eosio::contract("unicore")]] histoffund{
+    //     uint64_t id;
+    //     uint64_t fund_id;
+    //     eosio::name type;
+    //     eosio::asset quantity;
+    //     std::string memo;
+
+    //     uint64_t primary_key()const { return id; }
+
+    //     EOSLIB_SERIALIZE(histoffund, (id)(fund_id)(type)(quantity)(memo))
+
+    // }
 /*!
    \brief Структура хостов Двойной Спирали, подключенных к глобальным фондам распределения.
 */

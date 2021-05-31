@@ -2,24 +2,38 @@
    \brief Структура партнёров и их партнёров.
 */
 
-    struct [[eosio::table, eosio::contract("unicore")]] partners {
+    struct [[eosio::table]] partners2 {
         eosio::name username;
         eosio::name referer;
+        std::string nickname;
+        eosio::checksum256 nickhash;
+        
         uint64_t id;
         uint64_t cashback;
+        
+        eosio::name status;
+        
         std::string meta;
         
         uint64_t primary_key() const{return username.value;}
         uint64_t byreferer() const{return referer.value;}
         uint64_t byid() const {return id;}
+        uint64_t bystatus() const {return status.value;}
 
-        EOSLIB_SERIALIZE(partners, (username)(referer)(id)(cashback)(meta))
+        eosio::checksum256 bynickhash() const { return nickhash; }
+        
+        EOSLIB_SERIALIZE(partners2, (username)(referer)(nickname)(nickhash)(id)(cashback)(status)(meta))
+
+
     };
+      
+    typedef eosio::multi_index<"partners2"_n, partners2,
+      eosio::indexed_by<"byreferer"_n, eosio::const_mem_fun<partners2, uint64_t, &partners2::byreferer>>,
+      eosio::indexed_by<"byid"_n, eosio::const_mem_fun<partners2, uint64_t, &partners2::byid>>,
+      eosio::indexed_by<"bynickhash"_n, eosio::const_mem_fun<partners2, eosio::checksum256, &partners2::bynickhash>>,
+      eosio::indexed_by<"bystatus"_n, eosio::const_mem_fun<partners2, uint64_t, &partners2::bystatus>>
+    > partners2_index;
 
-    typedef eosio::multi_index<"partners"_n, partners,
-    eosio::indexed_by<"byreferer"_n, eosio::const_mem_fun<partners, uint64_t, &partners::byreferer>>,
-    eosio::indexed_by<"byid"_n, eosio::const_mem_fun<partners, uint64_t, &partners::byid>>
-    > partners_index;
 
 
 /*!
