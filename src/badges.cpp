@@ -46,7 +46,7 @@
 		
 		require_auth(host);
 		
-		unicore::giftbadge_action(host, to, badge_id, comment, netted, goal_id, task_id);
+		unicore::giftbadge_action(host, to, badge_id, comment, netted, true, goal_id, task_id);
 	}
 
 	/**
@@ -58,7 +58,7 @@
 	 * @param[in]  comment   The comment
 	 * @param[in]  op    The operation
 	 */
-	void unicore::giftbadge_action(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment, bool netted = false, uint64_t goal_id = 0, uint64_t task_id = 0){
+	void unicore::giftbadge_action(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment, bool netted = false, bool own = true, uint64_t goal_id = 0, uint64_t task_id = 0){
 		
 		account_index accounts(_me, host.value);
 		auto acc = accounts.find(host.value);
@@ -111,12 +111,15 @@
 				});
 			}
 
-			tasks_index tasks(_me, host.value);
-			auto task = tasks.find(task_id);
-			tasks.modify(task, _me, [&](auto &t){
-				t.gifted_badges += 1;
-				t.gifted_power += host_badge -> power;
-			});
+			if (own == true){
+				tasks_index tasks(_me, host.value);
+				auto task = tasks.find(task_id);
+				tasks.modify(task, _me, [&](auto &t){
+					t.gifted_badges += 1;
+					t.gifted_power += host_badge -> power;
+				});	
+			};
+			
 		}
 
 		if (user_badge == hostandbadge_idx.end()){

@@ -155,25 +155,25 @@
     > doers_index;
 
 
-/*!
-   \brief Структура задач, где аккаунт деятель.
-*/
-    struct [[eosio::table, eosio::contract("unicore")]] iamdoer {
-        uint64_t id;
-        eosio::name host;
-        uint64_t task_id; 
+// /*!
+//    \brief Структура задач, где аккаунт деятель.
+// */
+//     struct [[eosio::table, eosio::contract("unicore")]] iamdoer {
+//         uint64_t id;
+//         eosio::name host;
+//         uint64_t task_id; 
         
-        uint64_t primary_key() const {return id;}
-        uint64_t byhost() const {return host.value;}
-        uint128_t byhosttask() const { return combine_ids(host.value, task_id); }
+//         uint64_t primary_key() const {return id;}
+//         uint64_t byhost() const {return host.value;}
+//         uint128_t byhosttask() const { return combine_ids(host.value, task_id); }
 
-        EOSLIB_SERIALIZE(iamdoer, (id)(host)(task_id))
-    };
+//         EOSLIB_SERIALIZE(iamdoer, (id)(host)(task_id))
+//     };
 
-    typedef eosio::multi_index< "iamdoer"_n, iamdoer,
-        eosio::indexed_by<"byhost"_n, eosio::const_mem_fun<iamdoer, uint64_t, &iamdoer::byhost>>,
-        eosio::indexed_by<"byhosttask"_n, eosio::const_mem_fun<iamdoer, uint128_t, &iamdoer::byhosttask>>
-    > iamdoer_index;
+//     typedef eosio::multi_index< "iamdoer"_n, iamdoer,
+//         eosio::indexed_by<"byhost"_n, eosio::const_mem_fun<iamdoer, uint64_t, &iamdoer::byhost>>,
+//         eosio::indexed_by<"byhosttask"_n, eosio::const_mem_fun<iamdoer, uint128_t, &iamdoer::byhosttask>>
+//     > iamdoer_index;
 
 
 
@@ -183,18 +183,23 @@
     struct [[eosio::table]] incoming {
         uint64_t id;
         eosio::name host;
-        uint64_t ext_goal_id;
-        uint64_t ext_task_id;
+        uint64_t goal_id;
+        uint64_t task_id;
+        bool with_badge = false;
         uint64_t my_goal_id;
         uint64_t my_badge_id;
         
         uint64_t primary_key() const {return id;}
-        uint64_t byexpr() const {return expiration.sec_since_epoch();}
 
-        EOSLIB_SERIALIZE(incoming, (id)(host)(ext_goal_id)(ext_task_id)(my_goal_id)(my_badge_id))
+        uint128_t byhosttask() const { return combine_ids(host.value, goal_id); }
+        uint128_t byhostgoal() const { return combine_ids(host.value, task_id); }
+        uint64_t bymygoal() const { return my_goal_id; }
+
+        EOSLIB_SERIALIZE(incoming, (id)(host)(goal_id)(task_id)(my_goal_id)(with_badge)(my_badge_id))
     };
 
     typedef eosio::multi_index<"incoming"_n, incoming,
-       eosio::indexed_by< "byexpr"_n, eosio::const_mem_fun<incoming, uint64_t, 
-                      &incoming::byexpr>>
+       eosio::indexed_by< "byhosttask"_n, eosio::const_mem_fun<incoming, uint128_t, &incoming::byhosttask>>,
+       eosio::indexed_by< "byhostgoal"_n, eosio::const_mem_fun<incoming, uint128_t, &incoming::byhostgoal>>,
+       eosio::indexed_by< "bymygoal"_n, eosio::const_mem_fun<incoming, uint64_t, &incoming::bymygoal>>
     > incoming_index;

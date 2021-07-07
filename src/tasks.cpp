@@ -1,21 +1,102 @@
 
- void unicore::set_imdoer(eosio::name doer, eosio::name host, uint64_t task_id){
- 	iamdoer_index imdoer(_me, doer.value);
+// unicore::check_and_gift_netted_badge(report->username, host, task_id);
 
- 	auto host_with_task_index = imdoer.template get_index<"byhosttask"_n>();
+void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host, uint64_t task_id){
+
+	incoming_index incoming (_me, doer.value);
+
+
+	auto host_with_task_index = incoming.template get_index<"byhosttask"_n>();
 	auto task_idx = combine_ids(host.value, task_id);
 	auto is_exist = host_with_task_index.find(task_idx);
 
-	if (is_exist == host_with_task_index.end()){
-		imdoer.emplace(_me, [&](auto &d){
-			d.id = imdoer.available_primary_key();
-			d.host = host;
-			d.task_id = task_id;
-		});
-	}
+
+	if (is_exist != host_with_task_index.end() && is_exist -> with_badge) {
+		unicore::giftbadge_action(username, username, is_exist->my_badge_id, std::string("Completed task"), true, false, is_exist->goal_id, is_exist->task_id);
+	};
+
+}	
+ 
+
+ oid unicore::setincoming(eosio::name doer, eosio::name host, uint64_t goal_id, uint64_t task_id) {
+ 	
+ 	incoming_index incoming (_me, doer.value);
+
+ 	if (goal_id > 0) {
+ 		eosio::check(task_id == 0, "If set goal as incoming, task_id is should be zero");
+
+	 	auto host_with_goal_index = incoming.template get_index<"byhostgoal"_n>();
+		auto goal_idx = combine_ids(host.value, task_id);
+		auto is_exist = host_with_goal_index.find(goal_idx);
+
+		if (is_exist == host_with_goal_index.end()) {
+			incoming.emplace(_me, [&](auto &d){
+				d.id = incoming.available_primary_key();
+				d.host = host;
+				d.task_id = task_id;
+				d.goal_id = goal_id;
+			});
+		}
+
+
+ 	} else if (task_id > 0) {
+ 		eosio::check(goal_id == 0, "If set task as incoming, goal_id is should be zero");
+
+ 		auto host_with_task_index = incoming.template get_index<"byhosttask"_n>();
+		auto task_idx = combine_ids(host.value, task_id);
+		auto is_exist = host_with_task_index.find(task_idx);
+
+		if (is_exist == host_with_task_index.end()){
+			incoming.emplace(_me, [&](auto &d){
+				d.id = incoming.available_primary_key();
+				d.host = host;
+				d.task_id = task_id;
+				d.goal_id = goal_id;
+			});
+		}
+
+
+ 	} else if (task_id == 0 && goal_id == 0){
+ 		eosio::check(false, "Goal and task ids cannot be a zero both");
+ 	};
+
+
 
  }
 
+
+ void unicore::delincoming(eosio::name doer, eosio::name host, uint64_t goal_id, uint64_t task_id) {
+ 	incoming_index incoming (_me, doer.value);
+
+ 	if (goal_id > 0) {
+ 		eosio::check(task_id == 0, "If set goal as incoming, task_id is should be zero");
+
+	 	auto host_with_goal_index = incoming.template get_index<"byhostgoal"_n>();
+		auto goal_idx = combine_ids(host.value, task_id);
+		auto is_exist = host_with_goal_index.find(goal_idx);
+
+		if (is_exist == host_with_goal_index.end()) {
+			host_with_goal_index.erase(is_exist);
+		}
+
+ 	} else if (task_id > 0) {
+ 		eosio::check(goal_id == 0, "If set task as incoming, goal_id is should be zero");
+
+ 		auto host_with_task_index = incoming.template get_index<"byhosttask"_n>();
+		auto task_idx = combine_ids(host.value, task_id);
+		auto is_exist = host_with_task_index.find(task_idx);
+
+		if (is_exist == host_with_task_index.end()) {
+			host_with_task_index.erase(is_exist);
+		}
+
+
+ 	} else if (task_id == 0 && goal_id == 0){
+ 			eosio::check(false, "Goal and task ids cannot be a zero both");
+ 	};
+
+
+ }
 
 /**
  * @brief      Модуль задач
@@ -123,12 +204,7 @@
 				auto task_ids = combine_ids(doer.value, hash);
 				auto is_exist = doers_with_tasks_index.find(task_ids);
 
-				//TODO add incoming task for doer
-				incoming_index incoming(_self, doer.value);
-				incoming.emplace()
 
-				//TODO add incoming goal for doer
-				
 				if (is_exist == doers_with_tasks_index.end()){
 					
 					doers.emplace(payer,[&](auto &d){
@@ -149,7 +225,7 @@
 					});
 
 				}
-			}
+			} 
 
 			
 			validated = creator == acc->architect ? true : false;	
@@ -159,6 +235,12 @@
 
 			
 			//todo check calendar for 7 days
+
+			//TODO add incoming goal for doer			
+			if (doer != host) {
+				setincoming(doer, host, 0, hash);	
+			};
+
 			
 			tasks.emplace(payer, [&](auto &t){
 				t.host = host;
@@ -214,6 +296,11 @@
 			}
 			
 			
+			if (exist_task -> doer != doer) {
+				delincoming(exist_task -> doer, host, 0, hash);	
+				setincoming(doer, host, 0, hash);	
+			};
+
 
 			tasks.modify(exist_task, payer, [&](auto &t){
 				t.title = title;
@@ -376,12 +463,15 @@
 		eosio::check(task != tasks.end(), "Task is not found");
 		eosio::check( is_account( doer ), "user account does not exist");
 		eosio::check(task -> is_public == false, "Can set doer only for a private tasks");
+
 		
+		delincoming(task -> doer, host, 0, task_id);	
+		setincoming(doer, host, 0, task_id);	
+
 		tasks.modify(task, host, [&](auto &t){
 			t.doer = doer;
 		});
 
-		set_imdoer(doer, host, task_id);
 	}
 
 
@@ -418,6 +508,8 @@
 
 		if (task -> doer == doer) {
 
+			delincoming(doer, host, 0, task_id);	
+		
 			tasks.modify(task, payer, [&](auto &t){
 				t.doer = ""_n;
 			});
@@ -463,6 +555,9 @@
 		auto doers_with_tasks_index = doers.template get_index<"doerwithtask"_n>();
 		auto task_ids = combine_ids(doer.value, task->task_id);
 		auto is_exist = doers_with_tasks_index.find(task_ids);
+
+
+		setincoming(doer, host, 0, task_id);	
 
 		if (is_exist == doers_with_tasks_index.end()){
 			doers.emplace(doer,[&](auto &d){
@@ -526,6 +621,9 @@
 		eosio::check(goal_id != 0, "Parent goal is not setted");
 		eosio::check( is_account( doer ), "user account does not exist");
 				
+
+		delincoming(task -> doer, host, 0, task_id);	
+		setincoming(doer, host, 0, task_id);	
 
 		tasks.modify(task, host, [&](auto &t){
 			t.validated = true;	
@@ -778,7 +876,9 @@
 				} else {
 
 					//TODO use parent_goal first!
-
+					//THEN use CFUND
+					//AND THEN CREATE DEBT
+					//
 					goals.modify(goal, host, [&](auto &g){
 						// g.available -= report -> requested;
 						g.debt_count += 1;
@@ -798,6 +898,7 @@
 
 			} else {
 				print("imhere2");
+
 				tasks.modify(task, host, [&](auto &t){
 					t.remain = task -> remain - report->requested;
 				});
@@ -813,8 +914,10 @@
 	};
 
 		if (task -> with_badge == true) {
-			unicore::giftbadge_action(host, report->username, task->badge_id, std::string("Completed task"), true, report->goal_id, report->task_id);
+			unicore::giftbadge_action(host, report->username, task->badge_id, std::string("Completed task"), true, true, report->goal_id, report->task_id);
 		}
+
+		unicore::check_and_gift_netted_badge(report->username, host, task_id);
 
     // accounts.modify(acc, host, [&](auto &a){
     //   a.approved_reports = acc -> approved_reports + 1;

@@ -76,7 +76,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void giftbadge(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment, bool netted, uint64_t goal_id, uint64_t task_id);
         [[eosio::action]] void backbadge(eosio::name host, eosio::name from, uint64_t usbadge_id, eosio::string comment);
         
-        static void giftbadge_action(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment, bool netted, uint64_t goal_id, uint64_t task_id);
+        static void giftbadge_action(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment, bool netted, bool own, uint64_t goal_id, uint64_t task_id);
         static void deposit ( eosio::name username, eosio::name host, eosio::asset amount, eosio::name code, std::string message );
 
         //CMS
@@ -208,12 +208,17 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void tdeactivate(eosio::name host, uint64_t task_id);
         [[eosio::action]] void setpgoal(eosio::name host, uint64_t task_id, uint64_t goal_id);
         [[eosio::action]] void setdoer(eosio::name host, uint64_t task_id, eosio::name doer);
+        
+
         [[eosio::action]] void validate(eosio::name host, uint64_t task_id, uint64_t goal_id, eosio::name doer);
         [[eosio::action]] void jointask(eosio::name host, uint64_t task_id, eosio::name doer, std::string comment);
         [[eosio::action]] void canceljtask(eosio::name host, uint64_t task_id, eosio::name doer);
 
         [[eosio::action]] void settaskmeta(eosio::name host, uint64_t task_id, std::string meta);
-        static void set_imdoer(eosio::name doer, eosio::name host, uint64_t task_id);
+        
+        static void setincoming(eosio::name doer, eosio::name host, uint64_t goal_id, uint64_t task_id);
+        static void delincoming(eosio::name doer, eosio::name host, uint64_t goal_id, uint64_t task_id);
+
 
 
         [[eosio::action]] void deltask(eosio::name host, uint64_t task_id);
