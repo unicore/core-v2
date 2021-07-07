@@ -121,7 +121,7 @@ using namespace eosio;
         
         ps.pflow_available_segments -= (pstat -> pflow_available_in_asset).amount * TOTAL_SEGMENTS;
         ps.pflow_available_in_asset = asset(0, root_symbol);
-        ps.pflow_withdrawed += pstat -> pflow_available_in_asset;
+        ps.pflow_withdrawed += on_withdraw;
       });    
     }
 
@@ -191,23 +191,20 @@ using namespace eosio;
       if (plog == pool_idwithhost_idx.end()){
         if (plog != pool_idwithhost_idx.begin()){
           plog--;
+
+          if ( plog == pool_idwithhost_idx.end())
+            skip = true;
+
         } else {
           skip = true;
         }
       } 
 
-      print(" skip: ", skip);
-      print(" plog_id2: ", plog->id);
-
-      
-      if (acc->current_pool_id > sincome -> pool_id) { //Только полностью закрытые объекты sincome принимаем в распределение
+      if (plog -> pool_id < sincome -> pool_id) { //Только те plog принимаем в распределение, которые были преобретены до текущего раунда
         if ( sincome->liquid_power > 0 && sincome-> hfund_in_segments > 0 && !skip ) { 
           
-          // eosio::check(plog -> pool_id <= sincome->pool_id, "System error1");
           eosio::check(plog -> power <= sincome->liquid_power, "System error2");
-
           uint128_t user_segments = (double)plog -> power / (double)sincome -> liquid_power * sincome -> hfund_in_segments;
-          
           
           uint64_t user_segments_64 = (uint64_t)user_segments / TOTAL_SEGMENTS;
           eosio::asset segment_asset = asset(user_segments_64, root_symbol);
@@ -261,7 +258,7 @@ using namespace eosio;
           //(есть более новые актуальные записи)
           
         } else { 
-              print(" on else skip: ", skip);
+              print(" on skip: ", skip);
               if (pstat == pstats.end()){
                 pstats.emplace(_me, [&](auto &ps){
                   ps.host = host;
@@ -284,7 +281,7 @@ using namespace eosio;
                 });          
               }
             
-          //чистим plog
+          //TODO чистим plog слева
         }
       }
       sincome++;
@@ -508,6 +505,7 @@ using namespace eosio;
 
       accounts.modify(acc, _me, [&](auto &a){
         a.total_shares += shares;
+        a.approved_reports = acc -> approved_reports + 1;
       }); 
 
     }

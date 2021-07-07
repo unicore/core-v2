@@ -34,8 +34,11 @@
 	 */
 	[[eosio::action]] void unicore::settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, uint64_t expiration, bool is_batch, uint64_t parent_batch_id, bool is_regular, std::vector<uint64_t> calendar, eosio::time_point_sec start_at, std::string meta){
 		
-		require_auth(creator);
-		
+		eosio::check(has_auth(creator) || has_auth(host), "missing required authority");
+    
+    auto payer = has_auth(creator) ? creator : host;
+
+
 		account_index accounts(_me, host.value);
 		auto acc = accounts.find(host.value);
 		eosio::check(acc != accounts.end(), "Host is not found");
@@ -82,7 +85,7 @@
 					batch.push_back(hash);
 				};
 
-				tasks.modify(parent_task, creator, [&](auto &t){
+				tasks.modify(parent_task, payer, [&](auto &t){
 					t.batch = batch;
 				});
 
@@ -99,7 +102,7 @@
 				
 				eosio::check(goal -> target.symbol == requested.symbol, "Requested symbol and goal symbol should equal");
 
-				goals.modify(goal, creator, [&](auto &g){
+				goals.modify(goal, payer, [&](auto &g){
 		    	g.total_tasks = goal -> total_tasks + 1;
 		    	g.target += requested;
 		    	g.filled = goal -> available + goal -> withdrawed > goal -> target + requested;		
@@ -110,6 +113,7 @@
 			bool validated = false;
 
 			if (doer != ""_n) {
+				eosio::check( is_account( doer ), "user account does not exist");
 
 				auto doer_host = accounts.find(doer.value);
 				bool doer_is_host = doer_host == accounts.end() ? false: true;
@@ -119,9 +123,15 @@
 				auto task_ids = combine_ids(doer.value, hash);
 				auto is_exist = doers_with_tasks_index.find(task_ids);
 
+				//TODO add incoming task for doer
+				incoming_index incoming(_self, doer.value);
+				incoming.emplace()
+
+				//TODO add incoming goal for doer
+				
 				if (is_exist == doers_with_tasks_index.end()){
 					
-					doers.emplace(doer,[&](auto &d){
+					doers.emplace(payer,[&](auto &d){
 						d.id = doers.available_primary_key();
 						d.task_id = hash;
 						d.doer = doer;
@@ -133,7 +143,7 @@
 
 				} else {
 
-					doers_with_tasks_index.modify(is_exist, doer, [&](auto &d){
+					doers_with_tasks_index.modify(is_exist, payer, [&](auto &d){
 						d.doer = doer;
 						d.is_host = doer_is_host;
 					});
@@ -150,7 +160,7 @@
 			
 			//todo check calendar for 7 days
 			
-			tasks.emplace(creator, [&](auto &t){
+			tasks.emplace(payer, [&](auto &t){
 				t.host = host;
 				t.creator = creator;
 				t.task_id = hash;
@@ -180,7 +190,7 @@
 				t.calendar = calendar;
 			});
 			
-	    accounts.modify(acc, creator, [&](auto &a){
+	    accounts.modify(acc, payer, [&](auto &a){
 	      a.total_tasks = acc -> total_tasks + 1;
 	    });
 
@@ -188,7 +198,24 @@
 	    
 		} else {
 
-			tasks.modify(exist_task, creator, [&](auto &t){
+			goals_index goals(_me, host.value);
+			auto goal = goals.find(goal_id);
+			
+			if (goal != goals.end()){
+				eosio::check(goal -> target.symbol == requested.symbol, "Requested symbol and goal symbol should equal");
+				
+				eosio::asset change = requested - exist_task -> requested;
+
+				goals.modify(goal, payer, [&](auto &g){
+		    	g.target += change;
+		    	g.filled = goal -> available + goal -> withdrawed > goal -> target + change;		
+		    });
+
+			}
+			
+			
+
+			tasks.modify(exist_task, payer, [&](auto &t){
 				t.title = title;
 				t.doer = doer;
 				t.data = data;
@@ -202,6 +229,7 @@
 				t.calendar = calendar;
 				t.is_regular = is_regular;
 				t.start_at = start_at;
+				t.meta = meta;
 			});
 
 
@@ -277,7 +305,6 @@
 	 * @param[in]  op    The operation
 	 */
 	[[eosio::action]] void unicore::deltask(eosio::name host, uint64_t task_id){
-		require_auth(host);
 		account_index accounts(_me, host.value);
 		auto acc = accounts.find(host.value);
 		eosio::check(acc != accounts.end(), "Host is not found ");
@@ -285,7 +312,13 @@
 		tasks_index tasks(_me, host.value);
 
 		auto task = tasks.find(task_id);
+		
+    eosio::check(has_auth(task->creator) || has_auth(task->host), "missing required authority");
+    
+    auto payer = has_auth(task->creator) ? task->creator : task->host;
+
 		eosio::check(task -> reports_count == 0, "Cannot delete task with reports. Delete all reports firstly");
+		
 		eosio::check(task != tasks.end(), "Task is not found");
 
 		tasks.erase(task);
@@ -374,10 +407,21 @@
 		auto task = tasks.find(task_id);
 		eosio::check(task != tasks.end(), "Task is not found");
 
+		//report
+		reports_index reports(_me, host.value);
+		auto users_with_id = reports.template get_index<"userwithtask"_n>();
+		auto report_ids = combine_ids(doer.value, task_id);
+		auto user_report = users_with_id.find(report_ids);
+
+
+		eosio::check(user_report == users_with_id.end(), "Cannot cancel doer until delete report");
+
 		if (task -> doer == doer) {
+
 			tasks.modify(task, payer, [&](auto &t){
 				t.doer = ""_n;
 			});
+
 		}
 
 		doers_index doers(_me, host.value);
@@ -480,10 +524,13 @@
 		eosio::check(task != tasks.end(), "Task is not found");
 
 		eosio::check(goal_id != 0, "Parent goal is not setted");
+		eosio::check( is_account( doer ), "user account does not exist");
+				
 
 		tasks.modify(task, host, [&](auto &t){
 			t.validated = true;	
 			t.goal_id = goal_id;
+			t.doer = doer;
 		});
 
 	}
@@ -730,6 +777,8 @@
 
 				} else {
 
+					//TODO use parent_goal first!
+
 					goals.modify(goal, host, [&](auto &g){
 						// g.available -= report -> requested;
 						g.debt_count += 1;
@@ -739,7 +788,7 @@
 					debts_index debts(_me, host.value);
 					
 					debts.emplace(host, [&](auto &d){
-						d.id = goal->debt_count;
+						d.id = debts.available_primary_key();
 						d.amount = report -> requested;
 						d.goal_id = goal->id;
 						d.username = report -> username;
@@ -767,10 +816,10 @@
 			unicore::giftbadge_action(host, report->username, task->badge_id, std::string("Completed task"), true, report->goal_id, report->task_id);
 		}
 
-    accounts.modify(acc, host, [&](auto &a){
-      a.approved_reports = acc -> approved_reports + 1;
-      // a.completed_tasks = task->remain.amount == 0 ? acc -> completed_tasks + 1 : acc -> completed_tasks;
-    });
+    // accounts.modify(acc, host, [&](auto &a){
+    //   a.approved_reports = acc -> approved_reports + 1;
+    //   // a.completed_tasks = task->remain.amount == 0 ? acc -> completed_tasks + 1 : acc -> completed_tasks;
+    // });
 		
 	}
 

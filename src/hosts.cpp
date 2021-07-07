@@ -44,6 +44,171 @@ using namespace eosio;
 
     };
 
+
+    [[eosio::action]] void unicore::addvac(uint64_t id, bool is_edit, eosio::name creator, eosio::name host, eosio::name limit_type, eosio::asset income_limit, uint64_t weight, std::string title, std::string descriptor) {
+        require_auth(creator);
+
+        account_index accounts(_me, host.value);
+        vacs_index vacs(_me, host.value);
+
+        auto acc = accounts.find(host.value);
+        eosio::check(acc != accounts.end(), "Host is not found");
+        
+
+        auto root_symbol = acc->get_root_symbol();
+        eosio::check(income_limit.symbol == root_symbol, "Wrong root symbol");
+
+        if (is_edit == true) {
+            
+            auto vac = vacs.find(id);
+            eosio::check(vac != vacs.end(), "Vac is not found");
+            
+            vacs.modify(vac, creator, [&](auto &v){
+                v.description = descriptor;
+                v.role = title;
+            });
+
+        } else {
+
+            vacs.emplace(creator, [&](auto &d){
+                d.id = vacs.available_primary_key();
+                d.creator = creator;
+                d.limit_type = limit_type;
+                d.income_limit = income_limit;
+                d.weight = weight;
+                d.approved = creator == host ? true : false;
+                d.role = title;
+                d.description = descriptor;
+            });
+
+        };
+
+        
+
+    };
+
+    [[eosio::action]] void unicore::addvprop(uint64_t id, bool is_edit, eosio::name creator, eosio::name host, uint64_t vac_id, uint64_t weight, std::string why_me, std::string contacts) {
+        require_auth(creator);
+
+        vproposal_index vprops(_me, host.value);
+        vacs_index vacs(_me, host.value);
+        auto vac = vacs.find(vac_id);
+        
+        eosio::check(vac != vacs.end(), "VAC is not found");
+        eosio::check(vac->closed == false, "VAC is already closed");
+
+        if (is_edit == false){
+            vacs.modify(vac, creator, [&](auto &v){
+                v.proposals = vac -> proposals + 1;
+            });
+
+            vprops.emplace(creator, [&](auto &d){
+                d.id = vprops.available_primary_key();
+                d.vac_id = vac_id;
+                d.creator = creator;
+                d.weight = weight;
+                d.why_me = why_me;
+                d.contacts = contacts;
+            });
+        
+        } else {
+            auto vprop = vprops.find(id);
+            eosio::check(vprop != vprops.end(), "Proposal is not found");
+
+            vprops.modify(vprop, creator, [&](auto &d){
+                d.why_me = why_me;
+                d.contacts = contacts;
+            });
+
+        }
+    };
+
+
+
+
+    [[eosio::action]] void unicore::rmvac(eosio::name host, uint64_t id) {
+        require_auth(host);
+        vacs_index vacs(_me, host.value);
+
+        account_index accounts(_me, host.value);
+        auto acc = accounts.find(host.value);
+        eosio::check(acc != accounts.end(), "Host is not found");
+        
+        auto vac = vacs.find(id);
+
+        eosio::check(vac != vacs.end(), "VAC is not found");
+        eosio::check(vac -> proposals == 0, "VAC's proposals should be a zero" );
+
+        vacs.erase(vac);
+    };
+
+
+    [[eosio::action]] void unicore::approvevac(eosio::name host, uint64_t vac_id) {
+        require_auth(host);
+        vacs_index vacs(_me, host.value);
+
+        auto vac = vacs.find(vac_id);
+
+        eosio::check(vac != vacs.end(), "VAC is not found");
+
+        vacs.modify(vac, host, [&](auto &v){
+            v.approved = true;
+        });
+
+    };
+
+    [[eosio::action]] void unicore::apprvprop(eosio::name host, uint64_t vprop_id) {
+        require_auth(host);
+
+        vproposal_index vprops(_me, host.value);
+
+        auto vprop = vprops.find(vprop_id);
+        eosio::check(vprop != vprops.end(), "VAC of the proposal is not found");
+
+        vacs_index vacs(_me, host.value);
+        
+        auto vac = vacs.find(vprop -> vac_id);
+
+        eosio::check(vac != vacs.end(), "VAC is not found");
+        eosio::check(vac -> closed == false, "VAC is already closed" );
+
+        unicore::adddac(vprop -> creator, host, vprop -> weight, vac -> limit_type, vac -> income_limit, vac -> role, vac -> description);
+
+        vacs.modify(vac, host, [&](auto &v) {
+            v.closed = true;
+        });
+
+
+        vprops.modify(vprop, host, [&](auto &v){
+            v.closed = true;
+        });
+
+    };
+
+    [[eosio::action]] void unicore::rmvprop(eosio::name host, uint64_t vprop_id) {
+        
+        vproposal_index vprops(_me, host.value);
+
+        auto vprop = vprops.find(vprop_id);
+        eosio::check(vprop != vprops.end(), "Proposal is not found");
+
+        eosio::check(has_auth(host) || has_auth(vprop -> creator), "missing required authority");
+        
+        vacs_index vacs(_me, host.value);
+        
+        auto vac = vacs.find(vprop -> vac_id);
+
+        eosio::check(vac != vacs.end(), "VAC is not found");
+
+        vacs.modify(vac, host, [&](auto &v) {
+            v.proposals = vac->proposals - 1;
+        });
+
+        vprops.erase(vprop);
+
+    };
+
+
     [[eosio::action]] void unicore::setahost(eosio::name host, eosio::name ahostname){
         require_auth(host);
 
@@ -51,7 +216,7 @@ using namespace eosio;
         auto corehost = coreahosts.find(host.value);
 
         eosio::check(corehost != coreahosts.end(), "Core host is not found");
-        eosio::check(corehost -> type == "platform"_n, "Host is not a platform");
+        // eosio::check(corehost -> type == "platform"_n, "Host is not a platform");
 
         ahosts_index ahosts(_me, host.value);
         auto ahost = ahosts.find(ahostname.value);

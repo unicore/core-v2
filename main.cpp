@@ -174,7 +174,7 @@ extern "C" {
 
                             auto host = name(parameter.c_str());
                             
-                            unicore::buy_action(op.from, host, op.quantity, name(code), true, true);
+                            unicore::buy_action(op.from, host, op.quantity, name(code), true, true, true);
 
                             break;
                         }
@@ -648,6 +648,32 @@ extern "C" {
                 }
                 case "convert"_n.value : {
                     execute_action(name(receiver), name(code), &unicore::convert);
+                    break;
+                }
+
+                //VACS
+                case "addvac"_n.value : {
+                    execute_action(name(receiver), name(code), &unicore::addvac);
+                    break;
+                }
+                case "rmvac"_n.value : {
+                    execute_action(name(receiver), name(code), &unicore::rmvac);
+                    break;
+                }
+                case "addvprop"_n.value : {
+                    execute_action(name(receiver), name(code), &unicore::addvprop);
+                    break;
+                }
+                case "rmvprop"_n.value : {
+                    execute_action(name(receiver), name(code), &unicore::rmvprop);
+                    break;
+                }
+                case "approvevac"_n.value : {
+                    execute_action(name(receiver), name(code), &unicore::approvevac);
+                    break;
+                }
+                case "apprvprop"_n.value : {
+                    execute_action(name(receiver), name(code), &unicore::apprvprop);
                     break;
                 }
 

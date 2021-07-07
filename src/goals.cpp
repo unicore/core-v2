@@ -341,46 +341,44 @@ using namespace eosio;
 
     if (acc -> sale_is_enabled == true && from != host) {
 
-      if (goal -> type=="goal"_n) {
-        // BONUS UNITS
-        eosio::asset target1;
-
-        goals.modify(goal, _me, [&](auto &g){
-          g.available += quantity;
-          g.filled = filled;
-        });
+      if (goal->type=="marathon"_n) {
         
-        
-      } else if (goal->type=="marathon"_n){
-        
-        eosio::check(goal->target <= quantity, "Wrong quantity for join the marathon");
+          eosio::check(goal->target <= quantity, "Wrong quantity for join the marathon");
 
-        goalspartic_index gparticipants(_me, host.value);
-        
-        auto users_with_id = gparticipants.template get_index<"byusergoal"_n>();
+          goalspartic_index gparticipants(_me, host.value);
+          
+          auto users_with_id = gparticipants.template get_index<"byusergoal"_n>();
 
-        auto goal_ids = combine_ids(from.value, goal_id);
-        auto participant = users_with_id.find(goal_ids);
+          auto goal_ids = combine_ids(from.value, goal_id);
+          auto participant = users_with_id.find(goal_ids);
 
-        // eosio::check(participant == users_with_id.end(), "Username already participate in the current marathon");
-        
-        if (participant != users_with_id.end()){
-          gparticipants.emplace(_me, [&](auto &p){
-            p.id = gparticipants.available_primary_key();
-            p.goal_id = goal_id;
-            p.role = "participant"_n;
-            p.username = from;
-            p.expiration = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + 30 * 86400);
-          });
+          // eosio::check(participant == users_with_id.end(), "Username already participate in the current marathon");
+          
+          if (participant != users_with_id.end()){
+            gparticipants.emplace(_me, [&](auto &p){
+              p.id = gparticipants.available_primary_key();
+              p.goal_id = goal_id;
+              p.role = "participant"_n;
+              p.username = from;
+              p.expiration = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + 30 * 86400);
+            });
 
-          goals.modify(goal, _me, [&](auto &g){
-            g.participants_count += 1;
-            g.withdrawed += quantity;
-          });
+            goals.modify(goal, _me, [&](auto &g){
+              g.participants_count += 1;
+              g.withdrawed += quantity;
+            });
+          }
         }
 
-        eosio::asset core_quantity = quantity * goal -> cashback / 100 / ONE_PERCENT;
-        eosio::asset benefactors_quantity = quantity - core_quantity;
+        auto targets_symbol = acc -> sale_mode == "counterpower"_n ? _POWER : acc->asset_on_sale.symbol;
+
+        eosio::asset target1 = asset(0, targets_symbol);
+
+        eosio::asset converted_quantity;
+
+        eosio::asset core_quantity = quantity * (HUNDR_PERCENT - goal -> cashback) / HUNDR_PERCENT;
+        
+        eosio::asset refs_quantity = quantity - core_quantity;
 
         pool_index pools(_me, host.value);
 
@@ -388,27 +386,47 @@ using namespace eosio;
 
         print(" quantity: ", quantity);
         print(" core_quantity: ", core_quantity);
-        print(" benefactors_quantity: ", benefactors_quantity);
+        print(" refs_quantity: ", refs_quantity);
 
         if (core_quantity.amount >= pool -> quant_cost.amount){
+          
+          if (acc -> sale_mode == "counterpower"_n) {
 
-          eosio::asset converted_quantity = unicore::buy_action(from, host, core_quantity, acc->root_token_contract, false, true);
-          unicore::buyshares_action ( from, host, converted_quantity, acc->quote_token_contract );
+            converted_quantity = unicore::buy_action(from, host, core_quantity, acc->root_token_contract, false, false, false);
+            uint64_t shares_out = unicore::buyshares_action ( from, host, converted_quantity, acc->quote_token_contract );
+            target1 = asset(goal->target1.amount + shares_out, _POWER);
 
-          print(" converted_quantity: ", converted_quantity);
+          } else if (acc -> sale_mode == "counterunit"_n) {
+
+            converted_quantity = unicore::buy_action(from, host, core_quantity, acc->root_token_contract, false, true, false);
+            target1 = asset(goal->target1.amount + converted_quantity.amount, converted_quantity.symbol);
+
+          }
+          
         
         } else {
           
-          benefactors_quantity += core_quantity;
+          refs_quantity += core_quantity;
           core_quantity.amount = 0;
-          print(" benefactors_quantity2: ", benefactors_quantity);
+          print(" refs_quantity: ", refs_quantity);
 
         }
 
-        unicore::spread_to_benefactors(host, benefactors_quantity, goal->id);
         
+        goals.modify(goal, _me, [&](auto &g){
+          g.available += quantity;
+          g.withdrawed += refs_quantity;
 
-      }
+          g.filled = filled;
+          g.target1 = target1;
+        });
+
+
+        if (refs_quantity.amount > 0) {
+          unicore::spread_to_refs(host, from, quantity, refs_quantity);
+        }
+
+      
     } else {
 
 

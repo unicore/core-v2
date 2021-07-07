@@ -174,3 +174,27 @@
         eosio::indexed_by<"byhost"_n, eosio::const_mem_fun<iamdoer, uint64_t, &iamdoer::byhost>>,
         eosio::indexed_by<"byhosttask"_n, eosio::const_mem_fun<iamdoer, uint128_t, &iamdoer::byhosttask>>
     > iamdoer_index;
+
+
+
+/*!
+   \brief Структура входящих целей и задач
+*/
+    struct [[eosio::table]] incoming {
+        uint64_t id;
+        eosio::name host;
+        uint64_t ext_goal_id;
+        uint64_t ext_task_id;
+        uint64_t my_goal_id;
+        uint64_t my_badge_id;
+        
+        uint64_t primary_key() const {return id;}
+        uint64_t byexpr() const {return expiration.sec_since_epoch();}
+
+        EOSLIB_SERIALIZE(incoming, (id)(host)(ext_goal_id)(ext_task_id)(my_goal_id)(my_badge_id))
+    };
+
+    typedef eosio::multi_index<"incoming"_n, incoming,
+       eosio::indexed_by< "byexpr"_n, eosio::const_mem_fun<incoming, uint64_t, 
+                      &incoming::byexpr>>
+    > incoming_index;

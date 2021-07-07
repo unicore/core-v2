@@ -146,6 +146,7 @@ using namespace eosio;
         
         eosio::asset total_dac_asset;
         eosio::asset total_cfund_asset;
+        eosio::asset total_hfund_asset;
         eosio::asset total_sys_asset;
         
         if (host_income.amount > 0) {
@@ -159,6 +160,12 @@ using namespace eosio;
             // eosio::asset total_to_dacs = asset(host_income.amount * acc -> dacs_percent / HUNDR_PERCENT, root_symbol);
             // eosio::asset total_to_cfund = asset(host_income.amount * acc -> cfund_percent / HUNDR_PERCENT, root_symbol);
 
+            double total_ref = (double)host_income.amount * (double)(acc->referral_percent) / (double)HUNDR_PERCENT;
+            
+            double total_ref_min_sys = total_ref * (HUNDR_PERCENT - syspercent) / HUNDR_PERCENT;
+            double total_ref_sys = total_ref * syspercent / HUNDR_PERCENT;
+        
+
             double total_dac = (double)host_income.amount * (double)(acc->dacs_percent) / (double)HUNDR_PERCENT;
             
             double total_dac_min_sys = total_dac * (HUNDR_PERCENT - syspercent) / HUNDR_PERCENT;
@@ -169,12 +176,23 @@ using namespace eosio;
 
             double total_cfund_min_sys = total_cfund * (HUNDR_PERCENT - syspercent) / HUNDR_PERCENT;
             double total_cfund_sys = total_cfund * syspercent / HUNDR_PERCENT;
+
+
+            double total_hfund = (double)host_income.amount * (double)(acc->hfund_percent) / (double)HUNDR_PERCENT;
+            
+            double total_hfund_min_sys = total_hfund * (HUNDR_PERCENT - syspercent) / HUNDR_PERCENT;
+            double total_hfund_sys = total_hfund * syspercent / HUNDR_PERCENT;
+        
+
       
-            double total_sys = total_dac_sys + total_cfund_sys;
+            double total_sys = total_dac_sys + total_cfund_sys + total_hfund_sys + total_ref_sys;
 
             total_dac_asset = asset((uint64_t)total_dac_min_sys, root_symbol);
             total_cfund_asset = asset((uint64_t)total_cfund_min_sys, root_symbol);
+            total_hfund_asset = asset((uint64_t)total_hfund_min_sys, root_symbol);
+            
             total_sys_asset = asset((uint64_t)total_sys, root_symbol);
+
             print("on emission: ");
             print("on total_dac_asset: ", total_dac_asset);
             print("on total_cfund_asset: ", total_cfund_asset);
@@ -192,12 +210,13 @@ using namespace eosio;
                 });
             }
             print("here 3");
-            if (total_sys_asset.amount > 0) {
 
+            if (total_sys_asset.amount > 0) {
+                // Выплаты на системный аккаунт сообщества. 
                 action(
                     permission_level{ _me, "active"_n },
-                    acc->root_token_contract, "transfer"_n,
-                    std::make_tuple( _me, _saving, total_sys_asset, std::string("")) 
+                    "eosio"_n, "inprodincome"_n,
+                    std::make_tuple( acc -> root_token_contract, total_sys_asset) 
                 ).send();
 
             };
@@ -207,38 +226,30 @@ using namespace eosio;
 
             auto sinc = sincome.find(acc->current_pool_id );
             
-            if (sinc != sincome.end()){
-                sincome.modify(sinc, _me, [&](auto &s){
-                    s.total += total_sys_asset + total_dac_asset + total_cfund_asset;
-                    s.paid_to_sys += total_sys_asset;
-                    s.paid_to_dacs += total_dac_asset;
-                    s.paid_to_cfund += total_cfund_asset;
-                });    
-            } else {
+            
+            market_index market(_me, host.value);
+            auto itr = market.find(0);
+            auto liquid_power = acc->total_shares - itr->base.balance.amount;
 
-                market_index market(_me, host.value);
-                auto itr = market.find(0);
-                auto liquid_power = acc->total_shares - itr->base.balance.amount;
+            sincome.emplace(_me, [&](auto &s){
+                s.max = max_income;
+                s.pool_id = acc->current_pool_id;
+                s.ahost = main_host;
+                s.cycle_num = acc->current_cycle_num;
+                s.pool_num = acc->current_pool_num;
+                s.liquid_power = liquid_power;
+                s.total = total_sys_asset + total_dac_asset + total_cfund_asset + total_hfund_asset;
+                
+                s.paid_to_sys = total_sys_asset;
+                s.paid_to_dacs = total_dac_asset;
+                s.paid_to_cfund = total_cfund_asset;
+                s.paid_to_hfund = total_hfund_asset;
 
-                sincome.emplace(_me, [&](auto &s){
-                    s.max = max_income;
-                    s.pool_id = acc->current_pool_id;
-                    s.ahost = main_host;
-                    s.cycle_num = acc->current_cycle_num;
-                    s.pool_num = acc->current_pool_num;
-                    s.liquid_power = liquid_power;
-                    s.total = total_sys_asset + total_dac_asset + total_cfund_asset;
-                    
-                    s.paid_to_sys = total_sys_asset;
-                    s.paid_to_dacs = total_dac_asset;
-                    s.paid_to_cfund = total_cfund_asset;
+                s.paid_to_refs = asset(0, root_symbol);
+                s.hfund_in_segments = total_hfund_asset.amount * TOTAL_SEGMENTS;
 
-                    s.paid_to_hfund = asset(0, root_symbol);
-                    s.paid_to_refs = asset(0, root_symbol);
-                    s.hfund_in_segments = 0;
-                    s.distributed_segments = 0;
-                }); 
-            }
+                s.distributed_segments = 0;
+            }); 
             
         };
 
@@ -820,66 +831,65 @@ void next_pool( eosio::name host){
 };
 
 [[eosio::action]] void unicore::fixs(eosio::name host, uint64_t pool_num){
-    require_auth(_me);
+    // require_auth(_me);
     
     
-    bwtradegraph_index bwtradegraph(_me, host.value);
-    auto bwtrade0 = bwtradegraph.find(0);
-    auto bwtrade1 = bwtradegraph.find(1);
-    bwtradegraph.erase(bwtrade0);
-    bwtradegraph.erase(bwtrade1);
+    // bwtradegraph_index bwtradegraph(_me, host.value);
+    // auto bwtrade0 = bwtradegraph.find(0);
+    // auto bwtrade1 = bwtradegraph.find(1);
+    // bwtradegraph.erase(bwtrade0);
+    // bwtradegraph.erase(bwtrade1);
     
-    // coredhistory_index coredhistory(_me, host.value);
-    // auto coredhist_start = coredhistory.find(pool_num);
-    // coredhistory.erase(coredhist_start);
+        // coredhistory_index coredhistory(_me, host.value);
+        // auto coredhist_start = coredhistory.find(pool_num);
+        // coredhistory.erase(coredhist_start);
 
     account_index accounts(_me, host.value);
     auto acc = accounts.find(host.value);
     accounts.erase(acc);
     
-    market_index market(_me, host.value);
-    auto itr = market.find(0);
-    market.erase(itr);
+    // market_index market(_me, host.value);
+    // auto itr = market.find(0);
+    // market.erase(itr);
 
     // accounts.modify(acc, _me, [&](auto &a){
-    //     a.parameters_setted = false;
-    //     a.activated = false;
-    //     a.payed = true;
-    //     a.sale_is_enabled = false;
-    //     // a.power_market_id = "self"_n;
-    
+        // a.parameters_setted = false;
+        // a.activated = false;
+        // a.payed = true;
+        // a.sale_is_enabled = false;
+        // a.power_market_id = "self"_n;
     // });
 
-    spiral_index spiral(_me, host.value);
-    auto sp = spiral.find(0);
-    spiral.erase(sp);
+    // spiral_index spiral(_me, host.value);
+    // auto sp = spiral.find(0);
+    // spiral.erase(sp);
 
-    cycle_index cycles (_me, host.value);
-    auto cycle = cycles.find(0);
-    cycles.erase(cycle);
+    // cycle_index cycles (_me, host.value);
+    // auto cycle = cycles.find(0);
+    // cycles.erase(cycle);
 
-    pool_index pools(_me, host.value);
-    auto pool1 = pools.find(0);
-    auto pool2 = pools.find(1);
+    // pool_index pools(_me, host.value);
+    // auto pool1 = pools.find(0);
+    // auto pool2 = pools.find(1);
 
-    pools.erase(pool1);
-    pools.erase(pool2);
+    // pools.erase(pool1);
+    // pools.erase(pool2);
 
-    rate_index rates(_me, host.value);
+    // rate_index rates(_me, host.value);
     
     
-    for (auto i = 0; i < sp->pool_limit; i++){
-        auto rate = rates.find(i);
-        rates.erase(rate);    
-    }    
+    // for (auto i = 0; i < sp->pool_limit; i++){
+    //     auto rate = rates.find(i);
+    //     rates.erase(rate);    
+    // }    
 
-    emission_index emis(_me, host.value);
-    auto emi = emis.find(host.value);
-    emis.erase(emi);
+    // emission_index emis(_me, host.value);
+    // auto emi = emis.find(host.value);
+    // emis.erase(emi);
 
-    sincome_index sincome(_me, host.value);
-    auto s1 = sincome.find(0);
-    sincome.erase(s1);
+    // sincome_index sincome(_me, host.value);
+    // auto s1 = sincome.find(0);
+    // sincome.erase(s1);
 
 }
 
@@ -1709,23 +1719,28 @@ void unicore::fill_pool(eosio::name username, eosio::name host, uint64_t quants,
                         double total_ref_min_sys = total_ref * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
                         double total_ref_sys = total_ref * syspercent -> value / HUNDR_PERCENT;
 
-                        double total_dac = 0;
-                        double total_dac_min_sys = 0;
-                        double total_dac_sys = 0;
+                        // double total_dac = 0;
+                        // double total_dac_min_sys = 0;
+                        // double total_dac_sys = 0;
                         
 
-                        double total_cfund = 0;
-                        double total_cfund_min_sys = 0;
-                        double total_cfund_sys = 0;
+                        // double total_cfund = 0;
+                        // double total_cfund_min_sys = 0;
+                        // double total_cfund_sys = 0;
                
-                        // double total_dac =   (total * (double)ref_quants / (double)sp -> quants_precision * (double)(acc->dacs_percent))     / ((double)HUNDR_PERCENT * (double)sp->size_of_pool);
-                        // double total_dac_min_sys = total_dac * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
-                        // double total_dac_sys = total_dac * syspercent -> value / HUNDR_PERCENT;
+                        // double total_hfund = 0;
+                        // double total_hfund_min_sys = 0;
+                        // double total_hfund_sys = 0;
+               
+
+                        double total_dac =   (total * (double)ref_quants / (double)sp -> quants_precision * (double)(acc->dacs_percent))     / ((double)HUNDR_PERCENT * (double)sp->size_of_pool);
+                        double total_dac_min_sys = total_dac * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
+                        double total_dac_sys = total_dac * syspercent -> value / HUNDR_PERCENT;
                         
 
-                        // double total_cfund = (total * (double)ref_quants / (double)sp -> quants_precision * (double)(acc->cfund_percent))    / ((double)HUNDR_PERCENT * (double)sp->size_of_pool);
-                        // double total_cfund_min_sys = total_cfund * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
-                        // double total_cfund_sys = total_cfund * syspercent -> value / HUNDR_PERCENT;
+                        double total_cfund = (total * (double)ref_quants / (double)sp -> quants_precision * (double)(acc->cfund_percent))    / ((double)HUNDR_PERCENT * (double)sp->size_of_pool);
+                        double total_cfund_min_sys = total_cfund * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
+                        double total_cfund_sys = total_cfund * syspercent -> value / HUNDR_PERCENT;
                                                 
 
                         double total_hfund = (total * (double)ref_quants / (double)sp -> quants_precision * (double)(acc->hfund_percent))    / ((double)HUNDR_PERCENT * (double)sp->size_of_pool);
@@ -2361,7 +2376,7 @@ void unicore::createfund(eosio::name token_contract, eosio::asset fund_asset, st
 }
 
 
-[[eosio::action]] void unicore::adddac(eosio::name username, eosio::name host, uint64_t weight, std::string title, std::string descriptor) {
+[[eosio::action]] void unicore::adddac(eosio::name username, eosio::name host, uint64_t weight, eosio::name limit_type, eosio::asset income_limit, std::string title, std::string descriptor) {
     require_auth(host);
     account_index accounts(_me, host.value);
     dacs_index dacs(_me, host.value);
@@ -2381,12 +2396,14 @@ void unicore::createfund(eosio::name token_contract, eosio::asset fund_asset, st
             d.dac = username;
             d.weight = weight;
             d.income = asset(0, root_symbol);
-            d.income_limit = asset(0, root_symbol);
+            // d.income_limit = asset(0, root_symbol);
             d.withdrawed = asset(0, root_symbol);
             d.income_in_segments = 0;
             d.role = title;
             d.description = descriptor;
-            d.last_pay_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+            d.limit_type = limit_type;
+            d.income_limit = income_limit;
+            d.last_pay_at = eosio::time_point_sec(0);
             d.created_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
         });
 
@@ -2512,7 +2529,7 @@ void unicore::buy_account(eosio::name username, eosio::name host, eosio::asset q
     eosio::asset to_core = quantity * 10 / 100;
     eosio::asset to_buy =  quantity * 90 / 100 ;
 
-    eosio::asset units = unicore::buy_action(username, host, to_buy, name(code), false, true, asset());
+    eosio::asset units = unicore::buy_action(username, host, to_buy, name(code), false, false, true, asset());
     
     unicore::deposit(username, host, to_core, code, "");
 
@@ -2631,6 +2648,7 @@ void unicore::burn_action(eosio::name username, eosio::name host, eosio::asset q
     // eosio::check(pool->remain_quants >= quants, "Not enought quants in target pool");
 
     uint64_t quants_for_buy;
+
     eosio::asset remain_asset = asset(0, root_symbol);
 
     if (pool->remain_quants < quants) {
@@ -2644,8 +2662,6 @@ void unicore::burn_action(eosio::name username, eosio::name host, eosio::asset q
     
     };
 
-    auto amount_in_quants = quants_for_buy  /  sp -> quants_precision * rate -> convert_rate;
-    eosio::asset quants_for_user_in_asset = asset(amount_in_quants, (acc->asset_on_sale).symbol);
     
     pools.modify(pool, _me, [&](auto &p) {
         p.remain_quants = pool -> remain_quants - quants_for_buy;
@@ -2656,12 +2672,14 @@ void unicore::burn_action(eosio::name username, eosio::name host, eosio::asset q
     });
     
 
-    unicore::add_coredhistory(host, username, pool -> id, quants_for_user_in_asset, "burn", "");    
+    unicore::add_coredhistory(host, username, pool -> id, quantity, "burn", "");    
     unicore::change_bw_trade_graph(host, pool -> id, pool -> cycle_num, pool -> pool_num, rate -> buy_rate, next_rate -> buy_rate, pool -> total_quants, pool -> remain_quants, pool -> color);
     
+    unicore::check_burn_status(host, username, quantity);
+
     //spread amount calculated from quants for buy and part of system income:
 
-    // unicore::spread_to_funds(host, quants, username);
+    unicore::spread_to_funds(host, quants, username);
     
     unicore::refresh_state(host);
         
@@ -2674,7 +2692,7 @@ void unicore::burn_action(eosio::name username, eosio::name host, eosio::asset q
  *
 */
 
-eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, bool transfer, bool spread_to_funds, eosio::asset summ = asset()){
+eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, bool modify_pool, bool transfer, bool spread_to_funds, eosio::asset summ = asset()){
     
     account_index accounts(_me, host.value);
     auto acc = accounts.find(host.value);
@@ -2710,6 +2728,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
     //TODO make recursive and return summ of buys
     // eosio::check(pool->remain_quants >= quants, "Not enought quants in target pool");
     uint64_t quants_for_buy;
+
     eosio::asset remain_asset = asset(0, root_symbol);
 
     if (pool->remain_quants < quants) {
@@ -2726,14 +2745,16 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
     auto amount_in_quants = quants_for_buy  /  sp -> quants_precision * rate -> convert_rate;
     eosio::asset quants_for_user_in_asset = asset(amount_in_quants, (acc->asset_on_sale).symbol);
     
-    pools.modify(pool, _me, [&](auto &p) {
-        p.remain_quants = pool -> remain_quants - quants_for_buy;
-        p.filled = asset(( pool -> total_quants - p.remain_quants) / sp -> quants_precision * pool->quant_cost.amount, root_symbol);
-        p.filled_percent = (pool -> total_quants - p.remain_quants) * HUNDR_PERCENT / pool->total_quants;
-        p.remain = p.pool_cost - p.filled;
-        // p.creserved_quants += quants_for_buy; 
-    });
-    
+    if (modify_pool == true){
+
+        pools.modify(pool, _me, [&](auto &p) {
+            p.remain_quants = pool -> remain_quants - quants_for_buy;
+            p.filled = asset(( pool -> total_quants - p.remain_quants) / sp -> quants_precision * pool->quant_cost.amount, root_symbol);
+            p.filled_percent = (pool -> total_quants - p.remain_quants) * HUNDR_PERCENT / pool->total_quants;
+            p.remain = p.pool_cost - p.filled;
+            // p.creserved_quants += quants_for_buy; 
+        });
+    }
 
     unicore::check_and_modify_sale_fund(quants_for_user_in_asset, *acc);
     
@@ -2752,7 +2773,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
     
     //spread amount calculated from quants for buy and part of system income:
 
-    if (spread_to_funds == true){
+    if (spread_to_funds == true) {
         unicore::spread_to_funds(host, quants, username);
     }
 
@@ -2766,7 +2787,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
     
     if ( remain_asset.amount > 0 ) {
 
-        buy_action(username, host, remain_asset, code, transfer, spread_to_funds, summ);  
+        buy_action(username, host, remain_asset, code, modify_pool, transfer, spread_to_funds, summ);  
 
     }
     
@@ -2978,16 +2999,16 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
 
             // }
             
-            if((bal->sys_amount).amount > 0){
-                // Выплаты на системный аккаунт сообщества. 
-                action(
-                    permission_level{ _me, "active"_n },
-                    "eosio"_n, "inprodincome"_n,
-                    std::make_tuple( acc -> root_token_contract, bal->sys_amount) 
-                ).send();
+            // if((bal->sys_amount).amount > 0){
+                // // Выплаты на системный аккаунт сообщества. 
+                // action(
+                //     permission_level{ _me, "active"_n },
+                //     "eosio"_n, "inprodincome"_n,
+                //     std::make_tuple( acc -> root_token_contract, bal->sys_amount) 
+                // ).send();
             
                 
-            }
+            // }
             
             auto sinc = sincome.find(acc->current_pool_id);
 
@@ -3007,26 +3028,21 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                     s.cycle_num = acc->current_cycle_num;
                     s.pool_num = acc->current_pool_num;
                     s.liquid_power = liquid_power;
-                    s.total = bal->ref_amount + bal->dac_amount + bal->cfund_amount + bal->hfund_amount + bal->sys_amount;
-                    s.paid_to_sys = bal->sys_amount;
-                    s.paid_to_dacs = bal->dac_amount;
-                    s.paid_to_cfund = bal->cfund_amount;
-                    s.paid_to_hfund = bal->hfund_amount;
+                    s.total = bal->ref_amount;
+                    s.paid_to_sys = asset(0, root_symbol);
+                    s.paid_to_dacs = asset(0, root_symbol);
+                    s.paid_to_cfund = asset(0, root_symbol);
+                    s.paid_to_hfund = asset(0, root_symbol);
                     s.paid_to_refs = bal->ref_amount;
-                    s.hfund_in_segments = (bal->hfund_amount).amount * TOTAL_SEGMENTS;
+                    s.hfund_in_segments = 0;
                     s.distributed_segments = 0;
                 }); 
 
             } else {
                 print("on here4");
                 sincome.modify(sinc, _me, [&](auto &s){
-                    s.total += bal->ref_amount + bal->dac_amount + bal->cfund_amount + bal->hfund_amount + bal->sys_amount;
-                    s.paid_to_sys += bal->sys_amount;
-                    s.paid_to_dacs += bal->dac_amount;
-                    s.paid_to_cfund += bal->cfund_amount;
-                    s.paid_to_hfund += bal->hfund_amount;
+                    s.total += bal->ref_amount;
                     s.paid_to_refs += bal->ref_amount;
-                    s.hfund_in_segments += (bal->hfund_amount).amount * TOTAL_SEGMENTS;
                 });
                 print("on here5");
             }
@@ -3094,7 +3110,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                         //transfer to username
                         action(
                             permission_level{ _me, "active"_n },
-                            acc->root_token_contract, "transfer"_n,
+                            acc->sale_token_contract, "transfer"_n,
                             std::make_tuple( _me, username, bal->if_convert, std::string("")) 
                         ).send();
 
@@ -3144,6 +3160,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
 
                     eosio::asset to_ref_amount = asset(to_ref_segments / TOTAL_SEGMENTS, spread_amount.symbol);
                     refbalances_index refbalances(_me, referer.value);
+                    
                     refbalances.emplace(_me, [&](auto &rb){
                         rb.id = refbalances.available_primary_key();
                         rb.timepoint_sec = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
@@ -3172,23 +3189,58 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
             };
 
             /**
-             * Все неиспользуемые вознаграждения с вышестояющих уровней отправляются на корпорации 
+             * Все неиспользуемые вознаграждения с вышестояющих уровней отправляются на пользователя 
 
              */
             eosio::asset back_to_host = spread_amount - paid;
             
             if (back_to_host.amount > 0){
-                unicore::spread_to_dacs(host, back_to_host);
+                refbalances_index refbalances2(_me, username.value);
+                
+                uint128_t to_ref_segments = back_to_host.amount * TOTAL_SEGMENTS;
+
+                refbalances2.emplace(_me, [&](auto &rb){
+                    rb.id = refbalances2.available_primary_key();
+                    rb.timepoint_sec = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+                    rb.host = host;
+                    rb.refs_amount = back_to_host;
+                    rb.win_amount = back_to_host;
+                    rb.amount = back_to_host;
+                    rb.from = username;
+                    rb.level = 0;
+                    rb.percent = 0;
+                    rb.cashback = 0;
+                    rb.segments = (double)to_ref_segments;
+                });
+
+            // unicore::spread_to_dacs(host, back_to_host);
             }
 
 
             
         } else {
             /**
-             * Если рефералов у пользователя нет, то переводим все реферальные средства на корпорации.
+             * Если рефералов у пользователя нет, то переводим все реферальные средства пользователю.
              */
             if (spread_amount.amount > 0){
-                unicore::spread_to_dacs(host, spread_amount);
+                // unicore::spread_to_dacs(host, spread_amount);
+                refbalances_index refbalances(_me, username.value);
+                
+                uint128_t to_ref_segments = spread_amount.amount * TOTAL_SEGMENTS;
+
+                refbalances.emplace(_me, [&](auto &rb){
+                    rb.id = refbalances.available_primary_key();
+                    rb.timepoint_sec = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+                    rb.host = host;
+                    rb.refs_amount = spread_amount;
+                    rb.win_amount = spread_amount;
+                    rb.amount = spread_amount;
+                    rb.from = username;
+                    rb.level = 0;
+                    rb.percent = 0;
+                    rb.cashback = 0;
+                    rb.segments = (double)to_ref_segments;
+                });
             }
        
         }
@@ -3215,97 +3267,94 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
 
         uint64_t total = uint64_t((double)quants * (double)start_rate -> buy_rate / (double)sp -> quants_precision);
         
-        eosio::asset total_asset = asset(total, root_symbol);
-        
-        print("on spread to funds: ", total_asset);
-
         double total_ref = (total * (double)(acc->referral_percent)) / ((double)HUNDR_PERCENT);
         double total_ref_min_sys = total_ref * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
         double total_ref_sys = total_ref * syspercent -> value / HUNDR_PERCENT;
 
-        double total_dac =   (total * (double)(acc->dacs_percent))  / ((double)HUNDR_PERCENT);
-        double total_dac_min_sys = total_dac * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
-        double total_dac_sys = total_dac * syspercent -> value / HUNDR_PERCENT;
-        
-        double total_cfund = (total * (double)(acc->cfund_percent))    / ((double)HUNDR_PERCENT);
-        double total_cfund_min_sys = total_cfund * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
-        double total_cfund_sys = total_cfund * syspercent -> value / HUNDR_PERCENT;
-                                
-        double total_hfund = (total * (double)(acc->hfund_percent))    / ((double)HUNDR_PERCENT);
-        double total_hfund_min_sys = total_hfund * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
-        double total_hfund_sys = total_hfund * syspercent -> value / HUNDR_PERCENT;
-                                
-        double total_sys = total_ref_sys + total_dac_sys + total_cfund_sys + total_hfund_sys;
 
-        
         eosio::asset asset_ref_amount = asset((uint64_t)total_ref_min_sys, root_symbol);
-        eosio::asset asset_dac_amount = asset((uint64_t)total_dac_min_sys, root_symbol);
-        eosio::asset asset_sys_amount = asset((uint64_t)total_sys, root_symbol);
-        eosio::asset asset_cfund_amount = asset((uint64_t)total_cfund_min_sys, root_symbol); 
-        eosio::asset asset_hfund_amount = asset((uint64_t)total_hfund_min_sys, root_symbol);
 
+
+        //PAY all LOSE amount to refs cause this amount never will be withdrawed by participant
+        //TODO calculate sediment and pay it too
+
+        // double lost_amount = (double)quants * (double)middle_rate -> sell_rate / (double)sp -> quants_precision / (double)sp->size_of_pool * (double)finish_rate -> payment_to_wins.amount;
+        // eosio::asset lost_amount_asset = asset((uint64_t)lost_amount, root_symbol);
+
+        double lost_amount = (double)total - (double)total * (double)sp -> loss_percent / (double)HUNDR_PERCENT;
+        eosio::asset lost_amount_asset = asset((uint64_t)lost_amount, root_symbol);
+
+        // double lost_amount = (double)total - (double)quants * (double)middle_rate -> delta.amount / (double)sp -> quants_precision;
+        // eosio::asset lost_amount_asset = asset((uint64_t)lost_amount, root_symbol);
+
+        // double lost_amount = (double)quants * (double)finish_rate -> sell_rate / (double)finish_rate -> buy_rate  / (double)sp -> quants_precision / (double)sp->size_of_pool * (double)finish_rate -> payment_to_wins.amount;
+
+        // double lost_amount = (double)quants * (double)finish_rate -> sell_rate / (double)finish_rate -> buy_rate  / (double)sp -> quants_precision / (double)sp->size_of_pool * ;
+
+        eosio::asset total_asset_amount = asset(total, root_symbol);
+        
+        print("on_burn_amount: ", total_asset_amount);
         print("ref_amount: ", asset_ref_amount);
-        print("dac_amount: ", asset_dac_amount);
-        print("cfund_amount: ", asset_cfund_amount);
-        print("hfund_amount: ", asset_hfund_amount);
+        print("lost_amount: ", lost_amount_asset);
+        
 
-        // //CFUND
-        unicore::fund_emi_pool (host, asset_cfund_amount, acc->root_token_contract );
-        
-        //DACS
-        unicore::spread_to_dacs(host, asset_dac_amount);
-        
-        //REFS
-        unicore::spread_to_refs(host, referal, asset_ref_amount, total_asset);
+        //REFS 
+        unicore::spread_to_refs(host, referal, asset_ref_amount + lost_amount_asset, asset_ref_amount + lost_amount_asset);
 
-        //SYS
-        if(asset_sys_amount.amount > 0){
-            action(
-                permission_level{ _me, "active"_n },
-                acc->root_token_contract, "transfer"_n,
-                std::make_tuple( _me, _saving, asset_sys_amount, std::string("")) 
-            ).send();
-        };
+        //TODO write burned sincome to another table? 
         
-        
-        //HFUND
+
         market_index market(_me, host.value);
         auto itr = market.find(0);
         auto liquid_power = acc->total_shares - itr->base.balance.amount;
         
         sincome_index sincome(_me, host.value);
         auto sinc = sincome.find(acc->current_pool_id);
+
+
+        sincome2_index sincome2(_me, host.value);
+        auto sinc2 = sincome2.find(acc->current_pool_id);
+
+        if (sinc2 == sincome2.end()) {
+            
+            sincome2.emplace(_me, [&](auto &s) {
+                s.pool_id = acc->current_pool_id;
+                s.burned_loss_amount = lost_amount_asset;
+            });
+
+        } else {
+
+            sincome2.modify(sinc2, _me, [&](auto &s) {
+                s.burned_loss_amount += lost_amount_asset;
+            });
+
+        };
+
         
         if (sinc == sincome.end()){
             
             sincome.emplace(_me, [&](auto &s){
-                s.max = start_rate -> system_income + total_asset;
                 s.pool_id = acc->current_pool_id;
+                s.max = start_rate -> system_income + asset_ref_amount;
                 s.ahost = main_host;
                 s.cycle_num = acc->current_cycle_num;
                 s.pool_num = acc->current_pool_num;
                 s.liquid_power = liquid_power;
-                s.total = total_asset;
-                s.paid_to_sys = asset_sys_amount;
-                s.paid_to_dacs = asset_dac_amount;
-                s.paid_to_cfund = asset_cfund_amount;
-                s.paid_to_hfund = asset_hfund_amount;
+                s.total = asset_ref_amount;
+                s.paid_to_sys = asset(0, root_symbol);
+                s.paid_to_dacs = asset(0, root_symbol);
+                s.paid_to_cfund = asset(0, root_symbol);
+                s.paid_to_hfund = asset(0, root_symbol);
                 s.paid_to_refs = asset_ref_amount;
-                s.hfund_in_segments = asset_hfund_amount.amount * TOTAL_SEGMENTS;
+                s.hfund_in_segments = 0;
                 s.distributed_segments = 0;
             }); 
 
         } else {
 
             sincome.modify(sinc, _me, [&](auto &s){
-                s.max += total_asset;
-                s.total += total_asset;
-                s.paid_to_sys += asset_sys_amount;
-                s.paid_to_dacs += asset_dac_amount;
-                s.paid_to_cfund += asset_cfund_amount;
-                s.paid_to_hfund += asset_hfund_amount;
+                s.total += asset_ref_amount;
                 s.paid_to_refs += asset_ref_amount;
-                s.hfund_in_segments += asset_hfund_amount.amount * TOTAL_SEGMENTS;
             });
 
         }
@@ -3313,7 +3362,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
     }
 
 
-    void unicore::spread_to_dacs(eosio::name host, eosio::asset amount){
+    void unicore::spread_to_dacs(eosio::name host, eosio::asset amount) {
 
         dacs_index dacs(_me, host.value);
         account_index accounts(_me, host.value);

@@ -17,6 +17,33 @@ using namespace eosio;
         }
     }
 
+    void unicore::check_burn_status(eosio::name host, eosio::name username, eosio::asset burn_amount){
+        uint64_t minburn = unicore::getcondition(host, "minburn");
+        uint64_t burnperiod = unicore::getcondition(host, "burnperiod");
+
+        uint64_t times = burn_amount.amount / minburn;
+        print("times", times, burn_amount, minburn);
+
+        if (times > 0 && username != "eosio"_n) {
+
+            cpartners2_index partners(_me, host.value);
+            auto partner = partners.find(username.value);
+            
+            if (partner == partners.end()) {
+                partners.emplace(_me, [&](auto &p) {
+                    p.partner = username;
+                    p.status = "partner"_n;
+                    p.join_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+                    p.expiration = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + times * burnperiod * 86400);
+
+                });
+            } else {
+                partners.modify(partner, _me, [&](auto &p){
+                    p.expiration = eosio::time_point_sec(partner->expiration.sec_since_epoch() + times * burnperiod * 86400);
+                });
+            }
+        }
+    }
 
     void unicore::rmfromhostwl(eosio::name host, eosio::name username){
         cpartners2_index partners(_me, host.value);

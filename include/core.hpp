@@ -108,7 +108,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void rmhosfrfund(uint64_t fund_id, eosio::name host);
 
         static void createfund(eosio::name token_contract, eosio::asset fund_asset, std::string descriptor);
-        static eosio::asset buy_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, bool transfer, bool spread_to_funds, eosio::asset summ);
+        static eosio::asset buy_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, bool modify_pool, bool transfer, bool spread_to_funds, eosio::asset summ);
 
         static void buy_account(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, eosio::name status);
     
@@ -137,8 +137,17 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void withdrbeninc(eosio::name username, eosio::name host, uint64_t goal_id);
         
 
+        [[eosio::action]] void addvac(uint64_t id, bool is_edit, eosio::name creator, eosio::name host, eosio::name limit_type, eosio::asset income_limit, uint64_t weight, std::string title, std::string descriptor) ;
+        [[eosio::action]] void rmvac(eosio::name host, uint64_t id);
+
+        [[eosio::action]] void addvprop(uint64_t id, bool is_edit, eosio::name creator, eosio::name host, uint64_t vac_id, uint64_t weight, std::string why_me, std::string contacts);
+        [[eosio::action]] void rmvprop(eosio::name host, uint64_t vprop_id);
+
+        [[eosio::action]] void approvevac(eosio::name host, uint64_t vac_id);
+        [[eosio::action]] void apprvprop(eosio::name host, uint64_t vprop_id);
+
         //DACS
-        [[eosio::action]] void adddac(eosio::name username, eosio::name host, uint64_t weight, std::string title, std::string descriptor);
+        [[eosio::action]] void adddac(eosio::name username, eosio::name host, uint64_t weight, eosio::name limit_type, eosio::asset income_limit, std::string title, std::string descriptor);
         [[eosio::action]] void rmdac(eosio::name username, eosio::name host);
 
         [[eosio::action]] void suggestrole(eosio::name username, std::string title, std::string descriptor);
@@ -224,7 +233,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void setcondition(eosio::name host, eosio::string key, uint64_t value);
         [[eosio::action]] void rmcondition(eosio::name host, uint64_t key); 
         static void rmfromhostwl(eosio::name host, eosio::name username);
-        
+        static void check_burn_status(eosio::name host, eosio::name username, eosio::asset quants_for_user_in_asset);
+
         static uint64_t getcondition(eosio::name host, eosio::string key);
 
         static void addtohostwl(eosio::name host, eosio::name username);
@@ -472,6 +482,21 @@ class [[eosio::contract]] unicore : public eosio::contract {
     typedef eosio::multi_index<"sincome"_n, sincome,
     eosio::indexed_by<"cyclandpool"_n, eosio::const_mem_fun<sincome, uint128_t, &sincome::cyclandpool>>
     > sincome_index;
+    
+
+/*!
+   \brief Доп структура учёта системного дохода фондов хоста Двойной Спирали.
+*/
+    struct [[eosio::table, eosio::contract("unicore")]] sincome2 {
+        uint64_t pool_id;
+        eosio::asset burned_loss_amount;
+        
+        uint64_t primary_key() const {return pool_id;}
+        
+        EOSLIB_SERIALIZE(sincome2, (pool_id)(burned_loss_amount))
+
+    };
+    typedef eosio::multi_index<"sincome2"_n, sincome2> sincome2_index;
     
 
 /*!

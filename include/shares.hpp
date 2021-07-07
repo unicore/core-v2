@@ -16,6 +16,21 @@
 
 	typedef eosio::multi_index<"power"_n, power> power_index;
 
+/*!
+   \brief Расширение структуры силы пользователя у хоста Двойной Спирали.
+*/
+
+  struct [[eosio::table, eosio::contract("unicore")]] power2 {
+    eosio::name host;
+    uint64_t emitted;
+    uint64_t primary_key() const {return host.value;}
+
+    EOSLIB_SERIALIZE(struct power2, (host)(emitted))
+  };
+
+  typedef eosio::multi_index<"power2"_n, power2> power2_index;
+
+
 
 /*!
    \brief Структура статистики распределения безусловного потока жетонов хоста Двойной Спирали. 
@@ -125,14 +140,16 @@
 /*!
    \brief Структура учёта партнёров и их статусов у хоста Двойной Спирали.
 */
-    struct  [[eosio::table, eosio::contract("unicore")]] cpartners {
+    struct  [[eosio::table, eosio::contract("unicore")]] cpartners2 {
         eosio::name partner;
         eosio::name status;
+        eosio::time_point_sec join_at;
+        eosio::time_point_sec expiration;
 
         uint64_t primary_key() const {return partner.value;}
-        EOSLIB_SERIALIZE(cpartners, (partner)(status))
+        EOSLIB_SERIALIZE(cpartners2, (partner)(status)(join_at)(expiration))
     };
 
-    typedef eosio::multi_index<"cpartners"_n, cpartners> cpartners2_index;
+    typedef eosio::multi_index<"cpartners2"_n, cpartners2> cpartners2_index;
 
 

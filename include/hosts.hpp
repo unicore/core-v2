@@ -205,6 +205,23 @@
 
     typedef eosio::multi_index <"hosts"_n, hosts> account_index;
     
+/*!
+   \brief Расширение структуры хоста Двойной Спирали.
+*/
+
+    struct [[eosio::table, eosio::contract("unicore")]] hosts2 {
+        eosio::name username;
+        eosio::time_point_sec sale_price_updated_at;
+        uint64_t sale_price;
+        
+        EOSLIB_SERIALIZE( hosts2, (username)(sale_price_updated_at)(sale_price))
+
+        uint64_t primary_key()const { return username.value; }
+      
+    };
+
+    typedef eosio::multi_index <"hosts2"_n, hosts2> account2_index;
+    
 
 /*!
    \brief Структура командных ролей протокола.
@@ -225,6 +242,71 @@
     };
 
     typedef eosio::multi_index <"roles"_n, roles> roles_index;
+
+
+
+/*!
+   \brief Структура вакансии хоста Двойной Спирали.
+*/
+    struct [[eosio::table, eosio::contract("unicore")]] vacs {
+        uint64_t id;
+        eosio::name creator;
+        bool approved;
+        bool closed = false;
+        eosio::name limit_type;
+        eosio::asset income_limit;
+        uint64_t proposals;
+
+        uint64_t weight;
+        std::string role;
+        std::string description;
+        
+
+        uint64_t primary_key() const {return id;}  
+
+        uint64_t bycreator() const {return creator.value;}  
+        
+        EOSLIB_SERIALIZE(vacs, (id)(creator)(approved)(closed)(limit_type)(income_limit)(proposals)(weight)(role)(description))      
+    };
+
+    typedef eosio::multi_index <"vacs"_n, vacs,
+      eosio::indexed_by<"bycreator"_n, eosio::const_mem_fun<vacs, uint64_t, &vacs::bycreator>>  
+    > vacs_index;
+
+
+
+/*!
+   \brief Структура заявки на вакансию хоста Двойной Спирали.
+*/
+    struct [[eosio::table, eosio::contract("unicore")]] vproposal {
+        uint64_t id;
+        uint64_t vac_id;
+        eosio::name creator;
+        eosio::name limit_type;
+        eosio::name income_limit;
+        uint64_t weight;
+        bool closed = false;
+        std::string why_me;
+        std::string contacts;
+        int64_t votes;
+
+        uint64_t primary_key() const {return id;}  
+
+        uint64_t byusername() const {return creator.value;}  
+        uint64_t byvacid() const {return vac_id;}  
+        uint64_t byvotes() const {return votes;}  
+        
+
+        EOSLIB_SERIALIZE(vproposal, (id)(vac_id)(creator)(limit_type)(income_limit)(weight)(closed)(why_me)(contacts)(votes))      
+    };
+
+    typedef eosio::multi_index <"vproposal"_n, vproposal,
+      eosio::indexed_by<"byusername"_n, eosio::const_mem_fun<vproposal, uint64_t, &vproposal::byusername>>,
+      eosio::indexed_by<"byvacid"_n, eosio::const_mem_fun<vproposal, uint64_t, &vproposal::byvacid>>,  
+      eosio::indexed_by<"byvotes"_n, eosio::const_mem_fun<vproposal, uint64_t, &vproposal::byvotes>>  
+    
+    > vproposal_index;
+
 
 
 /*!
