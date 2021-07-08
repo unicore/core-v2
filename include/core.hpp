@@ -220,6 +220,10 @@ class [[eosio::contract]] unicore : public eosio::contract {
         static void delincoming(eosio::name doer, eosio::name host, uint64_t goal_id, uint64_t task_id);
 
 
+        static void check_and_gift_netted_badge(eosio::name username, eosio::name host, uint64_t task_id);
+        [[eosio::action]] void setinctask(eosio::name username, uint64_t income_id, bool with_badge, uint64_t my_goal_id, uint64_t my_badge_id);
+
+
 
         [[eosio::action]] void deltask(eosio::name host, uint64_t task_id);
         [[eosio::action]] void paydebt(eosio::name host, uint64_t goal_id);

@@ -103,7 +103,7 @@
 				g.gifted_power += host_badge -> power;
 			});
 
-			if (goal -> parent_id != 0){
+			if (goal -> parent_id != 0) {
 				auto parent_goal = goals.find(goal->parent_id);
 				goals.modify(parent_goal, _me, [&](auto &pg){
 					pg.gifted_badges += 1;

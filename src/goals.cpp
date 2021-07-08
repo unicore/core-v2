@@ -372,7 +372,8 @@ using namespace eosio;
 
         auto targets_symbol = acc -> sale_mode == "counterpower"_n ? _POWER : acc->asset_on_sale.symbol;
 
-        eosio::asset target1 = asset(0, targets_symbol);
+        eosio::asset target1 = goal -> target1;
+        eosio::asset target2 = goal -> target2;
 
         eosio::asset converted_quantity;
 
@@ -394,13 +395,13 @@ using namespace eosio;
 
             converted_quantity = unicore::buy_action(from, host, core_quantity, acc->root_token_contract, false, false, false);
             uint64_t shares_out = unicore::buyshares_action ( from, host, converted_quantity, acc->quote_token_contract );
-            target1 = asset(goal->target1.amount + shares_out, _POWER);
-
+            target2= asset(goal->target2.amount + shares_out, _POWER);
+          
           } else if (acc -> sale_mode == "counterunit"_n) {
 
             converted_quantity = unicore::buy_action(from, host, core_quantity, acc->root_token_contract, false, true, false);
-            target1 = asset(goal->target1.amount + converted_quantity.amount, converted_quantity.symbol);
-
+            target1 = asset(goal->target1.amount + converted_quantity.amount, acc->asset_on_sale.symbol);
+          
           }
           
         
@@ -419,6 +420,7 @@ using namespace eosio;
 
           g.filled = filled;
           g.target1 = target1;
+          g.target2= target2;
         });
 
 

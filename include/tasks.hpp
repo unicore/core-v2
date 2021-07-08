@@ -52,6 +52,7 @@
         
         uint64_t bycreator() const {return creator.value;}
         uint64_t bycurator() const {return curator.value;}
+        uint64_t bydoer() const {return doer.value;}
         uint64_t bybenefactor() const {return benefactor.value;}
         uint64_t bygoal() const {return goal_id; }
         uint128_t goalandtask() const { return combine_ids(goal_id, task_id); }
@@ -84,7 +85,9 @@
         eosio::indexed_by<"bycreator"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bycreator>>,
         eosio::indexed_by<"bycurator"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bycurator>>,
         eosio::indexed_by<"byvotes"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::byvotes>>,
-        eosio::indexed_by<"bystatus"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bystatus>>
+        eosio::indexed_by<"bystatus"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bystatus>>,
+        eosio::indexed_by<"bydoer"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bydoer>>
+    
     > tasks_index;
 
 
@@ -180,7 +183,7 @@
 /*!
    \brief Структура входящих целей и задач
 */
-    struct [[eosio::table]] incoming {
+    struct [[eosio::table, eosio::contract("unicore")]] incoming {
         uint64_t id;
         eosio::name host;
         uint64_t goal_id;
@@ -195,7 +198,7 @@
         uint128_t byhostgoal() const { return combine_ids(host.value, task_id); }
         uint64_t bymygoal() const { return my_goal_id; }
 
-        EOSLIB_SERIALIZE(incoming, (id)(host)(goal_id)(task_id)(my_goal_id)(with_badge)(my_badge_id))
+        EOSLIB_SERIALIZE(incoming, (id)(host)(goal_id)(task_id)(with_badge)(my_goal_id)(my_badge_id))
     };
 
     typedef eosio::multi_index<"incoming"_n, incoming,

@@ -573,7 +573,10 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::deltask);
                     break;
                 }
-
+                case "setinctask"_n.value:{
+                    execute_action(name(receiver), name(code), &unicore::setinctask);
+                    break;
+                }
                 case "tactivate"_n.value:{
                     execute_action(name(receiver), name(code), &unicore::tactivate);
                     break;

@@ -1,9 +1,39 @@
 
-// unicore::check_and_gift_netted_badge(report->username, host, task_id);
+[[eosio::action]] void unicore::setinctask(eosio::name username, uint64_t income_id, bool with_badge, uint64_t my_goal_id, uint64_t my_badge_id) {
+	require_auth(username);
 
+	incoming_index incoming (_me, username.value);
+
+	auto inc = incoming.find(income_id);
+
+	if (inc != incoming.end()){
+
+		goals_index goals(_me, username.value);
+		
+		if (my_goal_id != 0){
+			auto goal = goals.find(my_goal_id);
+			eosio::check(goal != goals.end(), "User goal id not found");	
+		}
+		
+
+		badge_index badges(_me, username.value);
+		auto badge = badges.find(my_badge_id);
+		eosio::check(badge != badges.end(), "User badge is not found ");
+
+		incoming.modify(inc, username, [&](auto &i){
+			i.with_badge = with_badge;
+			i.my_goal_id = my_goal_id;
+			i.my_badge_id = my_badge_id;
+		});	
+	}
+	
+
+
+};
+	
 void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host, uint64_t task_id){
 
-	incoming_index incoming (_me, doer.value);
+	incoming_index incoming (_me, username.value);
 
 
 	auto host_with_task_index = incoming.template get_index<"byhosttask"_n>();
@@ -12,13 +42,20 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 
 
 	if (is_exist != host_with_task_index.end() && is_exist -> with_badge) {
-		unicore::giftbadge_action(username, username, is_exist->my_badge_id, std::string("Completed task"), true, false, is_exist->goal_id, is_exist->task_id);
+		if (is_exist -> my_goal_id == 0){
+			unicore::giftbadge_action(username, username, is_exist->my_badge_id, std::string("Completed task"), false, false, 0,0);
+		} else {
+			unicore::giftbadge_action(username, username, is_exist->my_badge_id, std::string("Completed task"), true, false, is_exist->my_goal_id, 0);
+		}
 	};
+
+	
+	
 
 }	
  
 
- oid unicore::setincoming(eosio::name doer, eosio::name host, uint64_t goal_id, uint64_t task_id) {
+ void unicore::setincoming(eosio::name doer, eosio::name host, uint64_t goal_id, uint64_t task_id) {
  	
  	incoming_index incoming (_me, doer.value);
 
@@ -72,10 +109,10 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
  		eosio::check(task_id == 0, "If set goal as incoming, task_id is should be zero");
 
 	 	auto host_with_goal_index = incoming.template get_index<"byhostgoal"_n>();
-		auto goal_idx = combine_ids(host.value, task_id);
+		auto goal_idx = combine_ids(host.value, goal_id);
 		auto is_exist = host_with_goal_index.find(goal_idx);
 
-		if (is_exist == host_with_goal_index.end()) {
+		if (is_exist != host_with_goal_index.end()) {
 			host_with_goal_index.erase(is_exist);
 		}
 
@@ -86,7 +123,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		auto task_idx = combine_ids(host.value, task_id);
 		auto is_exist = host_with_task_index.find(task_idx);
 
-		if (is_exist == host_with_task_index.end()) {
+		if (is_exist != host_with_task_index.end()) {
 			host_with_task_index.erase(is_exist);
 		}
 
@@ -917,7 +954,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 			unicore::giftbadge_action(host, report->username, task->badge_id, std::string("Completed task"), true, true, report->goal_id, report->task_id);
 		}
 
-		unicore::check_and_gift_netted_badge(report->username, host, task_id);
+		unicore::check_and_gift_netted_badge(report->username, host, task->task_id);
 
     // accounts.modify(acc, host, [&](auto &a){
     //   a.approved_reports = acc -> approved_reports + 1;
