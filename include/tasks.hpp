@@ -83,10 +83,10 @@
         eosio::indexed_by<"crewithtask"_n, eosio::const_mem_fun<tasks, uint128_t, &tasks::crewithtask>>,
         eosio::indexed_by<"crewithgoal"_n, eosio::const_mem_fun<tasks, uint128_t, &tasks::crewithgoal>>,
         eosio::indexed_by<"bycreator"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bycreator>>,
-        eosio::indexed_by<"bycurator"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bycurator>>,
+        eosio::indexed_by<"bydoer"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bydoer>>,
         eosio::indexed_by<"byvotes"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::byvotes>>,
-        eosio::indexed_by<"bystatus"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bystatus>>,
-        eosio::indexed_by<"bydoer"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bydoer>>
+        eosio::indexed_by<"bystatus"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bystatus>>
+        // eosio::indexed_by<"bydoer"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bydoer>>
     
     > tasks_index;
 
