@@ -831,9 +831,19 @@ void next_pool( eosio::name host){
 };
 
 [[eosio::action]] void unicore::fixs(eosio::name host, uint64_t pool_num){
-    // require_auth(_me);
+    require_auth(_me);
     
+    account_index accounts(_me, host.value);
+    auto acc = accounts.find(host.value);
+    auto root_symbol = acc -> get_root_symbol();
+
+    emission_index emis(_me, host.value);
+    auto emi = emis.find(host.value);
     
+    emis.modify(emi, _me, [&](auto &e){
+        e.fund = asset(0, root_symbol);
+    });
+
     // bwtradegraph_index bwtradegraph(_me, host.value);
     // auto bwtrade0 = bwtradegraph.find(0);
     // auto bwtrade1 = bwtradegraph.find(1);
@@ -844,9 +854,6 @@ void next_pool( eosio::name host){
         // auto coredhist_start = coredhistory.find(pool_num);
         // coredhistory.erase(coredhist_start);
 
-    account_index accounts(_me, host.value);
-    auto acc = accounts.find(host.value);
-    accounts.erase(acc);
     
     // market_index market(_me, host.value);
     // auto itr = market.find(0);

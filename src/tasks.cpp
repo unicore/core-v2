@@ -59,43 +59,57 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
  	
  	incoming_index incoming (_me, doer.value);
 
- 	if (goal_id > 0) {
- 		eosio::check(task_id == 0, "If set goal as incoming, task_id is should be zero");
+ 	eosio::check(goal_id == 0, "If set task as incoming, goal_id is should be zero");
 
-	 	auto host_with_goal_index = incoming.template get_index<"byhostgoal"_n>();
-		auto goal_idx = combine_ids(host.value, task_id);
-		auto is_exist = host_with_goal_index.find(goal_idx);
+	auto host_with_task_index = incoming.template get_index<"byhosttask"_n>();
+	auto task_idx = combine_ids(host.value, task_id);
+	auto is_exist = host_with_task_index.find(task_idx);
 
-		if (is_exist == host_with_goal_index.end()) {
-			incoming.emplace(_me, [&](auto &d){
-				d.id = incoming.available_primary_key();
-				d.host = host;
-				d.task_id = task_id;
-				d.goal_id = goal_id;
-			});
-		}
+	if (is_exist == host_with_task_index.end()){
+		incoming.emplace(_me, [&](auto &d){
+			d.id = incoming.available_primary_key();
+			d.host = host;
+			d.task_id = task_id;
+			d.goal_id = goal_id;
+		});
+	}
+ 	// if (goal_id > 0) {
+ 	// 	eosio::check(task_id == 0, "If set goal as incoming, task_id is should be zero");
 
+	 // 	auto host_with_goal_index = incoming.template get_index<"byhostgoal"_n>();
+		// auto goal_idx = combine_ids(host.value, task_id);
+		// auto is_exist = host_with_goal_index.find(goal_idx);
 
- 	} else if (task_id > 0) {
- 		eosio::check(goal_id == 0, "If set task as incoming, goal_id is should be zero");
-
- 		auto host_with_task_index = incoming.template get_index<"byhosttask"_n>();
-		auto task_idx = combine_ids(host.value, task_id);
-		auto is_exist = host_with_task_index.find(task_idx);
-
-		if (is_exist == host_with_task_index.end()){
-			incoming.emplace(_me, [&](auto &d){
-				d.id = incoming.available_primary_key();
-				d.host = host;
-				d.task_id = task_id;
-				d.goal_id = goal_id;
-			});
-		}
+		// if (is_exist == host_with_goal_index.end()) {
+		// 	incoming.emplace(_me, [&](auto &d){
+		// 		d.id = incoming.available_primary_key();
+		// 		d.host = host;
+		// 		d.task_id = task_id;
+		// 		d.goal_id = goal_id;
+		// 	});
+		// }
 
 
- 	} else if (task_id == 0 && goal_id == 0){
- 		eosio::check(false, "Goal and task ids cannot be a zero both");
- 	};
+ 	// } else if (task_id > 0) {
+ 	// 	eosio::check(goal_id == 0, "If set task as incoming, goal_id is should be zero");
+
+ 	// 	auto host_with_task_index = incoming.template get_index<"byhosttask"_n>();
+		// auto task_idx = combine_ids(host.value, task_id);
+		// auto is_exist = host_with_task_index.find(task_idx);
+
+		// if (is_exist == host_with_task_index.end()){
+		// 	incoming.emplace(_me, [&](auto &d){
+		// 		d.id = incoming.available_primary_key();
+		// 		d.host = host;
+		// 		d.task_id = task_id;
+		// 		d.goal_id = goal_id;
+		// 	});
+		// }
+
+
+ 	// } else if (task_id == 0 && goal_id == 0){
+ 	// 	eosio::check(false, "Goal and task ids cannot be a zero both");
+ 	// };
 
 
 
@@ -445,6 +459,8 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		
 		eosio::check(task != tasks.end(), "Task is not found");
 
+		delincoming(task -> doer, host, 0, task_id);	
+
 		tasks.erase(task);
 
 	}
@@ -776,7 +792,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		uint64_t report_id;
 
 
-		if (user_report == users_with_id.end()){
+		if (user_report == users_with_id.end() || task -> is_regular == true){
 			
 			eosio::asset requested = task -> is_public == false ? task->requested : task->for_each;
 

@@ -439,7 +439,7 @@ using namespace eosio;
 
 		};
 
-    unicore::checkminpwr(host, buyer);
+    // unicore::checkminpwr(host, buyer);
 		
     return shares_out;
 	};
@@ -481,7 +481,7 @@ using namespace eosio;
     //   es.base.balance = asset((itr -> base).balance.amount + shares, eosio::symbol(eosio::symbol_code("POWER"), 0));
     // });
 
-    unicore::checkminpwr(host, from);
+    // unicore::checkminpwr(host, from);
 
   }
 
@@ -544,7 +544,7 @@ using namespace eosio;
       });      
     }   
 
-    unicore::checkminpwr(host, reciever);
+    // unicore::checkminpwr(host, reciever);
     
   }
 
@@ -745,7 +745,7 @@ using namespace eosio;
 	    	p.staked = userpower->staked - shares;
 	    });
 
-      unicore::checkminpwr(host, username);
+      // unicore::checkminpwr(host, username);
     
 	    
 	};

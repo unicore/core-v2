@@ -194,8 +194,8 @@
         
         uint64_t primary_key() const {return id;}
 
-        uint128_t byhosttask() const { return combine_ids(host.value, goal_id); }
-        uint128_t byhostgoal() const { return combine_ids(host.value, task_id); }
+        uint128_t byhosttask() const { return combine_ids(host.value, task_id); }
+        uint128_t byhostgoal() const { return combine_ids(host.value, goal_id); }
         uint64_t bymygoal() const { return my_goal_id; }
 
         EOSLIB_SERIALIZE(incoming, (id)(host)(goal_id)(task_id)(with_badge)(my_goal_id)(my_badge_id))

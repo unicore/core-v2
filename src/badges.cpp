@@ -93,7 +93,7 @@
 		
 		
 		if (netted == true) {
-			eosio::check(goal_id != 0 && task_id != 0, "Netted badge should have a goal and task ids");
+			eosio::check(goal_id != 0, "Netted badge should have a goal and task ids");
 			
 			//modify goal and task to increse badge_count
 			goals_index goals(_me, host.value);
