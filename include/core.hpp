@@ -90,6 +90,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void fundchildgoa(eosio::name architect, eosio::name host, uint64_t goal_id, eosio::asset amount);
         
         [[eosio::action]] void setgcreator(eosio::name oldcreator, eosio::name newcreator, eosio::name host, uint64_t goal_id);
+        
+        [[eosio::action]] void gaccept(eosio::name host, uint64_t goal_id, uint64_t parent_goal_id, bool status);
 
         [[eosio::action]] void delgoal(eosio::name username, eosio::name host, uint64_t goal_id);
         [[eosio::action]] void report(eosio::name username, eosio::name host, uint64_t goal_id, std::string report);
@@ -202,7 +204,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         
 
         //TASKS
-        [[eosio::action]] void settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, uint64_t expiration, bool is_batch, uint64_t parent_batch_id, bool is_regular, std::vector<uint64_t> calendar, eosio::time_point_sec start_at, std::string meta);
+        [[eosio::action]] void settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id, bool is_regular, std::vector<uint64_t> calendar, eosio::time_point_sec start_at,eosio::time_point_sec expired_at, std::string meta);
         [[eosio::action]] void fundtask(eosio::name host, uint64_t task_id, eosio::asset amount, eosio::string comment);
         [[eosio::action]] void tactivate(eosio::name host, uint64_t task_id);
         [[eosio::action]] void tdeactivate(eosio::name host, uint64_t task_id);

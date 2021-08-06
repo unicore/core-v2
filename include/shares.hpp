@@ -22,10 +22,10 @@
 
   struct [[eosio::table, eosio::contract("unicore")]] power2 {
     eosio::name host;
-    uint64_t emitted;
+    uint64_t frozen;
     uint64_t primary_key() const {return host.value;}
 
-    EOSLIB_SERIALIZE(struct power2, (host)(emitted))
+    EOSLIB_SERIALIZE(struct power2, (host)(frozen))
   };
 
   typedef eosio::multi_index<"power2"_n, power2> power2_index;

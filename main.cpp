@@ -284,7 +284,11 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::setgcreator);
                     break;
                  }
-
+                 case "gaccept"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::gaccept);
+                    break;
+                 }
+                 
                  case "paydebt"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::paydebt);
                     break;

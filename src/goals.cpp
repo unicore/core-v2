@@ -99,7 +99,9 @@ using namespace eosio;
         g.type = type;
         // g.hash = hash;
         g.creator = creator;
-        g.who_can_create_tasks = creator;
+        g.benefactor = creator == host ? host : ""_n;
+        g.status = creator == host ? "process"_n : ""_n;
+        // g.who_can_create_tasks = creator;
         g.created = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
         g.finish_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + duration);
         g.host = host;
@@ -108,6 +110,7 @@ using namespace eosio;
         g.title = title;
         g.description = description;
         g.target = target;
+        g.filled = target.amount == 0 ? true : false;
         g.target1 = asset(0, targets_symbol);
         g.target2 = asset(0, targets_symbol);
         g.target3 = asset(0, targets_symbol);
@@ -229,6 +232,47 @@ using namespace eosio;
       g.creator = newcreator;
       g.who_can_create_tasks = newcreator;
     });
+
+  }
+
+
+ 
+  [[eosio::action]] void unicore::gaccept(eosio::name host, uint64_t goal_id, uint64_t parent_goal_id, bool status) {
+    //accept or any
+    require_auth(host);
+    goals_index goals(_me, host.value);
+    
+    auto goal = goals.find(goal_id);
+    eosio::check(goal != goals.end(), "Goal is not exist");
+    
+    goals.modify(goal, host, [&](auto &g) {
+      g.benefactor = status == true ? host : ""_n;
+      g.status = status == true ? "process"_n : "declined"_n;
+      g.parent_id = parent_goal_id;
+    });
+
+    if (goal->is_batch == false){
+      eosio::check(parent_goal_id != 0, "Accepted goal should have a parent");
+    }
+
+    if (parent_goal_id != 0 && status == true) {
+      
+      auto parent_goal = goals.find(parent_goal_id);
+      eosio::check(parent_goal != goals.end(), "Parent batch is not founded");
+      std::vector<uint64_t> batch = parent_goal -> batch;
+      
+      //TODO check for batch length
+      auto itr = std::find(batch.begin(), batch.end(), goal_id);
+      
+      if (itr == batch.end()){
+        batch.push_back(goal_id);
+      };
+
+      goals.modify(parent_goal, host, [&](auto &t){
+        t.batch = batch;
+      });
+    };
+
 
   }
 

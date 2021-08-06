@@ -164,11 +164,11 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 	 *
 	 * @param[in]  op    The operation
 	 */
-	[[eosio::action]] void unicore::settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, uint64_t expiration, bool is_batch, uint64_t parent_batch_id, bool is_regular, std::vector<uint64_t> calendar, eosio::time_point_sec start_at, std::string meta){
+	[[eosio::action]] void unicore::settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id, bool is_regular, std::vector<uint64_t> calendar, eosio::time_point_sec start_at,eosio::time_point_sec expired_at, std::string meta){
 		
-		eosio::check(has_auth(creator) || has_auth(host), "missing required authority");
+		eosio::check(has_auth(creator) || has_auth(host) || has_auth(doer), "missing required authority");
     
-    auto payer = has_auth(creator) ? creator : host;
+    auto payer = has_auth(creator) ? creator : (has_auth(host) ? host : doer);
 
 
 		account_index accounts(_me, host.value);
@@ -288,11 +288,11 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 			//todo check calendar for 7 days
 
 			//TODO add incoming goal for doer			
-			if (doer != host) {
+			if (doer != host && doer != ""_n) {
 				setincoming(doer, host, 0, hash);	
 			};
 
-			
+
 			tasks.emplace(payer, [&](auto &t){
 				t.host = host;
 				t.creator = creator;
@@ -316,7 +316,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 				t.is_batch = is_batch;
 				t.meta = meta;
 				t.parent_batch_id = parent_batch_id;
-				t.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + expiration);
+				t.expired_at = expired_at;
 				t.created_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch());
 				t.start_at = start_at;
 				t.is_regular = is_regular;
@@ -347,27 +347,37 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 			}
 			
 			
-			if (exist_task -> doer != doer) {
+			if (exist_task -> doer != doer && doer != ""_n) {
 				delincoming(exist_task -> doer, host, 0, hash);	
 				setincoming(doer, host, 0, hash);	
 			};
 
 
 			tasks.modify(exist_task, payer, [&](auto &t){
-				t.title = title;
-				t.doer = doer;
-				t.data = data;
-				t.priority = priority;
-				t.requested = requested;
-				t.for_each = for_each;
-				t.is_public = is_public;
-				t.with_badge = with_badge;
-				t.badge_id = badge_id;
-				t.batch = batch;
-				t.calendar = calendar;
-				t.is_regular = is_regular;
-				t.start_at = start_at;
-				t.meta = meta;
+				if (payer == doer){
+
+					t.start_at = start_at;
+					t.expired_at = expired_at;
+				
+				} else {
+
+					t.title = title;
+					t.doer = doer;
+					t.data = data;
+					t.priority = priority;
+					t.requested = requested;
+					t.for_each = for_each;
+					t.is_public = is_public;
+					t.with_badge = with_badge;
+					t.badge_id = badge_id;
+					t.batch = batch;
+					t.calendar = calendar;
+					t.is_regular = is_regular;
+					t.start_at = start_at;
+					t.expired_at = expired_at;
+					t.meta = meta;
+				}
+				
 			});
 
 
@@ -459,6 +469,17 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		
 		eosio::check(task != tasks.end(), "Task is not found");
 
+
+		goals_index goals(_me, host.value);
+		auto goal = goals.find(task->goal_id);
+		eosio::check(goal != goals.end(), "Goal is not found");
+
+		goals.modify(goal, payer, [&](auto &g){
+    	g.total_tasks -= 1;
+    	g.target -= task->requested - task->funded;
+    });
+
+
 		delincoming(task -> doer, host, 0, task_id);	
 
 		tasks.erase(task);
@@ -519,7 +540,11 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 
 		
 		delincoming(task -> doer, host, 0, task_id);	
-		setincoming(doer, host, 0, task_id);	
+		
+		if (doer != ""_n && doer != host){
+			setincoming(doer, host, 0, task_id);		
+		}
+		
 
 		tasks.modify(task, host, [&](auto &t){
 			t.doer = doer;
@@ -609,8 +634,8 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		auto task_ids = combine_ids(doer.value, task->task_id);
 		auto is_exist = doers_with_tasks_index.find(task_ids);
 
-
-		setincoming(doer, host, 0, task_id);	
+		if (doer != host)
+			setincoming(doer, host, 0, task_id);	
 
 		if (is_exist == doers_with_tasks_index.end()){
 			doers.emplace(doer,[&](auto &d){
@@ -672,11 +697,16 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		eosio::check(task != tasks.end(), "Task is not found");
 
 		eosio::check(goal_id != 0, "Parent goal is not setted");
-		eosio::check( is_account( doer ), "user account does not exist");
+		
 				
 
 		delincoming(task -> doer, host, 0, task_id);	
-		setincoming(doer, host, 0, task_id);	
+
+		if (doer != ""_n && doer != host){
+			eosio::check( is_account( doer ), "user account does not exist");
+			setincoming(doer, host, 0, task_id);		
+		}
+		
 
 		tasks.modify(task, host, [&](auto &t){
 			t.validated = true;	

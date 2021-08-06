@@ -209,9 +209,22 @@ using namespace eosio;
     };
 
 
-    [[eosio::action]] void unicore::setahost(eosio::name host, eosio::name ahostname){
-        require_auth(host);
+    [[eosio::action]] void unicore::setahost( eosio::name host, eosio::name ahostname){
+        eosio::name payer;
 
+        conditions_index conditions(_me, host.value);
+        eosio::name keyname = name("condjoinhost");
+        auto condition = conditions.find(keyname.value);
+        
+
+        if (condition != conditions.end() && condition -> value == "architect"_n.value){
+            payer = host;
+            require_auth(host); 
+        } else {
+            eosio::check(has_auth(host) || has_auth(ahostname), "missing required authority");
+            payer = has_auth(host) ? host : ahostname;
+        }
+                
         ahosts_index coreahosts(_me, _me.value);
         auto corehost = coreahosts.find(host.value);
 
@@ -227,7 +240,7 @@ using namespace eosio;
         auto coreahost = coreahosts.find(ahostname.value);
         eosio::check(coreahost != coreahosts.end(), "Core ahost is not found");
 
-        ahosts.emplace(_me, [&](auto &a){
+        ahosts.emplace(payer, [&](auto &a){
             a.username = ahostname;
             a.type = coreahost -> type;
             a.title = coreahost -> title;
@@ -278,7 +291,21 @@ using namespace eosio;
     }
 
     [[eosio::action]] void unicore::rmahost(eosio::name host, eosio::name ahostname){
-        require_auth(host);
+        eosio::name payer;
+        
+        conditions_index conditions(_me, host.value);
+        eosio::name keyname = name("condjoinhost");
+        auto condition = conditions.find(keyname.value);
+        
+
+        if (condition != conditions.end() && condition -> value == "architect"_n.value){
+            payer = host;
+            require_auth(host); 
+        } else {
+            eosio::check(has_auth(host) || has_auth(ahostname), "missing required authority");
+            payer = has_auth(host) ? host : ahostname;
+        }
+
 
         ahosts_index coreahosts(_me, _me.value);
         auto corehost = coreahosts.find(host.value);

@@ -105,15 +105,19 @@ using namespace eosio;
         auto condition = conditions.find(keyname.value);
 
         if (condition == conditions.end()){
+            
             conditions.emplace(host, [&](auto &c){
                 c.key = keyname.value;
                 c.key_string = key;
                 c.value = value;
             });
+
         } else {
-            conditions.modify(condition, host, [&](auto &c){
+
+            conditions.modify(condition, host, [&](auto &c) {
                 c.value = value;
             });
+
         }
     }
 
