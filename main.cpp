@@ -289,6 +289,11 @@ extern "C" {
                     break;
                  }
                  
+                 case "gpause"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::gpause);
+                    break;
+                 }
+                 
                  case "paydebt"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::paydebt);
                     break;
@@ -585,6 +590,11 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::tactivate);
                     break;
                 }
+                case "tcomplete"_n.value:{
+                    execute_action(name(receiver), name(code), &unicore::tcomplete);
+                    break;
+                }
+
                 case "tdeactivate"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::tdeactivate);
                     break;

@@ -322,7 +322,7 @@ using namespace eosio;
     }
 
     [[eosio::action]] void unicore::setwebsite(eosio::name host, eosio::name ahostname, eosio::string website, eosio::name type, std::string meta){
-        require_auth(host);
+        require_auth(ahostname);
 
         ahosts_index coreahosts(_me, _me.value);
         auto corehost = coreahosts.find(ahostname.value);
@@ -339,7 +339,7 @@ using namespace eosio;
         }
 
         if (host.value == ahostname.value) {
-            coreahosts.modify(corehost, host, [&](auto &ch){
+            coreahosts.modify(corehost, ahostname, [&](auto &ch){
                 ch.website = website;
                 ch.hash = hash;
                 ch.type = type;
@@ -355,7 +355,7 @@ using namespace eosio;
         
         if (ahost == ahosts.end()){
             
-            ahosts.emplace(host,[&](auto &ah) {
+            ahosts.emplace(ahostname, [&](auto &ah) {
                 ah.username = coreahostbyusername -> username;
                 ah.is_host = coreahostbyusername -> is_host;
                 ah.title = coreahostbyusername -> title;
@@ -370,7 +370,7 @@ using namespace eosio;
 
         } else {
             
-            ahosts.modify(ahost, host, [&](auto &ah){
+            ahosts.modify(ahost, ahostname, [&](auto &ah){
                 ah.website = website;
                 ah.hash = hash;
                 ah.type = type;
@@ -517,19 +517,21 @@ using namespace eosio;
                 a.is_host = true;
                 a.manifest = "";
                 a.comments_is_enabled = false;
+                a.meta = meta;
             });
 
-            if (platform != _self){
-                ahosts_index ahosts(_me, platform.value);
-                ahosts.emplace(username, [&](auto &a){
-                    a.username = username;
-                    a.title = title;
-                    a.purpose = purpose;
-                    a.is_host = true;
-                    a.manifest = "";
-                    a.comments_is_enabled = false;
-                });
-            }
+            // if (platform != _self){
+            //     ahosts_index ahosts(_me, platform.value);
+            //     ahosts.emplace(username, [&](auto &a){
+            //         a.username = username;
+            //         a.title = title;
+            //         a.purpose = purpose;
+            //         a.is_host = true;
+            //         a.manifest = "";
+            //         a.comments_is_enabled = false;
+            //         a.meta = meta;
+            //     });
+            // }
         }
 
         emission_index emis(_me, username.value);

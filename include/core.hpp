@@ -92,6 +92,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void setgcreator(eosio::name oldcreator, eosio::name newcreator, eosio::name host, uint64_t goal_id);
         
         [[eosio::action]] void gaccept(eosio::name host, uint64_t goal_id, uint64_t parent_goal_id, bool status);
+        [[eosio::action]] void gpause(eosio::name host, uint64_t goal_id);
 
         [[eosio::action]] void delgoal(eosio::name username, eosio::name host, uint64_t goal_id);
         [[eosio::action]] void report(eosio::name username, eosio::name host, uint64_t goal_id, std::string report);
@@ -208,6 +209,9 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void fundtask(eosio::name host, uint64_t task_id, eosio::asset amount, eosio::string comment);
         [[eosio::action]] void tactivate(eosio::name host, uint64_t task_id);
         [[eosio::action]] void tdeactivate(eosio::name host, uint64_t task_id);
+
+        [[eosio::action]] void tcomplete(eosio::name host, uint64_t task_id);
+
         [[eosio::action]] void setpgoal(eosio::name host, uint64_t task_id, uint64_t goal_id);
         [[eosio::action]] void setdoer(eosio::name host, uint64_t task_id, eosio::name doer);
         

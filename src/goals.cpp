@@ -278,6 +278,21 @@ using namespace eosio;
 
 
 
+  [[eosio::action]] void unicore::gpause(eosio::name host, uint64_t goal_id) {
+    //accept or any
+    require_auth(host);
+    goals_index goals(_me, host.value);
+    
+    auto goal = goals.find(goal_id);
+    eosio::check(goal != goals.end(), "Goal is not exist");
+    
+    goals.modify(goal, host, [&](auto &g) {
+      g.status = ""_n;
+    });
+  }
+
+
+
   /**
    * @brief      Метод удаления цели
    *
@@ -290,7 +305,7 @@ using namespace eosio;
 		auto goal = goals.find(goal_id);
 		eosio::check(goal != goals.end(), "Goal is not exist");
     eosio::check(goal -> total_tasks == 0, "Impossible to delete goal with tasks. Clear tasks first");
-    eosio::check(goal->creator == username, "Wrong creator of goal");
+    eosio::check(goal->creator == username || username == host, "Wrong auth for del goal");
     eosio::check(goal->debt_count == 0, "Cannot delete goal with the debt");
 
 		goals.erase(goal);
@@ -305,20 +320,23 @@ using namespace eosio;
 	[[eosio::action]] void unicore::report(eosio::name username, eosio::name host, uint64_t goal_id, std::string report){
 		require_auth(username);
 		
-		// goals_index goals(_me, host.value);
+		goals_index goals(_me, host.value);
 	
-  // 	account_index accounts(_me, host.value);
-		// auto acc = accounts.find(host.value);
-		// eosio::check(acc != accounts.end(), "Host is not found");
+  	account_index accounts(_me, host.value);
+		auto acc = accounts.find(host.value);
+		eosio::check(acc != accounts.end(), "Host is not found");
 
-		// auto goal = goals.find(goal_id);
+		auto goal = goals.find(goal_id);
 
-		// eosio::check(username == goal->benefactor, "Only benefactor can set report");
+    eosio::check("process"_n == goal->status, "Only processed goals can be completed");
+    
+		eosio::check(username == goal->benefactor, "Only benefactor can set report");
 		
-		// goals.modify(goal, username, [&](auto &g){
-		// 	g.report = report;
-		// 	g.reported = true;
-		// });
+		goals.modify(goal, username, [&](auto &g){
+      g.status = "reported"_n;
+			g.report = report;
+      g.reported = true;
+		});
 	}
 
   /**
@@ -341,6 +359,7 @@ using namespace eosio;
 
 		goals.modify(goal, architect, [&](auto &g){
 			g.checked = true;
+      g.status = "completed"_n;
 		});
 
     accounts.modify(acc, architect, [&](auto &a){

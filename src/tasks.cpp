@@ -231,7 +231,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 
 			if (goal != goals.end()){
 				// eosio::check(goal -> who_can_create_tasks == creator || goal->who_can_create_tasks.value == 0, "Only creator can create task for current goal");
-				
+				eosio::check(goal -> status != "completed"_n, "Cannot add task to completed goal");
 				eosio::check(goal -> target.symbol == requested.symbol, "Requested symbol and goal symbol should equal");
 
 				goals.modify(goal, payer, [&](auto &g){
@@ -294,6 +294,8 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 
 
 			tasks.emplace(payer, [&](auto &t){
+				t.type = goal != goals.end() ? goal -> type : "goal"_n;
+
 				t.host = host;
 				t.creator = creator;
 				t.task_id = hash;
@@ -331,6 +333,9 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 	    
 		} else {
 
+			eosio::check(exist_task -> status != "completed"_n, "Only not completed tasks can be modified");
+			
+
 			goals_index goals(_me, host.value);
 			auto goal = goals.find(goal_id);
 			
@@ -354,13 +359,14 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 
 
 			tasks.modify(exist_task, payer, [&](auto &t){
-				if (payer == doer){
+				t.type = goal != goals.end() ? goal -> type : "goal"_n;
+
+				if (payer == doer) {
 
 					t.start_at = start_at;
 					t.expired_at = expired_at;
 				
 				} else {
-
 					t.title = title;
 					t.doer = doer;
 					t.data = data;
@@ -472,13 +478,15 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 
 		goals_index goals(_me, host.value);
 		auto goal = goals.find(task->goal_id);
-		eosio::check(goal != goals.end(), "Goal is not found");
-
-		goals.modify(goal, payer, [&](auto &g){
-    	g.total_tasks -= 1;
-    	g.target -= task->requested - task->funded;
-    });
-
+		
+		// eosio::check(goal != goals.end(), "Goal is not found");
+		
+		if (goal != goals.end()) {
+			goals.modify(goal, payer, [&](auto &g){
+	    	g.total_tasks -= 1;
+	    	g.target -= task->requested - task->funded;
+	    });
+		}
 
 		delincoming(task -> doer, host, 0, task_id);	
 
@@ -762,6 +770,34 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		eosio::check(task->active == true, "Task is already deactivated");
 
 		tasks.modify(task, host, [&](auto &t){
+			t.active = false;
+		});
+
+	}
+
+
+	/**
+	 * @brief      Публичный метод деактивации задачи
+	 * Применимо для публичных задач, когда поставленная цель достигнута или недостижима.
+	 * @param[in]  op    The operation
+	 */
+	[[eosio::action]] void unicore::tcomplete(eosio::name host, uint64_t task_id){
+		require_auth(host);
+		account_index accounts(_me, host.value);
+		auto acc = accounts.find(host.value);
+		eosio::check(acc != accounts.end(), "Host is not found");
+
+		tasks_index tasks(_me, host.value);
+
+		auto task = tasks.find(task_id);
+
+		eosio::check(task != tasks.end(), "Task is not found");
+
+		// eosio::check(task-> completed == true, "Task is already completed");
+
+		tasks.modify(task, host, [&](auto &t) {
+			t.status = "completed"_n;
+			t.completed = true;
 			t.active = false;
 		});
 
