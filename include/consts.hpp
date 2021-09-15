@@ -6,7 +6,7 @@
   #define TOTAL_SEGMENTS 1000000000
   #define MAX_CORE_HISTORY_LENGTH 1000
 
-  static constexpr eosio::symbol _SYM     = eosio::symbol(eosio::symbol_code("FLO"), 4);
+  static constexpr eosio::symbol _SYM     = eosio::symbol(eosio::symbol_code("FLOWER"), 4);
   static constexpr eosio::symbol _POWER     = eosio::symbol(eosio::symbol_code("POWER"), 0);
 
   static constexpr uint64_t _DATA_ORDER_EXPIRATION = 86400;
