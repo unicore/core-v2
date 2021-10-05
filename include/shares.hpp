@@ -32,6 +32,40 @@
 
 
 
+  
+/*!
+   \brief Обновленная структура силы пользователя у хоста Двойной Спирали.
+*/
+
+  struct [[eosio::table, eosio::contract("unicore")]] power3 {
+    eosio::name username;
+    uint64_t power;
+    uint64_t staked;
+    uint64_t delegated;
+    uint64_t with_badges;
+    uint64_t frozen;
+
+    uint64_t primary_key() const {return username.value;}
+
+    uint64_t bypower() const {return power;}
+    uint64_t bystaked() const {return staked;}
+    uint64_t bydelegated() const {return delegated;}
+    uint64_t bywbadges() const {return with_badges;}
+    uint64_t byfrozen() const {return frozen;}
+
+    EOSLIB_SERIALIZE(struct power3, (username)(power)(staked)(delegated)(with_badges)(frozen))
+  };
+
+  typedef eosio::multi_index<"power3"_n, power3,
+    eosio::indexed_by<"bypower"_n, eosio::const_mem_fun<power3, uint64_t, &power3::bypower>>,
+    eosio::indexed_by<"bystaked"_n, eosio::const_mem_fun<power3, uint64_t, &power3::bystaked>>,
+    eosio::indexed_by<"bydelegated"_n, eosio::const_mem_fun<power3, uint64_t, &power3::bydelegated>>,
+    eosio::indexed_by<"bywbadges"_n, eosio::const_mem_fun<power3, uint64_t, &power3::bywbadges>>,
+    eosio::indexed_by<"byfrozen"_n, eosio::const_mem_fun<power3, uint64_t, &power3::byfrozen>>
+  > power3_index;
+
+
+
 /*!
    \brief Структура статистики распределения безусловного потока жетонов хоста Двойной Спирали. 
 */

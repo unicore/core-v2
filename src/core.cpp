@@ -833,8 +833,8 @@ void next_pool( eosio::name host){
 [[eosio::action]] void unicore::fixs(eosio::name host, uint64_t pool_num){
     require_auth(_me);
     
-    // account_index accounts(_me, host.value);
-    // auto acc = accounts.find(host.value);
+    account_index accounts(_me, host.value);
+    auto acc = accounts.find(host.value);
     // auto root_symbol = acc -> get_root_symbol();
 
     // emission_index emis(_me, host.value);
@@ -859,18 +859,21 @@ void next_pool( eosio::name host){
     auto itr = market.find(0);
     
     market.modify(itr, _me, [&](auto &m){
-        m.base.balance = itr -> base.balance / 1000;
+        m.base.balance = asset(1000000000, _POWER);
+        m.quote.balance = asset(10000000000, acc ->quote_amount.symbol);
     });
 
     // market.erase(itr);
 
-    // accounts.modify(acc, _me, [&](auto &a){
+    accounts.modify(acc, _me, [&](auto &a){
+        a.quote_amount = asset(10000000000, acc ->quote_amount.symbol);
+        a.total_shares = acc -> total_shares - 1000000 + 1000000000;
         // a.parameters_setted = false;
         // a.activated = false;
         // a.payed = true;
         // a.sale_is_enabled = false;
         // a.power_market_id = "self"_n;
-    // });
+    });
 
     // spiral_index spiral(_me, host.value);
     // auto sp = spiral.find(0);
@@ -2260,7 +2263,6 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
     
     auto host_on_fund = by_fund_and_host.find(by_fund_and_host_ids);
 
-
     eosio::check(host_on_fund == by_fund_and_host.end(), "Host is already connected");
     
     hostsonfunds.emplace(_me, [&](auto &h){
@@ -2517,7 +2519,7 @@ void unicore::createfund(eosio::name token_contract, eosio::asset fund_asset, st
     //     } 
     // } else if (acc -> sale_mode == "counterpower"_n){
         
-    //     uint64_t shares_out = unicore::buyshares_action ( username, host, bal->if_convert, acc->quote_token_contract );
+    //     uint64_t shares_out = unicore::buyshares_action ( username, host, bal->if_convert, acc->quote_token_contract, false );
     //     unicore::add_coredhistory(host, username, acc->current_pool_id, asset(shares_out, _POWER), "convert", "");
 
     // }
@@ -2576,7 +2578,7 @@ void unicore::buy_account(eosio::name username, eosio::name host, eosio::asset q
         // account_index accounts(_me, host.value);
         // auto acc = accounts.find(host.value);
 
-        // uint64_t asset_minpower2 = buyshares_action (username, host, power_buy_for, acc -> quote_token_contract );
+        // uint64_t asset_minpower2 = buyshares_action (username, host, power_buy_for, acc -> quote_token_contract, false );
         // print("asset_minpower2: ", asset_minpower2);
 
     } else {
@@ -2687,14 +2689,39 @@ void unicore::burn_action(eosio::name username, eosio::name host, eosio::asset q
     unicore::add_coredhistory(host, username, pool -> id, quantity, "burn", "");    
     unicore::change_bw_trade_graph(host, pool -> id, pool -> cycle_num, pool -> pool_num, rate -> buy_rate, next_rate -> buy_rate, pool -> total_quants, pool -> remain_quants, pool -> color);
     
-    unicore::check_burn_status(host, username, quantity);
+    unicore::refresh_state(host);
 
     //spread amount calculated from quants for buy and part of system income:
-
-    unicore::spread_to_funds(host, quants, username);
+    //----
+    // unicore::check_burn_status(host, username, quantity);
+    // unicore::spread_to_funds(host, quants, username);
+    //----
     
-    unicore::refresh_state(host);
-        
+    
+}
+
+
+
+/**
+ * @brief Публичный метод сжигания квантов по текущему курсу из числа квантов раунда.
+ *
+*/
+
+void unicore::spread_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code){
+    
+    account_index accounts(_me, host.value);
+    auto acc = accounts.find(host.value);
+    
+    eosio::check(acc != accounts.end(), "Host is not found");
+    
+    //spread amount calculated from quants for buy and part of system income:
+    //----
+    
+    unicore::spread_to_funds(host, quantity, username);
+    unicore::check_burn_status(host, username, quantity);
+    
+    //----
+    
     
 }
 
@@ -2785,9 +2812,9 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
     
     //spread amount calculated from quants for buy and part of system income:
 
-    if (spread_to_funds == true) {
-        unicore::spread_to_funds(host, quants, username);
-    }
+    // if (spread_to_funds == true) {
+    //     unicore::spread_to_funds(host, quants, username);
+    // }
 
     unicore::refresh_state(host);
     
@@ -3130,7 +3157,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
 
                     } else if (acc -> sale_mode == "counterpower"_n ){
                     
-                        uint64_t shares_out = unicore::buyshares_action ( username, host, bal->if_convert, acc->quote_token_contract );
+                        uint64_t shares_out = unicore::buyshares_action ( username, host, bal->if_convert, acc->quote_token_contract, false );
                         unicore::add_coredhistory(host, username, last_pool -> id, asset(shares_out, _POWER), "p-withdraw", "");    
                     }
 
@@ -3167,10 +3194,14 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
              */
 
             for (auto level : acc->levels) {
-                if ((ref != refs.end()) && ((ref->referer).value != 0)) {
-                    uint128_t to_ref_segments = spread_amount.amount * TOTAL_SEGMENTS * level / 100 / ONE_PERCENT;
+                if ((ref != refs.end()) && ((ref->referer).value != 0)) { 
+                    uint64_t to_ref_segments = spread_amount.amount * level / 100 / ONE_PERCENT;
+                    print("to_ref_segments", to_ref_segments);
+                    eosio::asset to_ref_amount = asset(to_ref_segments, spread_amount.symbol);
+                    print("to_ref_amount", to_ref_amount);
+                    print("referer: ", referer);
 
-                    eosio::asset to_ref_amount = asset(to_ref_segments / TOTAL_SEGMENTS, spread_amount.symbol);
+                    
                     refbalances_index refbalances(_me, referer.value);
                     
                     refbalances.emplace(_me, [&](auto &rb){
@@ -3184,7 +3215,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                         rb.level = count;
                         rb.percent = level;
                         rb.cashback = ref->cashback;
-                        rb.segments = (double)to_ref_segments;
+                        rb.segments = (double)to_ref_segments * TOTAL_SEGMENTS;
                     });
 
  
@@ -3259,7 +3290,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
 
     };
 
-    void unicore::spread_to_funds(eosio::name host, uint64_t quants, eosio::name referal) {
+    void unicore::spread_to_funds(eosio::name host, eosio::asset total, eosio::name referal) {
         gpercents_index gpercents(_me, _me.value);
         auto syspercent = gpercents.find("system"_n.value);
         eosio::check(syspercent != gpercents.end(), "Contract is not active");
@@ -3269,6 +3300,12 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         auto main_host = acc->get_ahost();
         auto root_symbol = acc->get_root_symbol();
 
+        eosio::asset total_dac_asset;
+        eosio::asset total_cfund_asset;
+        eosio::asset total_hfund_asset;
+        eosio::asset total_sys_asset;
+        
+
         spiral_index spiral(_me, host.value);
         auto sp = spiral.find(0);
 
@@ -3277,44 +3314,84 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         auto middle_rate = rates.find(acc -> current_pool_num);
         auto finish_rate = rates.find(acc -> current_pool_num + 1);
 
-        uint64_t total = uint64_t((double)quants * (double)start_rate -> buy_rate / (double)sp -> quants_precision);
-        
-        double total_ref = (total * (double)(acc->referral_percent)) / ((double)HUNDR_PERCENT);
+        // uint64_t total = uint64_t((double)quants * (double)start_rate -> buy_rate) / sp -> quants_precision;
+        // print("buy_rate", start_rate -> buy_rate);
+
+
+        double total_ref = ((double)total.amount * (double)(acc->referral_percent)) / ((double)HUNDR_PERCENT);
         double total_ref_min_sys = total_ref * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
         double total_ref_sys = total_ref * syspercent -> value / HUNDR_PERCENT;
 
 
+        double total_dac = (double)total.amount * (double)(acc->dacs_percent) / (double)HUNDR_PERCENT;
+        double total_dac_min_sys = total_dac * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
+        double total_dac_sys = total_dac * syspercent -> value/ HUNDR_PERCENT;
+    
+
+        double total_cfund = (double)total.amount * (double)(acc->cfund_percent) / ((double)HUNDR_PERCENT);
+        double total_cfund_min_sys = total_cfund * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
+        double total_cfund_sys = total_cfund * syspercent -> value/ HUNDR_PERCENT;
+
+
+        double total_hfund = (double)total.amount * (double)(acc->hfund_percent) / (double)HUNDR_PERCENT;  
+        double total_hfund_min_sys = total_hfund * (HUNDR_PERCENT - syspercent -> value) / HUNDR_PERCENT;
+        double total_hfund_sys = total_hfund * syspercent -> value/ HUNDR_PERCENT;
+    
+
         eosio::asset asset_ref_amount = asset((uint64_t)total_ref_min_sys, root_symbol);
 
-
-        //PAY all LOSE amount to refs cause this amount never will be withdrawed by participant
-        //TODO calculate sediment and pay it too
-
-        // double lost_amount = (double)quants * (double)middle_rate -> sell_rate / (double)sp -> quants_precision / (double)sp->size_of_pool * (double)finish_rate -> payment_to_wins.amount;
-        // eosio::asset lost_amount_asset = asset((uint64_t)lost_amount, root_symbol);
-
-        double lost_amount = (double)total - (double)total * (double)sp -> loss_percent / (double)HUNDR_PERCENT;
-        eosio::asset lost_amount_asset = asset((uint64_t)lost_amount, root_symbol);
-
-        // double lost_amount = (double)total - (double)quants * (double)middle_rate -> delta.amount / (double)sp -> quants_precision;
-        // eosio::asset lost_amount_asset = asset((uint64_t)lost_amount, root_symbol);
-
-        // double lost_amount = (double)quants * (double)finish_rate -> sell_rate / (double)finish_rate -> buy_rate  / (double)sp -> quants_precision / (double)sp->size_of_pool * (double)finish_rate -> payment_to_wins.amount;
-
-        // double lost_amount = (double)quants * (double)finish_rate -> sell_rate / (double)finish_rate -> buy_rate  / (double)sp -> quants_precision / (double)sp->size_of_pool * ;
-
-        eosio::asset total_asset_amount = asset(total, root_symbol);
         
-        print("on_burn_amount: ", total_asset_amount);
+        total_dac_asset = asset((uint64_t)total_dac_min_sys, root_symbol);
+        total_cfund_asset = asset((uint64_t)total_cfund_min_sys, root_symbol);
+        total_hfund_asset = asset((uint64_t)total_hfund_min_sys, root_symbol);
+        
+        
+        double total_sys = total_dac_sys + total_cfund_sys + total_hfund_sys + total_ref_sys;
+        total_sys_asset = asset((uint64_t)total_sys, root_symbol);
+
+
+        // eosio::asset total_asset_amount = asset(total, root_symbol);
+        
+        // print("on_burn_amount: ", total_asset_amount);
         print("ref_amount: ", asset_ref_amount);
-        print("lost_amount: ", lost_amount_asset);
+
+        // print("lost_amount: ", lost_amount_asset);
         
 
         //REFS 
-        unicore::spread_to_refs(host, referal, asset_ref_amount + lost_amount_asset, asset_ref_amount + lost_amount_asset);
-
-        //TODO write burned sincome to another table? 
+        if (asset_ref_amount.amount > 0) {
+            unicore::spread_to_refs(host, referal, asset_ref_amount, asset_ref_amount);
+        }
         
+        if (total_dac_asset.amount > 0) {
+            //TODO check enabled condition auto buy shares from market here?
+            uint64_t asset_minpower2 = buyshares_action (referal, host, total_dac_asset, acc -> quote_token_contract, true );
+
+
+            unicore::spread_to_dacs(host, total_dac_asset);
+        }
+        
+        if (total_cfund_asset.amount > 0) {
+            emission_index emis(_me, host.value);
+            auto emi = emis.find(host.value);
+            eosio::check(emi != emis.end(), "Emission pool for current host is not found");
+            
+            emis.modify(emi, _me, [&](auto &e) {
+                e.fund += total_cfund_asset;
+            });
+        }
+        
+        if (total_sys_asset.amount > 0) {
+            // Выплаты на системный аккаунт сообщества. 
+            action(
+                permission_level{ _me, "active"_n },
+                "eosio"_n, "inprodincome"_n,
+                std::make_tuple( acc -> root_token_contract, total_sys_asset) 
+            ).send();
+
+        };
+
+
 
         market_index market(_me, host.value);
         auto itr = market.find(0);
@@ -3323,50 +3400,37 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         sincome_index sincome(_me, host.value);
         auto sinc = sincome.find(acc->current_pool_id);
 
-
-        sincome2_index sincome2(_me, host.value);
-        auto sinc2 = sincome2.find(acc->current_pool_id);
-
-        if (sinc2 == sincome2.end()) {
-            
-            sincome2.emplace(_me, [&](auto &s) {
-                s.pool_id = acc->current_pool_id;
-                s.burned_loss_amount = lost_amount_asset;
-            });
-
-        } else {
-
-            sincome2.modify(sinc2, _me, [&](auto &s) {
-                s.burned_loss_amount += lost_amount_asset;
-            });
-
-        };
-
         
         if (sinc == sincome.end()){
             
             sincome.emplace(_me, [&](auto &s){
                 s.pool_id = acc->current_pool_id;
-                s.max = start_rate -> system_income + asset_ref_amount;
+                s.max = start_rate -> system_income;
                 s.ahost = main_host;
                 s.cycle_num = acc->current_cycle_num;
                 s.pool_num = acc->current_pool_num;
                 s.liquid_power = liquid_power;
-                s.total = asset_ref_amount;
-                s.paid_to_sys = asset(0, root_symbol);
-                s.paid_to_dacs = asset(0, root_symbol);
-                s.paid_to_cfund = asset(0, root_symbol);
-                s.paid_to_hfund = asset(0, root_symbol);
+                s.total = total;
+                s.paid_to_sys = total_sys_asset;
+                s.paid_to_dacs = total_dac_asset;
+                s.paid_to_cfund = total_cfund_asset;
+                s.paid_to_hfund = total_hfund_asset;
                 s.paid_to_refs = asset_ref_amount;
-                s.hfund_in_segments = 0;
+                s.hfund_in_segments = total_hfund_asset.amount * TOTAL_SEGMENTS;
                 s.distributed_segments = 0;
             }); 
 
         } else {
 
             sincome.modify(sinc, _me, [&](auto &s){
-                s.total += asset_ref_amount;
+                s.total += total;
                 s.paid_to_refs += asset_ref_amount;
+                s.paid_to_sys += total_sys_asset;
+                s.paid_to_dacs += total_dac_asset;
+                s.paid_to_cfund += total_cfund_asset;
+                s.paid_to_hfund += total_hfund_asset;
+                s.hfund_in_segments += total_hfund_asset.amount * TOTAL_SEGMENTS;
+                
             });
 
         }

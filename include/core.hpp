@@ -160,9 +160,11 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
         static void spread_to_dacs(eosio::name host, eosio::asset amount);
 
-        static void spread_to_funds(eosio::name host, uint64_t quants, eosio::name referal);
+        static void spread_to_funds(eosio::name host, eosio::asset quantity, eosio::name referal);
 
         static void spread_to_refs(eosio::name host, eosio::name username, eosio::asset spread_amount, eosio::asset from_amount);
+
+        static void spread_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code);
 
         [[eosio::action]] void withdrdacinc(eosio::name username, eosio::name host);
         [[eosio::action]] void setwebsite(eosio::name host, eosio::name ahostname, eosio::string website, eosio::name type, std::string meta);
@@ -200,7 +202,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void withdrawsh(eosio::name owner, uint64_t id);
         [[eosio::action]] void sellshares(eosio::name username, eosio::name host, uint64_t shares);
         [[eosio::action]] void undelshares(eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares);
-        static uint64_t buyshares_action ( eosio::name buyer, eosio::name host, eosio::asset amount, eosio::name code );
+        static uint64_t buyshares_action ( eosio::name buyer, eosio::name host, eosio::asset amount, eosio::name code, bool is_frozen );
         static void delegate_shares_action(eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares);
         
 

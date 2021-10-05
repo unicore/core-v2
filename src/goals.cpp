@@ -81,18 +81,37 @@ using namespace eosio;
         eosio::check(parent_goal != goals.end(), "Parent batch is not founded");
         std::vector<uint64_t> batch = parent_goal -> batch;
         
+        //
         //TODO check for batch length
         auto itr = std::find(batch.begin(), batch.end(), hash);
         
         if (itr == batch.end()){
           batch.push_back(hash);
-        };
+        } 
 
         goals.modify(parent_goal, creator, [&](auto &t){
           t.batch = batch;
         });
       };
 
+
+      if (exist_goal -> parent_id != parent_batch_id){
+        auto parent_goal = goals.find(parent_batch_id);
+
+        if (parent_goal != goals.end()){
+
+          std::vector<uint64_t> batch = parent_goal -> batch;
+          
+          auto itr = std::find(batch.begin(), batch.end(), exist_goal->id);
+          if (itr != batch.end())
+            batch.erase(itr);
+
+          goals.modify(parent_goal, creator, [&](auto &g){
+            g.batch = batch;
+          });
+        }
+      }
+      
 
       goals.emplace(creator, [&](auto &g){
         g.id = hash;
@@ -135,6 +154,7 @@ using namespace eosio;
         g.who_can_create_tasks = creator;
         g.host = host;
         g.permlink = permlink;
+        g.parent_id = parent_batch_id;
         g.cashback = cashback;
         g.title = title;
         g.description = description;
@@ -308,6 +328,23 @@ using namespace eosio;
     eosio::check(goal->creator == username || username == host, "Wrong auth for del goal");
     eosio::check(goal->debt_count == 0, "Cannot delete goal with the debt");
 
+    if (goal ->parent_id != 0){
+      auto parent_goal = goals.find(goal->parent_id);
+
+      if (parent_goal != goals.end()){
+
+        std::vector<uint64_t> batch = parent_goal -> batch;
+          
+        auto itr = std::find(batch.begin(), batch.end(), goal_id);
+        if (itr != batch.end())
+          batch.erase(itr);
+
+        goals.modify(parent_goal, username, [&](auto &g){
+          g.batch = batch;
+        });
+      }
+    }
+
 		goals.erase(goal);
 
 	}
@@ -457,7 +494,7 @@ using namespace eosio;
           if (acc -> sale_mode == "counterpower"_n) {
 
             converted_quantity = unicore::buy_action(from, host, core_quantity, acc->root_token_contract, false, false, false);
-            uint64_t shares_out = unicore::buyshares_action ( from, host, converted_quantity, acc->quote_token_contract );
+            uint64_t shares_out = unicore::buyshares_action ( from, host, converted_quantity, acc->quote_token_contract, false );
             target2= asset(goal->target2.amount + shares_out, _POWER);
           
           } else if (acc -> sale_mode == "counterunit"_n) {

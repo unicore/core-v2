@@ -3,8 +3,8 @@ using namespace eosio;
     //add to AWL
 
     void unicore::checkminpwr(eosio::name host, eosio::name username){
-        power_index upower(_me, username.value);
-        auto hp = upower.find(host.value);
+        power3_index upower(_me, host.value);
+        auto hp = upower.find(username.value);
 
         if (hp != upower.end()){
             if (unicore::checkcondition(host, "minpower", hp->staked + hp->with_badges))
@@ -19,11 +19,32 @@ using namespace eosio;
 
     void unicore::check_burn_status(eosio::name host, eosio::name username, eosio::asset burn_amount){
         uint64_t minburn = unicore::getcondition(host, "minburn");
+        uint64_t threemburn = unicore::getcondition(host, "threemburn");
+        uint64_t sixmburn = unicore::getcondition(host, "sixmburn");
+        uint64_t ninemburn = unicore::getcondition(host, "ninemburn");
+        uint64_t twelvemburn = unicore::getcondition(host, "twelvemburn");
+
         uint64_t burnperiod = unicore::getcondition(host, "burnperiod");
 
-        uint64_t times = burn_amount.amount / minburn;
-        print("times", times, burn_amount, minburn);
-
+        uint64_t times = 0;
+        
+        if (burn_amount.amount >= twelvemburn * 12){
+            times = burn_amount.amount / twelvemburn;
+            print("times: ", 12, times);
+        } else if (burn_amount.amount >= ninemburn * 9){
+            times = burn_amount.amount / ninemburn;
+            print("times: ", 9, times);
+        } else if (burn_amount.amount >= sixmburn * 6) {
+            times = burn_amount.amount / sixmburn;
+            print("times: ", 6, times);
+        } else if (burn_amount.amount >= threemburn * 3){
+            times = burn_amount.amount / threemburn;
+            print("times: ", 3, times);
+        } else if (burn_amount.amount >= minburn) {
+            times = burn_amount.amount / minburn;
+            print("times: ", 1, times);
+        } 
+        
         if (times > 0 && username != "eosio"_n) {
 
             cpartners2_index partners(_me, host.value);

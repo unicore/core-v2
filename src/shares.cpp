@@ -145,15 +145,13 @@ using namespace eosio;
   */
   [[eosio::action]] void unicore::refreshpu(eosio::name username, eosio::name host){
     require_auth(username);
-    power_index power(_me, username.value);
-    // auto pexist = power.find(host);
+    
     account_index account(_me, host.value);
 
     auto acc = account.find(host.value);
     auto root_symbol = acc->get_root_symbol();
     eosio::check(acc != account.end(), "Host is not found");
-    // eosio::check(pexist != power.end(), "User never have any power");
-
+    
 
     pstats_index pstats(_me, username.value);
     auto pstat = pstats.find(host.value);
@@ -389,7 +387,7 @@ using namespace eosio;
    * @param[in]  host    The host
    * @param[in]  amount  The amount
    */
-	uint64_t unicore::buyshares_action ( eosio::name buyer, eosio::name host, eosio::asset amount, eosio::name code ){
+	uint64_t unicore::buyshares_action ( eosio::name buyer, eosio::name host, eosio::asset amount, eosio::name code, bool is_frozen ){
 		account_index accounts(_me, host.value);
 		partners2_index users(_partners,_partners.value);
     auto user = users.find(buyer.value);
@@ -413,17 +411,23 @@ using namespace eosio;
 
     eosio::check( shares_out > 0, "Amount is not enought for buy 1 share" );
 
-    power_index power(_me, buyer.value);
+    power3_index power(_me, host.value);
 
-    auto pexist = power.find(host.value);
+    auto pexist = power.find(buyer.value);
     
 
     if (pexist == power.end()){
+
       power.emplace(_me, [&](auto &p){
-      	p.host = host;
+      	p.username = buyer;
       	p.power = shares_out;
-      	p.staked = shares_out;	
+      	if (is_frozen == false){
+          p.staked = shares_out;	
+        } else {
+          p.frozen = shares_out;
+        }
       });
+
       log_event_with_shares(buyer, host, shares_out);
 		
     } else {
@@ -433,10 +437,12 @@ using namespace eosio;
 
 			power.modify(pexist, _me, [&](auto &p){
 				p.power += shares_out;
-				p.staked += shares_out;
+        if (is_frozen == false){
+				  p.staked += shares_out;
+        } else {
+          p.frozen += shares_out;
+        }
 			});
-		
-
 		};
 
     // unicore::checkminpwr(host, buyer);
@@ -458,8 +464,8 @@ using namespace eosio;
     auto acc = accounts.find(host.value);
     eosio::check(acc != accounts.end(), "Host is not found");
     
-    power_index power_to_idx (_me, from.value);
-    auto power_to = power_to_idx.find(host.value);
+    power3_index power_to_idx (_me, host.value);
+    auto power_to = power_to_idx.find(from.value);
       
     //modify
     unicore::propagate_votes_changes(host, from, power_to->power, power_to->power - shares);
@@ -498,8 +504,8 @@ using namespace eosio;
     auto acc = accounts.find(host.value);
     eosio::check(acc != accounts.end(), "Host is not found");
     
-    power_index power_to_idx (_me, reciever.value);
-    auto power_to = power_to_idx.find(host.value);
+    power3_index power_to_idx (_me, host.value);
+    auto power_to = power_to_idx.find(reciever.value);
     
     if (shares > 0){
 
@@ -522,10 +528,11 @@ using namespace eosio;
     // });
 
     //Emplace or modify power object of reciever and propagate votes changes;
-    if (power_to == power_to_idx.end()){
+    if (power_to == power_to_idx.end()) {
+
       log_event_with_shares(reciever, host, shares);
       power_to_idx.emplace(_me, [&](auto &pt){
-        pt.host = host;
+        pt.username = reciever;
         pt.power = shares;
         pt.delegated = 0;
         pt.with_badges = shares;
@@ -557,22 +564,22 @@ using namespace eosio;
 
 	void unicore::delegate_shares_action(eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares){
 	 	require_auth(from);
-		power_index power_from_idx (_me, from.value);
-		power_index power_to_idx (_me, reciever.value);
+		power3_index power_from_idx (_me, host.value);
+		power3_index power_to_idx (_me, host.value);
 
 		delegation_index delegations(_me, from.value);
 		
 		account_index accounts(_me, host.value);
 		auto acc = accounts.find(host.value);
 
-		auto power_from = power_from_idx.find(host.value);
+		auto power_from = power_from_idx.find(from.value);
 		eosio::check(power_from != power_from_idx.end(),"Nothing to delegatee");
 		eosio::check(power_from -> power > 0, "Nothing to delegate");
 		eosio::check(shares > 0, "Delegate amount must be greater then zero");
 		eosio::check(shares <= power_from->staked, "Not enough staked power for delegate");
 		
 		auto dlgtns = delegations.find(reciever.value);
-		auto power_to = power_to_idx.find(host.value);
+		auto power_to = power_to_idx.find(reciever.value);
 
 		if (dlgtns == delegations.end()){
 
@@ -601,7 +608,7 @@ using namespace eosio;
 		//Emplace or modify power object of reciever and propagate votes changes;
 		if (power_to == power_to_idx.end()){
 			power_to_idx.emplace(_me, [&](auto &pt){
-				pt.host = host;
+				pt.username = reciever;
 				pt.power = shares;
 				pt.delegated = shares;		
 			});
@@ -664,8 +671,8 @@ using namespace eosio;
 	[[eosio::action]] void unicore::undelshares(eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares){
 		require_auth(reciever);
 
-		power_index power_from_idx (_me, from.value);
-		power_index power_to_idx (_me, reciever.value);
+		power3_index power_from_idx (_me, host.value);
+		power3_index power_to_idx (_me, host.value);
 
 		delegation_index delegations(_me, reciever.value);
 		auto dlgtns = delegations.find(from.value);
@@ -674,8 +681,8 @@ using namespace eosio;
 		eosio::check(dlgtns -> shares >= shares, "Not enought shares for undelegate");
 		eosio::check(shares > 0, "Undelegate amount must be greater then zero");
 		
-		auto power_from = power_from_idx.find(host.value);
-		auto power_to = power_to_idx.find(host.value);
+		auto power_from = power_from_idx.find(from.value);
+		auto power_to = power_to_idx.find(reciever.value);
 
 		if (dlgtns->shares - shares == 0){
 			delegations.erase(dlgtns);
@@ -720,8 +727,8 @@ using namespace eosio;
     account_index accounts(_me, host.value);
     auto exist = accounts.find(host.value);
     
-		power_index power(_me, username.value);
-		auto userpower = power.find(host.value);
+		power3_index power(_me, host.value);
+		auto userpower = power.find(username.value);
 		auto upower = (userpower->staked);
 		eosio::check(upower >= shares, "Not enought power available for sell");
 

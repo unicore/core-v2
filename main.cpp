@@ -130,7 +130,7 @@ extern "C" {
                             //auto cd = name(code.c_str());
                             //Buy Shares
                             auto host = name(parameter.c_str());
-                            unicore::buyshares_action(op.from, host, op.quantity, name(code));
+                            unicore::buyshares_action(op.from, host, op.quantity, name(code), false);
                             break;
                         }
                         case 300: {
@@ -254,6 +254,18 @@ extern "C" {
                             auto host = name(parameter.c_str());
                             
                             unicore::burn_action(op.from, host, op.quantity, name(code));
+
+                            break;
+                        };
+                        case 900: {
+                            //SPREAD
+                            
+                            //direct buy saled quants
+                            require_auth(op.from);
+
+                            auto host = name(parameter.c_str());
+                            
+                            unicore::spread_action(op.from, host, op.quantity, name(code));
 
                             break;
                         }

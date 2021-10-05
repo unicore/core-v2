@@ -361,7 +361,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 			tasks.modify(exist_task, payer, [&](auto &t){
 				t.type = goal != goals.end() ? goal -> type : "goal"_n;
 
-				if (payer == doer) {
+				if (payer == doer && payer != host) {
 
 					t.start_at = start_at;
 					t.expired_at = expired_at;

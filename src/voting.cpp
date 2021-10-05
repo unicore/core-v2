@@ -52,7 +52,7 @@ using namespace eosio;
 		uint64_t vote_count = count_votes(voter, host);
 		
 		goals_index goals(_me, host.value);
-		power_index power(_me, voter.value);
+		power3_index power(_me, host.value);
 		votes_index votes(_me, voter.value);
 
 		auto goal = goals.find(goal_id);
@@ -67,7 +67,7 @@ using namespace eosio;
 
 		eosio::check(goal != goals.end(), "Goal is not founded");
 
-		auto pow = power.find((goal->host).value);
+		auto pow = power.find(voter.value);
 		eosio::check(pow != power.end(), "You dont have shares for voting process");
 		eosio::check(pow -> power != 0, "You cant vote with zero power");
 		
