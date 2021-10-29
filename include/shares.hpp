@@ -157,6 +157,8 @@
   	uint64_t id;
     eosio::name host;
   	eosio::name owner;
+    eosio::name contract;
+    eosio::name type;
   	eosio::time_point_sec startat;
   	uint64_t duration;
   	eosio::asset amount;
@@ -165,7 +167,7 @@
 
   	uint64_t primary_key() const {return id;}
 
-  	EOSLIB_SERIALIZE(vesting, (id)(host)(owner)(startat)(duration)(amount)(available)(withdrawed))
+  	EOSLIB_SERIALIZE(vesting, (id)(host)(owner)(contract)(type)(startat)(duration)(amount)(available)(withdrawed))
   };
 
   typedef eosio::multi_index<"vesting"_n, vesting> vesting_index;

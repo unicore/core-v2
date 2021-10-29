@@ -30,12 +30,22 @@ using namespace eosio;
         rs.sediment = double(new_sediment);
       });
 
-      action(
-          permission_level{ _me, "active"_n },
-          acc->root_token_contract, "transfer"_n,
-          std::make_tuple( _me, username, amount_in_asset, std::string("SEDIMENT-" + (name{username}.to_string() + "-" + (name{host}).to_string()) ))
-      ).send();
-  
+      uint64_t refreezesecs = unicore::getcondition(host, "refreezesecs");
+
+      if (refreezesecs > 0) {
+
+        make_vesting_action(username, host, acc -> quote_token_contract, amount_in_asset, refreezesecs, "refwithdraw"_n);
+      
+
+      } else {
+
+
+        action(
+            permission_level{ _me, "active"_n },
+            acc->root_token_contract, "transfer"_n,
+            std::make_tuple( _me, username, amount_in_asset, std::string("SEDIMENT-" + (name{username}.to_string() + "-" + (name{host}).to_string()) ))
+        ).send();
+      }
     } else {
       eosio::check(false, "Not enought segments for convertation");
     }
@@ -53,7 +63,8 @@ using namespace eosio;
  
     auto acc = account.find(host.value);
     auto root_symbol = acc->get_root_symbol();
-   
+    
+    uint64_t refreezesecs = unicore::getcondition(host, "refreezesecs");
 
     refbalances_index refbalances(_me, username.value);
     
@@ -63,7 +74,7 @@ using namespace eosio;
 
     auto id = ids.begin();
 
-    while(id != ids.end()) {
+    while(id != ids.end()){
 
       auto refbalance = refbalances.find(*id);
       eosio::check(refbalance != refbalances.end(), "Some ref balance is not found");
@@ -77,18 +88,27 @@ using namespace eosio;
       refbalances.erase(refbalance);
       refbalance = refbalances.begin();
       id++;
-     
+
     }
     
     print("on_withdraw: ", on_withdraw);
     eosio::asset on_widthdraw_asset = asset(on_withdraw, root_symbol);
 
-    if (on_withdraw > 0){
-      action(
-          permission_level{ _me, "active"_n },
-          acc->root_token_contract, "transfer"_n,
-          std::make_tuple( _me, username, on_widthdraw_asset, std::string("RFLOW-" + (name{username}.to_string() + "-" + (name{host}).to_string()) ))
-      ).send();
+    if (on_withdraw > 0) {
+
+      if (refreezesecs > 0) {
+      
+        make_vesting_action(username, host, acc -> quote_token_contract, on_widthdraw_asset, refreezesecs, "refwithdraw"_n);
+      
+      } else {
+        
+        action(
+            permission_level{ _me, "active"_n },
+            acc->root_token_contract, "transfer"_n,
+            std::make_tuple( _me, username, on_widthdraw_asset, std::string("RFLOW-" + (name{username}.to_string() + "-" + (name{host}).to_string()) ))
+        ).send();
+
+      }
 
       rstat_index rstats(_me, username.value);
 
@@ -107,9 +127,9 @@ using namespace eosio;
         });
       }
 
-    } else {
+
+  } else {
       eosio::check(false, "Nothing to withdraw");
     }
 
   }
-

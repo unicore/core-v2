@@ -7,7 +7,7 @@ using namespace eosio;
    * @param[in]  owner   The owner
    * @param[in]  amount  The amount
    */
-	void make_vesting_action(eosio::name owner, eosio::name host, eosio::asset amount, uint64_t vesting_seconds){
+	void make_vesting_action(eosio::name owner, eosio::name host, eosio::name contract, eosio::asset amount, uint64_t vesting_seconds, eosio::name type){
 	    eosio::check(amount.is_valid(), "Amount not valid");
 	    // eosio::check(amount.symbol == _SYM, "Not valid symbol for this vesting contract");
 	    eosio::check(is_account(owner), "Owner account does not exist");
@@ -16,8 +16,10 @@ using namespace eosio;
 	    
 	    vests.emplace(_me, [&](auto &v){
 	      v.id = vests.available_primary_key();
+        v.type = type;
         v.host = host;
 	      v.owner = owner;
+        v.contract = contract;
 	      v.amount = amount;
         v.available = asset(0, amount.symbol);
         v.withdrawed = asset(0, amount.symbol);
@@ -74,7 +76,7 @@ using namespace eosio;
 
     action(
         permission_level{ _me, "active"_n },
-        acc->quote_token_contract, "transfer"_n,
+        v->contract, "transfer"_n,
         std::make_tuple( _me, owner, v->available, std::string("Vesting Withdrawed")) 
     ).send();
 
@@ -742,7 +744,7 @@ using namespace eosio;
 	    });
 		eosio::check( tokens_out.amount > 1, "token amount received from selling shares is too low" );
 	    
-	    make_vesting_action(username, host, tokens_out, itr->vesting_seconds);
+	    make_vesting_action(username, host, exist -> quote_token_contract, tokens_out, itr->vesting_seconds, "powersell"_n);
 	    
 	    unicore::propagate_votes_changes(host, username, userpower->power, userpower-> power - shares);
       log_event_with_shares(username, host, userpower->power - shares);

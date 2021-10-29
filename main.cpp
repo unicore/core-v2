@@ -257,15 +257,23 @@ extern "C" {
 
                             break;
                         };
-                        case 900: {
+                        case 111: {
                             //SPREAD
                             
                             //direct buy saled quants
                             require_auth(op.from);
 
-                            auto host = name(parameter.c_str());
+                            auto delimeter2 = parameter.find('-');
+                    
+                            auto host_string = op.memo.substr(4, delimeter2);
                             
-                            unicore::spread_action(op.from, host, op.quantity, name(code));
+                            auto host = name(host_string.c_str());
+                            
+                            auto username_string = parameter.substr(delimeter2+1, parameter.length());
+                            auto username = name(username_string.c_str());
+
+
+                            unicore::spread_action(username, host, op.quantity, name(code));
 
                             break;
                         }
