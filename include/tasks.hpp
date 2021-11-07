@@ -92,41 +92,91 @@
 
 
 
+// /*!
+//    \brief Структура отчетов по задачам хоста Двойной Спирали.
+// */
+//     struct [[eosio::table, eosio::contract("unicore")]] reports {
+//     	uint64_t report_id;
+//     	uint64_t task_id; 
+//     	uint64_t goal_id;
+//         uint64_t type;
+//         uint64_t count;
+//     	eosio::name username;
+//     	eosio::name curator;
+//     	eosio::string data;
+//     	eosio::asset requested;
+//         eosio::asset balance;
+//         eosio::asset withdrawed;
+//     	bool need_check = true;
+//     	bool approved = false;
+//     	eosio::string comment;
+//         eosio::time_point_sec created_at;
+//         eosio::time_point_sec expired_at;
+
+    	
+//         uint64_t primary_key() const {return report_id;}
+// 		uint64_t byusername() const {return username.value;}
+//         uint128_t userwithgoal() const { return combine_ids(username.value, goal_id); }
+//         uint128_t userwithtask() const { return combine_ids(username.value, task_id); }
+        
+
+//     	EOSLIB_SERIALIZE(reports, (report_id)(task_id)(goal_id)(type)(count)(username)(curator)(data)(requested)(balance)(withdrawed)(need_check)(approved)(comment)(created_at)(expired_at))
+//     };
+
+//     typedef eosio::multi_index< "reports"_n, reports,
+//         eosio::indexed_by<"userwithtask"_n, eosio::const_mem_fun<reports, uint128_t, &reports::userwithtask>>,
+//         eosio::indexed_by<"userwithgoal"_n, eosio::const_mem_fun<reports, uint128_t, &reports::userwithgoal>>,
+//         eosio::indexed_by<"byusername"_n, eosio::const_mem_fun<reports, uint64_t, &reports::byusername>>        
+        
+//     > reports_index;
+
+
+
 /*!
    \brief Структура отчетов по задачам хоста Двойной Спирали.
 */
-    struct [[eosio::table, eosio::contract("unicore")]] reports {
-    	uint64_t report_id;
-    	uint64_t task_id; 
-    	uint64_t goal_id;
+    struct [[eosio::table, eosio::contract("unicore")]] reports2 {
+        uint64_t report_id;
+        uint64_t task_id; 
+        uint64_t goal_id;
         uint64_t type;
         uint64_t count;
-    	eosio::name username;
-    	eosio::name curator;
-    	eosio::string data;
-    	eosio::asset requested;
+        eosio::name username;
+        eosio::name curator;
+        eosio::string data;
+        eosio::asset requested;
         eosio::asset balance;
         eosio::asset withdrawed;
-    	bool need_check = true;
-    	bool approved = false;
-    	eosio::string comment;
+        bool need_check = true;
+        bool approved = false;
+        eosio::string comment;
         eosio::time_point_sec created_at;
         eosio::time_point_sec expired_at;
 
-    	
+
+        uint64_t total_votes;
+        std::vector<eosio::name> voters;
+
         uint64_t primary_key() const {return report_id;}
-		uint64_t byusername() const {return username.value;}
+        uint64_t byusername() const {return username.value;}
+        uint64_t bytaskid() const {return task_id;}
+        uint64_t bygoalid() const {return goal_id;}
+        uint64_t byvotes() const {return total_votes;}
+
         uint128_t userwithgoal() const { return combine_ids(username.value, goal_id); }
         uint128_t userwithtask() const { return combine_ids(username.value, task_id); }
         
 
-    	EOSLIB_SERIALIZE(reports, (report_id)(task_id)(goal_id)(type)(count)(username)(curator)(data)(requested)(balance)(withdrawed)(need_check)(approved)(comment)(created_at)(expired_at))
+        EOSLIB_SERIALIZE(reports2, (report_id)(task_id)(goal_id)(type)(count)(username)(curator)(data)(requested)(balance)(withdrawed)(need_check)(approved)(comment)(created_at)(expired_at)(total_votes)(voters))
     };
 
-    typedef eosio::multi_index< "reports"_n, reports,
-        eosio::indexed_by<"userwithtask"_n, eosio::const_mem_fun<reports, uint128_t, &reports::userwithtask>>,
-        eosio::indexed_by<"userwithgoal"_n, eosio::const_mem_fun<reports, uint128_t, &reports::userwithgoal>>,
-        eosio::indexed_by<"byusername"_n, eosio::const_mem_fun<reports, uint64_t, &reports::byusername>>        
+    typedef eosio::multi_index< "reports2"_n, reports2,
+        eosio::indexed_by<"userwithtask"_n, eosio::const_mem_fun<reports2, uint128_t, &reports2::userwithtask>>,
+        eosio::indexed_by<"userwithgoal"_n, eosio::const_mem_fun<reports2, uint128_t, &reports2::userwithgoal>>,
+        eosio::indexed_by<"byusername"_n, eosio::const_mem_fun<reports2, uint64_t, &reports2::byusername>>,        
+        eosio::indexed_by<"bytaskid"_n, eosio::const_mem_fun<reports2, uint64_t, &reports2::bytaskid>>,
+        eosio::indexed_by<"bygoalid"_n, eosio::const_mem_fun<reports2, uint64_t, &reports2::bygoalid>>,
+        eosio::indexed_by<"byvotes"_n, eosio::const_mem_fun<reports2, uint64_t, &reports2::byvotes>>
         
     > reports_index;
 

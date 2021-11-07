@@ -390,6 +390,12 @@ extern "C" {
                     break;
                  }
 
+                 case "rvote"_n.value: { 
+                    execute_action(name(receiver), name(code), &unicore::rvote);
+                    // voting().vote_action(eosio::unpack_action_data<vote>());
+                    break;
+                 }
+
                  // case "setliqpower"_n.value: {
                  //    execute_action(name(receiver), name(code), &unicore::setliqpower);
                  //    break;
@@ -458,6 +464,10 @@ extern "C" {
                 //HOSTS
                 case "upgrade"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::upgrade);
+                    break;
+                };
+                case "setlevels"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::setlevels);
                     break;
                 };
                 case "cchildhost"_n.value: {

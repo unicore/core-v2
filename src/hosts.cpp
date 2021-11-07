@@ -384,6 +384,39 @@ using namespace eosio;
 
         
     }
+
+    /**
+     * @brief      Метод установки уровней вознаграждений
+     * @param[in]  op    The operation
+     */
+    [[eosio::action]] void unicore::setlevels(eosio::name host, std::vector<uint64_t> levels){
+        require_auth(host);
+        account_index accounts(_me, host.value);
+        
+        auto acc = accounts.find(host.value);
+        eosio::check(acc != accounts.end(), "Account is not a host");
+
+        //eosio::check for referal levels;
+        uint64_t level_count = 0;
+        uint64_t percent_count = 0;
+        uint64_t prev_level = 100 * ONE_PERCENT;
+
+        for (auto level : levels){
+            level_count++;
+            eosio::check(level != 0, "Zero-level is prohibited.");
+            percent_count += level;
+        };
+
+        eosio::check(percent_count == 100 * ONE_PERCENT, "Summ of all levels should be 100%");
+        eosio::check(level_count <= _MAX_LEVELS, "Exceed the maximum number of levels");
+        
+        accounts.modify(acc, host, [&](auto &a){
+            a.levels = levels;
+        });
+
+
+    }
+
     /**
      * @brief      Метод апгрейда аккаунта до статуса сообщества
      * Принимает ряд параметров, такие как процент консенсуса, реферальный процент, уровни вознаграждений финансовых партнеров, 

@@ -369,10 +369,21 @@ using namespace eosio;
     
 		eosio::check(username == goal->benefactor, "Only benefactor can set report");
 		
-		goals.modify(goal, username, [&](auto &g){
-      g.status = "reported"_n;
-			g.report = report;
+
+		goals.modify(goal, username, [&](auto &g) {
+      // if (goal->available.amount == 0) {
+        g.status = "reported"_n;  
+      // } else {
+      //   g.checked = true;
+      //   g.status = "completed"_n;  
+      //   accounts.modify(acc, architect, [&](auto &a) {
+      //     a.achieved_goals = acc -> achieved_goals + 1;
+      //   });
+      // }
+			
+      g.report = report;
       g.reported = true;
+
 		});
 	}
 

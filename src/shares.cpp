@@ -643,23 +643,23 @@ using namespace eosio;
 		goals_index goals(_me, host.value);
 
 		//by host;
-
 		auto idx = votes.template get_index<"host"_n>();
-        auto matched_itr = idx.lower_bound(host.value);
+    auto matched_itr = idx.lower_bound(host.value);
        
-        while(matched_itr != idx.end() && matched_itr->host == host){
+
+    while(matched_itr != idx.end() && matched_itr->host == host){
 			auto goal = goals.find(matched_itr -> goal_id);
 				
 			goals.modify(goal, _me, [&](auto &g){
 				g.total_votes = goal->total_votes - old_power + new_power;
 			});
 
-
-
-			idx.modify(matched_itr, _me, [&](auto &v){
+			idx.modify(matched_itr, _me, [&](auto &v) {
 				v.power = v.power - old_power + new_power;
 			});
-			matched_itr++;
+			
+      matched_itr++;
+
 		};	
 	}
 

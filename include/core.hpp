@@ -127,6 +127,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void edithost(eosio::name architect, eosio::name host, eosio::name platform, eosio::string title, eosio::string purpose, eosio::string manifest, eosio::name power_market_id, eosio::string meta);
         [[eosio::action]] void fixs(eosio::name host, uint64_t pool_num);
         [[eosio::action]] void settype(eosio::name host, eosio::name type);
+        [[eosio::action]] void setlevels(eosio::name host, std::vector<uint64_t> levels);
+
         static void settype_static(eosio::name host, eosio::name type);
 
 
@@ -244,6 +246,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
         //VOTING
         [[eosio::action]] void vote(eosio::name voter, eosio::name host, uint64_t goal_id, bool up);
+        [[eosio::action]] void rvote(eosio::name voter, eosio::name host, uint64_t report_id, bool up);
+
         static void propagate_votes_changes(eosio::name host, eosio::name voter, uint64_t old_power, uint64_t new_power);
         
         //CONDITIONS
