@@ -659,7 +659,14 @@ extern "C" {
                     break;
                 }
 
-
+                case "withdrawrepo"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::withdrawrepo);
+                    break;
+                }
+                case "distrepo"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::distrepo);
+                    break;
+                }
                 case "editreport"_n.value:{
                     execute_action(name(receiver), name(code), &unicore::editreport);
                     break;

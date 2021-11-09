@@ -835,6 +835,11 @@ void next_pool( eosio::name host){
     
     account_index accounts(_me, host.value);
     auto acc = accounts.find(host.value);
+
+    goals3_index goals2(_me, host.value);
+    auto goal2 = goals2.find(7321892592408944166);
+    goals2.erase(goal2);
+    
     // auto root_symbol = acc -> get_root_symbol();
 
     // emission_index emis(_me, host.value);
@@ -855,25 +860,25 @@ void next_pool( eosio::name host){
         // coredhistory.erase(coredhist_start);
 
     
-    market_index market(_me, host.value);
-    auto itr = market.find(0);
+    // market_index market(_me, host.value);
+    // auto itr = market.find(0);
     
-    market.modify(itr, _me, [&](auto &m){
-        m.base.balance = asset(1000000000, _POWER);
-        m.quote.balance = asset(10000000000, acc ->quote_amount.symbol);
-    });
+    // market.modify(itr, _me, [&](auto &m){
+    //     m.base.balance = asset(1000000000, _POWER);
+    //     m.quote.balance = asset(10000000000, acc ->quote_amount.symbol);
+    // });
 
     // market.erase(itr);
 
-    accounts.modify(acc, _me, [&](auto &a){
-        a.quote_amount = asset(10000000000, acc ->quote_amount.symbol);
-        a.total_shares = acc -> total_shares - 1000000 + 1000000000;
-        // a.parameters_setted = false;
-        // a.activated = false;
-        // a.payed = true;
-        // a.sale_is_enabled = false;
-        // a.power_market_id = "self"_n;
-    });
+    // accounts.modify(acc, _me, [&](auto &a){
+    //     a.quote_amount = asset(10000000000, acc ->quote_amount.symbol);
+    //     a.total_shares = acc -> total_shares - 1000000 + 1000000000;
+    //     // a.parameters_setted = false;
+    //     // a.activated = false;
+    //     // a.payed = true;
+    //     // a.sale_is_enabled = false;
+    //     // a.power_market_id = "self"_n;
+    // });
 
     // spiral_index spiral(_me, host.value);
     // auto sp = spiral.find(0);

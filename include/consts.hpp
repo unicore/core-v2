@@ -13,6 +13,7 @@
   static constexpr uint64_t _SHARES_VESTING_DURATION = 604800;
   static constexpr uint64_t _TOTAL_VOTES = 7;
   static constexpr uint64_t _MAX_LEVELS = 26;
+  static constexpr uint64_t _VOTING_TIME_EXPIRATION = 86400; //
 
   static constexpr eosio::name _me = "unicore"_n;
   static constexpr eosio::name _partners = "part"_n;

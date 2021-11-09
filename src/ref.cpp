@@ -34,7 +34,7 @@ using namespace eosio;
 
       if (refreezesecs > 0) {
 
-        make_vesting_action(username, host, acc -> quote_token_contract, amount_in_asset, refreezesecs, "refwithdraw"_n);
+        make_vesting_action(username, host, acc -> root_token_contract, amount_in_asset, refreezesecs, "refwithdraw"_n);
       
 
       } else {
@@ -98,7 +98,7 @@ using namespace eosio;
 
       if (refreezesecs > 0) {
       
-        make_vesting_action(username, host, acc -> quote_token_contract, on_widthdraw_asset, refreezesecs, "refwithdraw"_n);
+        make_vesting_action(username, host, acc -> root_token_contract, on_widthdraw_asset, refreezesecs, "refwithdraw"_n);
       
       } else {
         

@@ -179,6 +179,7 @@ using namespace eosio;
 		auto task = tasks.find(task_id);
 		auto goal = goals.find(report -> goal_id);
 
+		
 		eosio::check(task != tasks.end(), "Task is not found");
 
 		eosio::check(report -> approved == true, "Report is not approved and cant participate on the voting");
@@ -200,6 +201,8 @@ using namespace eosio;
 
 		if (vote == reports_by_task_idx.end()){
 			//ADD VOTE
+			eosio::check(goal->finish_at.sec_since_epoch() > eosio::current_time_point().sec_since_epoch(), "Voting is completed");
+
 			eosio::check(vote_count < _TOTAL_VOTES, "Votes limit is exceeded");
 
       // eosio::check(goal->filled == false, "You cant vote for filled goal");

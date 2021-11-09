@@ -909,8 +909,6 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
     if (need_check == false) {
     	unicore::approver(host, report_id, "");
 		};
-
-		
 	}
 
 	/**
@@ -979,7 +977,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 				auto goal = goals.find(task -> goal_id);
 				eosio::check(goal != goals.end(), "Goal is not found");
 
-				if (goal -> available >= report -> requested ){
+				if (goal -> available >= report -> requested && goal -> status == "process"_n) {
 					
 					goals.modify(goal, host, [&](auto &g){
 						g.available -= report -> requested;
@@ -1068,3 +1066,108 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		});
 
 	};
+
+
+
+/**
+	 * @brief      Публичный метод вывода баланса отчёта
+	 * 
+	 * @param[in]  op    The operation
+	 */
+	[[eosio::action]] void unicore::withdrawrepo(eosio::name username, eosio::name host, uint64_t report_id) {
+		require_auth(username);
+		account_index accounts(_me, host.value);
+		
+		auto acc = accounts.find(host.value);
+		eosio::check(acc != accounts.end(), "Host is not found");
+
+		reports_index reports(_me, host.value);
+		auto report = reports.find(report_id);
+		
+		eosio::check(report->username == username, "wrong username");
+
+		eosio::check(report->balance.amount > 0, "Report does not have a balance for withdraw");
+		
+		goals3_index goals2(_me, host.value);
+		goals_index goals(_me, host.value);
+		auto goal2 = goals2.find(report->goal_id);
+		auto goal = goals.find(report->goal_id);
+
+		goals.modify(goal, username, [&](auto &g) {
+			g.withdrawed += report -> balance;
+		});
+
+		goals2.modify(goal2, username, [&](auto &g) {
+			eosio::check(goal2->remain_on_distribution >= report->balance, "System error on distribution");
+			g.remain_on_distribution -= report->balance;
+		});
+
+		uint64_t task_freeze_seconds = unicore::getcondition(host, "tafreezesecs");
+
+
+		if (task_freeze_seconds == 0){
+
+			action(
+	      permission_level{ _me, "active"_n },
+	      acc->root_token_contract, "transfer"_n,
+	      std::make_tuple( _me, report->username, report->balance, std::string("")) 
+	    ).send();
+
+		} else {
+
+			make_vesting_action(username, host, acc -> root_token_contract, report->balance, task_freeze_seconds, "distwithdraw"_n);
+
+		}
+
+		reports.modify(report, username, [&](auto &r){
+			r.withdrawed = report->balance;
+			r.balance = asset(0, report->balance.symbol);
+		});
+
+
+	};
+
+
+
+
+/**
+	 * @brief      Публичный метод обновления баланса отчёта при распределении баланса цели
+	 * 
+	 * @param[in]  op    The operation
+	 */
+	[[eosio::action]] void unicore::distrepo(eosio::name host, uint64_t report_id) {
+		require_auth(host);
+		account_index accounts(_me, host.value);
+		
+		auto acc = accounts.find(host.value);
+		eosio::check(acc != accounts.end(), "Host is not found");
+
+		reports_index reports(_me, host.value);
+		auto report = reports.find(report_id);
+
+		goals_index goals(_me, host.value);
+		auto goal = goals.find(report->goal_id);
+		
+		goals3_index goals3(_me, host.value);
+		auto goal2 = goals3.find(report->goal_id);
+		
+		eosio::check(report->distributed == false, "Distribution already happen to a report");
+
+		if ((goal->status == "reported"_n || goal->status == "completed"_n) && goal->finish_at.sec_since_epoch() < eosio::current_time_point().sec_since_epoch()) {
+
+			double part = (double)report->total_votes / (double)goal->target3.amount * (double)goal2->total_on_distribution.amount;
+			eosio::asset part_asset = asset((uint64_t)part, report->balance.symbol);
+
+			reports.modify(report, host, [&](auto &r){
+				r.balance += part_asset;
+				r.distributed = true;
+			});	
+
+		}
+		
+
+		
+
+	};
+
+	

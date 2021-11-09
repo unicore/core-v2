@@ -243,6 +243,9 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void approver(eosio::name host, uint64_t report_id, eosio::string comment); 
         [[eosio::action]] void disapprover(eosio::name host, uint64_t report_id, eosio::string comment);
 
+        [[eosio::action]] void withdrawrepo(eosio::name username, eosio::name host, uint64_t report_id);
+        [[eosio::action]] void distrepo(eosio::name host, uint64_t report_id);
+
 
         //VOTING
         [[eosio::action]] void vote(eosio::name voter, eosio::name host, uint64_t goal_id, bool up);

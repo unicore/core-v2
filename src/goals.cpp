@@ -94,6 +94,7 @@ using namespace eosio;
         });
       };
 
+      std::string parent_permlink = "";
 
       if (exist_goal -> parent_id != parent_batch_id){
         auto parent_goal = goals.find(parent_batch_id);
@@ -109,6 +110,8 @@ using namespace eosio;
           goals.modify(parent_goal, creator, [&](auto &g){
             g.batch = batch;
           });
+
+          parent_permlink = parent_goal -> permlink;
         }
       }
       
@@ -122,7 +125,7 @@ using namespace eosio;
         g.status = creator == host ? "process"_n : ""_n;
         // g.who_can_create_tasks = creator;
         g.created = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
-        g.finish_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + duration);
+        g.finish_at = eosio::time_point_sec(-1);
         g.host = host;
         g.permlink = permlink;
         g.cashback = cashback;
@@ -142,6 +145,7 @@ using namespace eosio;
         g.activated = activated;
         g.is_batch = is_batch;
         g.parent_id = parent_batch_id;
+        g.parent_permlink = parent_permlink;
       });      
 
       accounts.modify(acc, creator, [&](auto &a){
@@ -265,6 +269,8 @@ using namespace eosio;
     auto goal = goals.find(goal_id);
     eosio::check(goal != goals.end(), "Goal is not exist");
     
+    eosio::check(goal->status == ""_n, "Only not accepted goals can be accepted");
+
     goals.modify(goal, host, [&](auto &g) {
       g.benefactor = status == true ? host : ""_n;
       g.status = status == true ? "process"_n : "declined"_n;
@@ -369,21 +375,25 @@ using namespace eosio;
     
 		eosio::check(username == goal->benefactor, "Only benefactor can set report");
 		
+    goals3_index goals2(_me, host.value);
+    auto goal2 = goals2.find(goal_id);
+
+    if (goal->available.amount > 0){
+      goals2.emplace(username, [&](auto &g){
+        g.id = goal -> id;
+        g.total_on_distribution = goal->available;
+        g.remain_on_distribution = goal -> available;
+      });
+    
+    }
+    
 
 		goals.modify(goal, username, [&](auto &g) {
-      // if (goal->available.amount == 0) {
-        g.status = "reported"_n;  
-      // } else {
-      //   g.checked = true;
-      //   g.status = "completed"_n;  
-      //   accounts.modify(acc, architect, [&](auto &a) {
-      //     a.achieved_goals = acc -> achieved_goals + 1;
-      //   });
-      // }
-			
+      g.status = "reported"_n;  
+      g.finish_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + _VOTING_TIME_EXPIRATION);
+      g.available = asset(0, goal -> available.symbol);
       g.report = report;
       g.reported = true;
-
 		});
 	}
 
