@@ -195,12 +195,12 @@ class [[eosio::contract]] unicore : public eosio::contract {
         // [[eosio::action]] void setliqpower(eosio::name host, uint64_t liquid);
         // [[eosio::action]] void incrusersegm(eosio::name host, uint64_t pool_id, uint64_t user_segments);
         
-        [[eosio::action]] void refreshsh (eosio::name owner, uint64_t id);
         [[eosio::action]] void withpbenefit(eosio::name username, eosio::name host);
         [[eosio::action]] void withrsegment(eosio::name username, eosio::name host);
 
-        [[eosio::action]] void withrbenefit(eosio::name username, eosio::name host, std::vector<uint64_t> ids);
+        [[eosio::action]] void withrbenefit(eosio::name username, eosio::name host, uint64_t id);
         [[eosio::action]] void refreshpu(eosio::name username, eosio::name host);
+        [[eosio::action]] void refreshsh (eosio::name owner, uint64_t id);
         [[eosio::action]] void withdrawsh(eosio::name owner, uint64_t id);
         [[eosio::action]] void sellshares(eosio::name username, eosio::name host, uint64_t shares);
         [[eosio::action]] void undelshares(eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares);

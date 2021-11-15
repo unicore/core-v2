@@ -57,7 +57,7 @@ using namespace eosio;
    * @brief      Метод вывода партнерского финансового потока
    * withdraw power quant (withpowerun)
   */
-  [[eosio::action]] void unicore::withrbenefit(eosio::name username, eosio::name host, std::vector<uint64_t> ids){
+  [[eosio::action]] void unicore::withrbenefit(eosio::name username, eosio::name host, uint64_t id){
     require_auth(username);
     account_index account(_me, host.value);
  
@@ -70,35 +70,47 @@ using namespace eosio;
     
     uint64_t count=0;
     uint64_t on_withdraw = 0;
+    
     uint128_t sediment = 0;
 
-    auto id = ids.begin();
+    // auto id = ids.begin();
 
-    while(id != ids.end()){
+    auto refbalance = refbalances.find(id);
+    eosio::check(refbalance != refbalances.end(), "Some ref balance is not found");
 
-      auto refbalance = refbalances.find(*id);
-      eosio::check(refbalance != refbalances.end(), "Some ref balance is not found");
-
-      if (uint128_t(refbalance->amount.amount * TOTAL_SEGMENTS) < refbalance->segments) {
-        sediment += refbalance->segments - uint128_t(refbalance->amount.amount * TOTAL_SEGMENTS);
-      }
-
-      on_withdraw += refbalance->amount.amount;
-
-      refbalances.erase(refbalance);
-      refbalance = refbalances.begin();
-      id++;
-
+    if (uint128_t(refbalance->amount.amount * TOTAL_SEGMENTS) < refbalance->segments) {
+      sediment += refbalance->segments - uint128_t(refbalance->amount.amount * TOTAL_SEGMENTS);
     }
+
+    on_withdraw += refbalance->amount.amount;
+
+    uint64_t level = refbalance -> level;
     
+    refbalances.erase(refbalance);
+    
+
     print("on_withdraw: ", on_withdraw);
     eosio::asset on_widthdraw_asset = asset(on_withdraw, root_symbol);
 
     if (on_withdraw > 0) {
 
       if (refreezesecs > 0) {
-      
-        make_vesting_action(username, host, acc -> root_token_contract, on_widthdraw_asset, refreezesecs, "refwithdraw"_n);
+        
+        if (level == 1) {
+          //make transfer
+        
+          action(
+            permission_level{ _me, "active"_n },
+            acc->root_token_contract, "transfer"_n,
+            std::make_tuple( _me, username, on_widthdraw_asset, std::string("RFLOW-" + (name{username}.to_string() + "-" + (name{host}).to_string()) ))
+          ).send();
+        
+        } else {
+
+          make_vesting_action(username, host, acc -> root_token_contract, on_widthdraw_asset, refreezesecs, "refwithdraw"_n);  
+        
+        }
+        
       
       } else {
         
