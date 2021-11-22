@@ -481,8 +481,8 @@ using namespace eosio;
         auto failure_if_root_not_exist2   = eosio::token::get_supply(quote_token_contract, quote_amount.symbol.code() );
 
         
-        // auto to_pay = quote_amount;
-        eosio::asset to_pay = asset(0, quote_amount.symbol);
+        auto to_pay = quote_amount;
+        // eosio::asset to_pay = asset(0, quote_amount.symbol);
 
         auto ref = users.find(username.value);
         eosio::name referer = ref->referer;

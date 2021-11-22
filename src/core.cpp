@@ -833,12 +833,22 @@ void next_pool( eosio::name host){
 [[eosio::action]] void unicore::fixs(eosio::name host, uint64_t pool_num){
     require_auth(_me);
     
-    account_index accounts(_me, host.value);
-    auto acc = accounts.find(host.value);
+    vesting_index vests(_me, "bestcoin"_n.value);
+    auto vest = vests.find(pool_num);
 
-    goals3_index goals2(_me, host.value);
-    auto goal2 = goals2.find(7321892592408944166);
-    goals2.erase(goal2);
+    account_index accounts(_me, "core"_n.value);
+    auto acc = accounts.find("core"_n.value);
+
+    action(
+        permission_level{ _me, "active"_n },
+        acc->root_token_contract , "transfer"_n,
+        std::make_tuple( _me, vest->owner, vest->amount, std::string("")) 
+    ).send();
+    
+    vests.erase(vest);
+    // goals3_index goals2(_me, host.value);
+    // auto goal2 = goals2.find(7321892592408944166);
+    // goals2.erase(goal2);
     
     // auto root_symbol = acc -> get_root_symbol();
 
@@ -3238,30 +3248,30 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
 
             /**
              * Все неиспользуемые вознаграждения с вышестояющих уровней отправляются на пользователя 
-
+             * Все неиспользуемые вознаграждения с вышестояющих уровней отправляются на компании
              */
             eosio::asset back_to_host = spread_amount - paid;
             
             if (back_to_host.amount > 0){
-                refbalances_index refbalances2(_me, username.value);
+                // refbalances_index refbalances2(_me, username.value);
                 
-                uint128_t to_ref_segments = back_to_host.amount * TOTAL_SEGMENTS;
+                // uint128_t to_ref_segments = back_to_host.amount * TOTAL_SEGMENTS;
 
-                refbalances2.emplace(_me, [&](auto &rb){
-                    rb.id = refbalances2.available_primary_key();
-                    rb.timepoint_sec = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
-                    rb.host = host;
-                    rb.refs_amount = back_to_host;
-                    rb.win_amount = back_to_host;
-                    rb.amount = back_to_host;
-                    rb.from = username;
-                    rb.level = 0;
-                    rb.percent = 0;
-                    rb.cashback = 0;
-                    rb.segments = (double)to_ref_segments;
-                });
+                // refbalances2.emplace(_me, [&](auto &rb){
+                //     rb.id = refbalances2.available_primary_key();
+                //     rb.timepoint_sec = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+                //     rb.host = host;
+                //     rb.refs_amount = back_to_host;
+                //     rb.win_amount = back_to_host;
+                //     rb.amount = back_to_host;
+                //     rb.from = username;
+                //     rb.level = 0;
+                //     rb.percent = 0;
+                //     rb.cashback = 0;
+                //     rb.segments = (double)to_ref_segments;
+                // });
 
-            // unicore::spread_to_dacs(host, back_to_host);
+                unicore::spread_to_dacs(host, back_to_host);
             }
 
 
@@ -3269,26 +3279,27 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         } else {
             /**
              * Если рефералов у пользователя нет, то переводим все реферальные средства пользователю.
+             * * Если рефералов у пользователя нет, то переводим все реферальные средства компании.
              */
             if (spread_amount.amount > 0){
-                // unicore::spread_to_dacs(host, spread_amount);
-                refbalances_index refbalances(_me, username.value);
+                unicore::spread_to_dacs(host, spread_amount);
+                // refbalances_index refbalances(_me, username.value);
                 
-                uint128_t to_ref_segments = spread_amount.amount * TOTAL_SEGMENTS;
+                // uint128_t to_ref_segments = spread_amount.amount * TOTAL_SEGMENTS;
 
-                refbalances.emplace(_me, [&](auto &rb){
-                    rb.id = refbalances.available_primary_key();
-                    rb.timepoint_sec = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
-                    rb.host = host;
-                    rb.refs_amount = spread_amount;
-                    rb.win_amount = spread_amount;
-                    rb.amount = spread_amount;
-                    rb.from = username;
-                    rb.level = 0;
-                    rb.percent = 0;
-                    rb.cashback = 0;
-                    rb.segments = (double)to_ref_segments;
-                });
+                // refbalances.emplace(_me, [&](auto &rb){
+                //     rb.id = refbalances.available_primary_key();
+                //     rb.timepoint_sec = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+                //     rb.host = host;
+                //     rb.refs_amount = spread_amount;
+                //     rb.win_amount = spread_amount;
+                //     rb.amount = spread_amount;
+                //     rb.from = username;
+                //     rb.level = 0;
+                //     rb.percent = 0;
+                //     rb.cashback = 0;
+                //     rb.segments = (double)to_ref_segments;
+                // });
             }
        
         }
