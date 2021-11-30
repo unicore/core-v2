@@ -3381,8 +3381,8 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         
         if (total_dac_asset.amount > 0) {
             //TODO check enabled condition auto buy shares from market here?
-            uint64_t asset_minpower2 = buyshares_action (referal, host, total_dac_asset, acc -> quote_token_contract, true );
-
+            //TO WHO?!?!
+            //uint64_t asset_minpower2 = buyshares_action (referal, host, total_dac_asset, acc -> quote_token_contract, true );
 
             unicore::spread_to_dacs(host, total_dac_asset);
         }
