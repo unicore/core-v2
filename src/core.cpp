@@ -53,7 +53,7 @@ using namespace eosio;
         auto acc = accounts.find(host.value);
         
         if (acc->sale_is_enabled == true){
-            shares_out = tmp.convert( quantity, _POWER);    
+            shares_out = tmp.direct_convert( quantity, _POWER);    
         } else {
             shares_out = asset(0, _POWER); 
         };
@@ -72,7 +72,7 @@ using namespace eosio;
         auto acc = accounts.find(host.value);
         
         if (acc->sale_is_enabled == true){
-            asset_in = tmp.convert( quantity, acc -> quote_amount.symbol);    
+            asset_in = tmp.direct_convert( quantity, acc -> quote_amount.symbol);    
         } else {
             asset_in = asset(0, acc -> quote_amount.symbol); 
         };
@@ -833,19 +833,23 @@ void next_pool( eosio::name host){
 [[eosio::action]] void unicore::fixs(eosio::name host, uint64_t pool_num){
     require_auth(_me);
     
-    vesting_index vests(_me, "bestcoin"_n.value);
-    auto vest = vests.find(pool_num);
+    // vesting_index vests(_me, host.value);
+    // auto vest = vests.find(pool_num);
 
-    account_index accounts(_me, "core"_n.value);
-    auto acc = accounts.find("core"_n.value);
+    // account_index accounts(_me, "core"_n.value);
+    // auto acc = accounts.find("core"_n.value);
 
-    action(
-        permission_level{ _me, "active"_n },
-        acc->root_token_contract , "transfer"_n,
-        std::make_tuple( _me, vest->owner, vest->amount, std::string("")) 
-    ).send();
+    refbalances_index refbalances(_me, host.value);
+    auto rb = refbalances.find(pool_num);
+    refbalances.erase(rb);
+                    
+    // action(
+    //     permission_level{ _me, "active"_n },
+    //     acc->root_token_contract , "transfer"_n,
+    //     std::make_tuple( _me, vest->owner, vest->amount, std::string("")) 
+    // ).send();
     
-    vests.erase(vest);
+    // vests.erase(vest);
     // goals3_index goals2(_me, host.value);
     // auto goal2 = goals2.find(7321892592408944166);
     // goals2.erase(goal2);
@@ -870,13 +874,17 @@ void next_pool( eosio::name host){
         // coredhistory.erase(coredhist_start);
 
     
-    // market_index market(_me, host.value);
-    // auto itr = market.find(0);
+    market_index market(_me, host.value);
+    auto itr = market.find(0);
     
-    // market.modify(itr, _me, [&](auto &m){
-    //     m.base.balance = asset(1000000000, _POWER);
-    //     m.quote.balance = asset(10000000000, acc ->quote_amount.symbol);
-    // });
+    market.modify(itr, _me, [&](auto &m){
+        m.base.balance = asset(1000000000, _POWER);
+        
+        m.base.weight = 0.1;
+        m.quote.weight = 0.1;
+
+        m.quote.balance = asset(10000000000, acc ->quote_amount.symbol);
+    });
 
     // market.erase(itr);
 
@@ -2731,10 +2739,17 @@ void unicore::spread_action(eosio::name username, eosio::name host, eosio::asset
     
     //spread amount calculated from quants for buy and part of system income:
     //----
-    
+
     unicore::spread_to_funds(host, quantity, username);
+    
+    if (username != "eosio"_n){
+        buyshares_action (username, host, quantity, acc -> quote_token_contract, true );
+    };
+
     unicore::check_burn_status(host, username, quantity);
     
+    
+
     //----
     
     

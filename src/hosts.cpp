@@ -44,6 +44,49 @@ using namespace eosio;
 
     };
 
+    /**
+     * @brief      Установка компенсатора рисков
+     * Устанавливает компенсатор риска для системного жетона
+     * 
+     * @param[in]  op    The new value
+     */
+    [[eosio::action]] void unicore::compensator(eosio::name host, uint64_t compensator_percent){
+        require_auth(host);
+
+        account_index accounts(_me, host.value);
+        auto acc = accounts.find(host.value);
+        eosio::check(acc != accounts.end(), "Host is not found");
+        
+        spiral_index spiral(_me, host.value);
+        auto sp = spiral.find(0);
+        spiral2_index spiral2(_me, host.value);
+        auto sp2 = spiral2.find(0);
+    
+        eosio::check(acc->root_token_contract == "eosio.token"_n, "Only eosio.token contract can be used for compesation");
+        eosio::check(acc->root_token.symbol == _SYM, "Only core symbol can be used for compensation.");
+
+        eosio::check(host == _core_host, "Only core host can access compensator now");
+    
+        eosio::check(sp -> overlap <= 10500, "Overlap should be not more then 5% for compensator mode");
+        eosio::check(compensator_percent <= sp -> loss_percent, "Compensator Percent must be greater then 0 (0%) and less or equal 10000 (100%)");
+    
+        if (sp2 == spiral2.end()) {
+            
+            spiral2.emplace(host, [&](auto &s) {
+                s.id = 0;
+                s.compensator_percent = compensator_percent;
+            });
+
+        } else {
+
+            spiral2.modify(sp2, host, [&](auto &s) {
+                s.compensator_percent = compensator_percent;
+            });
+        }
+        
+
+    };
+
 
     [[eosio::action]] void unicore::addvac(uint64_t id, bool is_edit, eosio::name creator, eosio::name host, eosio::name limit_type, eosio::asset income_limit, uint64_t weight, std::string title, std::string descriptor) {
         require_auth(creator);

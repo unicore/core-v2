@@ -124,6 +124,9 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void setarch(eosio::name host, eosio::name architect);
         [[eosio::action]] void upgrade(eosio::name username, eosio::name platform, std::string title, std::string purpose, uint64_t total_shares, eosio::asset quote_amount, eosio::name quote_token_contract, eosio::asset root_token, eosio::name root_token_contract, bool voting_only_up, uint64_t consensus_percent, uint64_t referral_percent, uint64_t dacs_percent, uint64_t cfund_percent, uint64_t hfund_percent, std::vector<uint64_t> levels, uint64_t emission_percent, uint64_t gtop, std::string meta);
         [[eosio::action]] void cchildhost(eosio::name parent_host, eosio::name chost);
+        [[eosio::action]] void compensator(eosio::name host, uint64_t compensator_percent);
+        
+
         [[eosio::action]] void edithost(eosio::name architect, eosio::name host, eosio::name platform, eosio::string title, eosio::string purpose, eosio::string manifest, eosio::name power_market_id, eosio::string meta);
         [[eosio::action]] void fixs(eosio::name host, uint64_t pool_num);
         [[eosio::action]] void settype(eosio::name host, eosio::name type);

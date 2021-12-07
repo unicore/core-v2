@@ -60,6 +60,7 @@ using namespace eosio;
                 });
             } else {
                 partners.modify(partner, _me, [&](auto &p){
+                    print("on modify", times, burnperiod);
                     p.expiration = eosio::time_point_sec(partner->expiration.sec_since_epoch() + times * burnperiod * 86400);
                 });
             }

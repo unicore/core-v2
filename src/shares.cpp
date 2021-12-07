@@ -221,6 +221,7 @@ using namespace eosio;
           });
           
           if (pstat == pstats.end()){
+            print("here1");
             pstats.emplace(_me, [&](auto &ps){
               ps.host = host;
               ps.total_available_in_asset = segment_asset;
@@ -234,16 +235,20 @@ using namespace eosio;
               ps.ref_available_segments = 0;
               ps.ref_withdrawed = asset(0, root_symbol);
             });
+
+            pstat = pstats.find(host.value);
+
           } else {
             pstats.modify(pstat, _me, [&](auto &ps){
               ps.total_available_in_asset += segment_asset;
               ps.pflow_last_withdrawed_pool_id = sincome -> pool_id;
               ps.pflow_available_segments += user_segments;
               ps.pflow_available_in_asset += segment_asset;
-            });          
+            });    
+
           }
           dlog_index dlogs(_me, username.value);
-          
+          print("here2");
           dlogs.emplace(_me, [&](auto &dl){
             dl.id = dlogs.available_primary_key();
             dl.host = host;
@@ -408,7 +413,7 @@ using namespace eosio;
 		auto tmp = *itr;
 		uint64_t shares_out;
 		market.modify( itr, _me, [&]( auto &es ) {
-	    	shares_out = (es.convert( amount, eosio::symbol(eosio::symbol_code("POWER"), 0))).amount;
+	    	shares_out = (es.direct_convert( amount, eosio::symbol(eosio::symbol_code("POWER"), 0))).amount;
 	    });
 
     eosio::check( shares_out > 0, "Amount is not enought for buy 1 share" );
@@ -473,10 +478,6 @@ using namespace eosio;
     unicore::propagate_votes_changes(host, from, power_to->power, power_to->power - shares);
     log_event_with_shares(from, host, power_to->power - shares);
 
-    accounts.modify(acc, _me, [&](auto &a){
-      a.total_shares -= shares;
-    });
-
     power_to_idx.modify(power_to, _me, [&](auto &pt){
       pt.power -= shares;
       pt.with_badges -= shares; 
@@ -485,9 +486,22 @@ using namespace eosio;
     market_index market(_me, host.value);
     auto itr = market.find(0);
     
-    // market.modify( itr, _me, [&]( auto& es ) {
-    //   es.base.balance = asset((itr -> base).balance.amount + shares, eosio::symbol(eosio::symbol_code("POWER"), 0));
-    // });
+    uint64_t emitbdgspwr = unicore::getcondition(host, "emitbdgspwr");
+
+    if (emitbdgspwr == 0) {
+      
+      market.modify( itr, _me, [&]( auto& es ) {
+        es.base.balance = asset((itr -> base).balance.amount + shares, eosio::symbol(eosio::symbol_code("POWER"), 0));
+      });
+
+    } else {
+
+      accounts.modify(acc, _me, [&](auto &a){
+        a.total_shares -= shares;
+      });  
+
+    }
+    
 
     // unicore::checkminpwr(host, from);
 
@@ -509,25 +523,32 @@ using namespace eosio;
     power3_index power_to_idx (_me, host.value);
     auto power_to = power_to_idx.find(reciever.value);
     
-    if (shares > 0){
+    // SEPARATE BADGES AND MARKET
+    market_index market(_me, host.value);
+    
+    uint64_t emitbdgspwr = unicore::getcondition(host, "emitbdgspwr");
+  
+    if (emitbdgspwr == 0){
+      auto itr = market.find(0);
+  
+      eosio::check((itr->base).balance.amount >= shares, "Not enought shares on market");    
+      
+      market.modify( itr, _me, [&]( auto& es ) {
+        es.base.balance = asset((itr -> base).balance.amount - shares, eosio::symbol(eosio::symbol_code("POWER"), 0));
+      });
 
-      accounts.modify(acc, _me, [&](auto &a){
+    } 
+
+    accounts.modify(acc, _me, [&](auto &a){
+      if (emitbdgspwr > 0){
         a.total_shares += shares;
-        a.approved_reports = acc -> approved_reports + 1;
-      }); 
+      }
+      a.approved_reports = acc -> approved_reports + 1;
+    }); 
 
-    }
     
-    //SEPARATE BADGES AND MARKET
-    // market_index market(_me, host.value);
+    
 
-    // auto itr = market.find(0);
-    
-    // eosio::check((itr->base).balance.amount >= shares, "Not enought shares on market");    
-    
-    // market.modify( itr, _me, [&]( auto& es ) {
-    //   es.base.balance = asset((itr -> base).balance.amount - shares, eosio::symbol(eosio::symbol_code("POWER"), 0));
-    // });
 
     //Emplace or modify power object of reciever and propagate votes changes;
     if (power_to == power_to_idx.end()) {
@@ -740,7 +761,7 @@ using namespace eosio;
 
 		eosio::asset tokens_out;
 		market.modify( itr, _me, [&]( auto& es ) {
-        	tokens_out = es.convert( asset(shares,eosio::symbol(eosio::symbol_code("POWER"), 0)), exist -> quote_amount.symbol);
+        	tokens_out = es.direct_convert( asset(shares,eosio::symbol(eosio::symbol_code("POWER"), 0)), exist -> quote_amount.symbol);
 	    });
 		eosio::check( tokens_out.amount > 1, "token amount received from selling shares is too low" );
 	    

@@ -78,9 +78,9 @@ using namespace eosio;
       const double ib = inp_reserve;
       const double ob = out_reserve;
       const double in = inp;
-
+      
       int64_t out = int64_t( (in * ob) / (ib + in) );
-
+      
       if ( out < 0 ) out = 0;
 
       return out;

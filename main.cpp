@@ -246,7 +246,7 @@ extern "C" {
                             break;
                         };
                         case 800: {
-                            //BUY QUANTS
+                            //BURN QUANTS
                             
                             //direct buy saled quants
                             require_auth(op.from);
@@ -260,7 +260,7 @@ extern "C" {
                         case 111: {
                             //SPREAD
                             
-                            //direct buy saled quants
+                            //
                             require_auth(op.from);
 
                             auto delimeter2 = parameter.find('-');
@@ -464,6 +464,10 @@ extern "C" {
                 //HOSTS
                 case "upgrade"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::upgrade);
+                    break;
+                };
+                case "compensator"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::compensator);
                     break;
                 };
                 case "setlevels"_n.value: {
