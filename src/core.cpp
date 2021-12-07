@@ -874,17 +874,17 @@ void next_pool( eosio::name host){
         // coredhistory.erase(coredhist_start);
 
     
-    market_index market(_me, host.value);
-    auto itr = market.find(0);
+    // market_index market(_me, host.value);
+    // auto itr = market.find(0);
     
-    market.modify(itr, _me, [&](auto &m){
-        m.base.balance = asset(1000000000, _POWER);
+    // market.modify(itr, _me, [&](auto &m){
+    //     m.base.balance = asset(1000000000, _POWER);
         
-        m.base.weight = 0.1;
-        m.quote.weight = 0.1;
+    //     m.base.weight = 0.1;
+    //     m.quote.weight = 0.1;
 
-        m.quote.balance = asset(10000000000, acc ->quote_amount.symbol);
-    });
+    //     m.quote.balance = asset(10000000000, acc ->quote_amount.symbol);
+    // });
 
     // market.erase(itr);
 
