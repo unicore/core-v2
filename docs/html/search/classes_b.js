@@ -1,6 +1,9 @@
 var searchData=
 [
-  ['sale',['sale',['../structsale.html',1,'']]],
-  ['sincome',['sincome',['../structsincome.html',1,'']]],
-  ['spiral',['spiral',['../structspiral.html',1,'']]]
+  ['rate',['rate',['../structrate.html',1,'']]],
+  ['refbalances',['refbalances',['../structrefbalances.html',1,'']]],
+  ['reports3',['reports3',['../structreports3.html',1,'']]],
+  ['roles',['roles',['../structroles.html',1,'']]],
+  ['rstat',['rstat',['../structrstat.html',1,'']]],
+  ['rvotes',['rvotes',['../structrvotes.html',1,'']]]
 ];

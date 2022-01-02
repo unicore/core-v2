@@ -1,0 +1,852 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.14">
+  <compounddef id="goals_8cpp" kind="file" language="C++">
+    <compoundname>goals.cpp</compoundname>
+    <includedby refid="main_8cpp" local="yes">main.cpp</includedby>
+      <sectiondef kind="func">
+      <memberdef kind="function" id="goals_8cpp_1a37e7c828d50e126bd57dba81208af131" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type>void</type>
+        <definition>void validate_permlink</definition>
+        <argsstring>(const std::string &amp;permlink)</argsstring>
+        <name>validate_permlink</name>
+        <param>
+          <type>const std::string &amp;</type>
+          <declname>permlink</declname>
+        </param>
+        <briefdescription>
+<para>Модуль целей. Использует долю потока эмиссии для финансирования целей сообщества. Каждый участник может предложить цель к финансированию. Суть и смысл цели ограничен только желаниями сообщества. Каждая цель должна пройти минимальный порог процента собранных голосов от держателей силы сообщества. Цели, прошедшие порог консенсуса сообщества, попадают в лист финансирования. Все цели в листе финансирования получают равный поток финансирования относительно друг друга. Финансирование поступает в объект баланса цели в момент перехода на каждый следующий пул, или напрямую из фонда сообщества по подписи архитектора. </para>        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="src/goals.cpp" line="15" column="1" bodyfile="src/goals.cpp" bodystart="15" bodyend="33"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <programlisting>
+<codeline lineno="1"><highlight class="normal"></highlight></codeline>
+<codeline lineno="2"><highlight class="normal"></highlight><highlight class="keyword">using<sp/>namespace<sp/></highlight><highlight class="normal"><ref refid="namespaceeosio" kindref="compound">eosio</ref>;</highlight></codeline>
+<codeline lineno="3"><highlight class="normal"></highlight></codeline>
+<codeline lineno="15"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>validate_permlink(<sp/></highlight><highlight class="keyword">const</highlight><highlight class="normal"><sp/>std::string&amp;<sp/>permlink<sp/>)</highlight></codeline>
+<codeline lineno="16"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="17"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(<sp/>3<sp/>&lt;<sp/>permlink.size()<sp/>&amp;&amp;<sp/>permlink.size()<sp/>&lt;<sp/>255,<sp/></highlight><highlight class="stringliteral">&quot;Permlink<sp/>is<sp/>not<sp/>a<sp/>valid<sp/>size.&quot;</highlight><highlight class="normal"><sp/>);</highlight></codeline>
+<codeline lineno="18"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="19"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal">(<sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>c<sp/>:<sp/>permlink<sp/>)</highlight></codeline>
+<codeline lineno="20"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="21"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">switch</highlight><highlight class="normal">(<sp/>c<sp/>)</highlight></codeline>
+<codeline lineno="22"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>{</highlight></codeline>
+<codeline lineno="23"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;a&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;b&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;c&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;d&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;e&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;f&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;g&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;h&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;i&apos;</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="24"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;j&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;k&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;l&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;m&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;n&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;o&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;p&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;q&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;r&apos;</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="25"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;s&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;t&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;u&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;v&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;w&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;x&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;y&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;z&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;0&apos;</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="26"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;1&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;2&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;3&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;4&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;5&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;6&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;7&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;8&apos;</highlight><highlight class="normal">:<sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;9&apos;</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="27"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">case</highlight><highlight class="normal"><sp/></highlight><highlight class="charliteral">&apos;-&apos;</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="28"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">break</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="29"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">default</highlight><highlight class="normal">:</highlight></codeline>
+<codeline lineno="30"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;Invalid<sp/>permlink<sp/>character&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="31"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="32"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="33"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="34"><highlight class="normal"></highlight></codeline>
+<codeline lineno="40"><highlight class="normal"><sp/><sp/><sp/><sp/>[[eosio::action]]<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="classunicore_1aa2341c3f2393be329d759ef09f20367f" kindref="member">unicore::setgoal</ref>(eosio::name<sp/>creator,<sp/>eosio::name<sp/>host,<sp/>eosio::name<sp/>type,<sp/>std::string<sp/>title,<sp/>std::string<sp/>permlink,<sp/>std::string<sp/>description,<sp/>eosio::asset<sp/>target,<sp/>uint64_t<sp/>duration,<sp/>uint64_t<sp/>cashback,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>activated,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>is_batch,<sp/>uint64_t<sp/>parent_batch_id,<sp/>std::string<sp/>meta){</highlight></codeline>
+<codeline lineno="41"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>require_auth(creator);</highlight></codeline>
+<codeline lineno="42"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="43"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>goals_index<sp/><ref refid="structgoals" kindref="compound">goals</ref>(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="44"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>account_index<sp/>accounts(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="45"><highlight class="normal"></highlight></codeline>
+<codeline lineno="46"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>partners2_index<sp/>users(_partners,<sp/>_partners.value);</highlight></codeline>
+<codeline lineno="47"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>auto<sp/>user<sp/>=<sp/>users.find(creator.value);</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="48"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>eosio::check(user<sp/>!=<sp/>users.end(),<sp/>&quot;User<sp/>is<sp/>not<sp/>registered&quot;);</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="49"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="50"><highlight class="normal"><sp/><sp/><sp/><sp/>eosio::check(cashback<sp/>&lt;=<sp/>100<sp/>*<sp/>ONE_PERCENT,<sp/></highlight><highlight class="stringliteral">&quot;Cashback<sp/>should<sp/>be<sp/>less<sp/>or<sp/>equal<sp/>1000000&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="51"><highlight class="normal"></highlight></codeline>
+<codeline lineno="52"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>acc<sp/>=<sp/>accounts.find(host.value);</highlight></codeline>
+<codeline lineno="53"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>root_symbol<sp/>=<sp/>(acc-&gt;root_token).symbol;</highlight></codeline>
+<codeline lineno="54"><highlight class="normal"></highlight></codeline>
+<codeline lineno="55"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>validated<sp/>=<sp/>acc-&gt;consensus_percent<sp/>==<sp/>0;</highlight></codeline>
+<codeline lineno="56"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="57"><highlight class="normal"><sp/><sp/><sp/><sp/>validate_permlink(permlink);</highlight></codeline>
+<codeline lineno="58"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="59"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//check<sp/>for<sp/>uniq<sp/>permlink</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="60"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>hash<sp/>=<sp/>hash64(permlink);</highlight></codeline>
+<codeline lineno="61"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>exist_goal<sp/>=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.find(hash);</highlight></codeline>
+<codeline lineno="62"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>auto<sp/>idx_bv<sp/>=<sp/>goals.template<sp/>get_index&lt;&quot;hash&quot;_n&gt;();</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="63"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>auto<sp/>exist_permlink<sp/>=<sp/>idx_bv.find(hash);</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="64"><highlight class="normal"></highlight></codeline>
+<codeline lineno="65"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>eosio::check(exist_goal<sp/>==<sp/>goals.end(),<sp/>&quot;Goal<sp/>with<sp/>current<sp/>permlink<sp/>is<sp/>already<sp/>exist&quot;);</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="66"><highlight class="normal"></highlight></codeline>
+<codeline lineno="67"><highlight class="normal"></highlight></codeline>
+<codeline lineno="68"><highlight class="normal"><sp/><sp/><sp/><sp/>eosio::check(target.symbol<sp/>==<sp/>root_symbol,<sp/></highlight><highlight class="stringliteral">&quot;Wrong<sp/>symbol<sp/>for<sp/>this<sp/>host&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="69"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="70"><highlight class="normal"><sp/><sp/><sp/><sp/>eosio::check(title.length()<sp/>&lt;=<sp/>300<sp/>&amp;&amp;<sp/>title.length()<sp/>&gt;<sp/>0,<sp/></highlight><highlight class="stringliteral">&quot;Short<sp/>Description<sp/>is<sp/>a<sp/>maximum<sp/>100<sp/>symbols.<sp/>Describe<sp/>the<sp/>goal<sp/>shortly&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="71"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="72"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>goal_id<sp/>=<sp/><sp/>acc<sp/>-&gt;<sp/>total_goals<sp/>+<sp/>1;</highlight></codeline>
+<codeline lineno="73"><highlight class="normal"></highlight></codeline>
+<codeline lineno="74"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>targets_symbol<sp/>=<sp/>acc<sp/>-&gt;<sp/>sale_mode<sp/>==<sp/></highlight><highlight class="stringliteral">&quot;counterpower&quot;</highlight><highlight class="normal">_n<sp/>?<sp/>_POWER<sp/>:<sp/>acc-&gt;asset_on_sale.symbol;</highlight></codeline>
+<codeline lineno="75"><highlight class="normal"></highlight></codeline>
+<codeline lineno="76"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(exist_goal<sp/>==<sp/><ref refid="structgoals" kindref="compound">goals</ref>.end()){</highlight></codeline>
+<codeline lineno="77"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>eosio::check(target.amount<sp/>==<sp/>0,<sp/>&quot;Goal<sp/>target<sp/>is<sp/>a<sp/>summ<sp/>of<sp/>tasks<sp/>amounts&quot;);</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="78"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="79"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(parent_batch_id<sp/>!=<sp/>0)<sp/>{</highlight></codeline>
+<codeline lineno="80"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>parent_goal<sp/>=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.find(parent_batch_id);</highlight></codeline>
+<codeline lineno="81"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(parent_goal<sp/>!=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.end(),<sp/></highlight><highlight class="stringliteral">&quot;Parent<sp/>batch<sp/>is<sp/>not<sp/>founded&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="82"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::vector&lt;uint64_t&gt;<sp/>batch<sp/>=<sp/>parent_goal<sp/>-&gt;<sp/>batch;</highlight></codeline>
+<codeline lineno="83"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="84"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="85"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//TODO<sp/>check<sp/>for<sp/>batch<sp/>length</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="86"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>itr<sp/>=<sp/>std::find(batch.begin(),<sp/>batch.end(),<sp/>hash);</highlight></codeline>
+<codeline lineno="87"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="88"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(itr<sp/>==<sp/>batch.end()){</highlight></codeline>
+<codeline lineno="89"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>batch.push_back(hash);</highlight></codeline>
+<codeline lineno="90"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}<sp/></highlight></codeline>
+<codeline lineno="91"><highlight class="normal"></highlight></codeline>
+<codeline lineno="92"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.modify(parent_goal,<sp/>creator,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;t){</highlight></codeline>
+<codeline lineno="93"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>t.batch<sp/>=<sp/>batch;</highlight></codeline>
+<codeline lineno="94"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="95"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>};</highlight></codeline>
+<codeline lineno="96"><highlight class="normal"></highlight></codeline>
+<codeline lineno="97"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>std::string<sp/>parent_permlink<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;&quot;</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="98"><highlight class="normal"></highlight></codeline>
+<codeline lineno="99"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(exist_goal<sp/>-&gt;<sp/>parent_id<sp/>!=<sp/>parent_batch_id){</highlight></codeline>
+<codeline lineno="100"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>parent_goal<sp/>=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.find(parent_batch_id);</highlight></codeline>
+<codeline lineno="101"><highlight class="normal"></highlight></codeline>
+<codeline lineno="102"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(parent_goal<sp/>!=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.end()){</highlight></codeline>
+<codeline lineno="103"><highlight class="normal"></highlight></codeline>
+<codeline lineno="104"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::vector&lt;uint64_t&gt;<sp/>batch<sp/>=<sp/>parent_goal<sp/>-&gt;<sp/>batch;</highlight></codeline>
+<codeline lineno="105"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="106"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>itr<sp/>=<sp/>std::find(batch.begin(),<sp/>batch.end(),<sp/>exist_goal-&gt;id);</highlight></codeline>
+<codeline lineno="107"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(itr<sp/>!=<sp/>batch.end())</highlight></codeline>
+<codeline lineno="108"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>batch.erase(itr);</highlight></codeline>
+<codeline lineno="109"><highlight class="normal"></highlight></codeline>
+<codeline lineno="110"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.modify(parent_goal,<sp/>creator,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;g){</highlight></codeline>
+<codeline lineno="111"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.batch<sp/>=<sp/>batch;</highlight></codeline>
+<codeline lineno="112"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="113"><highlight class="normal"></highlight></codeline>
+<codeline lineno="114"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>parent_permlink<sp/>=<sp/>parent_goal<sp/>-&gt;<sp/>permlink;</highlight></codeline>
+<codeline lineno="115"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="116"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="117"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="118"><highlight class="normal"></highlight></codeline>
+<codeline lineno="119"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.emplace(creator,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;g){</highlight></codeline>
+<codeline lineno="120"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.id<sp/>=<sp/>hash;</highlight></codeline>
+<codeline lineno="121"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.type<sp/>=<sp/>type;</highlight></codeline>
+<codeline lineno="122"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>g.hash<sp/>=<sp/>hash;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="123"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.creator<sp/>=<sp/>creator;</highlight></codeline>
+<codeline lineno="124"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.benefactor<sp/>=<sp/>creator<sp/>==<sp/>host<sp/>?<sp/>host<sp/>:<sp/></highlight><highlight class="stringliteral">&quot;&quot;</highlight><highlight class="normal">_n;</highlight></codeline>
+<codeline lineno="125"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.status<sp/>=<sp/>creator<sp/>==<sp/>host<sp/>?<sp/></highlight><highlight class="stringliteral">&quot;process&quot;</highlight><highlight class="normal">_n<sp/>:<sp/></highlight><highlight class="stringliteral">&quot;&quot;</highlight><highlight class="normal">_n;</highlight></codeline>
+<codeline lineno="126"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>g.who_can_create_tasks<sp/>=<sp/>creator;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="127"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.created<sp/>=<sp/>eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());</highlight></codeline>
+<codeline lineno="128"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.finish_at<sp/>=<sp/>eosio::time_point_sec(-1);</highlight></codeline>
+<codeline lineno="129"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.host<sp/>=<sp/>host;</highlight></codeline>
+<codeline lineno="130"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.permlink<sp/>=<sp/>permlink;</highlight></codeline>
+<codeline lineno="131"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.cashback<sp/>=<sp/>cashback;</highlight></codeline>
+<codeline lineno="132"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.title<sp/>=<sp/>title;</highlight></codeline>
+<codeline lineno="133"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.description<sp/>=<sp/>description;</highlight></codeline>
+<codeline lineno="134"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.target<sp/>=<sp/>target;</highlight></codeline>
+<codeline lineno="135"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.filled<sp/>=<sp/>target.amount<sp/>==<sp/>0<sp/>?<sp/>true<sp/>:<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="136"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.target1<sp/>=<sp/>asset(0,<sp/>targets_symbol);</highlight></codeline>
+<codeline lineno="137"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.target2<sp/>=<sp/>asset(0,<sp/>targets_symbol);</highlight></codeline>
+<codeline lineno="138"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.target3<sp/>=<sp/>asset(0,<sp/>targets_symbol);</highlight></codeline>
+<codeline lineno="139"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.debt_amount<sp/>=<sp/>asset(0,<sp/>root_symbol);</highlight></codeline>
+<codeline lineno="140"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.withdrawed<sp/>=<sp/>asset(0,<sp/>root_symbol);</highlight></codeline>
+<codeline lineno="141"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.available<sp/>=<sp/>asset(0,<sp/>root_symbol);</highlight></codeline>
+<codeline lineno="142"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.validated<sp/>=<sp/>validated;</highlight></codeline>
+<codeline lineno="143"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.duration<sp/>=<sp/>duration;</highlight></codeline>
+<codeline lineno="144"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.meta<sp/>=<sp/>meta;</highlight></codeline>
+<codeline lineno="145"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.activated<sp/>=<sp/>activated;</highlight></codeline>
+<codeline lineno="146"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.is_batch<sp/>=<sp/>is_batch;</highlight></codeline>
+<codeline lineno="147"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.parent_id<sp/>=<sp/>parent_batch_id;</highlight></codeline>
+<codeline lineno="148"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.parent_permlink<sp/>=<sp/>parent_permlink;</highlight></codeline>
+<codeline lineno="149"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>});<sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="150"><highlight class="normal"></highlight></codeline>
+<codeline lineno="151"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>accounts.modify(acc,<sp/>creator,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;a){</highlight></codeline>
+<codeline lineno="152"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>a.total_goals<sp/>=<sp/>acc<sp/>-&gt;<sp/>total_goals<sp/>+<sp/>1;</highlight></codeline>
+<codeline lineno="153"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>});<sp/><sp/></highlight></codeline>
+<codeline lineno="154"><highlight class="normal"></highlight></codeline>
+<codeline lineno="155"><highlight class="normal"><sp/><sp/><sp/><sp/>}<sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="156"><highlight class="normal"></highlight></codeline>
+<codeline lineno="157"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.modify(exist_goal,<sp/>creator,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;g){</highlight></codeline>
+<codeline lineno="158"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.who_can_create_tasks<sp/>=<sp/>creator;</highlight></codeline>
+<codeline lineno="159"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.host<sp/>=<sp/>host;</highlight></codeline>
+<codeline lineno="160"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.permlink<sp/>=<sp/>permlink;</highlight></codeline>
+<codeline lineno="161"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.parent_id<sp/>=<sp/>parent_batch_id;</highlight></codeline>
+<codeline lineno="162"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.cashback<sp/>=<sp/>cashback;</highlight></codeline>
+<codeline lineno="163"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.title<sp/>=<sp/>title;</highlight></codeline>
+<codeline lineno="164"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.description<sp/>=<sp/>description;</highlight></codeline>
+<codeline lineno="165"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.target<sp/>=<sp/>target;</highlight></codeline>
+<codeline lineno="166"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.validated<sp/>=<sp/>validated;</highlight></codeline>
+<codeline lineno="167"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.duration<sp/>=<sp/>duration;</highlight></codeline>
+<codeline lineno="168"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.meta<sp/>=<sp/>meta;</highlight></codeline>
+<codeline lineno="169"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.activated<sp/>=<sp/>activated;</highlight></codeline>
+<codeline lineno="170"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.filled<sp/>=<sp/>exist_goal-&gt;available<sp/>+<sp/>exist_goal-&gt;withdrawed<sp/>&gt;=<sp/>target;<sp/></highlight></codeline>
+<codeline lineno="171"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="172"><highlight class="normal"></highlight></codeline>
+<codeline lineno="173"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="174"><highlight class="normal"></highlight></codeline>
+<codeline lineno="175"><highlight class="normal"></highlight></codeline>
+<codeline lineno="176"><highlight class="normal"></highlight></codeline>
+<codeline lineno="177"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>if<sp/>(creator<sp/>==<sp/>acc-&gt;architect<sp/>&amp;&amp;<sp/>type<sp/>==<sp/>&quot;goal&quot;_n)<sp/>{</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="178"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/><sp/><sp/>unicore::dfundgoal(creator,<sp/>host,<sp/>goal_id,<sp/>target,<sp/>&quot;autoset<sp/>by<sp/>architect&quot;);</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="179"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>}</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="180"><highlight class="normal"></highlight></codeline>
+<codeline lineno="181"><highlight class="normal"></highlight></codeline>
+<codeline lineno="182"><highlight class="normal"><sp/><sp/><sp/><sp/>};</highlight></codeline>
+<codeline lineno="183"><highlight class="normal"></highlight></codeline>
+<codeline lineno="184"><highlight class="normal"></highlight></codeline>
+<codeline lineno="192"><highlight class="normal"><sp/><sp/><sp/><sp/>[[eosio::action]]<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="classunicore_1a969e75dd90699b53b75ab8482cbc49d3" kindref="member">unicore::dfundgoal</ref>(eosio::name<sp/>architect,<sp/>eosio::name<sp/>host,<sp/>uint64_t<sp/>goal_id,<sp/>eosio::asset<sp/>amount,<sp/>std::string<sp/>comment){</highlight></codeline>
+<codeline lineno="193"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>require_auth(architect);</highlight></codeline>
+<codeline lineno="194"><highlight class="normal"></highlight></codeline>
+<codeline lineno="195"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>account_index<sp/>accounts(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="196"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>acc<sp/>=<sp/>accounts.find(host.value);</highlight></codeline>
+<codeline lineno="197"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(acc-&gt;architect<sp/>==<sp/>architect,<sp/></highlight><highlight class="stringliteral">&quot;Only<sp/>architect<sp/>can<sp/>direct<sp/>fund<sp/>the<sp/>goal&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="198"><highlight class="normal"></highlight></codeline>
+<codeline lineno="199"><highlight class="normal"><sp/><sp/><sp/><sp/>emission_index<sp/>emis(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="200"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>emi<sp/>=<sp/>emis.find(host.value);</highlight></codeline>
+<codeline lineno="201"><highlight class="normal"></highlight></codeline>
+<codeline lineno="202"><highlight class="normal"><sp/><sp/><sp/><sp/>eosio::check(emi-&gt;fund<sp/>&gt;=<sp/>amount,<sp/></highlight><highlight class="stringliteral">&quot;Not<sp/>enough<sp/>tokens<sp/>for<sp/>fund<sp/>the<sp/>goal&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="203"><highlight class="normal"></highlight></codeline>
+<codeline lineno="204"><highlight class="normal"><sp/><sp/><sp/><sp/>donate_action(architect,<sp/>host,<sp/>goal_id,<sp/>amount,<sp/>_me);</highlight></codeline>
+<codeline lineno="205"><highlight class="normal"></highlight></codeline>
+<codeline lineno="206"><highlight class="normal"><sp/><sp/><sp/><sp/>emis.modify(emi,<sp/>architect,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;e){</highlight></codeline>
+<codeline lineno="207"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>e.fund<sp/>=<sp/>e.fund<sp/>-<sp/>amount;</highlight></codeline>
+<codeline lineno="208"><highlight class="normal"><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="209"><highlight class="normal"></highlight></codeline>
+<codeline lineno="210"><highlight class="normal"><sp/><sp/><sp/><sp/>};</highlight></codeline>
+<codeline lineno="211"><highlight class="normal"></highlight></codeline>
+<codeline lineno="212"><highlight class="normal"></highlight></codeline>
+<codeline lineno="220"><highlight class="normal"><sp/><sp/>[[eosio::action]]<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="classunicore_1af6e32936bbe20a612c9348bf5f805982" kindref="member">unicore::fundchildgoa</ref>(eosio::name<sp/>architect,<sp/>eosio::name<sp/>host,<sp/>uint64_t<sp/>goal_id,<sp/>eosio::asset<sp/>amount){</highlight></codeline>
+<codeline lineno="221"><highlight class="normal"><sp/><sp/><sp/><sp/>require_auth(architect);</highlight></codeline>
+<codeline lineno="222"><highlight class="normal"></highlight></codeline>
+<codeline lineno="223"><highlight class="normal"><sp/><sp/><sp/><sp/>account_index<sp/>accounts(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="224"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>acc<sp/>=<sp/>accounts.find(host.value);</highlight></codeline>
+<codeline lineno="225"><highlight class="normal"><sp/><sp/><sp/><sp/>eosio::check(acc-&gt;architect<sp/>==<sp/>architect,<sp/></highlight><highlight class="stringliteral">&quot;Only<sp/>architect<sp/>can<sp/>direct<sp/>fund<sp/>the<sp/>goal&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="226"><highlight class="normal"></highlight></codeline>
+<codeline lineno="227"><highlight class="normal"><sp/><sp/><sp/><sp/>goals_index<sp/><ref refid="structgoals" kindref="compound">goals</ref>(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="228"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>child_goal<sp/>=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.find(goal_id);</highlight></codeline>
+<codeline lineno="229"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>parent_goal<sp/>=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.find(child_goal<sp/>-&gt;<sp/>parent_id);</highlight></codeline>
+<codeline lineno="230"><highlight class="normal"><sp/><sp/><sp/><sp/>eosio::check(parent_goal<sp/>!=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.end(),<sp/></highlight><highlight class="stringliteral">&quot;Parent<sp/>goal<sp/>is<sp/>not<sp/>found&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="231"><highlight class="normal"><sp/><sp/><sp/><sp/>eosio::check(parent_goal<sp/>-&gt;<sp/>available<sp/>&gt;=<sp/>amount,<sp/></highlight><highlight class="stringliteral">&quot;Not<sp/>enough<sp/>parent<sp/>balance<sp/>for<sp/>fund&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="232"><highlight class="normal"></highlight></codeline>
+<codeline lineno="233"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.modify(parent_goal,<sp/>architect,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;gp){</highlight></codeline>
+<codeline lineno="234"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>gp.available<sp/>-=<sp/>amount;</highlight></codeline>
+<codeline lineno="235"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>gp.withdrawed<sp/>+=<sp/>amount;</highlight></codeline>
+<codeline lineno="236"><highlight class="normal"><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="237"><highlight class="normal"></highlight></codeline>
+<codeline lineno="238"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.modify(child_goal,<sp/>architect,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;gc){</highlight></codeline>
+<codeline lineno="239"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>gc.available<sp/>+=<sp/>amount;</highlight></codeline>
+<codeline lineno="240"><highlight class="normal"><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="241"><highlight class="normal"></highlight></codeline>
+<codeline lineno="242"><highlight class="normal"><sp/><sp/>};</highlight></codeline>
+<codeline lineno="243"><highlight class="normal"></highlight></codeline>
+<codeline lineno="244"><highlight class="normal"></highlight></codeline>
+<codeline lineno="245"><highlight class="normal"></highlight></codeline>
+<codeline lineno="246"><highlight class="normal"><sp/></highlight></codeline>
+<codeline lineno="247"><highlight class="normal"><sp/><sp/>[[eosio::action]]<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>unicore::setgcreator(eosio::name<sp/>oldcreator,<sp/>eosio::name<sp/>newcreator,<sp/>eosio::name<sp/>host,<sp/>uint64_t<sp/>goal_id){</highlight></codeline>
+<codeline lineno="248"><highlight class="normal"><sp/><sp/><sp/><sp/>require_auth(oldcreator);</highlight></codeline>
+<codeline lineno="249"><highlight class="normal"><sp/><sp/><sp/><sp/>goals_index<sp/><ref refid="structgoals" kindref="compound">goals</ref>(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="250"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="251"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>goal<sp/>=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.find(goal_id);</highlight></codeline>
+<codeline lineno="252"><highlight class="normal"><sp/><sp/><sp/><sp/>eosio::check(goal<sp/>!=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.end(),<sp/></highlight><highlight class="stringliteral">&quot;Goal<sp/>is<sp/>not<sp/>exist&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="253"><highlight class="normal"><sp/><sp/><sp/><sp/>eosio::check(goal-&gt;creator<sp/>==<sp/>oldcreator,<sp/></highlight><highlight class="stringliteral">&quot;Wrong<sp/>creator<sp/>of<sp/>goal&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="254"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="255"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.modify(goal,<sp/>oldcreator,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;g){</highlight></codeline>
+<codeline lineno="256"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>g.creator<sp/>=<sp/>newcreator;</highlight></codeline>
+<codeline lineno="257"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>g.who_can_create_tasks<sp/>=<sp/>newcreator;</highlight></codeline>
+<codeline lineno="258"><highlight class="normal"><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="259"><highlight class="normal"></highlight></codeline>
+<codeline lineno="260"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="261"><highlight class="normal"></highlight></codeline>
+<codeline lineno="262"><highlight class="normal"></highlight></codeline>
+<codeline lineno="263"><highlight class="normal"><sp/></highlight></codeline>
+<codeline lineno="264"><highlight class="normal"><sp/><sp/>[[eosio::action]]<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>unicore::gaccept(eosio::name<sp/>host,<sp/>uint64_t<sp/>goal_id,<sp/>uint64_t<sp/>parent_goal_id,<sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>status)<sp/>{</highlight></codeline>
+<codeline lineno="265"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//accept<sp/>or<sp/>any</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="266"><highlight class="normal"><sp/><sp/><sp/><sp/>require_auth(host);</highlight></codeline>
+<codeline lineno="267"><highlight class="normal"><sp/><sp/><sp/><sp/>goals_index<sp/><ref refid="structgoals" kindref="compound">goals</ref>(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="268"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="269"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>goal<sp/>=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.find(goal_id);</highlight></codeline>
+<codeline lineno="270"><highlight class="normal"><sp/><sp/><sp/><sp/>eosio::check(goal<sp/>!=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.end(),<sp/></highlight><highlight class="stringliteral">&quot;Goal<sp/>is<sp/>not<sp/>exist&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="271"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="272"><highlight class="normal"><sp/><sp/><sp/><sp/>eosio::check(goal-&gt;status<sp/>==<sp/></highlight><highlight class="stringliteral">&quot;&quot;</highlight><highlight class="normal">_n,<sp/></highlight><highlight class="stringliteral">&quot;Only<sp/>not<sp/>accepted<sp/>goals<sp/>can<sp/>be<sp/>accepted&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="273"><highlight class="normal"></highlight></codeline>
+<codeline lineno="274"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.modify(goal,<sp/>host,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;g)<sp/>{</highlight></codeline>
+<codeline lineno="275"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>g.benefactor<sp/>=<sp/>status<sp/>==<sp/></highlight><highlight class="keyword">true</highlight><highlight class="normal"><sp/>?<sp/>host<sp/>:<sp/></highlight><highlight class="stringliteral">&quot;&quot;</highlight><highlight class="normal">_n;</highlight></codeline>
+<codeline lineno="276"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>g.status<sp/>=<sp/>status<sp/>==<sp/></highlight><highlight class="keyword">true</highlight><highlight class="normal"><sp/>?<sp/></highlight><highlight class="stringliteral">&quot;process&quot;</highlight><highlight class="normal">_n<sp/>:<sp/></highlight><highlight class="stringliteral">&quot;declined&quot;</highlight><highlight class="normal">_n;</highlight></codeline>
+<codeline lineno="277"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>g.parent_id<sp/>=<sp/>parent_goal_id;</highlight></codeline>
+<codeline lineno="278"><highlight class="normal"><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="279"><highlight class="normal"></highlight></codeline>
+<codeline lineno="280"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(goal-&gt;is_batch<sp/>==<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">){</highlight></codeline>
+<codeline lineno="281"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(parent_goal_id<sp/>!=<sp/>0,<sp/></highlight><highlight class="stringliteral">&quot;Accepted<sp/>goal<sp/>should<sp/>have<sp/>a<sp/>parent&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="282"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="283"><highlight class="normal"></highlight></codeline>
+<codeline lineno="284"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(parent_goal_id<sp/>!=<sp/>0<sp/>&amp;&amp;<sp/>status<sp/>==<sp/></highlight><highlight class="keyword">true</highlight><highlight class="normal">)<sp/>{</highlight></codeline>
+<codeline lineno="285"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="286"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>parent_goal<sp/>=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.find(parent_goal_id);</highlight></codeline>
+<codeline lineno="287"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(parent_goal<sp/>!=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.end(),<sp/></highlight><highlight class="stringliteral">&quot;Parent<sp/>batch<sp/>is<sp/>not<sp/>founded&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="288"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>std::vector&lt;uint64_t&gt;<sp/>batch<sp/>=<sp/>parent_goal<sp/>-&gt;<sp/>batch;</highlight></codeline>
+<codeline lineno="289"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="290"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//TODO<sp/>check<sp/>for<sp/>batch<sp/>length</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="291"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>itr<sp/>=<sp/>std::find(batch.begin(),<sp/>batch.end(),<sp/>goal_id);</highlight></codeline>
+<codeline lineno="292"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="293"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(itr<sp/>==<sp/>batch.end()){</highlight></codeline>
+<codeline lineno="294"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>batch.push_back(goal_id);</highlight></codeline>
+<codeline lineno="295"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>};</highlight></codeline>
+<codeline lineno="296"><highlight class="normal"></highlight></codeline>
+<codeline lineno="297"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.modify(parent_goal,<sp/>host,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;t){</highlight></codeline>
+<codeline lineno="298"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>t.batch<sp/>=<sp/>batch;</highlight></codeline>
+<codeline lineno="299"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="300"><highlight class="normal"><sp/><sp/><sp/><sp/>};</highlight></codeline>
+<codeline lineno="301"><highlight class="normal"></highlight></codeline>
+<codeline lineno="302"><highlight class="normal"></highlight></codeline>
+<codeline lineno="303"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="304"><highlight class="normal"></highlight></codeline>
+<codeline lineno="305"><highlight class="normal"></highlight></codeline>
+<codeline lineno="306"><highlight class="normal"></highlight></codeline>
+<codeline lineno="307"><highlight class="normal"><sp/><sp/>[[eosio::action]]<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>unicore::gpause(eosio::name<sp/>host,<sp/>uint64_t<sp/>goal_id)<sp/>{</highlight></codeline>
+<codeline lineno="308"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//accept<sp/>or<sp/>any</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="309"><highlight class="normal"><sp/><sp/><sp/><sp/>require_auth(host);</highlight></codeline>
+<codeline lineno="310"><highlight class="normal"><sp/><sp/><sp/><sp/>goals_index<sp/><ref refid="structgoals" kindref="compound">goals</ref>(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="311"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="312"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>goal<sp/>=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.find(goal_id);</highlight></codeline>
+<codeline lineno="313"><highlight class="normal"><sp/><sp/><sp/><sp/>eosio::check(goal<sp/>!=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.end(),<sp/></highlight><highlight class="stringliteral">&quot;Goal<sp/>is<sp/>not<sp/>exist&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="314"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="315"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.modify(goal,<sp/>host,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;g)<sp/>{</highlight></codeline>
+<codeline lineno="316"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>g.status<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;&quot;</highlight><highlight class="normal">_n;</highlight></codeline>
+<codeline lineno="317"><highlight class="normal"><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="318"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="319"><highlight class="normal"></highlight></codeline>
+<codeline lineno="320"><highlight class="normal"></highlight></codeline>
+<codeline lineno="321"><highlight class="normal"></highlight></codeline>
+<codeline lineno="327"><highlight class="normal"><sp/><sp/><sp/><sp/>[[eosio::action]]<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="classunicore_1a9fd534e0b189439c6f18e99689911b3e" kindref="member">unicore::delgoal</ref>(eosio::name<sp/>username,<sp/>eosio::name<sp/>host,<sp/>uint64_t<sp/>goal_id){</highlight></codeline>
+<codeline lineno="328"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>require_auth(username);</highlight></codeline>
+<codeline lineno="329"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>goals_index<sp/><ref refid="structgoals" kindref="compound">goals</ref>(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="330"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="331"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>goal<sp/>=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.find(goal_id);</highlight></codeline>
+<codeline lineno="332"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(goal<sp/>!=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.end(),<sp/></highlight><highlight class="stringliteral">&quot;Goal<sp/>is<sp/>not<sp/>exist&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="333"><highlight class="normal"><sp/><sp/><sp/><sp/>eosio::check(goal<sp/>-&gt;<sp/>total_tasks<sp/>==<sp/>0,<sp/></highlight><highlight class="stringliteral">&quot;Impossible<sp/>to<sp/>delete<sp/>goal<sp/>with<sp/>tasks.<sp/>Clear<sp/>tasks<sp/>first&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="334"><highlight class="normal"><sp/><sp/><sp/><sp/>eosio::check(goal-&gt;creator<sp/>==<sp/>username<sp/>||<sp/>username<sp/>==<sp/>host,<sp/></highlight><highlight class="stringliteral">&quot;Wrong<sp/>auth<sp/>for<sp/>del<sp/>goal&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="335"><highlight class="normal"><sp/><sp/><sp/><sp/>eosio::check(goal-&gt;debt_count<sp/>==<sp/>0,<sp/></highlight><highlight class="stringliteral">&quot;Cannot<sp/>delete<sp/>goal<sp/>with<sp/>the<sp/>debt&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="336"><highlight class="normal"></highlight></codeline>
+<codeline lineno="337"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(goal<sp/>-&gt;parent_id<sp/>!=<sp/>0){</highlight></codeline>
+<codeline lineno="338"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>parent_goal<sp/>=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.find(goal-&gt;parent_id);</highlight></codeline>
+<codeline lineno="339"><highlight class="normal"></highlight></codeline>
+<codeline lineno="340"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(parent_goal<sp/>!=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.end()){</highlight></codeline>
+<codeline lineno="341"><highlight class="normal"></highlight></codeline>
+<codeline lineno="342"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::vector&lt;uint64_t&gt;<sp/>batch<sp/>=<sp/>parent_goal<sp/>-&gt;<sp/>batch;</highlight></codeline>
+<codeline lineno="343"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="344"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>itr<sp/>=<sp/>std::find(batch.begin(),<sp/>batch.end(),<sp/>goal_id);</highlight></codeline>
+<codeline lineno="345"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(itr<sp/>!=<sp/>batch.end())</highlight></codeline>
+<codeline lineno="346"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>batch.erase(itr);</highlight></codeline>
+<codeline lineno="347"><highlight class="normal"></highlight></codeline>
+<codeline lineno="348"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.modify(parent_goal,<sp/>username,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;g){</highlight></codeline>
+<codeline lineno="349"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.batch<sp/>=<sp/>batch;</highlight></codeline>
+<codeline lineno="350"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="351"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="352"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="353"><highlight class="normal"></highlight></codeline>
+<codeline lineno="354"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.erase(goal);</highlight></codeline>
+<codeline lineno="355"><highlight class="normal"></highlight></codeline>
+<codeline lineno="356"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="357"><highlight class="normal"></highlight></codeline>
+<codeline lineno="363"><highlight class="normal"><sp/><sp/><sp/><sp/>[[eosio::action]]<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="classunicore_1ac0e6bf94b8bfd28e08c364631a357d91" kindref="member">unicore::report</ref>(eosio::name<sp/>username,<sp/>eosio::name<sp/>host,<sp/>uint64_t<sp/>goal_id,<sp/>std::string<sp/>report){</highlight></codeline>
+<codeline lineno="364"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>require_auth(username);</highlight></codeline>
+<codeline lineno="365"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="366"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>goals_index<sp/><ref refid="structgoals" kindref="compound">goals</ref>(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="367"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="368"><highlight class="normal"><sp/><sp/><sp/><sp/>account_index<sp/>accounts(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="369"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>acc<sp/>=<sp/>accounts.find(host.value);</highlight></codeline>
+<codeline lineno="370"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(acc<sp/>!=<sp/>accounts.end(),<sp/></highlight><highlight class="stringliteral">&quot;Host<sp/>is<sp/>not<sp/>found&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="371"><highlight class="normal"></highlight></codeline>
+<codeline lineno="372"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>goal<sp/>=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.find(goal_id);</highlight></codeline>
+<codeline lineno="373"><highlight class="normal"></highlight></codeline>
+<codeline lineno="374"><highlight class="normal"><sp/><sp/><sp/><sp/>eosio::check(</highlight><highlight class="stringliteral">&quot;process&quot;</highlight><highlight class="normal">_n<sp/>==<sp/>goal-&gt;status,<sp/></highlight><highlight class="stringliteral">&quot;Only<sp/>processed<sp/>goals<sp/>can<sp/>be<sp/>completed&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="375"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="376"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(username<sp/>==<sp/>goal-&gt;benefactor,<sp/></highlight><highlight class="stringliteral">&quot;Only<sp/>benefactor<sp/>can<sp/>set<sp/>report&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="377"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="378"><highlight class="normal"><sp/><sp/><sp/><sp/>goals3_index<sp/>goals2(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="379"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>goal2<sp/>=<sp/>goals2.find(goal_id);</highlight></codeline>
+<codeline lineno="380"><highlight class="normal"></highlight></codeline>
+<codeline lineno="381"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(goal-&gt;available.amount<sp/>&gt;<sp/>0){</highlight></codeline>
+<codeline lineno="382"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>goals2.emplace(username,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;g){</highlight></codeline>
+<codeline lineno="383"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.id<sp/>=<sp/>goal<sp/>-&gt;<sp/>id;</highlight></codeline>
+<codeline lineno="384"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.total_on_distribution<sp/>=<sp/>goal-&gt;available;</highlight></codeline>
+<codeline lineno="385"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.remain_on_distribution<sp/>=<sp/>goal<sp/>-&gt;<sp/>available;</highlight></codeline>
+<codeline lineno="386"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="387"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="388"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="389"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="390"><highlight class="normal"></highlight></codeline>
+<codeline lineno="391"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.modify(goal,<sp/>username,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;g)<sp/>{</highlight></codeline>
+<codeline lineno="392"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>g.status<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;reported&quot;</highlight><highlight class="normal">_n;<sp/><sp/></highlight></codeline>
+<codeline lineno="393"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>g.finish_at<sp/>=<sp/>eosio::time_point_sec(eosio::current_time_point().sec_since_epoch()<sp/>+<sp/>_VOTING_TIME_EXPIRATION);</highlight></codeline>
+<codeline lineno="394"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>g.available<sp/>=<sp/>asset(0,<sp/>goal<sp/>-&gt;<sp/>available.symbol);</highlight></codeline>
+<codeline lineno="395"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>g.report<sp/>=<sp/>report;</highlight></codeline>
+<codeline lineno="396"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>g.reported<sp/>=<sp/></highlight><highlight class="keyword">true</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="397"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="398"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="399"><highlight class="normal"></highlight></codeline>
+<codeline lineno="406"><highlight class="normal"><sp/><sp/><sp/><sp/>[[eosio::action]]<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="classunicore_1ac31cf68445b14c4dbdea9684a0556f10" kindref="member">unicore::check</ref>(eosio::name<sp/>architect,<sp/>eosio::name<sp/>host,<sp/>uint64_t<sp/>goal_id){</highlight></codeline>
+<codeline lineno="407"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>require_auth(architect);</highlight></codeline>
+<codeline lineno="408"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>account_index<sp/>accounts(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="409"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>acc<sp/>=<sp/>accounts.find(host.value);</highlight></codeline>
+<codeline lineno="410"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(acc<sp/>!=<sp/>accounts.end(),<sp/></highlight><highlight class="stringliteral">&quot;Host<sp/>is<sp/>not<sp/>found&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="411"><highlight class="normal"></highlight></codeline>
+<codeline lineno="412"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>goals_index<sp/><ref refid="structgoals" kindref="compound">goals</ref>(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="413"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>goal<sp/>=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.find(goal_id);</highlight></codeline>
+<codeline lineno="414"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(goal<sp/>!=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.end(),<sp/></highlight><highlight class="stringliteral">&quot;Goal<sp/>is<sp/>not<sp/>found&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="415"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(architect<sp/>==<sp/>acc-&gt;architect,<sp/></highlight><highlight class="stringliteral">&quot;Only<sp/>architect<sp/>can<sp/>eosio::check<sp/>report<sp/>for<sp/>now&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="416"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(goal-&gt;reported<sp/>==<sp/></highlight><highlight class="keyword">true</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;Goals<sp/>without<sp/>reports<sp/>cannot<sp/>be<sp/>eosio::checked&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="417"><highlight class="normal"></highlight></codeline>
+<codeline lineno="418"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.modify(goal,<sp/>architect,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;g){</highlight></codeline>
+<codeline lineno="419"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.checked<sp/>=<sp/></highlight><highlight class="keyword">true</highlight><highlight class="normal">;</highlight></codeline>
+<codeline lineno="420"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>g.status<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;completed&quot;</highlight><highlight class="normal">_n;</highlight></codeline>
+<codeline lineno="421"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="422"><highlight class="normal"></highlight></codeline>
+<codeline lineno="423"><highlight class="normal"><sp/><sp/><sp/><sp/>accounts.modify(acc,<sp/>architect,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;a){</highlight></codeline>
+<codeline lineno="424"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>a.achieved_goals<sp/>=<sp/>acc<sp/>-&gt;<sp/>achieved_goals<sp/>+<sp/>1;</highlight></codeline>
+<codeline lineno="425"><highlight class="normal"><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="426"><highlight class="normal"><sp/><sp/><sp/><sp/>};</highlight></codeline>
+<codeline lineno="427"><highlight class="normal"></highlight></codeline>
+<codeline lineno="438"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="classunicore_1a466aba74657c6022cc0d9163bd502625" kindref="member">unicore::donate_action</ref>(eosio::name<sp/>from,<sp/>eosio::name<sp/>host,<sp/>uint64_t<sp/>goal_id,<sp/>eosio::asset<sp/>quantity,<sp/>eosio::name<sp/>code){</highlight></codeline>
+<codeline lineno="439"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>require_auth(from);</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="440"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="441"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>goals_index<sp/><ref refid="structgoals" kindref="compound">goals</ref>(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="442"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>account_index<sp/>accounts(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="443"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>acc<sp/>=<sp/>accounts.find(host.value);</highlight></codeline>
+<codeline lineno="444"><highlight class="normal"><sp/><sp/><sp/><sp/>spiral_index<sp/><ref refid="structspiral" kindref="compound">spiral</ref>(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="445"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>sp<sp/>=<sp/><ref refid="structspiral" kindref="compound">spiral</ref>.find(0);</highlight></codeline>
+<codeline lineno="446"><highlight class="normal"></highlight></codeline>
+<codeline lineno="447"><highlight class="normal"><sp/><sp/><sp/><sp/>rate_index<sp/>rates(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="448"><highlight class="normal"></highlight></codeline>
+<codeline lineno="449"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/><ref refid="structrate" kindref="compound">rate</ref><sp/>=<sp/>rates.find(acc<sp/>-&gt;<sp/>current_pool_num<sp/>-1);</highlight></codeline>
+<codeline lineno="450"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(code<sp/>!=<sp/>_me)<sp/></highlight><highlight class="comment">//For<sp/>direct<sp/>donate<sp/>from<sp/>fund<sp/>and<sp/>by<sp/>architects<sp/>action</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="451"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(acc-&gt;root_token_contract<sp/>==<sp/>code,<sp/></highlight><highlight class="stringliteral">&quot;Wrong<sp/>root<sp/>token<sp/>contract<sp/>for<sp/>this<sp/>host&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="452"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="453"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check((acc-&gt;root_token).symbol<sp/>==<sp/>quantity.symbol,<sp/></highlight><highlight class="stringliteral">&quot;Wrong<sp/>root<sp/>symbol<sp/>for<sp/>this<sp/>host&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="454"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="455"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>goal<sp/>=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.find(goal_id);</highlight></codeline>
+<codeline lineno="456"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="457"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(goal<sp/>!=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.end(),<sp/></highlight><highlight class="stringliteral">&quot;Goal<sp/>is<sp/>not<sp/>exist&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="458"><highlight class="normal"></highlight></codeline>
+<codeline lineno="459"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">bool</highlight><highlight class="normal"><sp/>filled<sp/>=<sp/>goal-&gt;available<sp/>+<sp/>goal-&gt;withdrawed<sp/>+<sp/>quantity<sp/>&gt;=<sp/>goal-&gt;target;<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="460"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="461"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>root_symbol<sp/>=<sp/>acc-&gt;get_root_symbol();</highlight></codeline>
+<codeline lineno="462"><highlight class="normal"></highlight></codeline>
+<codeline lineno="463"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(acc<sp/>-&gt;<sp/>sale_is_enabled<sp/>==<sp/></highlight><highlight class="keyword">true</highlight><highlight class="normal"><sp/>&amp;&amp;<sp/>from<sp/>!=<sp/>host)<sp/>{</highlight></codeline>
+<codeline lineno="464"><highlight class="normal"></highlight></codeline>
+<codeline lineno="465"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(goal-&gt;type==</highlight><highlight class="stringliteral">&quot;marathon&quot;</highlight><highlight class="normal">_n)<sp/>{</highlight></codeline>
+<codeline lineno="466"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="467"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(goal-&gt;target<sp/>&lt;=<sp/>quantity,<sp/></highlight><highlight class="stringliteral">&quot;Wrong<sp/>quantity<sp/>for<sp/>join<sp/>the<sp/>marathon&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="468"><highlight class="normal"></highlight></codeline>
+<codeline lineno="469"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>goalspartic_index<sp/>gparticipants(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="470"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="471"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>users_with_id<sp/>=<sp/>gparticipants.template<sp/>get_index&lt;</highlight><highlight class="stringliteral">&quot;byusergoal&quot;</highlight><highlight class="normal">_n&gt;();</highlight></codeline>
+<codeline lineno="472"><highlight class="normal"></highlight></codeline>
+<codeline lineno="473"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>goal_ids<sp/>=<sp/>combine_ids(from.value,<sp/>goal_id);</highlight></codeline>
+<codeline lineno="474"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>participant<sp/>=<sp/>users_with_id.find(goal_ids);</highlight></codeline>
+<codeline lineno="475"><highlight class="normal"></highlight></codeline>
+<codeline lineno="476"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>eosio::check(participant<sp/>==<sp/>users_with_id.end(),<sp/>&quot;Username<sp/>already<sp/>participate<sp/>in<sp/>the<sp/>current<sp/>marathon&quot;);</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="477"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="478"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(participant<sp/>!=<sp/>users_with_id.end()){</highlight></codeline>
+<codeline lineno="479"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>gparticipants.emplace(_me,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;p){</highlight></codeline>
+<codeline lineno="480"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>p.id<sp/>=<sp/>gparticipants.available_primary_key();</highlight></codeline>
+<codeline lineno="481"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>p.goal_id<sp/>=<sp/>goal_id;</highlight></codeline>
+<codeline lineno="482"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>p.role<sp/>=<sp/></highlight><highlight class="stringliteral">&quot;participant&quot;</highlight><highlight class="normal">_n;</highlight></codeline>
+<codeline lineno="483"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>p.username<sp/>=<sp/>from;</highlight></codeline>
+<codeline lineno="484"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>p.expiration<sp/>=<sp/>eosio::time_point_sec(eosio::current_time_point().sec_since_epoch()<sp/>+<sp/>30<sp/>*<sp/>86400);</highlight></codeline>
+<codeline lineno="485"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="486"><highlight class="normal"></highlight></codeline>
+<codeline lineno="487"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.modify(goal,<sp/>_me,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;g){</highlight></codeline>
+<codeline lineno="488"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.participants_count<sp/>+=<sp/>1;</highlight></codeline>
+<codeline lineno="489"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.withdrawed<sp/>+=<sp/>quantity;</highlight></codeline>
+<codeline lineno="490"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="491"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="492"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="493"><highlight class="normal"></highlight></codeline>
+<codeline lineno="494"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>targets_symbol<sp/>=<sp/>acc<sp/>-&gt;<sp/>sale_mode<sp/>==<sp/></highlight><highlight class="stringliteral">&quot;counterpower&quot;</highlight><highlight class="normal">_n<sp/>?<sp/>_POWER<sp/>:<sp/>acc-&gt;asset_on_sale.symbol;</highlight></codeline>
+<codeline lineno="495"><highlight class="normal"></highlight></codeline>
+<codeline lineno="496"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::asset<sp/>target1<sp/>=<sp/>goal<sp/>-&gt;<sp/>target1;</highlight></codeline>
+<codeline lineno="497"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::asset<sp/>target2<sp/>=<sp/>goal<sp/>-&gt;<sp/>target2;</highlight></codeline>
+<codeline lineno="498"><highlight class="normal"></highlight></codeline>
+<codeline lineno="499"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::asset<sp/>converted_quantity;</highlight></codeline>
+<codeline lineno="500"><highlight class="normal"></highlight></codeline>
+<codeline lineno="501"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::asset<sp/>core_quantity<sp/>=<sp/>quantity<sp/>*<sp/>(HUNDR_PERCENT<sp/>-<sp/>goal<sp/>-&gt;<sp/>cashback)<sp/>/<sp/>HUNDR_PERCENT;</highlight></codeline>
+<codeline lineno="502"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="503"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::asset<sp/>refs_quantity<sp/>=<sp/>quantity<sp/>-<sp/>core_quantity;</highlight></codeline>
+<codeline lineno="504"><highlight class="normal"></highlight></codeline>
+<codeline lineno="505"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>pool_index<sp/>pools(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="506"><highlight class="normal"></highlight></codeline>
+<codeline lineno="507"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/><ref refid="structpool" kindref="compound">pool</ref><sp/>=<sp/>pools.find(acc-&gt;current_pool_id);</highlight></codeline>
+<codeline lineno="508"><highlight class="normal"></highlight></codeline>
+<codeline lineno="509"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>print(</highlight><highlight class="stringliteral">&quot;<sp/>quantity:<sp/>&quot;</highlight><highlight class="normal">,<sp/>quantity);</highlight></codeline>
+<codeline lineno="510"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>print(</highlight><highlight class="stringliteral">&quot;<sp/>core_quantity:<sp/>&quot;</highlight><highlight class="normal">,<sp/>core_quantity);</highlight></codeline>
+<codeline lineno="511"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>print(</highlight><highlight class="stringliteral">&quot;<sp/>refs_quantity:<sp/>&quot;</highlight><highlight class="normal">,<sp/>refs_quantity);</highlight></codeline>
+<codeline lineno="512"><highlight class="normal"></highlight></codeline>
+<codeline lineno="513"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(core_quantity.amount<sp/>&gt;=<sp/><ref refid="structpool" kindref="compound">pool</ref><sp/>-&gt;<sp/>quant_cost.amount){</highlight></codeline>
+<codeline lineno="514"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="515"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(acc<sp/>-&gt;<sp/>sale_mode<sp/>==<sp/></highlight><highlight class="stringliteral">&quot;counterpower&quot;</highlight><highlight class="normal">_n)<sp/>{</highlight></codeline>
+<codeline lineno="516"><highlight class="normal"></highlight></codeline>
+<codeline lineno="517"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>converted_quantity<sp/>=<sp/><ref refid="classunicore_1a278664e711bbb5194481633ae96bbc75" kindref="member">unicore::buy_action</ref>(from,<sp/>host,<sp/>core_quantity,<sp/>acc-&gt;root_token_contract,<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">,<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">,<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="518"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>uint64_t<sp/>shares_out<sp/>=<sp/><ref refid="classunicore_1ab899e878b848c48c9f6656c74565970d" kindref="member">unicore::buyshares_action</ref><sp/>(<sp/>from,<sp/>host,<sp/>converted_quantity,<sp/>acc-&gt;quote_token_contract,<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal"><sp/>);</highlight></codeline>
+<codeline lineno="519"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>target2=<sp/>asset(goal-&gt;target2.amount<sp/>+<sp/>shares_out,<sp/>_POWER);</highlight></codeline>
+<codeline lineno="520"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="521"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}<sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(acc<sp/>-&gt;<sp/>sale_mode<sp/>==<sp/></highlight><highlight class="stringliteral">&quot;counterunit&quot;</highlight><highlight class="normal">_n)<sp/>{</highlight></codeline>
+<codeline lineno="522"><highlight class="normal"></highlight></codeline>
+<codeline lineno="523"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>converted_quantity<sp/>=<sp/><ref refid="classunicore_1a278664e711bbb5194481633ae96bbc75" kindref="member">unicore::buy_action</ref>(from,<sp/>host,<sp/>core_quantity,<sp/>acc-&gt;root_token_contract,<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">,<sp/></highlight><highlight class="keyword">true</highlight><highlight class="normal">,<sp/></highlight><highlight class="keyword">false</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="524"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>target1<sp/>=<sp/>asset(goal-&gt;target1.amount<sp/>+<sp/>converted_quantity.amount,<sp/>acc-&gt;asset_on_sale.symbol);</highlight></codeline>
+<codeline lineno="525"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="526"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="527"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="528"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="529"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}<sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="530"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="531"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>refs_quantity<sp/>+=<sp/>core_quantity;</highlight></codeline>
+<codeline lineno="532"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>core_quantity.amount<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="533"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>print(</highlight><highlight class="stringliteral">&quot;<sp/>refs_quantity:<sp/>&quot;</highlight><highlight class="normal">,<sp/>refs_quantity);</highlight></codeline>
+<codeline lineno="534"><highlight class="normal"></highlight></codeline>
+<codeline lineno="535"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="536"><highlight class="normal"></highlight></codeline>
+<codeline lineno="537"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="538"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.modify(goal,<sp/>_me,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;g){</highlight></codeline>
+<codeline lineno="539"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.available<sp/>+=<sp/>quantity;</highlight></codeline>
+<codeline lineno="540"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.withdrawed<sp/>+=<sp/>refs_quantity;</highlight></codeline>
+<codeline lineno="541"><highlight class="normal"></highlight></codeline>
+<codeline lineno="542"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.filled<sp/>=<sp/>filled;</highlight></codeline>
+<codeline lineno="543"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.target1<sp/>=<sp/>target1;</highlight></codeline>
+<codeline lineno="544"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.target2=<sp/>target2;</highlight></codeline>
+<codeline lineno="545"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="546"><highlight class="normal"></highlight></codeline>
+<codeline lineno="547"><highlight class="normal"></highlight></codeline>
+<codeline lineno="548"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(refs_quantity.amount<sp/>&gt;<sp/>0)<sp/>{</highlight></codeline>
+<codeline lineno="549"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="classunicore_1a0c2b0c3fffe564405122f21621aedb78" kindref="member">unicore::spread_to_refs</ref>(host,<sp/>from,<sp/>quantity,<sp/>refs_quantity);</highlight></codeline>
+<codeline lineno="550"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="551"><highlight class="normal"></highlight></codeline>
+<codeline lineno="552"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="553"><highlight class="normal"><sp/><sp/><sp/><sp/>}<sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="554"><highlight class="normal"></highlight></codeline>
+<codeline lineno="555"><highlight class="normal"></highlight></codeline>
+<codeline lineno="556"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.modify(goal,<sp/>_me,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;g){</highlight></codeline>
+<codeline lineno="557"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.available<sp/>+=<sp/>quantity;</highlight></codeline>
+<codeline lineno="558"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.filled<sp/>=<sp/>filled;</highlight></codeline>
+<codeline lineno="559"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="560"><highlight class="normal"></highlight></codeline>
+<codeline lineno="561"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="562"><highlight class="normal"></highlight></codeline>
+<codeline lineno="563"><highlight class="normal"></highlight></codeline>
+<codeline lineno="564"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="565"><highlight class="normal"></highlight></codeline>
+<codeline lineno="574"><highlight class="normal"><sp/><sp/>[[eosio::action]]<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="classunicore_1a621817942c7b2758963d4147170b3c60" kindref="member">unicore::gsponsor</ref>(eosio::name<sp/>hoperator,<sp/>eosio::name<sp/>host,<sp/>eosio::name<sp/>reciever,<sp/>uint64_t<sp/>goal_id,<sp/>eosio::asset<sp/>amount){</highlight></codeline>
+<codeline lineno="575"><highlight class="normal"><sp/><sp/><sp/><sp/>require_auth<sp/>(hoperator);</highlight></codeline>
+<codeline lineno="576"><highlight class="normal"></highlight></codeline>
+<codeline lineno="577"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>account_index<sp/>accounts(_me,<sp/>host.value);</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="578"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>auto<sp/>acc<sp/>=<sp/>accounts.find(host.value);</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="579"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>eosio::check(acc-&gt;hoperator<sp/>==<sp/>hoperator,<sp/>&quot;Wrong<sp/>operator<sp/>for<sp/>this<sp/>host&quot;);</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="580"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>goals_index<sp/>goals(_me,<sp/>host.value);</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="581"><highlight class="normal"></highlight></codeline>
+<codeline lineno="582"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>auto<sp/>goal<sp/>=<sp/>goals.find(goal_id);</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="583"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>eosio::check(goal<sp/>!=<sp/>goals.end(),<sp/>&quot;Goal<sp/>is<sp/>not<sp/>founded&quot;);</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="584"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>auto<sp/>root_symbol<sp/>=<sp/>(acc-&gt;root_token).symbol;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="585"><highlight class="normal"></highlight></codeline>
+<codeline lineno="586"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>eosio::check(amount.symbol<sp/>==<sp/>root_symbol,<sp/>&quot;Wrong<sp/>root<sp/>symbol&quot;);</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="587"><highlight class="normal"></highlight></codeline>
+<codeline lineno="588"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>eosio::check(goal-&gt;available<sp/>&gt;=<sp/>amount,<sp/>&quot;Not<sp/>enough<sp/>tokens<sp/>for<sp/>sponsorhip<sp/>action.<sp/>&quot;);</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="589"><highlight class="normal"></highlight></codeline>
+<codeline lineno="590"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>action(</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="591"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/><sp/><sp/>permission_level{<sp/>_me,<sp/>&quot;active&quot;_n<sp/>},</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="592"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/><sp/><sp/>acc-&gt;root_token_contract,<sp/>&quot;transfer&quot;_n,</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="593"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/><sp/><sp/>std::make_tuple(<sp/>_me,<sp/>reciever,<sp/>amount,<sp/>std::string(&quot;Sponsor&quot;))<sp/></highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="594"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>).send();</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="595"><highlight class="normal"></highlight></codeline>
+<codeline lineno="596"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>goals.modify(goal,<sp/>hoperator,<sp/>[&amp;](auto<sp/>&amp;g){</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="597"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/><sp/><sp/>g.available<sp/>=<sp/>g.available<sp/>-<sp/>amount;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="598"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/><sp/><sp/>g.withdrawed<sp/>=<sp/>g.withdrawed<sp/>+<sp/>amount;</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="599"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>});</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="600"><highlight class="normal"></highlight></codeline>
+<codeline lineno="601"><highlight class="normal"><sp/><sp/>}</highlight></codeline>
+<codeline lineno="602"><highlight class="normal"></highlight></codeline>
+<codeline lineno="603"><highlight class="normal"></highlight></codeline>
+<codeline lineno="604"><highlight class="normal"></highlight></codeline>
+<codeline lineno="605"><highlight class="normal"></highlight></codeline>
+<codeline lineno="606"><highlight class="normal"></highlight></codeline>
+<codeline lineno="614"><highlight class="normal"><sp/><sp/>[[eosio::action]]<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="classunicore_1ab10a203c3d6c37fd1cb71a9110c62e8a" kindref="member">unicore::paydebt</ref>(eosio::name<sp/>host,<sp/>uint64_t<sp/>goal_id){</highlight></codeline>
+<codeline lineno="615"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>require_auth(host);</highlight></codeline>
+<codeline lineno="616"><highlight class="normal"></highlight></codeline>
+<codeline lineno="617"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>goals_index<sp/><ref refid="structgoals" kindref="compound">goals</ref>(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="618"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>goal<sp/>=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.find(goal_id);</highlight></codeline>
+<codeline lineno="619"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(goal<sp/>!=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.end(),<sp/></highlight><highlight class="stringliteral">&quot;Goal<sp/>is<sp/>not<sp/>found&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="620"><highlight class="normal"></highlight></codeline>
+<codeline lineno="621"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>account_index<sp/><ref refid="structhosts" kindref="compound">hosts</ref><sp/>(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="622"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>acc<sp/>=<sp/><ref refid="structhosts" kindref="compound">hosts</ref>.find(host.value);</highlight></codeline>
+<codeline lineno="623"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(acc<sp/>!=<sp/><ref refid="structhosts" kindref="compound">hosts</ref>.end(),<sp/></highlight><highlight class="stringliteral">&quot;Host<sp/>not<sp/>exist&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="624"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="625"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>debts_index<sp/><ref refid="structdebts" kindref="compound">debts</ref>(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="626"><highlight class="normal"></highlight></codeline>
+<codeline lineno="627"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>idx_bv<sp/>=<sp/><ref refid="structdebts" kindref="compound">debts</ref>.template<sp/>get_index&lt;</highlight><highlight class="stringliteral">&quot;bygoal&quot;</highlight><highlight class="normal">_n&gt;();</highlight></codeline>
+<codeline lineno="628"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>debt<sp/>=<sp/>idx_bv.begin();</highlight></codeline>
+<codeline lineno="629"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="630"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>uint64_t<sp/>count<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="631"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>uint64_t<sp/>limit<sp/>=<sp/>10;</highlight></codeline>
+<codeline lineno="632"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="633"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>std::vector&lt;uint64_t&gt;<sp/>list_for_delete;</highlight></codeline>
+<codeline lineno="634"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>eosio::asset<sp/>available<sp/>=<sp/>goal<sp/>-&gt;<sp/>available;</highlight></codeline>
+<codeline lineno="635"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>eosio::asset<sp/>debt_amount<sp/>=<sp/>goal<sp/>-&gt;<sp/>debt_amount;</highlight></codeline>
+<codeline lineno="636"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>print(</highlight><highlight class="stringliteral">&quot;imher1&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="637"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">while</highlight><highlight class="normal">(debt<sp/>!=<sp/>idx_bv.end()<sp/>&amp;&amp;<sp/>count<sp/>!=<sp/>limit<sp/>&amp;&amp;<sp/>debt<sp/>-&gt;<sp/>goal_id<sp/>==<sp/>goal_id)<sp/>{</highlight></codeline>
+<codeline lineno="638"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>print(</highlight><highlight class="stringliteral">&quot;imher2&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="639"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(available<sp/>&gt;=<sp/>debt<sp/>-&gt;<sp/>amount<sp/>){<sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="640"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>print(</highlight><highlight class="stringliteral">&quot;imher3&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="641"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>list_for_delete.push_back(debt-&gt;id);</highlight></codeline>
+<codeline lineno="642"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>available<sp/>-=<sp/>debt-&gt;<sp/>amount;<sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="643"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>debt_amount<sp/>-=<sp/>debt<sp/>-&gt;<sp/>amount;</highlight></codeline>
+<codeline lineno="644"><highlight class="normal"></highlight></codeline>
+<codeline lineno="645"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>action(</highlight></codeline>
+<codeline lineno="646"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>permission_level{<sp/>_me,<sp/></highlight><highlight class="stringliteral">&quot;active&quot;</highlight><highlight class="normal">_n<sp/>},</highlight></codeline>
+<codeline lineno="647"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>acc-&gt;root_token_contract,<sp/></highlight><highlight class="stringliteral">&quot;transfer&quot;</highlight><highlight class="normal">_n,</highlight></codeline>
+<codeline lineno="648"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::make_tuple(<sp/>_me,<sp/>debt-&gt;username,<sp/>debt-&gt;amount,<sp/>std::string(</highlight><highlight class="stringliteral">&quot;Debt<sp/>Withdraw&quot;</highlight><highlight class="normal">))<sp/></highlight></codeline>
+<codeline lineno="649"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>).send();<sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="650"><highlight class="normal"></highlight></codeline>
+<codeline lineno="651"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>};</highlight></codeline>
+<codeline lineno="652"><highlight class="normal"></highlight></codeline>
+<codeline lineno="653"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>count++;</highlight></codeline>
+<codeline lineno="654"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>debt++;</highlight></codeline>
+<codeline lineno="655"><highlight class="normal"></highlight></codeline>
+<codeline lineno="656"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>};</highlight></codeline>
+<codeline lineno="657"><highlight class="normal"></highlight></codeline>
+<codeline lineno="658"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">for</highlight><highlight class="normal"><sp/>(</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/></highlight><highlight class="keywordtype">id</highlight><highlight class="normal"><sp/>:<sp/>list_for_delete){</highlight></codeline>
+<codeline lineno="659"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>debt_for_delete<sp/>=<sp/><ref refid="structdebts" kindref="compound">debts</ref>.find(</highlight><highlight class="keywordtype">id</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="660"><highlight class="normal"></highlight></codeline>
+<codeline lineno="661"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structdebts" kindref="compound">debts</ref>.erase(debt_for_delete);</highlight></codeline>
+<codeline lineno="662"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>};</highlight></codeline>
+<codeline lineno="663"><highlight class="normal"></highlight></codeline>
+<codeline lineno="664"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.modify(goal,<sp/>host,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;g){</highlight></codeline>
+<codeline lineno="665"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.available<sp/>=<sp/>available;</highlight></codeline>
+<codeline lineno="666"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.debt_amount<sp/>=<sp/>debt_amount;</highlight></codeline>
+<codeline lineno="667"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="668"><highlight class="normal"><sp/><sp/>};</highlight></codeline>
+<codeline lineno="669"><highlight class="normal"></highlight></codeline>
+<codeline lineno="670"><highlight class="normal"></highlight></codeline>
+<codeline lineno="677"><highlight class="normal"><sp/><sp/><sp/>[[eosio::action]]<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="classunicore_1affa39993f35c8e2c8838a956c761cbcc" kindref="member">unicore::setemi</ref>(eosio::name<sp/>hostname,<sp/>uint64_t<sp/>percent,<sp/>uint64_t<sp/>gtop){</highlight></codeline>
+<codeline lineno="678"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>require_auth(hostname);</highlight></codeline>
+<codeline lineno="679"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>account_index<sp/><ref refid="structhosts" kindref="compound">hosts</ref><sp/>(_me,<sp/>hostname.value);</highlight></codeline>
+<codeline lineno="680"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>host<sp/>=<sp/><ref refid="structhosts" kindref="compound">hosts</ref>.find(hostname.value);</highlight></codeline>
+<codeline lineno="681"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(host<sp/>!=<sp/><ref refid="structhosts" kindref="compound">hosts</ref>.end(),<sp/></highlight><highlight class="stringliteral">&quot;Host<sp/>not<sp/>exist&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="682"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="683"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>ahost<sp/>=<sp/>host-&gt;get_ahost();</highlight></codeline>
+<codeline lineno="684"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>root_symbol<sp/>=<sp/>host-&gt;get_root_symbol();</highlight></codeline>
+<codeline lineno="685"><highlight class="normal"><sp/><sp/></highlight></codeline>
+<codeline lineno="686"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>emission_index<sp/>emis(_me,<sp/>hostname.value);</highlight></codeline>
+<codeline lineno="687"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>emi<sp/>=<sp/>emis.find(hostname.value);</highlight></codeline>
+<codeline lineno="688"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(gtop<sp/>&lt;=<sp/>100,<sp/></highlight><highlight class="stringliteral">&quot;Goal<sp/>top<sp/>should<sp/>be<sp/>less<sp/>then<sp/>100&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="689"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(percent<sp/>&lt;=<sp/>1000<sp/>*<sp/>ONE_PERCENT,<sp/></highlight><highlight class="stringliteral">&quot;Emission<sp/>percent<sp/>should<sp/>be<sp/>less<sp/>then<sp/>100<sp/>*<sp/>ONE_PERCENT&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="690"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="691"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>emis.modify(emi,<sp/>hostname,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;e){</highlight></codeline>
+<codeline lineno="692"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>e.percent<sp/>=<sp/>percent;</highlight></codeline>
+<codeline lineno="693"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>e.gtop<sp/>=<sp/>gtop;</highlight></codeline>
+<codeline lineno="694"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="695"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="696"><highlight class="normal"></highlight></codeline>
+<codeline lineno="697"><highlight class="normal"></highlight></codeline>
+<codeline lineno="704"><highlight class="normal"><sp/><sp/><sp/><sp/>[[eosio::action]]<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/><ref refid="classunicore_1a4faa41a68505840e66f78e350412723c" kindref="member">unicore::gwithdraw</ref>(eosio::name<sp/>username,<sp/>eosio::name<sp/>host,<sp/>uint64_t<sp/>goal_id){</highlight></codeline>
+<codeline lineno="705"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>require_auth(username);</highlight></codeline>
+<codeline lineno="706"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="707"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>goals_index<sp/><ref refid="structgoals" kindref="compound">goals</ref>(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="708"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>goal<sp/>=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.find(goal_id);</highlight></codeline>
+<codeline lineno="709"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="710"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(goal<sp/>!=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.end(),<sp/></highlight><highlight class="stringliteral">&quot;Goal<sp/>is<sp/>not<sp/>founded&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="711"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="712"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>account_index<sp/>accounts(_me,<sp/>(goal-&gt;host).value);</highlight></codeline>
+<codeline lineno="713"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>acc<sp/>=<sp/>accounts.find((goal-&gt;host).value);</highlight></codeline>
+<codeline lineno="714"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(acc<sp/>!=<sp/>accounts.end(),<sp/></highlight><highlight class="stringliteral">&quot;Host<sp/>is<sp/>not<sp/>founded&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="715"><highlight class="normal"></highlight></codeline>
+<codeline lineno="716"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>root_symbol<sp/>=<sp/>(acc-&gt;root_token).symbol;</highlight></codeline>
+<codeline lineno="717"><highlight class="normal"><sp/><sp/><sp/><sp/>eosio::check(acc-&gt;direct_goal_withdraw<sp/>==<sp/></highlight><highlight class="keyword">true</highlight><highlight class="normal">,<sp/></highlight><highlight class="stringliteral">&quot;Direct<sp/>withdraw<sp/>from<sp/>goal<sp/>is<sp/>prohibited.&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="718"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(goal-&gt;creator<sp/>==<sp/>username,<sp/></highlight><highlight class="stringliteral">&quot;You<sp/>are<sp/>not<sp/>owner<sp/>of<sp/>this<sp/>goal&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="719"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check((goal-&gt;available).amount<sp/>&gt;<sp/>0,<sp/></highlight><highlight class="stringliteral">&quot;Cannot<sp/>withdraw<sp/>a<sp/>zero<sp/>amount&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="720"><highlight class="normal"><sp/><sp/><sp/><sp/>eosio::check(goal-&gt;type<sp/>==<sp/></highlight><highlight class="stringliteral">&quot;goal&quot;</highlight><highlight class="normal">_n,<sp/></highlight><highlight class="stringliteral">&quot;Only<sp/>goal<sp/>type<sp/>can<sp/>be<sp/>withdrawed<sp/>by<sp/>this<sp/>method&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="721"><highlight class="normal"></highlight></codeline>
+<codeline lineno="722"><highlight class="normal"><sp/><sp/><sp/><sp/>eosio::asset<sp/>on_withdraw<sp/>=<sp/>goal-&gt;available;</highlight></codeline>
+<codeline lineno="723"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="724"><highlight class="normal"><sp/><sp/><sp/><sp/>action(</highlight></codeline>
+<codeline lineno="725"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>permission_level{<sp/>_me,<sp/></highlight><highlight class="stringliteral">&quot;active&quot;</highlight><highlight class="normal">_n<sp/>},</highlight></codeline>
+<codeline lineno="726"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>acc-&gt;root_token_contract,<sp/></highlight><highlight class="stringliteral">&quot;transfer&quot;</highlight><highlight class="normal">_n,</highlight></codeline>
+<codeline lineno="727"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/>std::make_tuple(<sp/>_me,<sp/>goal-&gt;creator,<sp/>on_withdraw,<sp/>std::string(</highlight><highlight class="stringliteral">&quot;Goal<sp/>Withdraw&quot;</highlight><highlight class="normal">))<sp/></highlight></codeline>
+<codeline lineno="728"><highlight class="normal"><sp/><sp/><sp/><sp/>).send();</highlight></codeline>
+<codeline lineno="729"><highlight class="normal"></highlight></codeline>
+<codeline lineno="730"><highlight class="normal"><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.modify(goal,<sp/>username,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;g){</highlight></codeline>
+<codeline lineno="731"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.available<sp/>=<sp/>asset(0,<sp/>root_symbol);</highlight></codeline>
+<codeline lineno="732"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>g.withdrawed<sp/>+=<sp/>on_withdraw;</highlight></codeline>
+<codeline lineno="733"><highlight class="normal"><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="734"><highlight class="normal"></highlight></codeline>
+<codeline lineno="735"><highlight class="normal"><sp/><sp/><sp/><sp/>};</highlight></codeline>
+<codeline lineno="736"><highlight class="normal"></highlight></codeline>
+<codeline lineno="737"><highlight class="normal"></highlight></codeline>
+<codeline lineno="738"><highlight class="normal"></highlight></codeline>
+<codeline lineno="739"><highlight class="normal"></highlight></codeline>
+<codeline lineno="740"><highlight class="normal"><sp/><sp/><sp/><sp/>[[eosio::action]]<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>unicore::withdrbeninc(eosio::name<sp/>username,<sp/>eosio::name<sp/>host,<sp/>uint64_t<sp/>goal_id){</highlight></codeline>
+<codeline lineno="741"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>require_auth(username);</highlight></codeline>
+<codeline lineno="742"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>benefactors_index<sp/><ref refid="structbenefactors" kindref="compound">benefactors</ref>(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="743"><highlight class="normal"></highlight></codeline>
+<codeline lineno="744"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="comment">//<sp/>auto<sp/>benefactor<sp/>=<sp/>benefactors.find(username.value);</highlight><highlight class="normal"></highlight></codeline>
+<codeline lineno="745"><highlight class="normal"></highlight></codeline>
+<codeline lineno="746"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>benefactor_with_goal_id<sp/>=<sp/><ref refid="structbenefactors" kindref="compound">benefactors</ref>.template<sp/>get_index&lt;</highlight><highlight class="stringliteral">&quot;bybengoal&quot;</highlight><highlight class="normal">_n&gt;();</highlight></codeline>
+<codeline lineno="747"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>benefactor_ids<sp/>=<sp/>combine_ids(username.value,<sp/>goal_id);</highlight></codeline>
+<codeline lineno="748"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>benefactor<sp/>=<sp/>benefactor_with_goal_id.find(benefactor_ids);</highlight></codeline>
+<codeline lineno="749"><highlight class="normal"></highlight></codeline>
+<codeline lineno="750"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(benefactor<sp/>!=<sp/>benefactor_with_goal_id.end(),<sp/></highlight><highlight class="stringliteral">&quot;Benefactor<sp/>is<sp/>not<sp/>found&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="751"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="752"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>account_index<sp/>accounts(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="753"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>acc<sp/>=<sp/>accounts.find(host.value);</highlight></codeline>
+<codeline lineno="754"><highlight class="normal"></highlight></codeline>
+<codeline lineno="755"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>root_symbol<sp/>=<sp/>acc-&gt;get_root_symbol();</highlight></codeline>
+<codeline lineno="756"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>income<sp/>=<sp/>benefactor-&gt;income;</highlight></codeline>
+<codeline lineno="757"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(income.amount<sp/>&gt;<sp/>0,<sp/></highlight><highlight class="stringliteral">&quot;Only<sp/>positive<sp/>amount<sp/>can<sp/>be<sp/>withdrawed&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="758"><highlight class="normal"></highlight></codeline>
+<codeline lineno="759"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>action(</highlight></codeline>
+<codeline lineno="760"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>permission_level{<sp/>_me,<sp/></highlight><highlight class="stringliteral">&quot;active&quot;</highlight><highlight class="normal">_n<sp/>},</highlight></codeline>
+<codeline lineno="761"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>acc-&gt;root_token_contract,<sp/></highlight><highlight class="stringliteral">&quot;transfer&quot;</highlight><highlight class="normal">_n,</highlight></codeline>
+<codeline lineno="762"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::make_tuple(<sp/>_me,<sp/>username,<sp/>income,<sp/>std::string(</highlight><highlight class="stringliteral">&quot;benefactor<sp/>income&quot;</highlight><highlight class="normal">))<sp/></highlight></codeline>
+<codeline lineno="763"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>).send();</highlight></codeline>
+<codeline lineno="764"><highlight class="normal"></highlight></codeline>
+<codeline lineno="765"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>benefactor_with_goal_id.modify(benefactor,<sp/>username,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;d){</highlight></codeline>
+<codeline lineno="766"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d.income<sp/>=<sp/>asset(0,<sp/>root_symbol);</highlight></codeline>
+<codeline lineno="767"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d.income_in_segments<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="768"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d.withdrawed<sp/>+=<sp/>income;</highlight></codeline>
+<codeline lineno="769"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="770"><highlight class="normal"></highlight></codeline>
+<codeline lineno="771"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="772"><highlight class="normal"></highlight></codeline>
+<codeline lineno="773"><highlight class="normal"><sp/><sp/><sp/><sp/>[[eosio::action]]<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>unicore::addben(eosio::name<sp/>creator,<sp/>eosio::name<sp/>username,<sp/>eosio::name<sp/>host,<sp/>uint64_t<sp/>goal_id,<sp/>uint64_t<sp/>weight)<sp/>{</highlight></codeline>
+<codeline lineno="774"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>require_auth(creator);</highlight></codeline>
+<codeline lineno="775"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="776"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>account_index<sp/>accounts(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="777"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>benefactors_index<sp/><ref refid="structbenefactors" kindref="compound">benefactors</ref>(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="778"><highlight class="normal"></highlight></codeline>
+<codeline lineno="779"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>benefactor_with_goal_id<sp/>=<sp/><ref refid="structbenefactors" kindref="compound">benefactors</ref>.template<sp/>get_index&lt;</highlight><highlight class="stringliteral">&quot;bybengoal&quot;</highlight><highlight class="normal">_n&gt;();</highlight></codeline>
+<codeline lineno="780"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>benefactor_ids<sp/>=<sp/>combine_ids(username.value,<sp/>goal_id);</highlight></codeline>
+<codeline lineno="781"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>benefactor<sp/>=<sp/>benefactor_with_goal_id.find(benefactor_ids);</highlight></codeline>
+<codeline lineno="782"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(benefactor<sp/>==<sp/>benefactor_with_goal_id.end(),<sp/></highlight><highlight class="stringliteral">&quot;Benefactor<sp/>is<sp/>already<sp/>exist&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="783"><highlight class="normal"></highlight></codeline>
+<codeline lineno="784"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>acc<sp/>=<sp/>accounts.find(host.value);</highlight></codeline>
+<codeline lineno="785"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(acc<sp/>!=<sp/>accounts.end(),<sp/></highlight><highlight class="stringliteral">&quot;Host<sp/>is<sp/>not<sp/>found&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="786"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>root_symbol<sp/>=<sp/>acc-&gt;get_root_symbol();</highlight></codeline>
+<codeline lineno="787"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="788"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>goals_index<sp/><ref refid="structgoals" kindref="compound">goals</ref>(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="789"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>goal<sp/>=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.find(goal_id);</highlight></codeline>
+<codeline lineno="790"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="791"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(creator<sp/>==<sp/>goal-&gt;creator,<sp/></highlight><highlight class="stringliteral">&quot;Only<sp/>goal<sp/>creator<sp/>can<sp/>modify<sp/>benefactors<sp/>table&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="792"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="793"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(goal<sp/>!=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.end(),<sp/></highlight><highlight class="stringliteral">&quot;Marathon<sp/>is<sp/>not<sp/>found&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="794"><highlight class="normal"></highlight></codeline>
+<codeline lineno="795"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structbenefactors" kindref="compound">benefactors</ref>.emplace(creator,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;d){</highlight></codeline>
+<codeline lineno="796"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d.id<sp/>=<sp/><ref refid="structbenefactors" kindref="compound">benefactors</ref>.available_primary_key();</highlight></codeline>
+<codeline lineno="797"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d.goal_id<sp/>=<sp/>goal_id;</highlight></codeline>
+<codeline lineno="798"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d.benefactor<sp/>=<sp/>username;</highlight></codeline>
+<codeline lineno="799"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d.weight<sp/>=<sp/>weight;</highlight></codeline>
+<codeline lineno="800"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d.income<sp/>=<sp/>asset(0,<sp/>root_symbol);</highlight></codeline>
+<codeline lineno="801"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d.income_in_segments<sp/>=<sp/>0;</highlight></codeline>
+<codeline lineno="802"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d.withdrawed<sp/>=<sp/>asset(0,<sp/>root_symbol);</highlight></codeline>
+<codeline lineno="803"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d.income_limit<sp/>=<sp/>asset(0,<sp/>root_symbol);</highlight></codeline>
+<codeline lineno="804"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="805"><highlight class="normal"></highlight></codeline>
+<codeline lineno="806"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="807"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.modify(goal,<sp/>creator,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;h){</highlight></codeline>
+<codeline lineno="808"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>h.benefactors_weight<sp/>+=<sp/>weight;</highlight></codeline>
+<codeline lineno="809"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="810"><highlight class="normal"><sp/><sp/><sp/><sp/>};</highlight></codeline>
+<codeline lineno="811"><highlight class="normal"></highlight></codeline>
+<codeline lineno="812"><highlight class="normal"><sp/><sp/><sp/><sp/>[[eosio::action]]<sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>unicore::rmben(eosio::name<sp/>creator,<sp/>eosio::name<sp/>username,<sp/>eosio::name<sp/>host,<sp/>uint64_t<sp/>goal_id){</highlight></codeline>
+<codeline lineno="813"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>require_auth(creator);</highlight></codeline>
+<codeline lineno="814"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>account_index<sp/>accounts(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="815"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>benefactors_index<sp/><ref refid="structbenefactors" kindref="compound">benefactors</ref>(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="816"><highlight class="normal"></highlight></codeline>
+<codeline lineno="817"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>benefactor_with_goal_id<sp/>=<sp/><ref refid="structbenefactors" kindref="compound">benefactors</ref>.template<sp/>get_index&lt;</highlight><highlight class="stringliteral">&quot;bybengoal&quot;</highlight><highlight class="normal">_n&gt;();</highlight></codeline>
+<codeline lineno="818"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>benefactor_ids<sp/>=<sp/>combine_ids(username.value,<sp/>goal_id);</highlight></codeline>
+<codeline lineno="819"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>benefactor<sp/>=<sp/>benefactor_with_goal_id.find(benefactor_ids);</highlight></codeline>
+<codeline lineno="820"><highlight class="normal"></highlight></codeline>
+<codeline lineno="821"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(benefactor<sp/>!=<sp/>benefactor_with_goal_id.end(),<sp/></highlight><highlight class="stringliteral">&quot;Benefactor<sp/>is<sp/>not<sp/>found&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="822"><highlight class="normal"></highlight></codeline>
+<codeline lineno="823"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>acc<sp/>=<sp/>accounts.find(host.value);</highlight></codeline>
+<codeline lineno="824"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(acc<sp/>!=<sp/>accounts.end(),<sp/></highlight><highlight class="stringliteral">&quot;Host<sp/>is<sp/>not<sp/>found&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="825"><highlight class="normal"></highlight></codeline>
+<codeline lineno="826"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>goals_index<sp/><ref refid="structgoals" kindref="compound">goals</ref>(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="827"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>goal<sp/>=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.find(goal_id);</highlight></codeline>
+<codeline lineno="828"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(goal<sp/>!=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.end(),<sp/></highlight><highlight class="stringliteral">&quot;Marathon<sp/>is<sp/>not<sp/>found&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="829"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(goal-&gt;creator<sp/>==<sp/>creator,<sp/></highlight><highlight class="stringliteral">&quot;You<sp/>are<sp/>not<sp/>creator<sp/>of<sp/>the<sp/>goal<sp/>for<sp/>set<sp/>benefactors&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="830"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="831"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.modify(goal,<sp/>creator,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;h){</highlight></codeline>
+<codeline lineno="832"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>h.benefactors_weight<sp/>-=<sp/>benefactor-&gt;weight;</highlight></codeline>
+<codeline lineno="833"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="834"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="835"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(benefactor-&gt;income.amount<sp/>&gt;<sp/>0)</highlight></codeline>
+<codeline lineno="836"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>action(</highlight></codeline>
+<codeline lineno="837"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>permission_level{<sp/>_me,<sp/></highlight><highlight class="stringliteral">&quot;active&quot;</highlight><highlight class="normal">_n<sp/>},</highlight></codeline>
+<codeline lineno="838"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>acc-&gt;root_token_contract,<sp/></highlight><highlight class="stringliteral">&quot;transfer&quot;</highlight><highlight class="normal">_n,</highlight></codeline>
+<codeline lineno="839"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>std::make_tuple(<sp/>_me,<sp/>username,<sp/>benefactor-&gt;income,<sp/>std::string(</highlight><highlight class="stringliteral">&quot;Benefactor<sp/>income<sp/>before<sp/>remove&quot;</highlight><highlight class="normal">))<sp/></highlight></codeline>
+<codeline lineno="840"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>).send();</highlight></codeline>
+<codeline lineno="841"><highlight class="normal"></highlight></codeline>
+<codeline lineno="842"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>benefactor_with_goal_id.erase(benefactor);</highlight></codeline>
+<codeline lineno="843"><highlight class="normal"><sp/><sp/><sp/><sp/>};</highlight></codeline>
+<codeline lineno="844"><highlight class="normal"></highlight></codeline>
+<codeline lineno="845"><highlight class="normal"></highlight></codeline>
+<codeline lineno="846"><highlight class="normal"><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">void</highlight><highlight class="normal"><sp/>unicore::spread_to_benefactors(eosio::name<sp/>host,<sp/>eosio::asset<sp/>amount,<sp/>uint64_t<sp/>goal_id){</highlight></codeline>
+<codeline lineno="847"><highlight class="normal"></highlight></codeline>
+<codeline lineno="848"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>benefactors_index<sp/><ref refid="structbenefactors" kindref="compound">benefactors</ref>(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="849"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>account_index<sp/>accounts(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="850"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>acc<sp/>=<sp/>accounts.find(host.value);</highlight></codeline>
+<codeline lineno="851"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>root_symbol<sp/>=<sp/>acc-&gt;get_root_symbol();</highlight></codeline>
+<codeline lineno="852"><highlight class="normal"></highlight></codeline>
+<codeline lineno="853"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(amount.symbol<sp/>==<sp/>root_symbol,<sp/></highlight><highlight class="stringliteral">&quot;System<sp/>error<sp/>on<sp/>spead<sp/>to<sp/>dacs&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="854"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="855"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>goals_index<sp/><ref refid="structgoals" kindref="compound">goals</ref>(_me,<sp/>host.value);</highlight></codeline>
+<codeline lineno="856"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>goal<sp/>=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.find(goal_id);</highlight></codeline>
+<codeline lineno="857"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::check(goal<sp/>!=<sp/><ref refid="structgoals" kindref="compound">goals</ref>.end(),<sp/></highlight><highlight class="stringliteral">&quot;Marathon<sp/>is<sp/>not<sp/>found&quot;</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="858"><highlight class="normal"></highlight></codeline>
+<codeline lineno="859"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="860"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>benefactor_with_goal_id<sp/>=<sp/><ref refid="structbenefactors" kindref="compound">benefactors</ref>.template<sp/>get_index&lt;</highlight><highlight class="stringliteral">&quot;bygoalid&quot;</highlight><highlight class="normal">_n&gt;();</highlight></codeline>
+<codeline lineno="861"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>benefactor<sp/>=<sp/>benefactor_with_goal_id.lower_bound(goal_id);</highlight></codeline>
+<codeline lineno="862"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>print(</highlight><highlight class="stringliteral">&quot;benefactor_id&quot;</highlight><highlight class="normal">,<sp/>benefactor<sp/>-&gt;<sp/></highlight><highlight class="keywordtype">id</highlight><highlight class="normal">);</highlight></codeline>
+<codeline lineno="863"><highlight class="normal"></highlight></codeline>
+<codeline lineno="864"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">if</highlight><highlight class="normal"><sp/>(benefactor<sp/>!=<sp/>benefactor_with_goal_id.end()<sp/>&amp;&amp;<sp/>benefactor<sp/>-&gt;<sp/>goal_id<sp/>==<sp/>goal_id){</highlight></codeline>
+<codeline lineno="865"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordflow">while</highlight><highlight class="normal">(benefactor<sp/>!=<sp/>benefactor_with_goal_id.end()<sp/>&amp;&amp;<sp/>benefactor<sp/>-&gt;<sp/>goal_id<sp/>==<sp/>goal_id)<sp/>{</highlight></codeline>
+<codeline lineno="866"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="867"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>eosio::asset<sp/>amount_for_benefactor<sp/>=<sp/>asset(amount.amount<sp/>*<sp/>benefactor<sp/>-&gt;<sp/>weight<sp/>/<sp/>goal-&gt;<sp/>benefactors_weight,<sp/>root_symbol);</highlight></codeline>
+<codeline lineno="868"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="869"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>benefactor_with_goal_id.modify(benefactor,<sp/>_me,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;d){</highlight></codeline>
+<codeline lineno="870"><highlight class="normal"></highlight></codeline>
+<codeline lineno="871"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>uint128_t<sp/>dac_income_in_segments<sp/>=<sp/>amount_for_benefactor.amount<sp/>*<sp/>TOTAL_SEGMENTS;</highlight></codeline>
+<codeline lineno="872"><highlight class="normal"></highlight></codeline>
+<codeline lineno="873"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight><highlight class="keywordtype">double</highlight><highlight class="normal"><sp/>income<sp/>=<sp/>double(benefactor<sp/>-&gt;income_in_segments<sp/>+<sp/>dac_income_in_segments)<sp/>/<sp/>(double)TOTAL_SEGMENTS;</highlight></codeline>
+<codeline lineno="874"><highlight class="normal"></highlight></codeline>
+<codeline lineno="875"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d.income<sp/>=<sp/>asset(uint64_t(income),<sp/>root_symbol);</highlight></codeline>
+<codeline lineno="876"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d.income_in_segments<sp/>+=<sp/>amount_for_benefactor.amount<sp/>*<sp/>TOTAL_SEGMENTS;</highlight></codeline>
+<codeline lineno="877"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="878"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="879"><highlight class="normal"></highlight></codeline>
+<codeline lineno="880"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>benefactor++;</highlight></codeline>
+<codeline lineno="881"><highlight class="normal"></highlight></codeline>
+<codeline lineno="882"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="883"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}<sp/><sp/></highlight><highlight class="keywordflow">else</highlight><highlight class="normal"><sp/>{</highlight></codeline>
+<codeline lineno="884"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/></highlight></codeline>
+<codeline lineno="885"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structbenefactors" kindref="compound">benefactors</ref>.emplace(_me,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;d){</highlight></codeline>
+<codeline lineno="886"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d.id<sp/>=<sp/><ref refid="structbenefactors" kindref="compound">benefactors</ref>.available_primary_key();</highlight></codeline>
+<codeline lineno="887"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d.goal_id<sp/>=<sp/>goal_id;</highlight></codeline>
+<codeline lineno="888"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d.benefactor<sp/>=<sp/>host;</highlight></codeline>
+<codeline lineno="889"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d.weight<sp/>=<sp/>1;</highlight></codeline>
+<codeline lineno="890"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d.income<sp/>=<sp/>amount;</highlight></codeline>
+<codeline lineno="891"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d.income_in_segments<sp/>=<sp/>amount.amount<sp/>*<sp/>TOTAL_SEGMENTS;</highlight></codeline>
+<codeline lineno="892"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d.withdrawed<sp/>=<sp/>asset(0,<sp/>root_symbol);</highlight></codeline>
+<codeline lineno="893"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>d.income_limit<sp/>=<sp/>asset(0,<sp/>root_symbol);</highlight></codeline>
+<codeline lineno="894"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="895"><highlight class="normal"></highlight></codeline>
+<codeline lineno="896"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><ref refid="structgoals" kindref="compound">goals</ref>.modify(goal,<sp/>_me,<sp/>[&amp;](</highlight><highlight class="keyword">auto</highlight><highlight class="normal"><sp/>&amp;h){</highlight></codeline>
+<codeline lineno="897"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>h.benefactors_weight<sp/>=<sp/>1;</highlight></codeline>
+<codeline lineno="898"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>});</highlight></codeline>
+<codeline lineno="899"><highlight class="normal"><sp/><sp/><sp/><sp/><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="900"><highlight class="normal"></highlight></codeline>
+<codeline lineno="901"><highlight class="normal"><sp/><sp/><sp/><sp/>}</highlight></codeline>
+<codeline lineno="902"><highlight class="normal"></highlight></codeline>
+    </programlisting>
+    <location file="src/goals.cpp"/>
+  </compounddef>
+</doxygen>

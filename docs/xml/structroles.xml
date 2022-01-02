@@ -1,0 +1,144 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.14">
+  <compounddef id="structroles" kind="struct" language="C++" prot="public">
+    <compoundname>roles</compoundname>
+    <includes refid="hosts_8hpp" local="no">hosts.hpp</includes>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structroles_1a09f3a5f9d5f49dc5f42dd341c3625921" prot="public" static="no" mutable="no">
+        <type>uint64_t</type>
+        <definition>uint64_t roles::role_id</definition>
+        <argsstring></argsstring>
+        <name>role_id</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/hosts.hpp" line="231" column="1" bodyfile="include/hosts.hpp" bodystart="231" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structroles_1a1636a96590f017868b52e4fb0981b122" prot="public" static="no" mutable="no">
+        <type>eosio::name</type>
+        <definition>eosio::name roles::model</definition>
+        <argsstring></argsstring>
+        <name>model</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/hosts.hpp" line="232" column="1" bodyfile="include/hosts.hpp" bodystart="232" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structroles_1ad862fbb4086a677484e0b08e44c46b4b" prot="public" static="no" mutable="no">
+        <type>eosio::name</type>
+        <definition>eosio::name roles::lang</definition>
+        <argsstring></argsstring>
+        <name>lang</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/hosts.hpp" line="233" column="1" bodyfile="include/hosts.hpp" bodystart="233" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structroles_1af0b8c91fa6b8352837b7dbcec1ce1103" prot="public" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string roles::title</definition>
+        <argsstring></argsstring>
+        <name>title</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/hosts.hpp" line="234" column="1" bodyfile="include/hosts.hpp" bodystart="234" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structroles_1ac00f8989da077196f53ef6b114d203f0" prot="public" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string roles::descriptor</definition>
+        <argsstring></argsstring>
+        <name>descriptor</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/hosts.hpp" line="235" column="1" bodyfile="include/hosts.hpp" bodystart="235" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structroles_1a386104c4d56af816a3c4c486c521666b" prot="public" static="no" mutable="no">
+        <type>eosio::name</type>
+        <definition>eosio::name roles::suggester</definition>
+        <argsstring></argsstring>
+        <name>suggester</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/hosts.hpp" line="236" column="1" bodyfile="include/hosts.hpp" bodystart="236" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structroles_1ac5d3a4e7af37f855dc3c7772794d7cdb" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool roles::approved</definition>
+        <argsstring></argsstring>
+        <name>approved</name>
+        <initializer>= false</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/hosts.hpp" line="237" column="1" bodyfile="include/hosts.hpp" bodystart="237" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="structroles_1a77e285402e8f705d872e8f972d60da5d" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>uint64_t</type>
+        <definition>uint64_t roles::primary_key</definition>
+        <argsstring>() const</argsstring>
+        <name>primary_key</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/hosts.hpp" line="239" column="1" bodyfile="include/hosts.hpp" bodystart="239" bodyend="239"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Структура командных ролей протокола. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="137">
+        <label>roles</label>
+        <link refid="structroles"/>
+        <childnode refid="138" relation="usage">
+          <edgelabel>title</edgelabel>
+          <edgelabel>descriptor</edgelabel>
+        </childnode>
+      </node>
+      <node id="138">
+        <label>string</label>
+      </node>
+    </collaborationgraph>
+    <location file="include/hosts.hpp" line="230" column="1" bodyfile="include/hosts.hpp" bodystart="230" bodyend="242"/>
+    <listofallmembers>
+      <member refid="structroles_1ac5d3a4e7af37f855dc3c7772794d7cdb" prot="public" virt="non-virtual"><scope>roles</scope><name>approved</name></member>
+      <member refid="structroles_1ac00f8989da077196f53ef6b114d203f0" prot="public" virt="non-virtual"><scope>roles</scope><name>descriptor</name></member>
+      <member refid="structroles_1ad862fbb4086a677484e0b08e44c46b4b" prot="public" virt="non-virtual"><scope>roles</scope><name>lang</name></member>
+      <member refid="structroles_1a1636a96590f017868b52e4fb0981b122" prot="public" virt="non-virtual"><scope>roles</scope><name>model</name></member>
+      <member refid="structroles_1a77e285402e8f705d872e8f972d60da5d" prot="public" virt="non-virtual"><scope>roles</scope><name>primary_key</name></member>
+      <member refid="structroles_1a09f3a5f9d5f49dc5f42dd341c3625921" prot="public" virt="non-virtual"><scope>roles</scope><name>role_id</name></member>
+      <member refid="structroles_1a386104c4d56af816a3c4c486c521666b" prot="public" virt="non-virtual"><scope>roles</scope><name>suggester</name></member>
+      <member refid="structroles_1af0b8c91fa6b8352837b7dbcec1ce1103" prot="public" virt="non-virtual"><scope>roles</scope><name>title</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

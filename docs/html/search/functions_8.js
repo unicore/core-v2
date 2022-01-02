@@ -1,9 +1,7 @@
 var searchData=
 [
-  ['refreshbal',['refreshbal',['../classunicore.html#abb1a56452f7d8819475e04e5ad10fe54',1,'unicore']]],
-  ['refreshpu',['refreshpu',['../classunicore.html#a00ca80d8fa12bd41448d55cd82c5cd60',1,'unicore']]],
-  ['refreshsh',['refreshsh',['../classunicore.html#a790c1a22331df2bd9e7f9b9094de7dfb',1,'unicore']]],
-  ['refreshst',['refreshst',['../classunicore.html#a2a410729955a5bc11fe3b3051f10a4c9',1,'unicore']]],
-  ['report',['report',['../classunicore.html#ac0e6bf94b8bfd28e08c364631a357d91',1,'unicore']]],
-  ['rmcontent',['rmcontent',['../classunicore.html#af6aac321d5880fcb577ba00abea5c38f',1,'unicore']]]
+  ['pay_5ffor_5fupgrade',['pay_for_upgrade',['../classunicore.html#a4f4a69c310c073c6cf1ebf41f2c210e8',1,'unicore']]],
+  ['paydebt',['paydebt',['../classunicore.html#ab10a203c3d6c37fd1cb71a9110c62e8a',1,'unicore']]],
+  ['priorenter',['priorenter',['../classunicore.html#a7c554fbaa488514c2fd09879a6b4c662',1,'unicore']]],
+  ['propagate_5fvotes_5fchanges',['propagate_votes_changes',['../classunicore.html#a9db4a730ab5cb5c91f4af22fcbe314fc',1,'unicore']]]
 ];

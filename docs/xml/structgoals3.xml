@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.14">
+  <compounddef id="structgoals3" kind="struct" language="C++" prot="public">
+    <compoundname>goals3</compoundname>
+    <includes refid="goals_8hpp" local="no">goals.hpp</includes>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structgoals3_1a9eea3f010911379e6f4ead29d5a3fe71" prot="public" static="no" mutable="no">
+        <type>uint64_t</type>
+        <definition>uint64_t goals3::id</definition>
+        <argsstring></argsstring>
+        <name>id</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/goals.hpp" line="105" column="1" bodyfile="include/goals.hpp" bodystart="105" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structgoals3_1a008e54ebad1f5d93e022501b3b3fc012" prot="public" static="no" mutable="no">
+        <type>eosio::asset</type>
+        <definition>eosio::asset goals3::total_on_distribution</definition>
+        <argsstring></argsstring>
+        <name>total_on_distribution</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/goals.hpp" line="106" column="1" bodyfile="include/goals.hpp" bodystart="106" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structgoals3_1a8733ab368d84a3588b197e1b58a08c32" prot="public" static="no" mutable="no">
+        <type>eosio::asset</type>
+        <definition>eosio::asset goals3::remain_on_distribution</definition>
+        <argsstring></argsstring>
+        <name>remain_on_distribution</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/goals.hpp" line="107" column="1" bodyfile="include/goals.hpp" bodystart="107" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="structgoals3_1a2d06e31d7cef3d14996bb5f49b04fd66" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>uint64_t</type>
+        <definition>uint64_t goals3::primary_key</definition>
+        <argsstring>() const</argsstring>
+        <name>primary_key</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/goals.hpp" line="109" column="1" bodyfile="include/goals.hpp" bodystart="109" bodyend="109"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Структура целей хоста Двойной Спирали. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="82">
+        <label>asset</label>
+      </node>
+      <node id="81">
+        <label>goals3</label>
+        <link refid="structgoals3"/>
+        <childnode refid="82" relation="usage">
+          <edgelabel>remain_on_distribution</edgelabel>
+          <edgelabel>total_on_distribution</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="include/goals.hpp" line="104" column="1" bodyfile="include/goals.hpp" bodystart="104" bodyend="112"/>
+    <listofallmembers>
+      <member refid="structgoals3_1a9eea3f010911379e6f4ead29d5a3fe71" prot="public" virt="non-virtual"><scope>goals3</scope><name>id</name></member>
+      <member refid="structgoals3_1a2d06e31d7cef3d14996bb5f49b04fd66" prot="public" virt="non-virtual"><scope>goals3</scope><name>primary_key</name></member>
+      <member refid="structgoals3_1a8733ab368d84a3588b197e1b58a08c32" prot="public" virt="non-virtual"><scope>goals3</scope><name>remain_on_distribution</name></member>
+      <member refid="structgoals3_1a008e54ebad1f5d93e022501b3b3fc012" prot="public" virt="non-virtual"><scope>goals3</scope><name>total_on_distribution</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

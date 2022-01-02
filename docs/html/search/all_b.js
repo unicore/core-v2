@@ -1,18 +1,15 @@
 var searchData=
 [
-  ['sale',['sale',['../structsale.html',1,'']]],
-  ['sellshares',['sellshares',['../classunicore.html#a237ab7bb223b33ba87375e177ced89a2',1,'unicore']]],
-  ['setarch',['setarch',['../classunicore.html#ac5b6ba6e6362cc73943265c750429fd4',1,'unicore']]],
-  ['setcmsconfig',['setcmsconfig',['../classunicore.html#ad0188feae42e22b52afbb6e3c3f70c86',1,'unicore']]],
-  ['setcontent',['setcontent',['../classunicore.html#abab6ddd4a167efde5f0e45a1ffd9dfba',1,'unicore']]],
-  ['setemi',['setemi',['../classunicore.html#affa39993f35c8e2c8838a956c761cbcc',1,'unicore']]],
-  ['setgoal',['setgoal',['../classunicore.html#aa2341c3f2393be329d759ef09f20367f',1,'unicore']]],
-  ['setparams',['setparams',['../classunicore.html#accfb2e432f24f46fe7432110f0361d2f',1,'unicore']]],
-  ['setreport',['setreport',['../classunicore.html#a178fc39ee1d642454bddeaa3f6084d00',1,'unicore']]],
-  ['settask',['settask',['../classunicore.html#acfa60cf59df336c954662c1ae46a67b2',1,'unicore']]],
-  ['settiming',['settiming',['../classunicore.html#af4454491cb629dc007eed9b6febdd161',1,'unicore']]],
-  ['sincome',['sincome',['../structsincome.html',1,'']]],
-  ['spiral',['spiral',['../structspiral.html',1,'']]],
-  ['start',['start',['../classunicore.html#ad83b75f3c4afd1ab954d428be8f6f7d7',1,'unicore']]],
-  ['symbol_5fto_5fstring',['symbol_to_string',['../classunicore.html#adb0134644edf42ff41b84bca15e6e8ff',1,'unicore']]]
+  ['partners2',['partners2',['../structpartners2.html',1,'']]],
+  ['pay_5ffor_5fupgrade',['pay_for_upgrade',['../classunicore.html#a4f4a69c310c073c6cf1ebf41f2c210e8',1,'unicore']]],
+  ['paydebt',['paydebt',['../classunicore.html#ab10a203c3d6c37fd1cb71a9110c62e8a',1,'unicore']]],
+  ['plog',['plog',['../structplog.html',1,'']]],
+  ['pool',['pool',['../structpool.html',1,'']]],
+  ['power',['power',['../structpower.html',1,'']]],
+  ['power2',['power2',['../structpower2.html',1,'']]],
+  ['power3',['power3',['../structpower3.html',1,'']]],
+  ['priorenter',['priorenter',['../classunicore.html#a7c554fbaa488514c2fd09879a6b4c662',1,'unicore']]],
+  ['producer_5finfo',['producer_info',['../structproducer__info.html',1,'']]],
+  ['propagate_5fvotes_5fchanges',['propagate_votes_changes',['../classunicore.html#a9db4a730ab5cb5c91f4af22fcbe314fc',1,'unicore']]],
+  ['pstats',['pstats',['../structpstats.html',1,'']]]
 ];

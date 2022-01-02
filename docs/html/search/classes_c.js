@@ -1,5 +1,8 @@
 var searchData=
 [
-  ['tasks',['tasks',['../structtasks.html',1,'']]],
-  ['token',['token',['../classeosio_1_1token.html',1,'eosio']]]
+  ['sale',['sale',['../structsale.html',1,'']]],
+  ['sincome',['sincome',['../structsincome.html',1,'']]],
+  ['sincome2',['sincome2',['../structsincome2.html',1,'']]],
+  ['spiral',['spiral',['../structspiral.html',1,'']]],
+  ['spiral2',['spiral2',['../structspiral2.html',1,'']]]
 ];

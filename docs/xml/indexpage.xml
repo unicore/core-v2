@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.14">
+  <compounddef id="indexpage" kind="page">
+    <compoundname>index</compoundname>
+    <title>UNICORE - универсальный протокол создания социально-экономических платформ</title>
+    <briefdescription>
+    </briefdescription>
+    <detaileddescription>
+<para>Протокол UNICORE предлагает инновационный механизм перераспределения ценности в замкнутой цифровой экономической системе на основе математического алгоритма точного финансового планирования &quot;Двойная Спираль&quot;.</para><para><itemizedlist>
+<listitem><para>Исполняется в любой сетевой операционной системе типа EOS.</para></listitem><listitem><para>Генерирует теоретически неограниченную прибыль при фиксированных рисках и абсолютном финансовом балансе в любой момент.</para></listitem><listitem><para>Предоставляет инновационную бизнес-модель, основанную на энергии внимания и добровольных пожертвованиях людей.</para></listitem></itemizedlist>
+</para><sect1 id="index_1purpose_sec">
+<title>Назначение</title>
+<para>Протокол предназначен для запуска и обслуживания цифровых экономических систем &quot;Двойная Спираль&quot; во множестве различных конфигураций с целью увеличения качества жизни участников и реализации новых масштабных коллективных проектов за счёт ускоренного движения финансовых потоков. </para></sect1>
+<sect1 id="index_1install_sec">
+<title>Клуб разработчиков</title>
+<para><ulink url="https://unicode.club">https://unicode.club</ulink> </para></sect1>
+<sect1 id="index_1club_sec">
+<title>Открытый код</title>
+<para><ulink url="https://github.com/dacom-core/unicore">https://github.com/dacom-core/unicore</ulink> </para></sect1>
+<sect1 id="index_1licension_sec">
+<title>Лицензия</title>
+<para>MIT </para></sect1>
+    </detaileddescription>
+  </compounddef>
+</doxygen>

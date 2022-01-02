@@ -95,9 +95,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>apply</b> (uint64_t r
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a30206473eb9672b7b67d0a85d2035ff3">convert</a> (eosio::name username, eosio::name host, uint64_t balance_id)</td></tr>
 <tr class="memdesc:a30206473eb9672b7b67d0a85d2035ff3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Публичный метод обмена баланса на жетон распределения по текущему курсу из числа квантов раунда. <br /></td></tr>
 <tr class="separator:a30206473eb9672b7b67d0a85d2035ff3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:accfb2e432f24f46fe7432110f0361d2f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#accfb2e432f24f46fe7432110f0361d2f">setparams</a> (eosio::name host, eosio::name chost, uint64_t size_of_pool, uint64_t quants_precision, uint64_t overlap, uint64_t profit_growth, uint64_t base_rate, uint64_t loss_percent, uint64_t pool_limit, uint64_t pool_timeout, uint64_t priority_seconds)</td></tr>
-<tr class="memdesc:accfb2e432f24f46fe7432110f0361d2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Публичный метод установки параметров протокола двойной спирали Вызывается пользователем после базовой операции создания хоста и проведения оплаты. Так же вызывается при установке параметров дочернего хоста. Содержит алгоритм финансового ядра. Производит основные расчеты таблиц курсов и валидирует положительность бизнес-дохода.  <a href="#accfb2e432f24f46fe7432110f0361d2f">More...</a><br /></td></tr>
-<tr class="separator:accfb2e432f24f46fe7432110f0361d2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8898e75bc9abe84fd78c15f9de3731f5"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a8898e75bc9abe84fd78c15f9de3731f5">setparams</a> (eosio::name host, eosio::name chost, uint64_t size_of_pool, uint64_t quants_precision, uint64_t overlap, uint64_t profit_growth, uint64_t base_rate, uint64_t loss_percent, uint64_t compensator_percent, uint64_t pool_limit, uint64_t pool_timeout, uint64_t priority_seconds)</td></tr>
+<tr class="memdesc:a8898e75bc9abe84fd78c15f9de3731f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Публичный метод установки параметров протокола двойной спирали Вызывается пользователем после базовой операции создания хоста и проведения оплаты. Так же вызывается при установке параметров дочернего хоста. Содержит алгоритм финансового ядра. Производит основные расчеты таблиц курсов и валидирует положительность бизнес-дохода.  <a href="#a8898e75bc9abe84fd78c15f9de3731f5">More...</a><br /></td></tr>
+<tr class="separator:a8898e75bc9abe84fd78c15f9de3731f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad83b75f3c4afd1ab954d428be8f6f7d7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#ad83b75f3c4afd1ab954d428be8f6f7d7">start</a> (eosio::name host, eosio::name chost)</td></tr>
 <tr class="memdesc:ad83b75f3c4afd1ab954d428be8f6f7d7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Публичный метод запуска хоста Метод необходимо вызвать для запуска хоста после установки параметров хоста. Добавляет первый цикл, два пула, переключает демонастративный флаг запуска и создает статистические объекты. Подписывается аккаунтом хоста.  <a href="#ad83b75f3c4afd1ab954d428be8f6f7d7">More...</a><br /></td></tr>
 <tr class="separator:ad83b75f3c4afd1ab954d428be8f6f7d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -143,6 +143,18 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>giftbadge</b> (eosio:
 <tr class="memitem:a969e75dd90699b53b75ab8482cbc49d3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a969e75dd90699b53b75ab8482cbc49d3">dfundgoal</a> (eosio::name architect, eosio::name host, uint64_t goal_id, eosio::asset amount, std::string comment)</td></tr>
 <tr class="memdesc:a969e75dd90699b53b75ab8482cbc49d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод прямого финансирования цели Используется архитектором для финансирования цели из фонда  <a href="#a969e75dd90699b53b75ab8482cbc49d3">More...</a><br /></td></tr>
 <tr class="separator:a969e75dd90699b53b75ab8482cbc49d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af6e32936bbe20a612c9348bf5f805982"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#af6e32936bbe20a612c9348bf5f805982">fundchildgoa</a> (eosio::name architect, eosio::name host, uint64_t goal_id, eosio::asset amount)</td></tr>
+<tr class="memdesc:af6e32936bbe20a612c9348bf5f805982"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод прямого финансирования родительской цели Используется архитектором для наполнения дочерней цели за счет баланса родительской цели  <a href="#af6e32936bbe20a612c9348bf5f805982">More...</a><br /></td></tr>
+<tr class="separator:af6e32936bbe20a612c9348bf5f805982"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ba1753b7dc4109e94dc7c4c9dbd5400"><td class="memItemLeft" align="right" valign="top"><a id="a1ba1753b7dc4109e94dc7c4c9dbd5400"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setgcreator</b> (eosio::name oldcreator, eosio::name newcreator, eosio::name host, uint64_t goal_id)</td></tr>
+<tr class="separator:a1ba1753b7dc4109e94dc7c4c9dbd5400"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2ee6a26c970b05e61c3753791a55dee4"><td class="memItemLeft" align="right" valign="top"><a id="a2ee6a26c970b05e61c3753791a55dee4"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>gaccept</b> (eosio::name host, uint64_t goal_id, uint64_t parent_goal_id, bool status)</td></tr>
+<tr class="separator:a2ee6a26c970b05e61c3753791a55dee4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2cc7c4ae8c6ea5e604d6666d37d11405"><td class="memItemLeft" align="right" valign="top"><a id="a2cc7c4ae8c6ea5e604d6666d37d11405"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>gpause</b> (eosio::name host, uint64_t goal_id)</td></tr>
+<tr class="separator:a2cc7c4ae8c6ea5e604d6666d37d11405"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9fd534e0b189439c6f18e99689911b3e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a9fd534e0b189439c6f18e99689911b3e">delgoal</a> (eosio::name username, eosio::name host, uint64_t goal_id)</td></tr>
 <tr class="memdesc:a9fd534e0b189439c6f18e99689911b3e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод удаления цели  <a href="#a9fd534e0b189439c6f18e99689911b3e">More...</a><br /></td></tr>
 <tr class="separator:a9fd534e0b189439c6f18e99689911b3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -185,15 +197,21 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:abae3b92d93cbbbd1058005639975f09d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#abae3b92d93cbbbd1058005639975f09d">cchildhost</a> (eosio::name parent_host, eosio::name chost)</td></tr>
 <tr class="memdesc:abae3b92d93cbbbd1058005639975f09d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод создания дочернего хоста Позволяет сообществу на границе циклов изменять параметры финансового ядра, распологая их в области памяти аккаунта дочернего хоста.  <a href="#abae3b92d93cbbbd1058005639975f09d">More...</a><br /></td></tr>
 <tr class="separator:abae3b92d93cbbbd1058005639975f09d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a286cd81b9f3e28d9a49aaa7969e21ee7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a286cd81b9f3e28d9a49aaa7969e21ee7">edithost</a> (eosio::name architect, eosio::name host, eosio::string title, eosio::string purpose, eosio::string manifest, eosio::string meta)</td></tr>
-<tr class="memdesc:a286cd81b9f3e28d9a49aaa7969e21ee7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод редактирования информации о хосте  <a href="#a286cd81b9f3e28d9a49aaa7969e21ee7">More...</a><br /></td></tr>
-<tr class="separator:a286cd81b9f3e28d9a49aaa7969e21ee7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb38bcc39c9e3ca74f955944a84274fe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#abb38bcc39c9e3ca74f955944a84274fe">compensator</a> (eosio::name host, uint64_t compensator_percent)</td></tr>
+<tr class="memdesc:abb38bcc39c9e3ca74f955944a84274fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Установка компенсатора рисков Устанавливает компенсатор риска для системного жетона  <a href="#abb38bcc39c9e3ca74f955944a84274fe">More...</a><br /></td></tr>
+<tr class="separator:abb38bcc39c9e3ca74f955944a84274fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a38d070fb8067b91799456f1472ced47d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a38d070fb8067b91799456f1472ced47d">edithost</a> (eosio::name architect, eosio::name host, eosio::name platform, eosio::string title, eosio::string purpose, eosio::string manifest, eosio::name power_market_id, eosio::string meta)</td></tr>
+<tr class="memdesc:a38d070fb8067b91799456f1472ced47d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод редактирования информации о хосте  <a href="#a38d070fb8067b91799456f1472ced47d">More...</a><br /></td></tr>
+<tr class="separator:a38d070fb8067b91799456f1472ced47d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abb22debda627e37951ea15e47fc77985"><td class="memItemLeft" align="right" valign="top"><a id="abb22debda627e37951ea15e47fc77985"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>fixs</b> (eosio::name host, uint64_t pool_num)</td></tr>
 <tr class="separator:abb22debda627e37951ea15e47fc77985"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a61965d7a5c449487b565b444659d6cd7"><td class="memItemLeft" align="right" valign="top"><a id="a61965d7a5c449487b565b444659d6cd7"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>settype</b> (eosio::name host, eosio::name type)</td></tr>
 <tr class="separator:a61965d7a5c449487b565b444659d6cd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9ebdfe87e84d1a283143d274f2337e84"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a9ebdfe87e84d1a283143d274f2337e84">setlevels</a> (eosio::name host, std::vector&lt; uint64_t &gt; levels)</td></tr>
+<tr class="memdesc:a9ebdfe87e84d1a283143d274f2337e84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод установки уровней вознаграждений  <a href="#a9ebdfe87e84d1a283143d274f2337e84">More...</a><br /></td></tr>
+<tr class="separator:a9ebdfe87e84d1a283143d274f2337e84"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af4454491cb629dc007eed9b6febdd161"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#af4454491cb629dc007eed9b6febdd161">settiming</a> (eosio::name host, uint64_t pool_timeout, uint64_t priority_seconds)</td></tr>
 <tr class="memdesc:af4454491cb629dc007eed9b6febdd161"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод редактирования времени  <a href="#af4454491cb629dc007eed9b6febdd161">More...</a><br /></td></tr>
 <tr class="separator:af4454491cb629dc007eed9b6febdd161"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -209,9 +227,27 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>addben</b> (eosio::na
 <tr class="memitem:a0a2ae5cf5fb3cdf3ba23f0948dd5c391"><td class="memItemLeft" align="right" valign="top"><a id="a0a2ae5cf5fb3cdf3ba23f0948dd5c391"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>withdrbeninc</b> (eosio::name username, eosio::name host, uint64_t goal_id)</td></tr>
 <tr class="separator:a0a2ae5cf5fb3cdf3ba23f0948dd5c391"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7539f51bcd1838f0789542e7a814720b"><td class="memItemLeft" align="right" valign="top"><a id="a7539f51bcd1838f0789542e7a814720b"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>adddac</b> (eosio::name username, eosio::name host, uint64_t weight, bool is_new_role, uint64_t role_id, std::string title, std::string descriptor)</td></tr>
-<tr class="separator:a7539f51bcd1838f0789542e7a814720b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aabd42ff2a6dcac81d487e65b0bf5dda6"><td class="memItemLeft" align="right" valign="top"><a id="aabd42ff2a6dcac81d487e65b0bf5dda6"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>addvac</b> (uint64_t id, bool is_edit, eosio::name creator, eosio::name host, eosio::name limit_type, eosio::asset income_limit, uint64_t weight, std::string title, std::string descriptor)</td></tr>
+<tr class="separator:aabd42ff2a6dcac81d487e65b0bf5dda6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a756863a6910963e79adbb3bfcdf7ba47"><td class="memItemLeft" align="right" valign="top"><a id="a756863a6910963e79adbb3bfcdf7ba47"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>rmvac</b> (eosio::name host, uint64_t id)</td></tr>
+<tr class="separator:a756863a6910963e79adbb3bfcdf7ba47"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a728bf4c6d03c63fa2969a3effe312fea"><td class="memItemLeft" align="right" valign="top"><a id="a728bf4c6d03c63fa2969a3effe312fea"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>addvprop</b> (uint64_t id, bool is_edit, eosio::name creator, eosio::name host, uint64_t vac_id, uint64_t weight, std::string why_me, std::string contacts)</td></tr>
+<tr class="separator:a728bf4c6d03c63fa2969a3effe312fea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb6489dbbbb032b012f3faa9e8ba963f"><td class="memItemLeft" align="right" valign="top"><a id="adb6489dbbbb032b012f3faa9e8ba963f"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>rmvprop</b> (eosio::name host, uint64_t vprop_id)</td></tr>
+<tr class="separator:adb6489dbbbb032b012f3faa9e8ba963f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a55e754af41251b55a9c6b1cfe0f0f8c1"><td class="memItemLeft" align="right" valign="top"><a id="a55e754af41251b55a9c6b1cfe0f0f8c1"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>approvevac</b> (eosio::name host, uint64_t vac_id)</td></tr>
+<tr class="separator:a55e754af41251b55a9c6b1cfe0f0f8c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afcacb23342b138f05740e3bd57d03fde"><td class="memItemLeft" align="right" valign="top"><a id="afcacb23342b138f05740e3bd57d03fde"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>apprvprop</b> (eosio::name host, uint64_t vprop_id)</td></tr>
+<tr class="separator:afcacb23342b138f05740e3bd57d03fde"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac6f84b754aa586043376617165f90eca"><td class="memItemLeft" align="right" valign="top"><a id="ac6f84b754aa586043376617165f90eca"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>adddac</b> (eosio::name username, eosio::name host, uint64_t weight, eosio::name limit_type, eosio::asset income_limit, std::string title, std::string descriptor)</td></tr>
+<tr class="separator:ac6f84b754aa586043376617165f90eca"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1a76e2539a42f80b8ac6f514305665c8"><td class="memItemLeft" align="right" valign="top"><a id="a1a76e2539a42f80b8ac6f514305665c8"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>rmdac</b> (eosio::name username, eosio::name host)</td></tr>
 <tr class="separator:a1a76e2539a42f80b8ac6f514305665c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -221,9 +257,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>suggestrole</b> (eosi
 <tr class="memitem:a00bbf7a3172cc73697b3fcdfc19b7a4b"><td class="memItemLeft" align="right" valign="top"><a id="a00bbf7a3172cc73697b3fcdfc19b7a4b"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>withdrdacinc</b> (eosio::name username, eosio::name host)</td></tr>
 <tr class="separator:a00bbf7a3172cc73697b3fcdfc19b7a4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afa11dcc7868db49a1864c88f90437663"><td class="memItemLeft" align="right" valign="top"><a id="afa11dcc7868db49a1864c88f90437663"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setwebsite</b> (eosio::name host, eosio::name ahostname, eosio::string website, eosio::name type)</td></tr>
-<tr class="separator:afa11dcc7868db49a1864c88f90437663"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a1fde814fc862b339230cfb85505145"><td class="memItemLeft" align="right" valign="top"><a id="a3a1fde814fc862b339230cfb85505145"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setwebsite</b> (eosio::name host, eosio::name ahostname, eosio::string website, eosio::name type, std::string meta)</td></tr>
+<tr class="separator:a3a1fde814fc862b339230cfb85505145"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab1e9b13cec99a231f1c6a71e3edc37c6"><td class="memItemLeft" align="right" valign="top"><a id="ab1e9b13cec99a231f1c6a71e3edc37c6"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>rmahost</b> (eosio::name host, eosio::name ahostname)</td></tr>
 <tr class="separator:ab1e9b13cec99a231f1c6a71e3edc37c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -236,10 +272,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>closeahost</b> (eosio
 <tr class="memitem:a339ec2fd85cf7ddd182a7e41d0f66f66"><td class="memItemLeft" align="right" valign="top"><a id="a339ec2fd85cf7ddd182a7e41d0f66f66"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>openahost</b> (eosio::name host)</td></tr>
 <tr class="separator:a339ec2fd85cf7ddd182a7e41d0f66f66"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a790c1a22331df2bd9e7f9b9094de7dfb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a790c1a22331df2bd9e7f9b9094de7dfb">refreshsh</a> (eosio::name owner, uint64_t id)</td></tr>
-<tr class="memdesc:a790c1a22331df2bd9e7f9b9094de7dfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод обновления вестинг-баланса. <br />
-Обновляет вестинг-баланс до актуальных параметров продолжительности.  <a href="#a790c1a22331df2bd9e7f9b9094de7dfb">More...</a><br /></td></tr>
-<tr class="separator:a790c1a22331df2bd9e7f9b9094de7dfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a78e7d25bcf723965ab405b66327a23e7"><td class="memItemLeft" align="right" valign="top"><a id="a78e7d25bcf723965ab405b66327a23e7"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a78e7d25bcf723965ab405b66327a23e7">withpbenefit</a> (eosio::name username, eosio::name host)</td></tr>
 <tr class="memdesc:a78e7d25bcf723965ab405b66327a23e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод вывода силового финансового потока withdraw power quant (withpowerun) Позволяет вывести часть финансового потока, направленного на держателя силы <br /></td></tr>
@@ -248,13 +280,17 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#ad330ad73fc269d1e37df00b7e9823441">withrsegment</a> (eosio::name username, eosio::name host)</td></tr>
 <tr class="memdesc:ad330ad73fc269d1e37df00b7e9823441"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод вывода остатка партнерского финансового потока withdraw power quant (withpowerun) <br /></td></tr>
 <tr class="separator:ad330ad73fc269d1e37df00b7e9823441"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a864ff1841ee9e00708db7f64326f4792"><td class="memItemLeft" align="right" valign="top"><a id="a864ff1841ee9e00708db7f64326f4792"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a864ff1841ee9e00708db7f64326f4792">withrbenefit</a> (eosio::name username, eosio::name host, std::vector&lt; uint64_t &gt; ids)</td></tr>
-<tr class="memdesc:a864ff1841ee9e00708db7f64326f4792"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод вывода партнерского финансового потока withdraw power quant (withpowerun) <br /></td></tr>
-<tr class="separator:a864ff1841ee9e00708db7f64326f4792"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0eeced7a1cf17a871f0458eb327da6e"><td class="memItemLeft" align="right" valign="top"><a id="ad0eeced7a1cf17a871f0458eb327da6e"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#ad0eeced7a1cf17a871f0458eb327da6e">withrbenefit</a> (eosio::name username, eosio::name host, uint64_t id)</td></tr>
+<tr class="memdesc:ad0eeced7a1cf17a871f0458eb327da6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод вывода партнерского финансового потока withdraw power quant (withpowerun) <br /></td></tr>
+<tr class="separator:ad0eeced7a1cf17a871f0458eb327da6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a00ca80d8fa12bd41448d55cd82c5cd60"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a00ca80d8fa12bd41448d55cd82c5cd60">refreshpu</a> (eosio::name username, eosio::name host)</td></tr>
 <tr class="memdesc:a00ca80d8fa12bd41448d55cd82c5cd60"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод обновления силового финансового потока  <a href="#a00ca80d8fa12bd41448d55cd82c5cd60">More...</a><br /></td></tr>
 <tr class="separator:a00ca80d8fa12bd41448d55cd82c5cd60"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a790c1a22331df2bd9e7f9b9094de7dfb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a790c1a22331df2bd9e7f9b9094de7dfb">refreshsh</a> (eosio::name owner, uint64_t id)</td></tr>
+<tr class="memdesc:a790c1a22331df2bd9e7f9b9094de7dfb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод обновления вестинг-баланса. <br />
+Обновляет вестинг-баланс до актуальных параметров продолжительности.  <a href="#a790c1a22331df2bd9e7f9b9094de7dfb">More...</a><br /></td></tr>
+<tr class="separator:a790c1a22331df2bd9e7f9b9094de7dfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4dd6d244c3fac428419342dc782f53a1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a4dd6d244c3fac428419342dc782f53a1">withdrawsh</a> (eosio::name owner, uint64_t id)</td></tr>
 <tr class="memdesc:a4dd6d244c3fac428419342dc782f53a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Вывод вестинг-баланса Обеспечивает вывод доступных средств из вестинг-баланса.  <a href="#a4dd6d244c3fac428419342dc782f53a1">More...</a><br /></td></tr>
 <tr class="separator:a4dd6d244c3fac428419342dc782f53a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -264,9 +300,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a9464479eb5d28b6c7f9956319077b294"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a9464479eb5d28b6c7f9956319077b294">undelshares</a> (eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares)</td></tr>
 <tr class="memdesc:a9464479eb5d28b6c7f9956319077b294"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод возврата делегированной силы  <a href="#a9464479eb5d28b6c7f9956319077b294">More...</a><br /></td></tr>
 <tr class="separator:a9464479eb5d28b6c7f9956319077b294"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acfa60cf59df336c954662c1ae46a67b2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#acfa60cf59df336c954662c1ae46a67b2">settask</a> (eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id, std::string meta)</td></tr>
-<tr class="memdesc:acfa60cf59df336c954662c1ae46a67b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Модуль задач Задачи есть составляющие части достижения любой цели. Постановка задач осуществляется только в рамках целей. Задачи могут быть  <a href="#acfa60cf59df336c954662c1ae46a67b2">More...</a><br /></td></tr>
-<tr class="separator:acfa60cf59df336c954662c1ae46a67b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa989f60384b7167e4e1ff2b4d219a1b3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#aa989f60384b7167e4e1ff2b4d219a1b3">settask</a> (eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id, bool is_regular, std::vector&lt; uint64_t &gt; calendar, eosio::time_point_sec start_at, eosio::time_point_sec expired_at, std::string meta)</td></tr>
+<tr class="memdesc:aa989f60384b7167e4e1ff2b4d219a1b3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Модуль задач Задачи есть составляющие части достижения любой цели. Постановка задач осуществляется только в рамках целей. Задачи могут быть  <a href="#aa989f60384b7167e4e1ff2b4d219a1b3">More...</a><br /></td></tr>
+<tr class="separator:aa989f60384b7167e4e1ff2b4d219a1b3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae8ca388e55f11d3c32430edbaabcf7e2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#ae8ca388e55f11d3c32430edbaabcf7e2">fundtask</a> (eosio::name host, uint64_t task_id, eosio::asset amount, eosio::string comment)</td></tr>
 <tr class="memdesc:ae8ca388e55f11d3c32430edbaabcf7e2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Публичный метод фондирования задачи Исполняется хостом для пополнения баланса задачи из доступного баланса цели.  <a href="#ae8ca388e55f11d3c32430edbaabcf7e2">More...</a><br /></td></tr>
 <tr class="separator:ae8ca388e55f11d3c32430edbaabcf7e2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -276,6 +312,30 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a725477908310816ec80cddbf733af04b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a725477908310816ec80cddbf733af04b">tdeactivate</a> (eosio::name host, uint64_t task_id)</td></tr>
 <tr class="memdesc:a725477908310816ec80cddbf733af04b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Публичный метод деактивации задачи Применимо для публичных задач, когда поставленная цель достигнута или недостижима.  <a href="#a725477908310816ec80cddbf733af04b">More...</a><br /></td></tr>
 <tr class="separator:a725477908310816ec80cddbf733af04b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a54639a2c971d48407747efdda1b2f2ca"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a54639a2c971d48407747efdda1b2f2ca">tcomplete</a> (eosio::name host, uint64_t task_id)</td></tr>
+<tr class="memdesc:a54639a2c971d48407747efdda1b2f2ca"><td class="mdescLeft">&#160;</td><td class="mdescRight">Публичный метод деактивации задачи Применимо для публичных задач, когда поставленная цель достигнута или недостижима.  <a href="#a54639a2c971d48407747efdda1b2f2ca">More...</a><br /></td></tr>
+<tr class="separator:a54639a2c971d48407747efdda1b2f2ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff7586ddb285e938d5228562eb459234"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#aff7586ddb285e938d5228562eb459234">setpgoal</a> (eosio::name host, uint64_t task_id, uint64_t goal_id)</td></tr>
+<tr class="memdesc:aff7586ddb285e938d5228562eb459234"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод установки родительской цели  <a href="#aff7586ddb285e938d5228562eb459234">More...</a><br /></td></tr>
+<tr class="separator:aff7586ddb285e938d5228562eb459234"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ff597c20fe7071fa4d48a1e6fb4e654"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a4ff597c20fe7071fa4d48a1e6fb4e654">setdoer</a> (eosio::name host, uint64_t task_id, eosio::name doer)</td></tr>
+<tr class="memdesc:a4ff597c20fe7071fa4d48a1e6fb4e654"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод установки исполнителя  <a href="#a4ff597c20fe7071fa4d48a1e6fb4e654">More...</a><br /></td></tr>
+<tr class="separator:a4ff597c20fe7071fa4d48a1e6fb4e654"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5a31fb29df7ae2b8cbf51625b5c2bc21"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a5a31fb29df7ae2b8cbf51625b5c2bc21">validate</a> (eosio::name host, uint64_t task_id, uint64_t goal_id, eosio::name doer)</td></tr>
+<tr class="memdesc:a5a31fb29df7ae2b8cbf51625b5c2bc21"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод ручной валидации задачи  <a href="#a5a31fb29df7ae2b8cbf51625b5c2bc21">More...</a><br /></td></tr>
+<tr class="separator:a5a31fb29df7ae2b8cbf51625b5c2bc21"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a799e41649cd9bab8a1a9a9c41822925b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a799e41649cd9bab8a1a9a9c41822925b">jointask</a> (eosio::name host, uint64_t task_id, eosio::name doer, std::string comment)</td></tr>
+<tr class="memdesc:a799e41649cd9bab8a1a9a9c41822925b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод предложения себя как исполнителя задачи  <a href="#a799e41649cd9bab8a1a9a9c41822925b">More...</a><br /></td></tr>
+<tr class="separator:a799e41649cd9bab8a1a9a9c41822925b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d4a35a4c18d428c7e70ff7096cfd47d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a4d4a35a4c18d428c7e70ff7096cfd47d">canceljtask</a> (eosio::name host, uint64_t task_id, eosio::name doer)</td></tr>
+<tr class="memdesc:a4d4a35a4c18d428c7e70ff7096cfd47d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод предложения отклонения заявки деятеля  <a href="#a4d4a35a4c18d428c7e70ff7096cfd47d">More...</a><br /></td></tr>
+<tr class="separator:a4d4a35a4c18d428c7e70ff7096cfd47d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a07802302c610d2dc17f77a3019b81838"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a07802302c610d2dc17f77a3019b81838">settaskmeta</a> (eosio::name host, uint64_t task_id, std::string meta)</td></tr>
+<tr class="memdesc:a07802302c610d2dc17f77a3019b81838"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод ручной валидации задачи  <a href="#a07802302c610d2dc17f77a3019b81838">More...</a><br /></td></tr>
+<tr class="separator:a07802302c610d2dc17f77a3019b81838"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85136296400d6c3654bc80fcdb835bd3"><td class="memItemLeft" align="right" valign="top"><a id="a85136296400d6c3654bc80fcdb835bd3"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setinctask</b> (eosio::name username, uint64_t income_id, bool with_badge, uint64_t my_goal_id, uint64_t my_badge_id)</td></tr>
+<tr class="separator:a85136296400d6c3654bc80fcdb835bd3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a09d7d2d602069a26875aa1eee250d5f4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a09d7d2d602069a26875aa1eee250d5f4">deltask</a> (eosio::name host, uint64_t task_id)</td></tr>
 <tr class="memdesc:a09d7d2d602069a26875aa1eee250d5f4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод удаления задачи Вызывается хостом для удаления поставленной задачи.  <a href="#a09d7d2d602069a26875aa1eee250d5f4">More...</a><br /></td></tr>
 <tr class="separator:a09d7d2d602069a26875aa1eee250d5f4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -294,9 +354,18 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a403175c6abbcf360d36ec0259bccc109"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a403175c6abbcf360d36ec0259bccc109">disapprover</a> (eosio::name host, uint64_t report_id, eosio::string comment)</td></tr>
 <tr class="memdesc:a403175c6abbcf360d36ec0259bccc109"><td class="mdescLeft">&#160;</td><td class="mdescRight">Публичный метод отклонения отчета  <a href="#a403175c6abbcf360d36ec0259bccc109">More...</a><br /></td></tr>
 <tr class="separator:a403175c6abbcf360d36ec0259bccc109"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9c8a515eef8e3dd262372da54945047b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a9c8a515eef8e3dd262372da54945047b">withdrawrepo</a> (eosio::name username, eosio::name host, uint64_t report_id)</td></tr>
+<tr class="memdesc:a9c8a515eef8e3dd262372da54945047b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Публичный метод вывода баланса отчёта  <a href="#a9c8a515eef8e3dd262372da54945047b">More...</a><br /></td></tr>
+<tr class="separator:a9c8a515eef8e3dd262372da54945047b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae82cde0f788172b152c6b6896ac75d0d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#ae82cde0f788172b152c6b6896ac75d0d">distrepo</a> (eosio::name host, uint64_t report_id)</td></tr>
+<tr class="memdesc:ae82cde0f788172b152c6b6896ac75d0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Публичный метод обновления баланса отчёта при распределении баланса цели  <a href="#ae82cde0f788172b152c6b6896ac75d0d">More...</a><br /></td></tr>
+<tr class="separator:ae82cde0f788172b152c6b6896ac75d0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac1ca3033e5f65695c938c3d0621e6bfb"><td class="memItemLeft" align="right" valign="top"><a id="ac1ca3033e5f65695c938c3d0621e6bfb"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>vote</b> (eosio::name voter, eosio::name host, uint64_t goal_id, bool up)</td></tr>
 <tr class="separator:ac1ca3033e5f65695c938c3d0621e6bfb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace8526f2178dd5662a3d96fa1b9b6c7f"><td class="memItemLeft" align="right" valign="top"><a id="ace8526f2178dd5662a3d96fa1b9b6c7f"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>rvote</b> (eosio::name voter, eosio::name host, uint64_t report_id, bool up)</td></tr>
+<tr class="separator:ace8526f2178dd5662a3d96fa1b9b6c7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7b973d2c279fca2fa0cc08c35ebf1abe"><td class="memItemLeft" align="right" valign="top"><a id="a7b973d2c279fca2fa0cc08c35ebf1abe"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>setcondition</b> (eosio::name host, eosio::string key, uint64_t value)</td></tr>
 <tr class="separator:a7b973d2c279fca2fa0cc08c35ebf1abe"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -312,24 +381,27 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a739255f27ec8bb084f76fcb8cd5c33d8"><td class="memItemLeft" align="right" valign="top"><a id="a739255f27ec8bb084f76fcb8cd5c33d8"></a>
 static eosio::asset&#160;</td><td class="memItemRight" valign="bottom"><b>convert_to_power</b> (eosio::asset quantity, eosio::name host)</td></tr>
 <tr class="separator:a739255f27ec8bb084f76fcb8cd5c33d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aae7a94db6860df276fd7821044144a3e"><td class="memItemLeft" align="right" valign="top"><a id="aae7a94db6860df276fd7821044144a3e"></a>
+static eosio::asset&#160;</td><td class="memItemRight" valign="bottom"><b>calculate_asset_from_power</b> (eosio::asset quantity, eosio::name host)</td></tr>
+<tr class="separator:aae7a94db6860df276fd7821044144a3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4f4a69c310c073c6cf1ebf41f2c210e8"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a4f4a69c310c073c6cf1ebf41f2c210e8">pay_for_upgrade</a> (eosio::name username, eosio::asset amount, eosio::name code)</td></tr>
 <tr class="memdesc:a4f4a69c310c073c6cf1ebf41f2c210e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод оплаты комиссии создания дочернего хоста  <a href="#a4f4a69c310c073c6cf1ebf41f2c210e8">More...</a><br /></td></tr>
 <tr class="separator:a4f4a69c310c073c6cf1ebf41f2c210e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8703f9141c36861284ca003a348b61d0"><td class="memItemLeft" align="right" valign="top"><a id="a8703f9141c36861284ca003a348b61d0"></a>
 static void&#160;</td><td class="memItemRight" valign="bottom"><b>refresh_state</b> (eosio::name host)</td></tr>
 <tr class="separator:a8703f9141c36861284ca003a348b61d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5e0d285466d37fa9f315b5a52dba4c8a"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a5e0d285466d37fa9f315b5a52dba4c8a">giftbadge_action</a> (eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment, bool netted, uint64_t goal_id, uint64_t task_id)</td></tr>
-<tr class="memdesc:a5e0d285466d37fa9f315b5a52dba4c8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод передачи значка награждаемому  <a href="#a5e0d285466d37fa9f315b5a52dba4c8a">More...</a><br /></td></tr>
-<tr class="separator:a5e0d285466d37fa9f315b5a52dba4c8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8cdb743e8708845d4a6064d43400d415"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a8cdb743e8708845d4a6064d43400d415">giftbadge_action</a> (eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment, bool netted, bool own, uint64_t goal_id, uint64_t task_id)</td></tr>
+<tr class="memdesc:a8cdb743e8708845d4a6064d43400d415"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод передачи значка награждаемому  <a href="#a8cdb743e8708845d4a6064d43400d415">More...</a><br /></td></tr>
+<tr class="separator:a8cdb743e8708845d4a6064d43400d415"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac1a80266ee2fcc4565d3e0924eaf2c60"><td class="memItemLeft" align="right" valign="top"><a id="ac1a80266ee2fcc4565d3e0924eaf2c60"></a>
 static void&#160;</td><td class="memItemRight" valign="bottom"><b>deposit</b> (eosio::name username, eosio::name host, eosio::asset amount, eosio::name code, std::string message)</td></tr>
 <tr class="separator:ac1a80266ee2fcc4565d3e0924eaf2c60"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a466aba74657c6022cc0d9163bd502625"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a466aba74657c6022cc0d9163bd502625">donate_action</a> (eosio::name from, eosio::name host, uint64_t goal_id, eosio::asset quantity, eosio::name code)</td></tr>
 <tr class="memdesc:a466aba74657c6022cc0d9163bd502625"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод спонсорского взноса на цель Позволяет любому участнику произвести финансирование цели из числа собственных средств.  <a href="#a466aba74657c6022cc0d9163bd502625">More...</a><br /></td></tr>
 <tr class="separator:a466aba74657c6022cc0d9163bd502625"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae4010919890b14f831b4d4a633771062"><td class="memItemLeft" align="right" valign="top">static eosio::asset&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#ae4010919890b14f831b4d4a633771062">adjust_goals_emission_pool</a> (eosio::name hostname)</td></tr>
-<tr class="memdesc:ae4010919890b14f831b4d4a633771062"><td class="mdescLeft">&#160;</td><td class="mdescRight">Внутренний метод расчета пула эмиссии. Вызывается в момент распределения эмиссии на цели сообщества. Расчет объема эмиссии происходит исходя из параметра life_balance_for_sale завершенного пула, и процента эмиссии, установленного архитектором. Процент эмиссии ограничен от 0 до 1000% относительного живого остатка на продажу в каждом новом пуле.  <a href="#ae4010919890b14f831b4d4a633771062">More...</a><br /></td></tr>
-<tr class="separator:ae4010919890b14f831b4d4a633771062"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aacdeaae7b4b591419bd366661b92cd27"><td class="memItemLeft" align="right" valign="top">static eosio::asset&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#aacdeaae7b4b591419bd366661b92cd27">adjust_goals_emission_pool</a> (eosio::name hostname, eosio::asset host_income)</td></tr>
+<tr class="memdesc:aacdeaae7b4b591419bd366661b92cd27"><td class="mdescLeft">&#160;</td><td class="mdescRight">Внутренний метод расчета пула эмиссии. Вызывается в момент распределения эмиссии на цели сообщества. Расчет объема эмиссии происходит исходя из параметра life_balance_for_sale завершенного пула, и процента эмиссии, установленного архитектором. Процент эмиссии ограничен от 0 до 1000% относительного живого остатка на продажу в каждом новом пуле.  <a href="#aacdeaae7b4b591419bd366661b92cd27">More...</a><br /></td></tr>
+<tr class="separator:aacdeaae7b4b591419bd366661b92cd27"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a416ca740d83132d969c0e99d035a5c7f"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a416ca740d83132d969c0e99d035a5c7f">fund_emi_pool</a> (eosio::name host, eosio::asset amount, eosio::name code)</td></tr>
 <tr class="memdesc:a416ca740d83132d969c0e99d035a5c7f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод ручного пополнения целевого фонда сообщества. Жетоны, попадающие в целевой фонд сообщества, подлежат распределению на цели с помощью голосования участников по установленным правилам консенсуса.  <a href="#a416ca740d83132d969c0e99d035a5c7f">More...</a><br /></td></tr>
 <tr class="separator:a416ca740d83132d969c0e99d035a5c7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -341,10 +413,18 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" hre
 static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a2439f37a892708018e3474efa938d778">createfund</a> (eosio::name token_contract, eosio::asset fund_asset, std::string descriptor)</td></tr>
 <tr class="memdesc:a2439f37a892708018e3474efa938d778"><td class="mdescLeft">&#160;</td><td class="mdescRight">Статичный метод создания фонда <br /></td></tr>
 <tr class="separator:a2439f37a892708018e3474efa938d778"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad50a4ce9c9910d11c914c01ba15f859c"><td class="memItemLeft" align="right" valign="top"><a id="ad50a4ce9c9910d11c914c01ba15f859c"></a>
-static eosio::asset&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#ad50a4ce9c9910d11c914c01ba15f859c">buy_action</a> (eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, bool transfer, bool spread_to_funds, eosio::asset summ)</td></tr>
-<tr class="memdesc:ad50a4ce9c9910d11c914c01ba15f859c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Публичный метод покупки по текущему курсу из числа квантов раунда. <br /></td></tr>
-<tr class="separator:ad50a4ce9c9910d11c914c01ba15f859c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a278664e711bbb5194481633ae96bbc75"><td class="memItemLeft" align="right" valign="top"><a id="a278664e711bbb5194481633ae96bbc75"></a>
+static eosio::asset&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a278664e711bbb5194481633ae96bbc75">buy_action</a> (eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, bool modify_pool, bool transfer, bool spread_to_funds, eosio::asset summ)</td></tr>
+<tr class="memdesc:a278664e711bbb5194481633ae96bbc75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Публичный метод покупки по текущему курсу из числа квантов раунда. <br /></td></tr>
+<tr class="separator:a278664e711bbb5194481633ae96bbc75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a98f88515bc39a8534fbe42aba341ae3b"><td class="memItemLeft" align="right" valign="top"><a id="a98f88515bc39a8534fbe42aba341ae3b"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a98f88515bc39a8534fbe42aba341ae3b">buy_account</a> (eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, eosio::name status)</td></tr>
+<tr class="memdesc:a98f88515bc39a8534fbe42aba341ae3b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Публичный метод покупки статуса участника для аккаунта (выкуп гостевого аккаунта у регистратора) <br /></td></tr>
+<tr class="separator:a98f88515bc39a8534fbe42aba341ae3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a686b70b2ba7f98510b783d4093defdb6"><td class="memItemLeft" align="right" valign="top"><a id="a686b70b2ba7f98510b783d4093defdb6"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a686b70b2ba7f98510b783d4093defdb6">burn_action</a> (eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code)</td></tr>
+<tr class="memdesc:a686b70b2ba7f98510b783d4093defdb6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Публичный метод сжигания квантов по текущему курсу из числа квантов раунда. <br /></td></tr>
+<tr class="separator:a686b70b2ba7f98510b783d4093defdb6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada4e4997f2a64086d89dd64c26b13cb4"><td class="memItemLeft" align="right" valign="top"><a id="ada4e4997f2a64086d89dd64c26b13cb4"></a>
 static void&#160;</td><td class="memItemRight" valign="bottom"><b>settype_static</b> (eosio::name host, eosio::name type)</td></tr>
 <tr class="separator:ada4e4997f2a64086d89dd64c26b13cb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -354,21 +434,42 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>spread_to_bene
 <tr class="memitem:a97e2f30594f2b3dab8302e1c086b5a5d"><td class="memItemLeft" align="right" valign="top"><a id="a97e2f30594f2b3dab8302e1c086b5a5d"></a>
 static void&#160;</td><td class="memItemRight" valign="bottom"><b>spread_to_dacs</b> (eosio::name host, eosio::asset amount)</td></tr>
 <tr class="separator:a97e2f30594f2b3dab8302e1c086b5a5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab0a98a60f69f5c664ae2276f4cdf4e83"><td class="memItemLeft" align="right" valign="top"><a id="ab0a98a60f69f5c664ae2276f4cdf4e83"></a>
-static void&#160;</td><td class="memItemRight" valign="bottom"><b>spread_to_funds</b> (eosio::name host, uint64_t quants)</td></tr>
-<tr class="separator:ab0a98a60f69f5c664ae2276f4cdf4e83"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adcb2695fb82248b1037eba240d567fdc"><td class="memItemLeft" align="right" valign="top">static uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#adcb2695fb82248b1037eba240d567fdc">buyshares_action</a> (eosio::name buyer, eosio::name host, eosio::asset amount, eosio::name code)</td></tr>
-<tr class="memdesc:adcb2695fb82248b1037eba240d567fdc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод покупки силы сообщества Обеспечивает покупку силы сообщества за котировочный токен по внутренней рыночной цене, определяемой с помощью алгоритма банкор.  <a href="#adcb2695fb82248b1037eba240d567fdc">More...</a><br /></td></tr>
-<tr class="separator:adcb2695fb82248b1037eba240d567fdc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5dab3c2359093e45f4e0b1fa5f41df29"><td class="memItemLeft" align="right" valign="top"><a id="a5dab3c2359093e45f4e0b1fa5f41df29"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>spread_to_funds</b> (eosio::name host, eosio::asset quantity, eosio::name referal)</td></tr>
+<tr class="separator:a5dab3c2359093e45f4e0b1fa5f41df29"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c2b0c3fffe564405122f21621aedb78"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a0c2b0c3fffe564405122f21621aedb78">spread_to_refs</a> (eosio::name host, eosio::name username, eosio::asset spread_amount, eosio::asset from_amount)</td></tr>
+<tr class="separator:a0c2b0c3fffe564405122f21621aedb78"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a128c65265d5c63d43c16f01220b06946"><td class="memItemLeft" align="right" valign="top"><a id="a128c65265d5c63d43c16f01220b06946"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a128c65265d5c63d43c16f01220b06946">spread_action</a> (eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code)</td></tr>
+<tr class="memdesc:a128c65265d5c63d43c16f01220b06946"><td class="mdescLeft">&#160;</td><td class="mdescRight">Публичный метод сжигания квантов по текущему курсу из числа квантов раунда. <br /></td></tr>
+<tr class="separator:a128c65265d5c63d43c16f01220b06946"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab899e878b848c48c9f6656c74565970d"><td class="memItemLeft" align="right" valign="top">static uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#ab899e878b848c48c9f6656c74565970d">buyshares_action</a> (eosio::name buyer, eosio::name host, eosio::asset amount, eosio::name code, bool is_frozen)</td></tr>
+<tr class="memdesc:ab899e878b848c48c9f6656c74565970d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод покупки силы сообщества Обеспечивает покупку силы сообщества за котировочный токен по внутренней рыночной цене, определяемой с помощью алгоритма банкор.  <a href="#ab899e878b848c48c9f6656c74565970d">More...</a><br /></td></tr>
+<tr class="separator:ab899e878b848c48c9f6656c74565970d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad357c4583f4d72f085919ad874bf0b28"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#ad357c4583f4d72f085919ad874bf0b28">delegate_shares_action</a> (eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares)</td></tr>
 <tr class="memdesc:ad357c4583f4d72f085919ad874bf0b28"><td class="mdescLeft">&#160;</td><td class="mdescRight">Метод делегирования силы. Позволяет делегировать купленную силу для принятия каких-либо решений в пользу любого аккаунта.  <a href="#ad357c4583f4d72f085919ad874bf0b28">More...</a><br /></td></tr>
 <tr class="separator:ad357c4583f4d72f085919ad874bf0b28"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a85158234a313fe5b2dc08b3cd9210dd6"><td class="memItemLeft" align="right" valign="top"><a id="a85158234a313fe5b2dc08b3cd9210dd6"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>setincoming</b> (eosio::name doer, eosio::name host, uint64_t goal_id, uint64_t task_id)</td></tr>
+<tr class="separator:a85158234a313fe5b2dc08b3cd9210dd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61a8cdde982effe739244f9b4015a5f5"><td class="memItemLeft" align="right" valign="top"><a id="a61a8cdde982effe739244f9b4015a5f5"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>delincoming</b> (eosio::name doer, eosio::name host, uint64_t goal_id, uint64_t task_id)</td></tr>
+<tr class="separator:a61a8cdde982effe739244f9b4015a5f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aafefe860d9af675b4bb1a4ec1477cffd"><td class="memItemLeft" align="right" valign="top"><a id="aafefe860d9af675b4bb1a4ec1477cffd"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>check_and_gift_netted_badge</b> (eosio::name username, eosio::name host, uint64_t task_id)</td></tr>
+<tr class="separator:aafefe860d9af675b4bb1a4ec1477cffd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9db4a730ab5cb5c91f4af22fcbe314fc"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classunicore.html#a9db4a730ab5cb5c91f4af22fcbe314fc">propagate_votes_changes</a> (eosio::name host, eosio::name voter, uint64_t old_power, uint64_t new_power)</td></tr>
 <tr class="memdesc:a9db4a730ab5cb5c91f4af22fcbe314fc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Обновление счетчика голосов Внутренний метод, используемый для обновления голосов у целей в момент покупки/продажи силы.  <a href="#a9db4a730ab5cb5c91f4af22fcbe314fc">More...</a><br /></td></tr>
 <tr class="separator:a9db4a730ab5cb5c91f4af22fcbe314fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abcc8b6f0d5fabea652fb09b641ae1b87"><td class="memItemLeft" align="right" valign="top"><a id="abcc8b6f0d5fabea652fb09b641ae1b87"></a>
 static void&#160;</td><td class="memItemRight" valign="bottom"><b>rmfromhostwl</b> (eosio::name host, eosio::name username)</td></tr>
 <tr class="separator:abcc8b6f0d5fabea652fb09b641ae1b87"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a025c27857c9bfe21219241279e0dd61e"><td class="memItemLeft" align="right" valign="top"><a id="a025c27857c9bfe21219241279e0dd61e"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>check_burn_status</b> (eosio::name host, eosio::name username, eosio::asset quants_for_user_in_asset)</td></tr>
+<tr class="separator:a025c27857c9bfe21219241279e0dd61e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a136dfcacb74672c4f8babbe80275ab80"><td class="memItemLeft" align="right" valign="top"><a id="a136dfcacb74672c4f8babbe80275ab80"></a>
+static uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>getcondition</b> (eosio::name host, eosio::string key)</td></tr>
+<tr class="separator:a136dfcacb74672c4f8babbe80275ab80"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6944e1980de8d07225c5dd4ee1157634"><td class="memItemLeft" align="right" valign="top"><a id="a6944e1980de8d07225c5dd4ee1157634"></a>
 static void&#160;</td><td class="memItemRight" valign="bottom"><b>addtohostwl</b> (eosio::name host, eosio::name username)</td></tr>
 <tr class="separator:a6944e1980de8d07225c5dd4ee1157634"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -410,8 +511,8 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Содержит все доступные действия, публичные и приватные методы протокола. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="ae4010919890b14f831b4d4a633771062"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae4010919890b14f831b4d4a633771062">&#9670;&nbsp;</a></span>adjust_goals_emission_pool()</h2>
+<a id="aacdeaae7b4b591419bd366661b92cd27"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aacdeaae7b4b591419bd366661b92cd27">&#9670;&nbsp;</a></span>adjust_goals_emission_pool()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -423,8 +524,18 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
           <td class="memname">eosio::asset unicore::adjust_goals_emission_pool </td>
           <td>(</td>
           <td class="paramtype">eosio::name&#160;</td>
-          <td class="paramname"><em>hostname</em></td><td>)</td>
+          <td class="paramname"><em>hostname</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">eosio::asset&#160;</td>
+          <td class="paramname"><em>host_income</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
   </td>
@@ -585,8 +696,8 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
 
 </div>
 </div>
-<a id="adcb2695fb82248b1037eba240d567fdc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adcb2695fb82248b1037eba240d567fdc">&#9670;&nbsp;</a></span>buyshares_action()</h2>
+<a id="ab899e878b848c48c9f6656c74565970d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab899e878b848c48c9f6656c74565970d">&#9670;&nbsp;</a></span>buyshares_action()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -616,7 +727,13 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">eosio::name&#160;</td>
-          <td class="paramname"><em>code</em>&#160;</td>
+          <td class="paramname"><em>code</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>is_frozen</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -722,6 +839,48 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
 
 </div>
 </div>
+<a id="a4d4a35a4c18d428c7e70ff7096cfd47d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d4a35a4c18d428c7e70ff7096cfd47d">&#9670;&nbsp;</a></span>canceljtask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void unicore::canceljtask </td>
+          <td>(</td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>host</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>task_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>doer</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Метод предложения отклонения заявки деятеля </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">op</td><td>The operation </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="abae3b92d93cbbbd1058005639975f09d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#abae3b92d93cbbbd1058005639975f09d">&#9670;&nbsp;</a></span>cchildhost()</h2>
 
@@ -794,6 +953,42 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">op</td><td>The operation </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="abb38bcc39c9e3ca74f955944a84274fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb38bcc39c9e3ca74f955944a84274fe">&#9670;&nbsp;</a></span>compensator()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void unicore::compensator </td>
+          <td>(</td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>host</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>compensator_percent</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Установка компенсатора рисков Устанавливает компенсатор риска для системного жетона </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">op</td><td>The new value </td></tr>
   </table>
   </dd>
 </dl>
@@ -1106,6 +1301,42 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
 
 </div>
 </div>
+<a id="ae82cde0f788172b152c6b6896ac75d0d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae82cde0f788172b152c6b6896ac75d0d">&#9670;&nbsp;</a></span>distrepo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void unicore::distrepo </td>
+          <td>(</td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>host</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>report_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Публичный метод обновления баланса отчёта при распределении баланса цели </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">op</td><td>The operation </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a466aba74657c6022cc0d9163bd502625"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a466aba74657c6022cc0d9163bd502625">&#9670;&nbsp;</a></span>donate_action()</h2>
 
@@ -1172,8 +1403,8 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
 
 </div>
 </div>
-<a id="a286cd81b9f3e28d9a49aaa7969e21ee7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a286cd81b9f3e28d9a49aaa7969e21ee7">&#9670;&nbsp;</a></span>edithost()</h2>
+<a id="a38d070fb8067b91799456f1472ced47d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a38d070fb8067b91799456f1472ced47d">&#9670;&nbsp;</a></span>edithost()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1193,6 +1424,12 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>platform</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">eosio::string&#160;</td>
           <td class="paramname"><em>title</em>, </td>
         </tr>
@@ -1207,6 +1444,12 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
           <td></td>
           <td class="paramtype">eosio::string&#160;</td>
           <td class="paramname"><em>manifest</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>power_market_id</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1402,6 +1645,54 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
 
 </div>
 </div>
+<a id="af6e32936bbe20a612c9348bf5f805982"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af6e32936bbe20a612c9348bf5f805982">&#9670;&nbsp;</a></span>fundchildgoa()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void unicore::fundchildgoa </td>
+          <td>(</td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>architect</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>host</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>goal_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">eosio::asset&#160;</td>
+          <td class="paramname"><em>amount</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Метод прямого финансирования родительской цели Используется архитектором для наполнения дочерней цели за счет баланса родительской цели </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">op</td><td>The operation </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ae8ca388e55f11d3c32430edbaabcf7e2"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae8ca388e55f11d3c32430edbaabcf7e2">&#9670;&nbsp;</a></span>fundtask()</h2>
 
@@ -1450,8 +1741,8 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
 
 </div>
 </div>
-<a id="a5e0d285466d37fa9f315b5a52dba4c8a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5e0d285466d37fa9f315b5a52dba4c8a">&#9670;&nbsp;</a></span>giftbadge_action()</h2>
+<a id="a8cdb743e8708845d4a6064d43400d415"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8cdb743e8708845d4a6064d43400d415">&#9670;&nbsp;</a></span>giftbadge_action()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1488,6 +1779,12 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
           <td></td>
           <td class="paramtype">bool&#160;</td>
           <td class="paramname"><em>netted</em> = <code>false</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>own</em> = <code>true</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1665,6 +1962,54 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
 </div><div class="memdoc">
 
 <p>Метод вывода баланса цели Выводит доступный баланс цели на аккаунт создателя цели. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">op</td><td>The operation </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a799e41649cd9bab8a1a9a9c41822925b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a799e41649cd9bab8a1a9a9c41822925b">&#9670;&nbsp;</a></span>jointask()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void unicore::jointask </td>
+          <td>(</td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>host</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>task_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>doer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>comment</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Метод предложения себя как исполнителя задачи </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">op</td><td>The operation </td></tr>
@@ -2254,6 +2599,48 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
 
 </div>
 </div>
+<a id="a4ff597c20fe7071fa4d48a1e6fb4e654"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4ff597c20fe7071fa4d48a1e6fb4e654">&#9670;&nbsp;</a></span>setdoer()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void unicore::setdoer </td>
+          <td>(</td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>host</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>task_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>doer</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Метод установки исполнителя </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">op</td><td>The operation </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="affa39993f35c8e2c8838a956c761cbcc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#affa39993f35c8e2c8838a956c761cbcc">&#9670;&nbsp;</a></span>setemi()</h2>
 
@@ -2398,8 +2785,44 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
 
 </div>
 </div>
-<a id="accfb2e432f24f46fe7432110f0361d2f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#accfb2e432f24f46fe7432110f0361d2f">&#9670;&nbsp;</a></span>setparams()</h2>
+<a id="a9ebdfe87e84d1a283143d274f2337e84"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9ebdfe87e84d1a283143d274f2337e84">&#9670;&nbsp;</a></span>setlevels()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void unicore::setlevels </td>
+          <td>(</td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>host</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; uint64_t &gt;&#160;</td>
+          <td class="paramname"><em>levels</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Метод установки уровней вознаграждений </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">op</td><td>The operation </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a8898e75bc9abe84fd78c15f9de3731f5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8898e75bc9abe84fd78c15f9de3731f5">&#9670;&nbsp;</a></span>setparams()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2456,6 +2879,12 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>compensator_percent</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
           <td class="paramname"><em>pool_limit</em>, </td>
         </tr>
         <tr>
@@ -2488,6 +2917,48 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
 <p>Математическое ядро алгоритма курса двойной спирали.</p>
 <p>Проверка бизнес-модели на положительный баланс. Остатка на балансе в любой момент должно быть достаточно для выплат всем проигравшим и всем победителям. Если это не так - протокол не позволит себя создать.</p>
 <p>Установка таблиц курсов в область памяти хоста</p>
+
+</div>
+</div>
+<a id="aff7586ddb285e938d5228562eb459234"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff7586ddb285e938d5228562eb459234">&#9670;&nbsp;</a></span>setpgoal()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void unicore::setpgoal </td>
+          <td>(</td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>host</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>task_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>goal_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Метод установки родительской цели </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">op</td><td>The operation </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -2539,8 +3010,8 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
 
 </div>
 </div>
-<a id="acfa60cf59df336c954662c1ae46a67b2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acfa60cf59df336c954662c1ae46a67b2">&#9670;&nbsp;</a></span>settask()</h2>
+<a id="aa989f60384b7167e4e1ff2b4d219a1b3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa989f60384b7167e4e1ff2b4d219a1b3">&#9670;&nbsp;</a></span>settask()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2644,6 +3115,30 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>is_regular</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; uint64_t &gt;&#160;</td>
+          <td class="paramname"><em>calendar</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">eosio::time_point_sec&#160;</td>
+          <td class="paramname"><em>start_at</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">eosio::time_point_sec&#160;</td>
+          <td class="paramname"><em>expired_at</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">std::string&#160;</td>
           <td class="paramname"><em>meta</em>&#160;</td>
         </tr>
@@ -2660,6 +3155,48 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
 <li>публичными, т.е. достуными к исполнению каждым участником сообщества,</li>
 <li>приватными, т.е. доступными к исполнению только внутренним управляющим командам. Публичный метод создания задачи Может использовать только аккаунт хоста на текущий момент.</li>
 </ul>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">op</td><td>The operation </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a07802302c610d2dc17f77a3019b81838"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a07802302c610d2dc17f77a3019b81838">&#9670;&nbsp;</a></span>settaskmeta()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void unicore::settaskmeta </td>
+          <td>(</td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>host</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>task_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string&#160;</td>
+          <td class="paramname"><em>meta</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Метод ручной валидации задачи </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">op</td><td>The operation </td></tr>
@@ -2708,6 +3245,59 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a0c2b0c3fffe564405122f21621aedb78"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0c2b0c3fffe564405122f21621aedb78">&#9670;&nbsp;</a></span>spread_to_refs()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void unicore::spread_to_refs </td>
+          <td>(</td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>host</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>username</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">eosio::asset&#160;</td>
+          <td class="paramname"><em>spread_amount</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">eosio::asset&#160;</td>
+          <td class="paramname"><em>from_amount</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Вычисляем размер выплаты для каждого уровня партнеров и производим выплаты.</p>
+<p>Все неиспользуемые вознаграждения с вышестояющих уровней отправляются на пользователя Все неиспользуемые вознаграждения с вышестояющих уровней отправляются на компании</p>
+<p>Если рефералов у пользователя нет, то переводим все реферальные средства пользователю.</p><ul>
+<li>Если рефералов у пользователя нет, то переводим все реферальные средства компании.</li>
+</ul>
 
 </div>
 </div>
@@ -2802,6 +3392,42 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
 </div><div class="memdoc">
 
 <p>Метод активации задачи Вызывается хостом для активации выполнения поставленной задачи. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">op</td><td>The operation </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a54639a2c971d48407747efdda1b2f2ca"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a54639a2c971d48407747efdda1b2f2ca">&#9670;&nbsp;</a></span>tcomplete()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void unicore::tcomplete </td>
+          <td>(</td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>host</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>task_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Публичный метод деактивации задачи Применимо для публичных задач, когда поставленная цель достигнута или недостижима. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">op</td><td>The operation </td></tr>
@@ -3033,6 +3659,54 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
 
 </div>
 </div>
+<a id="a5a31fb29df7ae2b8cbf51625b5c2bc21"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5a31fb29df7ae2b8cbf51625b5c2bc21">&#9670;&nbsp;</a></span>validate()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void unicore::validate </td>
+          <td>(</td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>host</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>task_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>goal_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>doer</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Метод ручной валидации задачи </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">op</td><td>The operation </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a25c98e5ea071940b6ab153d71a328a5c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a25c98e5ea071940b6ab153d71a328a5c">&#9670;&nbsp;</a></span>withdraw()</h2>
 
@@ -3080,10 +3754,6 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
 <br />
 <br />
 <br />
-<br />
-<br />
-<br />
-<br />
  Например, если общий доход от движения баланса пользователя по спирали составляет 100 USD, а коэфициенты распределения Рефералов и Корпоративных Управляющих равняются соответственно по 0.5 (50%), то все рефералы получат по 33$, все управляющие получат по 33$, и еще 33$ попадет в фонд целей сообщества. 1$ останется в качестве комиссии округления на делении у протокола.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -3098,12 +3768,50 @@ static void&#160;</td><td class="memItemRight" valign="bottom"><b>add_sale_histo
 </ul>
 <p>Выигрыш или проигрыш. Расчет производится на основе сравнения текущего цвета пула с цветом пула входа. При совпадении цветов - баланс выиграл. При несовпадении - проиграл.</p>
 <p>Выигрыш. Инициирует распределение реферальных вознаграждений и выплаты во все фонды.</p>
-<p>Вычисляем размер выплаты для каждого уровня партнеров и производим выплаты.</p>
-<p>Все неиспользуемые вознаграждения с вышестояющих уровней отправляются на корпорации</p>
-<p>Если рефералов у пользователя нет, то переводим все реферальные средства на корпорации.</p>
-<p>Выплаты на управляющие аккаунты. В первом приближении для выплат используем единственный аккаунт хоста. Позже можем использовать массив управляющих аккаунтов и условия распределеления согласно любой модели (акции, равенство, и т.д.).</p>
 <p>Выплаты в целевой фонд сообщества</p>
 <p>Все кванты победителей должны быть возвращены в пулы.</p>
+
+</div>
+</div>
+<a id="a9c8a515eef8e3dd262372da54945047b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c8a515eef8e3dd262372da54945047b">&#9670;&nbsp;</a></span>withdrawrepo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void unicore::withdrawrepo </td>
+          <td>(</td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>username</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">eosio::name&#160;</td>
+          <td class="paramname"><em>host</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t&#160;</td>
+          <td class="paramname"><em>report_id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Публичный метод вывода баланса отчёта </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">op</td><td>The operation </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

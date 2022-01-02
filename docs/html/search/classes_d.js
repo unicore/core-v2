@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['unicore',['unicore',['../classunicore.html',1,'']]],
-  ['usbadges',['usbadges',['../structusbadges.html',1,'']]],
-  ['userscount',['userscount',['../structuserscount.html',1,'']]]
+  ['tasks',['tasks',['../structtasks.html',1,'']]],
+  ['token',['token',['../classeosio_1_1token.html',1,'eosio']]]
 ];

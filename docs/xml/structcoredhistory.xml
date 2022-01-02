@@ -1,0 +1,155 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.14">
+  <compounddef id="structcoredhistory" kind="struct" language="C++" prot="public">
+    <compoundname>coredhistory</compoundname>
+    <includes refid="core_8hpp" local="no">core.hpp</includes>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structcoredhistory_1a1ea9f7d117c11540b58739b550f87091" prot="public" static="no" mutable="no">
+        <type>uint64_t</type>
+        <definition>uint64_t coredhistory::id</definition>
+        <argsstring></argsstring>
+        <name>id</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/core.hpp" line="454" column="1" bodyfile="include/core.hpp" bodystart="454" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structcoredhistory_1a94bdb8112e0158dd245686615a984781" prot="public" static="no" mutable="no">
+        <type>uint64_t</type>
+        <definition>uint64_t coredhistory::pool_id</definition>
+        <argsstring></argsstring>
+        <name>pool_id</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/core.hpp" line="455" column="1" bodyfile="include/core.hpp" bodystart="455" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structcoredhistory_1a8bf1a39cea053b8bde6e5aa59c811477" prot="public" static="no" mutable="no">
+        <type>eosio::name</type>
+        <definition>eosio::name coredhistory::username</definition>
+        <argsstring></argsstring>
+        <name>username</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/core.hpp" line="456" column="1" bodyfile="include/core.hpp" bodystart="456" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structcoredhistory_1a32396e9e3e997367f5ec62d5b008733d" prot="public" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string coredhistory::action</definition>
+        <argsstring></argsstring>
+        <name>action</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/core.hpp" line="457" column="1" bodyfile="include/core.hpp" bodystart="457" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structcoredhistory_1a237f39d70f67537ea87e0c773ef0e936" prot="public" static="no" mutable="no">
+        <type>std::string</type>
+        <definition>std::string coredhistory::message</definition>
+        <argsstring></argsstring>
+        <name>message</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/core.hpp" line="458" column="1" bodyfile="include/core.hpp" bodystart="458" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structcoredhistory_1a0916b76d450651176c2a245879af398a" prot="public" static="no" mutable="no">
+        <type>eosio::asset</type>
+        <definition>eosio::asset coredhistory::amount</definition>
+        <argsstring></argsstring>
+        <name>amount</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/core.hpp" line="459" column="1" bodyfile="include/core.hpp" bodystart="459" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="structcoredhistory_1a24de1f8333ffcd0a24742c03bb2218ba" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>uint64_t</type>
+        <definition>uint64_t coredhistory::primary_key</definition>
+        <argsstring>() const</argsstring>
+        <name>primary_key</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/core.hpp" line="460" column="1" bodyfile="include/core.hpp" bodystart="460" bodyend="460"/>
+      </memberdef>
+      <memberdef kind="function" id="structcoredhistory_1a3238d8500fdc23f1d16513dae4afc7eb" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>coredhistory::EOSLIB_SERIALIZE</definition>
+        <argsstring>(coredhistory,(id)(pool_id)(username)(action)(message)(amount))</argsstring>
+        <name>EOSLIB_SERIALIZE</name>
+        <param>
+          <type><ref refid="structcoredhistory" kindref="compound">coredhistory</ref></type>
+        </param>
+        <param>
+          <type>(id)(pool_id)(username)(action)(message)(amount)</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/core.hpp" line="462" column="1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Структура для хранения сообщений в режиме чата ограниченной длинны от спонсоров хоста Двойной Спирали. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="36">
+        <label>asset</label>
+      </node>
+      <node id="35">
+        <label>string</label>
+      </node>
+      <node id="34">
+        <label>coredhistory</label>
+        <link refid="structcoredhistory"/>
+        <childnode refid="35" relation="usage">
+          <edgelabel>action</edgelabel>
+          <edgelabel>message</edgelabel>
+        </childnode>
+        <childnode refid="36" relation="usage">
+          <edgelabel>amount</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="include/core.hpp" line="453" column="1" bodyfile="include/core.hpp" bodystart="453" bodyend="464"/>
+    <listofallmembers>
+      <member refid="structcoredhistory_1a32396e9e3e997367f5ec62d5b008733d" prot="public" virt="non-virtual"><scope>coredhistory</scope><name>action</name></member>
+      <member refid="structcoredhistory_1a0916b76d450651176c2a245879af398a" prot="public" virt="non-virtual"><scope>coredhistory</scope><name>amount</name></member>
+      <member refid="structcoredhistory_1a3238d8500fdc23f1d16513dae4afc7eb" prot="public" virt="non-virtual"><scope>coredhistory</scope><name>EOSLIB_SERIALIZE</name></member>
+      <member refid="structcoredhistory_1a1ea9f7d117c11540b58739b550f87091" prot="public" virt="non-virtual"><scope>coredhistory</scope><name>id</name></member>
+      <member refid="structcoredhistory_1a237f39d70f67537ea87e0c773ef0e936" prot="public" virt="non-virtual"><scope>coredhistory</scope><name>message</name></member>
+      <member refid="structcoredhistory_1a94bdb8112e0158dd245686615a984781" prot="public" virt="non-virtual"><scope>coredhistory</scope><name>pool_id</name></member>
+      <member refid="structcoredhistory_1a24de1f8333ffcd0a24742c03bb2218ba" prot="public" virt="non-virtual"><scope>coredhistory</scope><name>primary_key</name></member>
+      <member refid="structcoredhistory_1a8bf1a39cea053b8bde6e5aa59c811477" prot="public" virt="non-virtual"><scope>coredhistory</scope><name>username</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

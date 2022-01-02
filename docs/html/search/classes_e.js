@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['vesting',['vesting',['../structvesting.html',1,'']]],
-  ['votes',['votes',['../structvotes.html',1,'']]]
+  ['unicore',['unicore',['../classunicore.html',1,'']]],
+  ['usbadges',['usbadges',['../structusbadges.html',1,'']]],
+  ['userscount',['userscount',['../structuserscount.html',1,'']]]
 ];

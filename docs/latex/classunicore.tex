@@ -27,7 +27,7 @@ void {\bfseries apply} (uint64\+\_\+t receiver, uint64\+\_\+t code, uint64\+\_\+
 \mbox{\Hypertarget{classunicore_a30206473eb9672b7b67d0a85d2035ff3}\label{classunicore_a30206473eb9672b7b67d0a85d2035ff3}} 
 void \mbox{\hyperlink{classunicore_a30206473eb9672b7b67d0a85d2035ff3}{convert}} (eosio\+::name username, eosio\+::name host, uint64\+\_\+t balance\+\_\+id)
 \begin{DoxyCompactList}\small\item\em Публичный метод обмена баланса на жетон распределения по текущему курсу из числа квантов раунда. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{classunicore_accfb2e432f24f46fe7432110f0361d2f}{setparams}} (eosio\+::name host, eosio\+::name chost, uint64\+\_\+t size\+\_\+of\+\_\+pool, uint64\+\_\+t quants\+\_\+precision, uint64\+\_\+t overlap, uint64\+\_\+t profit\+\_\+growth, uint64\+\_\+t base\+\_\+rate, uint64\+\_\+t loss\+\_\+percent, uint64\+\_\+t pool\+\_\+limit, uint64\+\_\+t pool\+\_\+timeout, uint64\+\_\+t priority\+\_\+seconds)
+void \mbox{\hyperlink{classunicore_a8898e75bc9abe84fd78c15f9de3731f5}{setparams}} (eosio\+::name host, eosio\+::name chost, uint64\+\_\+t size\+\_\+of\+\_\+pool, uint64\+\_\+t quants\+\_\+precision, uint64\+\_\+t overlap, uint64\+\_\+t profit\+\_\+growth, uint64\+\_\+t base\+\_\+rate, uint64\+\_\+t loss\+\_\+percent, uint64\+\_\+t compensator\+\_\+percent, uint64\+\_\+t pool\+\_\+limit, uint64\+\_\+t pool\+\_\+timeout, uint64\+\_\+t priority\+\_\+seconds)
 \begin{DoxyCompactList}\small\item\em Публичный метод установки параметров протокола двойной спирали Вызывается пользователем после базовой операции создания хоста и проведения оплаты. Так же вызывается при установке параметров дочернего хоста. Содержит алгоритм финансового ядра. Производит основные расчеты таблиц курсов и валидирует положительность бизнес-\/дохода. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{classunicore_ad83b75f3c4afd1ab954d428be8f6f7d7}{start}} (eosio\+::name host, eosio\+::name chost)
 \begin{DoxyCompactList}\small\item\em Публичный метод запуска хоста Метод необходимо вызвать для запуска хоста после установки параметров хоста. Добавляет первый цикл, два пула, переключает демонастративный флаг запуска и создает статистические объекты. Подписывается аккаунтом хоста. \end{DoxyCompactList}\item 
@@ -63,6 +63,17 @@ void \mbox{\hyperlink{classunicore_aa2341c3f2393be329d759ef09f20367f}{setgoal}} 
 \begin{DoxyCompactList}\small\item\em Метод создания цели \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{classunicore_a969e75dd90699b53b75ab8482cbc49d3}{dfundgoal}} (eosio\+::name architect, eosio\+::name host, uint64\+\_\+t goal\+\_\+id, eosio\+::asset amount, std\+::string comment)
 \begin{DoxyCompactList}\small\item\em Метод прямого финансирования цели Используется архитектором для финансирования цели из фонда \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classunicore_af6e32936bbe20a612c9348bf5f805982}{fundchildgoa}} (eosio\+::name architect, eosio\+::name host, uint64\+\_\+t goal\+\_\+id, eosio\+::asset amount)
+\begin{DoxyCompactList}\small\item\em Метод прямого финансирования родительской цели Используется архитектором для наполнения дочерней цели за счет баланса родительской цели \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classunicore_a1ba1753b7dc4109e94dc7c4c9dbd5400}\label{classunicore_a1ba1753b7dc4109e94dc7c4c9dbd5400}} 
+void {\bfseries setgcreator} (eosio\+::name oldcreator, eosio\+::name newcreator, eosio\+::name host, uint64\+\_\+t goal\+\_\+id)
+\item 
+\mbox{\Hypertarget{classunicore_a2ee6a26c970b05e61c3753791a55dee4}\label{classunicore_a2ee6a26c970b05e61c3753791a55dee4}} 
+void {\bfseries gaccept} (eosio\+::name host, uint64\+\_\+t goal\+\_\+id, uint64\+\_\+t parent\+\_\+goal\+\_\+id, bool status)
+\item 
+\mbox{\Hypertarget{classunicore_a2cc7c4ae8c6ea5e604d6666d37d11405}\label{classunicore_a2cc7c4ae8c6ea5e604d6666d37d11405}} 
+void {\bfseries gpause} (eosio\+::name host, uint64\+\_\+t goal\+\_\+id)
+\item 
 void \mbox{\hyperlink{classunicore_a9fd534e0b189439c6f18e99689911b3e}{delgoal}} (eosio\+::name username, eosio\+::name host, uint64\+\_\+t goal\+\_\+id)
 \begin{DoxyCompactList}\small\item\em Метод удаления цели \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{classunicore_ac0e6bf94b8bfd28e08c364631a357d91}{report}} (eosio\+::name username, eosio\+::name host, uint64\+\_\+t goal\+\_\+id, std\+::string report)
@@ -93,7 +104,9 @@ void \mbox{\hyperlink{classunicore_adabf2b3d106784b146a047e35ceec410}{upgrade}} 
 \begin{DoxyCompactList}\small\item\em Метод апгрейда аккаунта до статуса сообщества Принимает ряд параметров, такие как процент консенсуса, реферальный процент, уровни вознаграждений финансовых партнеров, корпоративный процент, а так же параметры рынка силы. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{classunicore_abae3b92d93cbbbd1058005639975f09d}{cchildhost}} (eosio\+::name parent\+\_\+host, eosio\+::name chost)
 \begin{DoxyCompactList}\small\item\em Метод создания дочернего хоста Позволяет сообществу на границе циклов изменять параметры финансового ядра, распологая их в области памяти аккаунта дочернего хоста. \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{classunicore_a286cd81b9f3e28d9a49aaa7969e21ee7}{edithost}} (eosio\+::name architect, eosio\+::name host, eosio\+::string title, eosio\+::string purpose, eosio\+::string manifest, eosio\+::string meta)
+void \mbox{\hyperlink{classunicore_abb38bcc39c9e3ca74f955944a84274fe}{compensator}} (eosio\+::name host, uint64\+\_\+t compensator\+\_\+percent)
+\begin{DoxyCompactList}\small\item\em Установка компенсатора рисков Устанавливает компенсатор риска для системного жетона \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classunicore_a38d070fb8067b91799456f1472ced47d}{edithost}} (eosio\+::name architect, eosio\+::name host, eosio\+::name platform, eosio\+::string title, eosio\+::string purpose, eosio\+::string manifest, eosio\+::name power\+\_\+market\+\_\+id, eosio\+::string meta)
 \begin{DoxyCompactList}\small\item\em Метод редактирования информации о хосте \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{classunicore_abb22debda627e37951ea15e47fc77985}\label{classunicore_abb22debda627e37951ea15e47fc77985}} 
 void {\bfseries fixs} (eosio\+::name host, uint64\+\_\+t pool\+\_\+num)
@@ -101,6 +114,8 @@ void {\bfseries fixs} (eosio\+::name host, uint64\+\_\+t pool\+\_\+num)
 \mbox{\Hypertarget{classunicore_a61965d7a5c449487b565b444659d6cd7}\label{classunicore_a61965d7a5c449487b565b444659d6cd7}} 
 void {\bfseries settype} (eosio\+::name host, eosio\+::name type)
 \item 
+void \mbox{\hyperlink{classunicore_a9ebdfe87e84d1a283143d274f2337e84}{setlevels}} (eosio\+::name host, std\+::vector$<$ uint64\+\_\+t $>$ levels)
+\begin{DoxyCompactList}\small\item\em Метод установки уровней вознаграждений \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{classunicore_af4454491cb629dc007eed9b6febdd161}{settiming}} (eosio\+::name host, uint64\+\_\+t pool\+\_\+timeout, uint64\+\_\+t priority\+\_\+seconds)
 \begin{DoxyCompactList}\small\item\em Метод редактирования времени \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{classunicore_a2b63d1aac35b533f122286943a54db18}\label{classunicore_a2b63d1aac35b533f122286943a54db18}} 
@@ -115,8 +130,26 @@ void {\bfseries addben} (eosio\+::name creator, eosio\+::name username, eosio\+:
 \mbox{\Hypertarget{classunicore_a0a2ae5cf5fb3cdf3ba23f0948dd5c391}\label{classunicore_a0a2ae5cf5fb3cdf3ba23f0948dd5c391}} 
 void {\bfseries withdrbeninc} (eosio\+::name username, eosio\+::name host, uint64\+\_\+t goal\+\_\+id)
 \item 
-\mbox{\Hypertarget{classunicore_a7539f51bcd1838f0789542e7a814720b}\label{classunicore_a7539f51bcd1838f0789542e7a814720b}} 
-void {\bfseries adddac} (eosio\+::name username, eosio\+::name host, uint64\+\_\+t weight, bool is\+\_\+new\+\_\+role, uint64\+\_\+t role\+\_\+id, std\+::string title, std\+::string descriptor)
+\mbox{\Hypertarget{classunicore_aabd42ff2a6dcac81d487e65b0bf5dda6}\label{classunicore_aabd42ff2a6dcac81d487e65b0bf5dda6}} 
+void {\bfseries addvac} (uint64\+\_\+t id, bool is\+\_\+edit, eosio\+::name creator, eosio\+::name host, eosio\+::name limit\+\_\+type, eosio\+::asset income\+\_\+limit, uint64\+\_\+t weight, std\+::string title, std\+::string descriptor)
+\item 
+\mbox{\Hypertarget{classunicore_a756863a6910963e79adbb3bfcdf7ba47}\label{classunicore_a756863a6910963e79adbb3bfcdf7ba47}} 
+void {\bfseries rmvac} (eosio\+::name host, uint64\+\_\+t id)
+\item 
+\mbox{\Hypertarget{classunicore_a728bf4c6d03c63fa2969a3effe312fea}\label{classunicore_a728bf4c6d03c63fa2969a3effe312fea}} 
+void {\bfseries addvprop} (uint64\+\_\+t id, bool is\+\_\+edit, eosio\+::name creator, eosio\+::name host, uint64\+\_\+t vac\+\_\+id, uint64\+\_\+t weight, std\+::string why\+\_\+me, std\+::string contacts)
+\item 
+\mbox{\Hypertarget{classunicore_adb6489dbbbb032b012f3faa9e8ba963f}\label{classunicore_adb6489dbbbb032b012f3faa9e8ba963f}} 
+void {\bfseries rmvprop} (eosio\+::name host, uint64\+\_\+t vprop\+\_\+id)
+\item 
+\mbox{\Hypertarget{classunicore_a55e754af41251b55a9c6b1cfe0f0f8c1}\label{classunicore_a55e754af41251b55a9c6b1cfe0f0f8c1}} 
+void {\bfseries approvevac} (eosio\+::name host, uint64\+\_\+t vac\+\_\+id)
+\item 
+\mbox{\Hypertarget{classunicore_afcacb23342b138f05740e3bd57d03fde}\label{classunicore_afcacb23342b138f05740e3bd57d03fde}} 
+void {\bfseries apprvprop} (eosio\+::name host, uint64\+\_\+t vprop\+\_\+id)
+\item 
+\mbox{\Hypertarget{classunicore_ac6f84b754aa586043376617165f90eca}\label{classunicore_ac6f84b754aa586043376617165f90eca}} 
+void {\bfseries adddac} (eosio\+::name username, eosio\+::name host, uint64\+\_\+t weight, eosio\+::name limit\+\_\+type, eosio\+::asset income\+\_\+limit, std\+::string title, std\+::string descriptor)
 \item 
 \mbox{\Hypertarget{classunicore_a1a76e2539a42f80b8ac6f514305665c8}\label{classunicore_a1a76e2539a42f80b8ac6f514305665c8}} 
 void {\bfseries rmdac} (eosio\+::name username, eosio\+::name host)
@@ -127,8 +160,8 @@ void {\bfseries suggestrole} (eosio\+::name username, std\+::string title, std\+
 \mbox{\Hypertarget{classunicore_a00bbf7a3172cc73697b3fcdfc19b7a4b}\label{classunicore_a00bbf7a3172cc73697b3fcdfc19b7a4b}} 
 void {\bfseries withdrdacinc} (eosio\+::name username, eosio\+::name host)
 \item 
-\mbox{\Hypertarget{classunicore_afa11dcc7868db49a1864c88f90437663}\label{classunicore_afa11dcc7868db49a1864c88f90437663}} 
-void {\bfseries setwebsite} (eosio\+::name host, eosio\+::name ahostname, eosio\+::string website, eosio\+::name type)
+\mbox{\Hypertarget{classunicore_a3a1fde814fc862b339230cfb85505145}\label{classunicore_a3a1fde814fc862b339230cfb85505145}} 
+void {\bfseries setwebsite} (eosio\+::name host, eosio\+::name ahostname, eosio\+::string website, eosio\+::name type, std\+::string meta)
 \item 
 \mbox{\Hypertarget{classunicore_ab1e9b13cec99a231f1c6a71e3edc37c6}\label{classunicore_ab1e9b13cec99a231f1c6a71e3edc37c6}} 
 void {\bfseries rmahost} (eosio\+::name host, eosio\+::name ahostname)
@@ -142,27 +175,27 @@ void {\bfseries closeahost} (eosio\+::name host)
 \mbox{\Hypertarget{classunicore_a339ec2fd85cf7ddd182a7e41d0f66f66}\label{classunicore_a339ec2fd85cf7ddd182a7e41d0f66f66}} 
 void {\bfseries openahost} (eosio\+::name host)
 \item 
-void \mbox{\hyperlink{classunicore_a790c1a22331df2bd9e7f9b9094de7dfb}{refreshsh}} (eosio\+::name owner, uint64\+\_\+t id)
-\begin{DoxyCompactList}\small\item\em Метод обновления вестинг-\/баланса. ~\newline
-Обновляет вестинг-\/баланс до актуальных параметров продолжительности. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{classunicore_a78e7d25bcf723965ab405b66327a23e7}\label{classunicore_a78e7d25bcf723965ab405b66327a23e7}} 
 void \mbox{\hyperlink{classunicore_a78e7d25bcf723965ab405b66327a23e7}{withpbenefit}} (eosio\+::name username, eosio\+::name host)
 \begin{DoxyCompactList}\small\item\em Метод вывода силового финансового потока withdraw power quant (withpowerun) Позволяет вывести часть финансового потока, направленного на держателя силы \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{classunicore_ad330ad73fc269d1e37df00b7e9823441}\label{classunicore_ad330ad73fc269d1e37df00b7e9823441}} 
 void \mbox{\hyperlink{classunicore_ad330ad73fc269d1e37df00b7e9823441}{withrsegment}} (eosio\+::name username, eosio\+::name host)
 \begin{DoxyCompactList}\small\item\em Метод вывода остатка партнерского финансового потока withdraw power quant (withpowerun) \end{DoxyCompactList}\item 
-\mbox{\Hypertarget{classunicore_a864ff1841ee9e00708db7f64326f4792}\label{classunicore_a864ff1841ee9e00708db7f64326f4792}} 
-void \mbox{\hyperlink{classunicore_a864ff1841ee9e00708db7f64326f4792}{withrbenefit}} (eosio\+::name username, eosio\+::name host, std\+::vector$<$ uint64\+\_\+t $>$ ids)
+\mbox{\Hypertarget{classunicore_ad0eeced7a1cf17a871f0458eb327da6e}\label{classunicore_ad0eeced7a1cf17a871f0458eb327da6e}} 
+void \mbox{\hyperlink{classunicore_ad0eeced7a1cf17a871f0458eb327da6e}{withrbenefit}} (eosio\+::name username, eosio\+::name host, uint64\+\_\+t id)
 \begin{DoxyCompactList}\small\item\em Метод вывода партнерского финансового потока withdraw power quant (withpowerun) \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{classunicore_a00ca80d8fa12bd41448d55cd82c5cd60}{refreshpu}} (eosio\+::name username, eosio\+::name host)
 \begin{DoxyCompactList}\small\item\em Метод обновления силового финансового потока \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classunicore_a790c1a22331df2bd9e7f9b9094de7dfb}{refreshsh}} (eosio\+::name owner, uint64\+\_\+t id)
+\begin{DoxyCompactList}\small\item\em Метод обновления вестинг-\/баланса. ~\newline
+Обновляет вестинг-\/баланс до актуальных параметров продолжительности. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{classunicore_a4dd6d244c3fac428419342dc782f53a1}{withdrawsh}} (eosio\+::name owner, uint64\+\_\+t id)
 \begin{DoxyCompactList}\small\item\em Вывод вестинг-\/баланса Обеспечивает вывод доступных средств из вестинг-\/баланса. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{classunicore_a237ab7bb223b33ba87375e177ced89a2}{sellshares}} (eosio\+::name username, eosio\+::name host, uint64\+\_\+t shares)
 \begin{DoxyCompactList}\small\item\em Публичный метод продажи силы рынку за котировочный токен \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{classunicore_a9464479eb5d28b6c7f9956319077b294}{undelshares}} (eosio\+::name from, eosio\+::name reciever, eosio\+::name host, uint64\+\_\+t shares)
 \begin{DoxyCompactList}\small\item\em Метод возврата делегированной силы \end{DoxyCompactList}\item 
-void \mbox{\hyperlink{classunicore_acfa60cf59df336c954662c1ae46a67b2}{settask}} (eosio\+::name host, eosio\+::name creator, std\+::string permlink, uint64\+\_\+t goal\+\_\+id, uint64\+\_\+t priority, eosio\+::string title, eosio\+::string data, eosio\+::asset requested, bool is\+\_\+public, eosio\+::name doer, eosio\+::asset for\+\_\+each, bool with\+\_\+badge, uint64\+\_\+t badge\+\_\+id, uint64\+\_\+t duration, bool is\+\_\+batch, uint64\+\_\+t parent\+\_\+batch\+\_\+id, std\+::string meta)
+void \mbox{\hyperlink{classunicore_aa989f60384b7167e4e1ff2b4d219a1b3}{settask}} (eosio\+::name host, eosio\+::name creator, std\+::string permlink, uint64\+\_\+t goal\+\_\+id, uint64\+\_\+t priority, eosio\+::string title, eosio\+::string data, eosio\+::asset requested, bool is\+\_\+public, eosio\+::name doer, eosio\+::asset for\+\_\+each, bool with\+\_\+badge, uint64\+\_\+t badge\+\_\+id, uint64\+\_\+t duration, bool is\+\_\+batch, uint64\+\_\+t parent\+\_\+batch\+\_\+id, bool is\+\_\+regular, std\+::vector$<$ uint64\+\_\+t $>$ calendar, eosio\+::time\+\_\+point\+\_\+sec start\+\_\+at, eosio\+::time\+\_\+point\+\_\+sec expired\+\_\+at, std\+::string meta)
 \begin{DoxyCompactList}\small\item\em Модуль задач Задачи есть составляющие части достижения любой цели. Постановка задач осуществляется только в рамках целей. Задачи могут быть \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{classunicore_ae8ca388e55f11d3c32430edbaabcf7e2}{fundtask}} (eosio\+::name host, uint64\+\_\+t task\+\_\+id, eosio\+::asset amount, eosio\+::string comment)
 \begin{DoxyCompactList}\small\item\em Публичный метод фондирования задачи Исполняется хостом для пополнения баланса задачи из доступного баланса цели. \end{DoxyCompactList}\item 
@@ -170,6 +203,23 @@ void \mbox{\hyperlink{classunicore_a0c35d9830c0c05c8f13be48b8cbdf236}{tactivate}
 \begin{DoxyCompactList}\small\item\em Метод активации задачи Вызывается хостом для активации выполнения поставленной задачи. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{classunicore_a725477908310816ec80cddbf733af04b}{tdeactivate}} (eosio\+::name host, uint64\+\_\+t task\+\_\+id)
 \begin{DoxyCompactList}\small\item\em Публичный метод деактивации задачи Применимо для публичных задач, когда поставленная цель достигнута или недостижима. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classunicore_a54639a2c971d48407747efdda1b2f2ca}{tcomplete}} (eosio\+::name host, uint64\+\_\+t task\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Публичный метод деактивации задачи Применимо для публичных задач, когда поставленная цель достигнута или недостижима. \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classunicore_aff7586ddb285e938d5228562eb459234}{setpgoal}} (eosio\+::name host, uint64\+\_\+t task\+\_\+id, uint64\+\_\+t goal\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Метод установки родительской цели \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classunicore_a4ff597c20fe7071fa4d48a1e6fb4e654}{setdoer}} (eosio\+::name host, uint64\+\_\+t task\+\_\+id, eosio\+::name doer)
+\begin{DoxyCompactList}\small\item\em Метод установки исполнителя \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classunicore_a5a31fb29df7ae2b8cbf51625b5c2bc21}{validate}} (eosio\+::name host, uint64\+\_\+t task\+\_\+id, uint64\+\_\+t goal\+\_\+id, eosio\+::name doer)
+\begin{DoxyCompactList}\small\item\em Метод ручной валидации задачи \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classunicore_a799e41649cd9bab8a1a9a9c41822925b}{jointask}} (eosio\+::name host, uint64\+\_\+t task\+\_\+id, eosio\+::name doer, std\+::string comment)
+\begin{DoxyCompactList}\small\item\em Метод предложения себя как исполнителя задачи \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classunicore_a4d4a35a4c18d428c7e70ff7096cfd47d}{canceljtask}} (eosio\+::name host, uint64\+\_\+t task\+\_\+id, eosio\+::name doer)
+\begin{DoxyCompactList}\small\item\em Метод предложения отклонения заявки деятеля \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classunicore_a07802302c610d2dc17f77a3019b81838}{settaskmeta}} (eosio\+::name host, uint64\+\_\+t task\+\_\+id, std\+::string meta)
+\begin{DoxyCompactList}\small\item\em Метод ручной валидации задачи \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classunicore_a85136296400d6c3654bc80fcdb835bd3}\label{classunicore_a85136296400d6c3654bc80fcdb835bd3}} 
+void {\bfseries setinctask} (eosio\+::name username, uint64\+\_\+t income\+\_\+id, bool with\+\_\+badge, uint64\+\_\+t my\+\_\+goal\+\_\+id, uint64\+\_\+t my\+\_\+badge\+\_\+id)
+\item 
 void \mbox{\hyperlink{classunicore_a09d7d2d602069a26875aa1eee250d5f4}{deltask}} (eosio\+::name host, uint64\+\_\+t task\+\_\+id)
 \begin{DoxyCompactList}\small\item\em Метод удаления задачи Вызывается хостом для удаления поставленной задачи. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{classunicore_ab10a203c3d6c37fd1cb71a9110c62e8a}{paydebt}} (eosio\+::name host, uint64\+\_\+t goal\+\_\+id)
@@ -182,8 +232,15 @@ void \mbox{\hyperlink{classunicore_a765b3c6b36dc26922fec8c1236e3d154}{approver}}
 \begin{DoxyCompactList}\small\item\em Публичный метод одобрения отчета Используется хостом для того, чтобы принять задачу как выполненную и выдать вознаграждение / награду в виде значка. \end{DoxyCompactList}\item 
 void \mbox{\hyperlink{classunicore_a403175c6abbcf360d36ec0259bccc109}{disapprover}} (eosio\+::name host, uint64\+\_\+t report\+\_\+id, eosio\+::string comment)
 \begin{DoxyCompactList}\small\item\em Публичный метод отклонения отчета \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classunicore_a9c8a515eef8e3dd262372da54945047b}{withdrawrepo}} (eosio\+::name username, eosio\+::name host, uint64\+\_\+t report\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Публичный метод вывода баланса отчёта \end{DoxyCompactList}\item 
+void \mbox{\hyperlink{classunicore_ae82cde0f788172b152c6b6896ac75d0d}{distrepo}} (eosio\+::name host, uint64\+\_\+t report\+\_\+id)
+\begin{DoxyCompactList}\small\item\em Публичный метод обновления баланса отчёта при распределении баланса цели \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{classunicore_ac1ca3033e5f65695c938c3d0621e6bfb}\label{classunicore_ac1ca3033e5f65695c938c3d0621e6bfb}} 
 void {\bfseries vote} (eosio\+::name voter, eosio\+::name host, uint64\+\_\+t goal\+\_\+id, bool up)
+\item 
+\mbox{\Hypertarget{classunicore_ace8526f2178dd5662a3d96fa1b9b6c7f}\label{classunicore_ace8526f2178dd5662a3d96fa1b9b6c7f}} 
+void {\bfseries rvote} (eosio\+::name voter, eosio\+::name host, uint64\+\_\+t report\+\_\+id, bool up)
 \item 
 \mbox{\Hypertarget{classunicore_a7b973d2c279fca2fa0cc08c35ebf1abe}\label{classunicore_a7b973d2c279fca2fa0cc08c35ebf1abe}} 
 void {\bfseries setcondition} (eosio\+::name host, eosio\+::string key, uint64\+\_\+t value)
@@ -199,19 +256,22 @@ std\+::string \mbox{\hyperlink{classunicore_adb0134644edf42ff41b84bca15e6e8ff}{s
 \mbox{\Hypertarget{classunicore_a739255f27ec8bb084f76fcb8cd5c33d8}\label{classunicore_a739255f27ec8bb084f76fcb8cd5c33d8}} 
 static eosio\+::asset {\bfseries convert\+\_\+to\+\_\+power} (eosio\+::asset quantity, eosio\+::name host)
 \item 
+\mbox{\Hypertarget{classunicore_aae7a94db6860df276fd7821044144a3e}\label{classunicore_aae7a94db6860df276fd7821044144a3e}} 
+static eosio\+::asset {\bfseries calculate\+\_\+asset\+\_\+from\+\_\+power} (eosio\+::asset quantity, eosio\+::name host)
+\item 
 static void \mbox{\hyperlink{classunicore_a4f4a69c310c073c6cf1ebf41f2c210e8}{pay\+\_\+for\+\_\+upgrade}} (eosio\+::name username, eosio\+::asset amount, eosio\+::name code)
 \begin{DoxyCompactList}\small\item\em Метод оплаты комиссии создания дочернего хоста \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{classunicore_a8703f9141c36861284ca003a348b61d0}\label{classunicore_a8703f9141c36861284ca003a348b61d0}} 
 static void {\bfseries refresh\+\_\+state} (eosio\+::name host)
 \item 
-static void \mbox{\hyperlink{classunicore_a5e0d285466d37fa9f315b5a52dba4c8a}{giftbadge\+\_\+action}} (eosio\+::name host, eosio\+::name to, uint64\+\_\+t badge\+\_\+id, eosio\+::string comment, bool netted, uint64\+\_\+t goal\+\_\+id, uint64\+\_\+t task\+\_\+id)
+static void \mbox{\hyperlink{classunicore_a8cdb743e8708845d4a6064d43400d415}{giftbadge\+\_\+action}} (eosio\+::name host, eosio\+::name to, uint64\+\_\+t badge\+\_\+id, eosio\+::string comment, bool netted, bool own, uint64\+\_\+t goal\+\_\+id, uint64\+\_\+t task\+\_\+id)
 \begin{DoxyCompactList}\small\item\em Метод передачи значка награждаемому \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{classunicore_ac1a80266ee2fcc4565d3e0924eaf2c60}\label{classunicore_ac1a80266ee2fcc4565d3e0924eaf2c60}} 
 static void {\bfseries deposit} (eosio\+::name username, eosio\+::name host, eosio\+::asset amount, eosio\+::name code, std\+::string message)
 \item 
 static void \mbox{\hyperlink{classunicore_a466aba74657c6022cc0d9163bd502625}{donate\+\_\+action}} (eosio\+::name from, eosio\+::name host, uint64\+\_\+t goal\+\_\+id, eosio\+::asset quantity, eosio\+::name code)
 \begin{DoxyCompactList}\small\item\em Метод спонсорского взноса на цель Позволяет любому участнику произвести финансирование цели из числа собственных средств. \end{DoxyCompactList}\item 
-static eosio\+::asset \mbox{\hyperlink{classunicore_ae4010919890b14f831b4d4a633771062}{adjust\+\_\+goals\+\_\+emission\+\_\+pool}} (eosio\+::name hostname)
+static eosio\+::asset \mbox{\hyperlink{classunicore_aacdeaae7b4b591419bd366661b92cd27}{adjust\+\_\+goals\+\_\+emission\+\_\+pool}} (eosio\+::name hostname, eosio\+::asset host\+\_\+income)
 \begin{DoxyCompactList}\small\item\em Внутренний метод расчета пула эмиссии. Вызывается в момент распределения эмиссии на цели сообщества. Расчет объема эмиссии происходит исходя из параметра life\+\_\+balance\+\_\+for\+\_\+sale завершенного пула, и процента эмиссии, установленного архитектором. Процент эмиссии ограничен от 0 до 1000\% относительного живого остатка на продажу в каждом новом пуле. \end{DoxyCompactList}\item 
 static void \mbox{\hyperlink{classunicore_a416ca740d83132d969c0e99d035a5c7f}{fund\+\_\+emi\+\_\+pool}} (eosio\+::name host, eosio\+::asset amount, eosio\+::name code)
 \begin{DoxyCompactList}\small\item\em Метод ручного пополнения целевого фонда сообщества. Жетоны, попадающие в целевой фонд сообщества, подлежат распределению на цели с помощью голосования участников по установленным правилам консенсуса. \end{DoxyCompactList}\item 
@@ -221,9 +281,15 @@ static void \mbox{\hyperlink{classunicore_aac61e7c884c079854b1987c88abce0c5}{add
 \mbox{\Hypertarget{classunicore_a2439f37a892708018e3474efa938d778}\label{classunicore_a2439f37a892708018e3474efa938d778}} 
 static void \mbox{\hyperlink{classunicore_a2439f37a892708018e3474efa938d778}{createfund}} (eosio\+::name token\+\_\+contract, eosio\+::asset fund\+\_\+asset, std\+::string descriptor)
 \begin{DoxyCompactList}\small\item\em Статичный метод создания фонда \end{DoxyCompactList}\item 
-\mbox{\Hypertarget{classunicore_ad50a4ce9c9910d11c914c01ba15f859c}\label{classunicore_ad50a4ce9c9910d11c914c01ba15f859c}} 
-static eosio\+::asset \mbox{\hyperlink{classunicore_ad50a4ce9c9910d11c914c01ba15f859c}{buy\+\_\+action}} (eosio\+::name username, eosio\+::name host, eosio\+::asset quantity, eosio\+::name code, bool transfer, bool spread\+\_\+to\+\_\+funds, eosio\+::asset summ)
+\mbox{\Hypertarget{classunicore_a278664e711bbb5194481633ae96bbc75}\label{classunicore_a278664e711bbb5194481633ae96bbc75}} 
+static eosio\+::asset \mbox{\hyperlink{classunicore_a278664e711bbb5194481633ae96bbc75}{buy\+\_\+action}} (eosio\+::name username, eosio\+::name host, eosio\+::asset quantity, eosio\+::name code, bool modify\+\_\+pool, bool transfer, bool spread\+\_\+to\+\_\+funds, eosio\+::asset summ)
 \begin{DoxyCompactList}\small\item\em Публичный метод покупки по текущему курсу из числа квантов раунда. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classunicore_a98f88515bc39a8534fbe42aba341ae3b}\label{classunicore_a98f88515bc39a8534fbe42aba341ae3b}} 
+static void \mbox{\hyperlink{classunicore_a98f88515bc39a8534fbe42aba341ae3b}{buy\+\_\+account}} (eosio\+::name username, eosio\+::name host, eosio\+::asset quantity, eosio\+::name code, eosio\+::name status)
+\begin{DoxyCompactList}\small\item\em Публичный метод покупки статуса участника для аккаунта (выкуп гостевого аккаунта у регистратора) \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classunicore_a686b70b2ba7f98510b783d4093defdb6}\label{classunicore_a686b70b2ba7f98510b783d4093defdb6}} 
+static void \mbox{\hyperlink{classunicore_a686b70b2ba7f98510b783d4093defdb6}{burn\+\_\+action}} (eosio\+::name username, eosio\+::name host, eosio\+::asset quantity, eosio\+::name code)
+\begin{DoxyCompactList}\small\item\em Публичный метод сжигания квантов по текущему курсу из числа квантов раунда. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{classunicore_ada4e4997f2a64086d89dd64c26b13cb4}\label{classunicore_ada4e4997f2a64086d89dd64c26b13cb4}} 
 static void {\bfseries settype\+\_\+static} (eosio\+::name host, eosio\+::name type)
 \item 
@@ -233,17 +299,37 @@ static void {\bfseries spread\+\_\+to\+\_\+benefactors} (eosio\+::name host, eos
 \mbox{\Hypertarget{classunicore_a97e2f30594f2b3dab8302e1c086b5a5d}\label{classunicore_a97e2f30594f2b3dab8302e1c086b5a5d}} 
 static void {\bfseries spread\+\_\+to\+\_\+dacs} (eosio\+::name host, eosio\+::asset amount)
 \item 
-\mbox{\Hypertarget{classunicore_ab0a98a60f69f5c664ae2276f4cdf4e83}\label{classunicore_ab0a98a60f69f5c664ae2276f4cdf4e83}} 
-static void {\bfseries spread\+\_\+to\+\_\+funds} (eosio\+::name host, uint64\+\_\+t quants)
+\mbox{\Hypertarget{classunicore_a5dab3c2359093e45f4e0b1fa5f41df29}\label{classunicore_a5dab3c2359093e45f4e0b1fa5f41df29}} 
+static void {\bfseries spread\+\_\+to\+\_\+funds} (eosio\+::name host, eosio\+::asset quantity, eosio\+::name referal)
 \item 
-static uint64\+\_\+t \mbox{\hyperlink{classunicore_adcb2695fb82248b1037eba240d567fdc}{buyshares\+\_\+action}} (eosio\+::name buyer, eosio\+::name host, eosio\+::asset amount, eosio\+::name code)
+static void \mbox{\hyperlink{classunicore_a0c2b0c3fffe564405122f21621aedb78}{spread\+\_\+to\+\_\+refs}} (eosio\+::name host, eosio\+::name username, eosio\+::asset spread\+\_\+amount, eosio\+::asset from\+\_\+amount)
+\item 
+\mbox{\Hypertarget{classunicore_a128c65265d5c63d43c16f01220b06946}\label{classunicore_a128c65265d5c63d43c16f01220b06946}} 
+static void \mbox{\hyperlink{classunicore_a128c65265d5c63d43c16f01220b06946}{spread\+\_\+action}} (eosio\+::name username, eosio\+::name host, eosio\+::asset quantity, eosio\+::name code)
+\begin{DoxyCompactList}\small\item\em Публичный метод сжигания квантов по текущему курсу из числа квантов раунда. \end{DoxyCompactList}\item 
+static uint64\+\_\+t \mbox{\hyperlink{classunicore_ab899e878b848c48c9f6656c74565970d}{buyshares\+\_\+action}} (eosio\+::name buyer, eosio\+::name host, eosio\+::asset amount, eosio\+::name code, bool is\+\_\+frozen)
 \begin{DoxyCompactList}\small\item\em Метод покупки силы сообщества Обеспечивает покупку силы сообщества за котировочный токен по внутренней рыночной цене, определяемой с помощью алгоритма банкор. \end{DoxyCompactList}\item 
 static void \mbox{\hyperlink{classunicore_ad357c4583f4d72f085919ad874bf0b28}{delegate\+\_\+shares\+\_\+action}} (eosio\+::name from, eosio\+::name reciever, eosio\+::name host, uint64\+\_\+t shares)
 \begin{DoxyCompactList}\small\item\em Метод делегирования силы. Позволяет делегировать купленную силу для принятия каких-\/либо решений в пользу любого аккаунта. \end{DoxyCompactList}\item 
+\mbox{\Hypertarget{classunicore_a85158234a313fe5b2dc08b3cd9210dd6}\label{classunicore_a85158234a313fe5b2dc08b3cd9210dd6}} 
+static void {\bfseries setincoming} (eosio\+::name doer, eosio\+::name host, uint64\+\_\+t goal\+\_\+id, uint64\+\_\+t task\+\_\+id)
+\item 
+\mbox{\Hypertarget{classunicore_a61a8cdde982effe739244f9b4015a5f5}\label{classunicore_a61a8cdde982effe739244f9b4015a5f5}} 
+static void {\bfseries delincoming} (eosio\+::name doer, eosio\+::name host, uint64\+\_\+t goal\+\_\+id, uint64\+\_\+t task\+\_\+id)
+\item 
+\mbox{\Hypertarget{classunicore_aafefe860d9af675b4bb1a4ec1477cffd}\label{classunicore_aafefe860d9af675b4bb1a4ec1477cffd}} 
+static void {\bfseries check\+\_\+and\+\_\+gift\+\_\+netted\+\_\+badge} (eosio\+::name username, eosio\+::name host, uint64\+\_\+t task\+\_\+id)
+\item 
 static void \mbox{\hyperlink{classunicore_a9db4a730ab5cb5c91f4af22fcbe314fc}{propagate\+\_\+votes\+\_\+changes}} (eosio\+::name host, eosio\+::name voter, uint64\+\_\+t old\+\_\+power, uint64\+\_\+t new\+\_\+power)
 \begin{DoxyCompactList}\small\item\em Обновление счетчика голосов Внутренний метод, используемый для обновления голосов у целей в момент покупки/продажи силы. \end{DoxyCompactList}\item 
 \mbox{\Hypertarget{classunicore_abcc8b6f0d5fabea652fb09b641ae1b87}\label{classunicore_abcc8b6f0d5fabea652fb09b641ae1b87}} 
 static void {\bfseries rmfromhostwl} (eosio\+::name host, eosio\+::name username)
+\item 
+\mbox{\Hypertarget{classunicore_a025c27857c9bfe21219241279e0dd61e}\label{classunicore_a025c27857c9bfe21219241279e0dd61e}} 
+static void {\bfseries check\+\_\+burn\+\_\+status} (eosio\+::name host, eosio\+::name username, eosio\+::asset quants\+\_\+for\+\_\+user\+\_\+in\+\_\+asset)
+\item 
+\mbox{\Hypertarget{classunicore_a136dfcacb74672c4f8babbe80275ab80}\label{classunicore_a136dfcacb74672c4f8babbe80275ab80}} 
+static uint64\+\_\+t {\bfseries getcondition} (eosio\+::name host, eosio\+::string key)
 \item 
 \mbox{\Hypertarget{classunicore_a6944e1980de8d07225c5dd4ee1157634}\label{classunicore_a6944e1980de8d07225c5dd4ee1157634}} 
 static void {\bfseries addtohostwl} (eosio\+::name host, eosio\+::name username)
@@ -282,11 +368,11 @@ static void {\bfseries add\+\_\+sale\+\_\+history} (\mbox{\hyperlink{structhosts
 Содержит все доступные действия, публичные и приватные методы протокола. 
 
 \subsection{Member Function Documentation}
-\mbox{\Hypertarget{classunicore_ae4010919890b14f831b4d4a633771062}\label{classunicore_ae4010919890b14f831b4d4a633771062}} 
+\mbox{\Hypertarget{classunicore_aacdeaae7b4b591419bd366661b92cd27}\label{classunicore_aacdeaae7b4b591419bd366661b92cd27}} 
 \index{unicore@{unicore}!adjust\+\_\+goals\+\_\+emission\+\_\+pool@{adjust\+\_\+goals\+\_\+emission\+\_\+pool}}
 \index{adjust\+\_\+goals\+\_\+emission\+\_\+pool@{adjust\+\_\+goals\+\_\+emission\+\_\+pool}!unicore@{unicore}}
 \subsubsection{\texorpdfstring{adjust\+\_\+goals\+\_\+emission\+\_\+pool()}{adjust\_goals\_emission\_pool()}}
-{\footnotesize\ttfamily eosio\+::asset unicore\+::adjust\+\_\+goals\+\_\+emission\+\_\+pool (\begin{DoxyParamCaption}\item[{eosio\+::name}]{hostname }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+{\footnotesize\ttfamily eosio\+::asset unicore\+::adjust\+\_\+goals\+\_\+emission\+\_\+pool (\begin{DoxyParamCaption}\item[{eosio\+::name}]{hostname,  }\item[{eosio\+::asset}]{host\+\_\+income }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
 
 
 
@@ -345,11 +431,11 @@ static void {\bfseries add\+\_\+sale\+\_\+history} (\mbox{\hyperlink{structhosts
 \mbox{\tt in}  & {\em op} & The operation \\
 \hline
 \end{DoxyParams}
-\mbox{\Hypertarget{classunicore_adcb2695fb82248b1037eba240d567fdc}\label{classunicore_adcb2695fb82248b1037eba240d567fdc}} 
+\mbox{\Hypertarget{classunicore_ab899e878b848c48c9f6656c74565970d}\label{classunicore_ab899e878b848c48c9f6656c74565970d}} 
 \index{unicore@{unicore}!buyshares\+\_\+action@{buyshares\+\_\+action}}
 \index{buyshares\+\_\+action@{buyshares\+\_\+action}!unicore@{unicore}}
 \subsubsection{\texorpdfstring{buyshares\+\_\+action()}{buyshares\_action()}}
-{\footnotesize\ttfamily uint64\+\_\+t unicore\+::buyshares\+\_\+action (\begin{DoxyParamCaption}\item[{eosio\+::name}]{buyer,  }\item[{eosio\+::name}]{host,  }\item[{eosio\+::asset}]{amount,  }\item[{eosio\+::name}]{code }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+{\footnotesize\ttfamily uint64\+\_\+t unicore\+::buyshares\+\_\+action (\begin{DoxyParamCaption}\item[{eosio\+::name}]{buyer,  }\item[{eosio\+::name}]{host,  }\item[{eosio\+::asset}]{amount,  }\item[{eosio\+::name}]{code,  }\item[{bool}]{is\+\_\+frozen }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
 
 
 
@@ -390,6 +476,21 @@ T\+O\+DO Может дополнительно быть реализован в 
 \begin{DoxyReturn}{Returns}
 The forecast. 
 \end{DoxyReturn}
+\mbox{\Hypertarget{classunicore_a4d4a35a4c18d428c7e70ff7096cfd47d}\label{classunicore_a4d4a35a4c18d428c7e70ff7096cfd47d}} 
+\index{unicore@{unicore}!canceljtask@{canceljtask}}
+\index{canceljtask@{canceljtask}!unicore@{unicore}}
+\subsubsection{\texorpdfstring{canceljtask()}{canceljtask()}}
+{\footnotesize\ttfamily void unicore\+::canceljtask (\begin{DoxyParamCaption}\item[{eosio\+::name}]{host,  }\item[{uint64\+\_\+t}]{task\+\_\+id,  }\item[{eosio\+::name}]{doer }\end{DoxyParamCaption})}
+
+
+
+Метод предложения отклонения заявки деятеля 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em op} & The operation \\
+\hline
+\end{DoxyParams}
 \mbox{\Hypertarget{classunicore_abae3b92d93cbbbd1058005639975f09d}\label{classunicore_abae3b92d93cbbbd1058005639975f09d}} 
 \index{unicore@{unicore}!cchildhost@{cchildhost}}
 \index{cchildhost@{cchildhost}!unicore@{unicore}}
@@ -418,6 +519,21 @@ The forecast.
 
 \begin{DoxyParams}[1]{Parameters}
 \mbox{\tt in}  & {\em op} & The operation \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classunicore_abb38bcc39c9e3ca74f955944a84274fe}\label{classunicore_abb38bcc39c9e3ca74f955944a84274fe}} 
+\index{unicore@{unicore}!compensator@{compensator}}
+\index{compensator@{compensator}!unicore@{unicore}}
+\subsubsection{\texorpdfstring{compensator()}{compensator()}}
+{\footnotesize\ttfamily void unicore\+::compensator (\begin{DoxyParamCaption}\item[{eosio\+::name}]{host,  }\item[{uint64\+\_\+t}]{compensator\+\_\+percent }\end{DoxyParamCaption})}
+
+
+
+Установка компенсатора рисков Устанавливает компенсатор риска для системного жетона 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em op} & The new value \\
 \hline
 \end{DoxyParams}
 \mbox{\Hypertarget{classunicore_a0ea88fc9a5ee27ea75a85e6b842aeba6}\label{classunicore_a0ea88fc9a5ee27ea75a85e6b842aeba6}} 
@@ -514,6 +630,21 @@ The forecast.
 \mbox{\tt in}  & {\em op} & The operation \\
 \hline
 \end{DoxyParams}
+\mbox{\Hypertarget{classunicore_ae82cde0f788172b152c6b6896ac75d0d}\label{classunicore_ae82cde0f788172b152c6b6896ac75d0d}} 
+\index{unicore@{unicore}!distrepo@{distrepo}}
+\index{distrepo@{distrepo}!unicore@{unicore}}
+\subsubsection{\texorpdfstring{distrepo()}{distrepo()}}
+{\footnotesize\ttfamily void unicore\+::distrepo (\begin{DoxyParamCaption}\item[{eosio\+::name}]{host,  }\item[{uint64\+\_\+t}]{report\+\_\+id }\end{DoxyParamCaption})}
+
+
+
+Публичный метод обновления баланса отчёта при распределении баланса цели 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em op} & The operation \\
+\hline
+\end{DoxyParams}
 \mbox{\Hypertarget{classunicore_a466aba74657c6022cc0d9163bd502625}\label{classunicore_a466aba74657c6022cc0d9163bd502625}} 
 \index{unicore@{unicore}!donate\+\_\+action@{donate\+\_\+action}}
 \index{donate\+\_\+action@{donate\+\_\+action}!unicore@{unicore}}
@@ -537,11 +668,11 @@ The forecast.
 \mbox{\tt in}  & {\em code} & The code \\
 \hline
 \end{DoxyParams}
-\mbox{\Hypertarget{classunicore_a286cd81b9f3e28d9a49aaa7969e21ee7}\label{classunicore_a286cd81b9f3e28d9a49aaa7969e21ee7}} 
+\mbox{\Hypertarget{classunicore_a38d070fb8067b91799456f1472ced47d}\label{classunicore_a38d070fb8067b91799456f1472ced47d}} 
 \index{unicore@{unicore}!edithost@{edithost}}
 \index{edithost@{edithost}!unicore@{unicore}}
 \subsubsection{\texorpdfstring{edithost()}{edithost()}}
-{\footnotesize\ttfamily void unicore\+::edithost (\begin{DoxyParamCaption}\item[{eosio\+::name}]{architect,  }\item[{eosio\+::name}]{host,  }\item[{eosio\+::string}]{title,  }\item[{eosio\+::string}]{purpose,  }\item[{eosio\+::string}]{manifest,  }\item[{eosio\+::string}]{meta }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily void unicore\+::edithost (\begin{DoxyParamCaption}\item[{eosio\+::name}]{architect,  }\item[{eosio\+::name}]{host,  }\item[{eosio\+::name}]{platform,  }\item[{eosio\+::string}]{title,  }\item[{eosio\+::string}]{purpose,  }\item[{eosio\+::string}]{manifest,  }\item[{eosio\+::name}]{power\+\_\+market\+\_\+id,  }\item[{eosio\+::string}]{meta }\end{DoxyParamCaption})}
 
 
 
@@ -616,6 +747,21 @@ The forecast.
 \mbox{\tt in}  & {\em code} & The code -\/ контракт токена, поступивший на вход. \\
 \hline
 \end{DoxyParams}
+\mbox{\Hypertarget{classunicore_af6e32936bbe20a612c9348bf5f805982}\label{classunicore_af6e32936bbe20a612c9348bf5f805982}} 
+\index{unicore@{unicore}!fundchildgoa@{fundchildgoa}}
+\index{fundchildgoa@{fundchildgoa}!unicore@{unicore}}
+\subsubsection{\texorpdfstring{fundchildgoa()}{fundchildgoa()}}
+{\footnotesize\ttfamily void unicore\+::fundchildgoa (\begin{DoxyParamCaption}\item[{eosio\+::name}]{architect,  }\item[{eosio\+::name}]{host,  }\item[{uint64\+\_\+t}]{goal\+\_\+id,  }\item[{eosio\+::asset}]{amount }\end{DoxyParamCaption})}
+
+
+
+Метод прямого финансирования родительской цели Используется архитектором для наполнения дочерней цели за счет баланса родительской цели 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em op} & The operation \\
+\hline
+\end{DoxyParams}
 \mbox{\Hypertarget{classunicore_ae8ca388e55f11d3c32430edbaabcf7e2}\label{classunicore_ae8ca388e55f11d3c32430edbaabcf7e2}} 
 \index{unicore@{unicore}!fundtask@{fundtask}}
 \index{fundtask@{fundtask}!unicore@{unicore}}
@@ -631,11 +777,11 @@ The forecast.
 \mbox{\tt in}  & {\em op} & The operation \\
 \hline
 \end{DoxyParams}
-\mbox{\Hypertarget{classunicore_a5e0d285466d37fa9f315b5a52dba4c8a}\label{classunicore_a5e0d285466d37fa9f315b5a52dba4c8a}} 
+\mbox{\Hypertarget{classunicore_a8cdb743e8708845d4a6064d43400d415}\label{classunicore_a8cdb743e8708845d4a6064d43400d415}} 
 \index{unicore@{unicore}!giftbadge\+\_\+action@{giftbadge\+\_\+action}}
 \index{giftbadge\+\_\+action@{giftbadge\+\_\+action}!unicore@{unicore}}
 \subsubsection{\texorpdfstring{giftbadge\+\_\+action()}{giftbadge\_action()}}
-{\footnotesize\ttfamily void unicore\+::giftbadge\+\_\+action (\begin{DoxyParamCaption}\item[{eosio\+::name}]{host,  }\item[{eosio\+::name}]{to,  }\item[{uint64\+\_\+t}]{badge\+\_\+id,  }\item[{eosio\+::string}]{comment,  }\item[{bool}]{netted = {\ttfamily false},  }\item[{uint64\+\_\+t}]{goal\+\_\+id = {\ttfamily 0},  }\item[{uint64\+\_\+t}]{task\+\_\+id = {\ttfamily 0} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+{\footnotesize\ttfamily void unicore\+::giftbadge\+\_\+action (\begin{DoxyParamCaption}\item[{eosio\+::name}]{host,  }\item[{eosio\+::name}]{to,  }\item[{uint64\+\_\+t}]{badge\+\_\+id,  }\item[{eosio\+::string}]{comment,  }\item[{bool}]{netted = {\ttfamily false},  }\item[{bool}]{own = {\ttfamily true},  }\item[{uint64\+\_\+t}]{goal\+\_\+id = {\ttfamily 0},  }\item[{uint64\+\_\+t}]{task\+\_\+id = {\ttfamily 0} }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
 
 
 
@@ -693,6 +839,21 @@ The forecast.
 
 
 Метод вывода баланса цели Выводит доступный баланс цели на аккаунт создателя цели. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em op} & The operation \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classunicore_a799e41649cd9bab8a1a9a9c41822925b}\label{classunicore_a799e41649cd9bab8a1a9a9c41822925b}} 
+\index{unicore@{unicore}!jointask@{jointask}}
+\index{jointask@{jointask}!unicore@{unicore}}
+\subsubsection{\texorpdfstring{jointask()}{jointask()}}
+{\footnotesize\ttfamily void unicore\+::jointask (\begin{DoxyParamCaption}\item[{eosio\+::name}]{host,  }\item[{uint64\+\_\+t}]{task\+\_\+id,  }\item[{eosio\+::name}]{doer,  }\item[{std\+::string}]{comment }\end{DoxyParamCaption})}
+
+
+
+Метод предложения себя как исполнителя задачи 
 
 
 \begin{DoxyParams}[1]{Parameters}
@@ -928,6 +1089,21 @@ Sets the architect. Устанавливает архитектора сообщ
 \mbox{\tt in}  & {\em op} & The operation \\
 \hline
 \end{DoxyParams}
+\mbox{\Hypertarget{classunicore_a4ff597c20fe7071fa4d48a1e6fb4e654}\label{classunicore_a4ff597c20fe7071fa4d48a1e6fb4e654}} 
+\index{unicore@{unicore}!setdoer@{setdoer}}
+\index{setdoer@{setdoer}!unicore@{unicore}}
+\subsubsection{\texorpdfstring{setdoer()}{setdoer()}}
+{\footnotesize\ttfamily void unicore\+::setdoer (\begin{DoxyParamCaption}\item[{eosio\+::name}]{host,  }\item[{uint64\+\_\+t}]{task\+\_\+id,  }\item[{eosio\+::name}]{doer }\end{DoxyParamCaption})}
+
+
+
+Метод установки исполнителя 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em op} & The operation \\
+\hline
+\end{DoxyParams}
 \mbox{\Hypertarget{classunicore_affa39993f35c8e2c8838a956c761cbcc}\label{classunicore_affa39993f35c8e2c8838a956c761cbcc}} 
 \index{unicore@{unicore}!setemi@{setemi}}
 \index{setemi@{setemi}!unicore@{unicore}}
@@ -958,11 +1134,26 @@ Sets the architect. Устанавливает архитектора сообщ
 \mbox{\tt in}  & {\em op} & The new value \\
 \hline
 \end{DoxyParams}
-\mbox{\Hypertarget{classunicore_accfb2e432f24f46fe7432110f0361d2f}\label{classunicore_accfb2e432f24f46fe7432110f0361d2f}} 
+\mbox{\Hypertarget{classunicore_a9ebdfe87e84d1a283143d274f2337e84}\label{classunicore_a9ebdfe87e84d1a283143d274f2337e84}} 
+\index{unicore@{unicore}!setlevels@{setlevels}}
+\index{setlevels@{setlevels}!unicore@{unicore}}
+\subsubsection{\texorpdfstring{setlevels()}{setlevels()}}
+{\footnotesize\ttfamily void unicore\+::setlevels (\begin{DoxyParamCaption}\item[{eosio\+::name}]{host,  }\item[{std\+::vector$<$ uint64\+\_\+t $>$}]{levels }\end{DoxyParamCaption})}
+
+
+
+Метод установки уровней вознаграждений 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em op} & The operation \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classunicore_a8898e75bc9abe84fd78c15f9de3731f5}\label{classunicore_a8898e75bc9abe84fd78c15f9de3731f5}} 
 \index{unicore@{unicore}!setparams@{setparams}}
 \index{setparams@{setparams}!unicore@{unicore}}
 \subsubsection{\texorpdfstring{setparams()}{setparams()}}
-{\footnotesize\ttfamily void unicore\+::setparams (\begin{DoxyParamCaption}\item[{eosio\+::name}]{host,  }\item[{eosio\+::name}]{chost,  }\item[{uint64\+\_\+t}]{size\+\_\+of\+\_\+pool,  }\item[{uint64\+\_\+t}]{quants\+\_\+precision,  }\item[{uint64\+\_\+t}]{overlap,  }\item[{uint64\+\_\+t}]{profit\+\_\+growth,  }\item[{uint64\+\_\+t}]{base\+\_\+rate,  }\item[{uint64\+\_\+t}]{loss\+\_\+percent,  }\item[{uint64\+\_\+t}]{pool\+\_\+limit,  }\item[{uint64\+\_\+t}]{pool\+\_\+timeout,  }\item[{uint64\+\_\+t}]{priority\+\_\+seconds }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily void unicore\+::setparams (\begin{DoxyParamCaption}\item[{eosio\+::name}]{host,  }\item[{eosio\+::name}]{chost,  }\item[{uint64\+\_\+t}]{size\+\_\+of\+\_\+pool,  }\item[{uint64\+\_\+t}]{quants\+\_\+precision,  }\item[{uint64\+\_\+t}]{overlap,  }\item[{uint64\+\_\+t}]{profit\+\_\+growth,  }\item[{uint64\+\_\+t}]{base\+\_\+rate,  }\item[{uint64\+\_\+t}]{loss\+\_\+percent,  }\item[{uint64\+\_\+t}]{compensator\+\_\+percent,  }\item[{uint64\+\_\+t}]{pool\+\_\+limit,  }\item[{uint64\+\_\+t}]{pool\+\_\+timeout,  }\item[{uint64\+\_\+t}]{priority\+\_\+seconds }\end{DoxyParamCaption})}
 
 
 
@@ -977,7 +1168,22 @@ Sets the architect. Устанавливает архитектора сообщ
 
 Проверка бизнес-\/модели на положительный баланс. Остатка на балансе в любой момент должно быть достаточно для выплат всем проигравшим и всем победителям. Если это не так -\/ протокол не позволит себя создать.
 
-Установка таблиц курсов в область памяти хоста\mbox{\Hypertarget{classunicore_a178fc39ee1d642454bddeaa3f6084d00}\label{classunicore_a178fc39ee1d642454bddeaa3f6084d00}} 
+Установка таблиц курсов в область памяти хоста\mbox{\Hypertarget{classunicore_aff7586ddb285e938d5228562eb459234}\label{classunicore_aff7586ddb285e938d5228562eb459234}} 
+\index{unicore@{unicore}!setpgoal@{setpgoal}}
+\index{setpgoal@{setpgoal}!unicore@{unicore}}
+\subsubsection{\texorpdfstring{setpgoal()}{setpgoal()}}
+{\footnotesize\ttfamily void unicore\+::setpgoal (\begin{DoxyParamCaption}\item[{eosio\+::name}]{host,  }\item[{uint64\+\_\+t}]{task\+\_\+id,  }\item[{uint64\+\_\+t}]{goal\+\_\+id }\end{DoxyParamCaption})}
+
+
+
+Метод установки родительской цели 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em op} & The operation \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classunicore_a178fc39ee1d642454bddeaa3f6084d00}\label{classunicore_a178fc39ee1d642454bddeaa3f6084d00}} 
 \index{unicore@{unicore}!setreport@{setreport}}
 \index{setreport@{setreport}!unicore@{unicore}}
 \subsubsection{\texorpdfstring{setreport()}{setreport()}}
@@ -992,11 +1198,11 @@ Sets the architect. Устанавливает архитектора сообщ
 \mbox{\tt in}  & {\em op} & The operation \\
 \hline
 \end{DoxyParams}
-\mbox{\Hypertarget{classunicore_acfa60cf59df336c954662c1ae46a67b2}\label{classunicore_acfa60cf59df336c954662c1ae46a67b2}} 
+\mbox{\Hypertarget{classunicore_aa989f60384b7167e4e1ff2b4d219a1b3}\label{classunicore_aa989f60384b7167e4e1ff2b4d219a1b3}} 
 \index{unicore@{unicore}!settask@{settask}}
 \index{settask@{settask}!unicore@{unicore}}
 \subsubsection{\texorpdfstring{settask()}{settask()}}
-{\footnotesize\ttfamily void unicore\+::settask (\begin{DoxyParamCaption}\item[{eosio\+::name}]{host,  }\item[{eosio\+::name}]{creator,  }\item[{std\+::string}]{permlink,  }\item[{uint64\+\_\+t}]{goal\+\_\+id,  }\item[{uint64\+\_\+t}]{priority,  }\item[{eosio\+::string}]{title,  }\item[{eosio\+::string}]{data,  }\item[{eosio\+::asset}]{requested,  }\item[{bool}]{is\+\_\+public,  }\item[{eosio\+::name}]{doer,  }\item[{eosio\+::asset}]{for\+\_\+each,  }\item[{bool}]{with\+\_\+badge,  }\item[{uint64\+\_\+t}]{badge\+\_\+id,  }\item[{uint64\+\_\+t}]{duration,  }\item[{bool}]{is\+\_\+batch,  }\item[{uint64\+\_\+t}]{parent\+\_\+batch\+\_\+id,  }\item[{std\+::string}]{meta }\end{DoxyParamCaption})}
+{\footnotesize\ttfamily void unicore\+::settask (\begin{DoxyParamCaption}\item[{eosio\+::name}]{host,  }\item[{eosio\+::name}]{creator,  }\item[{std\+::string}]{permlink,  }\item[{uint64\+\_\+t}]{goal\+\_\+id,  }\item[{uint64\+\_\+t}]{priority,  }\item[{eosio\+::string}]{title,  }\item[{eosio\+::string}]{data,  }\item[{eosio\+::asset}]{requested,  }\item[{bool}]{is\+\_\+public,  }\item[{eosio\+::name}]{doer,  }\item[{eosio\+::asset}]{for\+\_\+each,  }\item[{bool}]{with\+\_\+badge,  }\item[{uint64\+\_\+t}]{badge\+\_\+id,  }\item[{uint64\+\_\+t}]{duration,  }\item[{bool}]{is\+\_\+batch,  }\item[{uint64\+\_\+t}]{parent\+\_\+batch\+\_\+id,  }\item[{bool}]{is\+\_\+regular,  }\item[{std\+::vector$<$ uint64\+\_\+t $>$}]{calendar,  }\item[{eosio\+::time\+\_\+point\+\_\+sec}]{start\+\_\+at,  }\item[{eosio\+::time\+\_\+point\+\_\+sec}]{expired\+\_\+at,  }\item[{std\+::string}]{meta }\end{DoxyParamCaption})}
 
 
 
@@ -1007,6 +1213,21 @@ Sets the architect. Устанавливает архитектора сообщ
 \item публичными, т.\+е. достуными к исполнению каждым участником сообщества,
 \item приватными, т.\+е. доступными к исполнению только внутренним управляющим командам. Публичный метод создания задачи Может использовать только аккаунт хоста на текущий момент.
 \end{DoxyItemize}
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em op} & The operation \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classunicore_a07802302c610d2dc17f77a3019b81838}\label{classunicore_a07802302c610d2dc17f77a3019b81838}} 
+\index{unicore@{unicore}!settaskmeta@{settaskmeta}}
+\index{settaskmeta@{settaskmeta}!unicore@{unicore}}
+\subsubsection{\texorpdfstring{settaskmeta()}{settaskmeta()}}
+{\footnotesize\ttfamily void unicore\+::settaskmeta (\begin{DoxyParamCaption}\item[{eosio\+::name}]{host,  }\item[{uint64\+\_\+t}]{task\+\_\+id,  }\item[{std\+::string}]{meta }\end{DoxyParamCaption})}
+
+
+
+Метод ручной валидации задачи 
 
 
 \begin{DoxyParams}[1]{Parameters}
@@ -1028,7 +1249,20 @@ Sets the architect. Устанавливает архитектора сообщ
 \mbox{\tt in}  & {\em op} & The operation \\
 \hline
 \end{DoxyParams}
-\mbox{\Hypertarget{classunicore_ad83b75f3c4afd1ab954d428be8f6f7d7}\label{classunicore_ad83b75f3c4afd1ab954d428be8f6f7d7}} 
+\mbox{\Hypertarget{classunicore_a0c2b0c3fffe564405122f21621aedb78}\label{classunicore_a0c2b0c3fffe564405122f21621aedb78}} 
+\index{unicore@{unicore}!spread\+\_\+to\+\_\+refs@{spread\+\_\+to\+\_\+refs}}
+\index{spread\+\_\+to\+\_\+refs@{spread\+\_\+to\+\_\+refs}!unicore@{unicore}}
+\subsubsection{\texorpdfstring{spread\+\_\+to\+\_\+refs()}{spread\_to\_refs()}}
+{\footnotesize\ttfamily void unicore\+::spread\+\_\+to\+\_\+refs (\begin{DoxyParamCaption}\item[{eosio\+::name}]{host,  }\item[{eosio\+::name}]{username,  }\item[{eosio\+::asset}]{spread\+\_\+amount,  }\item[{eosio\+::asset}]{from\+\_\+amount }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Вычисляем размер выплаты для каждого уровня партнеров и производим выплаты.
+
+Все неиспользуемые вознаграждения с вышестояющих уровней отправляются на пользователя Все неиспользуемые вознаграждения с вышестояющих уровней отправляются на компании
+
+Если рефералов у пользователя нет, то переводим все реферальные средства пользователю.
+\begin{DoxyItemize}
+\item Если рефералов у пользователя нет, то переводим все реферальные средства компании.
+\end{DoxyItemize}\mbox{\Hypertarget{classunicore_ad83b75f3c4afd1ab954d428be8f6f7d7}\label{classunicore_ad83b75f3c4afd1ab954d428be8f6f7d7}} 
 \index{unicore@{unicore}!start@{start}}
 \index{start@{start}!unicore@{unicore}}
 \subsubsection{\texorpdfstring{start()}{start()}}
@@ -1072,6 +1306,21 @@ String representation of the asset.
 
 
 Метод активации задачи Вызывается хостом для активации выполнения поставленной задачи. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em op} & The operation \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classunicore_a54639a2c971d48407747efdda1b2f2ca}\label{classunicore_a54639a2c971d48407747efdda1b2f2ca}} 
+\index{unicore@{unicore}!tcomplete@{tcomplete}}
+\index{tcomplete@{tcomplete}!unicore@{unicore}}
+\subsubsection{\texorpdfstring{tcomplete()}{tcomplete()}}
+{\footnotesize\ttfamily void unicore\+::tcomplete (\begin{DoxyParamCaption}\item[{eosio\+::name}]{host,  }\item[{uint64\+\_\+t}]{task\+\_\+id }\end{DoxyParamCaption})}
+
+
+
+Публичный метод деактивации задачи Применимо для публичных задач, когда поставленная цель достигнута или недостижима. 
 
 
 \begin{DoxyParams}[1]{Parameters}
@@ -1123,6 +1372,21 @@ String representation of the asset.
 \mbox{\tt in}  & {\em op} & The operation \\
 \hline
 \end{DoxyParams}
+\mbox{\Hypertarget{classunicore_a5a31fb29df7ae2b8cbf51625b5c2bc21}\label{classunicore_a5a31fb29df7ae2b8cbf51625b5c2bc21}} 
+\index{unicore@{unicore}!validate@{validate}}
+\index{validate@{validate}!unicore@{unicore}}
+\subsubsection{\texorpdfstring{validate()}{validate()}}
+{\footnotesize\ttfamily void unicore\+::validate (\begin{DoxyParamCaption}\item[{eosio\+::name}]{host,  }\item[{uint64\+\_\+t}]{task\+\_\+id,  }\item[{uint64\+\_\+t}]{goal\+\_\+id,  }\item[{eosio\+::name}]{doer }\end{DoxyParamCaption})}
+
+
+
+Метод ручной валидации задачи 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em op} & The operation \\
+\hline
+\end{DoxyParams}
 \mbox{\Hypertarget{classunicore_a25c98e5ea071940b6ab153d71a328a5c}\label{classunicore_a25c98e5ea071940b6ab153d71a328a5c}} 
 \index{unicore@{unicore}!withdraw@{withdraw}}
 \index{withdraw@{withdraw}!unicore@{unicore}}
@@ -1152,10 +1416,6 @@ String representation of the asset.
 ~\newline
 ~\newline
 ~\newline
-~\newline
-~\newline
-~\newline
-~\newline
  Например, если общий доход от движения баланса пользователя по спирали составляет 100 U\+SD, а коэфициенты распределения Рефералов и Корпоративных Управляющих равняются соответственно по 0.\+5 (50\%), то все рефералы получат по 33\$, все управляющие получат по 33\$, и еще 33\$ попадет в фонд целей сообщества. 1\$ останется в качестве комиссии округления на делении у протокола.
 
 
@@ -1174,17 +1434,24 @@ String representation of the asset.
 
 Выигрыш. Инициирует распределение реферальных вознаграждений и выплаты во все фонды.
 
-Вычисляем размер выплаты для каждого уровня партнеров и производим выплаты.
-
-Все неиспользуемые вознаграждения с вышестояющих уровней отправляются на корпорации
-
-Если рефералов у пользователя нет, то переводим все реферальные средства на корпорации.
-
-Выплаты на управляющие аккаунты. В первом приближении для выплат используем единственный аккаунт хоста. Позже можем использовать массив управляющих аккаунтов и условия распределеления согласно любой модели (акции, равенство, и т.\+д.).
-
 Выплаты в целевой фонд сообщества
 
-Все кванты победителей должны быть возвращены в пулы.\mbox{\Hypertarget{classunicore_a4dd6d244c3fac428419342dc782f53a1}\label{classunicore_a4dd6d244c3fac428419342dc782f53a1}} 
+Все кванты победителей должны быть возвращены в пулы.\mbox{\Hypertarget{classunicore_a9c8a515eef8e3dd262372da54945047b}\label{classunicore_a9c8a515eef8e3dd262372da54945047b}} 
+\index{unicore@{unicore}!withdrawrepo@{withdrawrepo}}
+\index{withdrawrepo@{withdrawrepo}!unicore@{unicore}}
+\subsubsection{\texorpdfstring{withdrawrepo()}{withdrawrepo()}}
+{\footnotesize\ttfamily void unicore\+::withdrawrepo (\begin{DoxyParamCaption}\item[{eosio\+::name}]{username,  }\item[{eosio\+::name}]{host,  }\item[{uint64\+\_\+t}]{report\+\_\+id }\end{DoxyParamCaption})}
+
+
+
+Публичный метод вывода баланса отчёта 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em op} & The operation \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{classunicore_a4dd6d244c3fac428419342dc782f53a1}\label{classunicore_a4dd6d244c3fac428419342dc782f53a1}} 
 \index{unicore@{unicore}!withdrawsh@{withdrawsh}}
 \index{withdrawsh@{withdrawsh}!unicore@{unicore}}
 \subsubsection{\texorpdfstring{withdrawsh()}{withdrawsh()}}

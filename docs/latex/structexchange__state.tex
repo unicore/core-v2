@@ -1,9 +1,5 @@
 \hypertarget{structexchange__state}{}\section{exchange\+\_\+state Struct Reference}
 \label{structexchange__state}\index{exchange\+\_\+state@{exchange\+\_\+state}}
-
-
-{\ttfamily \#include $<$exchange\+\_\+state.\+hpp$>$}
-
 \subsection*{Classes}
 \begin{DoxyCompactItemize}
 \item 
@@ -15,41 +11,20 @@ struct \mbox{\hyperlink{structexchange__state_1_1connector}{connector}}
 \mbox{\Hypertarget{structexchange__state_a7891948a4c98433065f6297a846770b4}\label{structexchange__state_a7891948a4c98433065f6297a846770b4}} 
 uint64\+\_\+t {\bfseries primary\+\_\+key} () const
 \item 
-\mbox{\Hypertarget{structexchange__state_afdd3a7968aaae22c287e2301f12df8fc}\label{structexchange__state_afdd3a7968aaae22c287e2301f12df8fc}} 
-asset {\bfseries convert\+\_\+to\+\_\+exchange} (\mbox{\hyperlink{structexchange__state_1_1connector}{connector}} \&reserve, const asset \&payment)
+\mbox{\Hypertarget{structexchange__state_ac3dab3448c9d5bb55770d33d95f688ba}\label{structexchange__state_ac3dab3448c9d5bb55770d33d95f688ba}} 
+asset {\bfseries convert\+\_\+to\+\_\+exchange} (\mbox{\hyperlink{structexchange__state_1_1connector}{connector}} \&c, asset in)
 \item 
-\mbox{\Hypertarget{structexchange__state_a90c01b5b89955787029f151a6c4b134a}\label{structexchange__state_a90c01b5b89955787029f151a6c4b134a}} 
-asset {\bfseries convert\+\_\+from\+\_\+exchange} (\mbox{\hyperlink{structexchange__state_1_1connector}{connector}} \&reserve, const asset \&tokens)
+\mbox{\Hypertarget{structexchange__state_a65e34e352f066f1dae0385b2e6aa333e}\label{structexchange__state_a65e34e352f066f1dae0385b2e6aa333e}} 
+asset {\bfseries convert\+\_\+from\+\_\+exchange} (\mbox{\hyperlink{structexchange__state_1_1connector}{connector}} \&c, asset in)
 \item 
-\mbox{\Hypertarget{structexchange__state_abbf59e6671e0432040e20caae7006c54}\label{structexchange__state_abbf59e6671e0432040e20caae7006c54}} 
-asset {\bfseries convert} (const asset \&from, const symbol \&to)
-\item 
-\mbox{\Hypertarget{structexchange__state_ab5c2f70f8e3de76e8fdc5ebcabedb4cc}\label{structexchange__state_ab5c2f70f8e3de76e8fdc5ebcabedb4cc}} 
-asset {\bfseries direct\+\_\+convert} (const asset \&from, const symbol \&to)
-\end{DoxyCompactItemize}
-\subsection*{Static Public Member Functions}
-\begin{DoxyCompactItemize}
-\item 
-\mbox{\Hypertarget{structexchange__state_a943b9f6619c754fd673abeee0712be44}\label{structexchange__state_a943b9f6619c754fd673abeee0712be44}} 
-static int64\+\_\+t {\bfseries get\+\_\+bancor\+\_\+output} (int64\+\_\+t inp\+\_\+reserve, int64\+\_\+t out\+\_\+reserve, int64\+\_\+t inp)
-\item 
-\mbox{\Hypertarget{structexchange__state_a32a222b082994484aadef66aef2211e8}\label{structexchange__state_a32a222b082994484aadef66aef2211e8}} 
-static int64\+\_\+t {\bfseries get\+\_\+bancor\+\_\+input} (int64\+\_\+t out\+\_\+reserve, int64\+\_\+t inp\+\_\+reserve, int64\+\_\+t out)
+\mbox{\Hypertarget{structexchange__state_aa791a6a6eac2f7a8c7b5615bc57f177b}\label{structexchange__state_aa791a6a6eac2f7a8c7b5615bc57f177b}} 
+asset {\bfseries convert} (asset from, const symbol \&to)
 \end{DoxyCompactItemize}
 \subsection*{Public Attributes}
 \begin{DoxyCompactItemize}
 \item 
-\mbox{\Hypertarget{structexchange__state_a611e5c10bf3e43db4d648d61630b78b6}\label{structexchange__state_a611e5c10bf3e43db4d648d61630b78b6}} 
-uint64\+\_\+t {\bfseries id}
-\item 
-\mbox{\Hypertarget{structexchange__state_a8b788617274dac3c962c8f838037e147}\label{structexchange__state_a8b788617274dac3c962c8f838037e147}} 
-std\+::string {\bfseries name}
-\item 
-\mbox{\Hypertarget{structexchange__state_ad3b052d8c1918f431e2f4a2a82042535}\label{structexchange__state_ad3b052d8c1918f431e2f4a2a82042535}} 
-uint64\+\_\+t {\bfseries vesting\+\_\+seconds} = 0
-\item 
-\mbox{\Hypertarget{structexchange__state_a784cc236e2b292519abd4ced4afc6755}\label{structexchange__state_a784cc236e2b292519abd4ced4afc6755}} 
-eosio\+::asset {\bfseries supply}
+\mbox{\Hypertarget{structexchange__state_aed724d12bf57c748a1bd1cae697323e3}\label{structexchange__state_aed724d12bf57c748a1bd1cae697323e3}} 
+asset {\bfseries supply}
 \item 
 \mbox{\Hypertarget{structexchange__state_ac347aedb89368530adf4740be02822bd}\label{structexchange__state_ac347aedb89368530adf4740be02822bd}} 
 \mbox{\hyperlink{structexchange__state_1_1connector}{connector}} {\bfseries base}
@@ -58,9 +33,6 @@ eosio\+::asset {\bfseries supply}
 \mbox{\hyperlink{structexchange__state_1_1connector}{connector}} {\bfseries quote}
 \end{DoxyCompactItemize}
 
-
-\subsection{Detailed Description}
-Uses Bancor math to create a 50/50 relay between two asset types. The state of the bancor exchange is entirely contained within this struct. There are no external side effects associated with using this A\+PI. 
 
 The documentation for this struct was generated from the following files\+:\begin{DoxyCompactItemize}
 \item 

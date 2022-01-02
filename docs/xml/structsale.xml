@@ -1,0 +1,121 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.14">
+  <compounddef id="structsale" kind="struct" language="C++" prot="public">
+    <compoundname>sale</compoundname>
+    <includes refid="core_8hpp" local="no">core.hpp</includes>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structsale_1a9a9e29e910e7fad4176920b4c5820598" prot="public" static="no" mutable="no">
+        <type>uint64_t</type>
+        <definition>uint64_t sale::pool_id</definition>
+        <argsstring></argsstring>
+        <name>pool_id</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/core.hpp" line="473" column="1" bodyfile="include/core.hpp" bodystart="473" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structsale_1adcf1a6b39d7e7a342974ae39d90a4126" prot="public" static="no" mutable="no">
+        <type>uint64_t</type>
+        <definition>uint64_t sale::sell_rate</definition>
+        <argsstring></argsstring>
+        <name>sell_rate</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/core.hpp" line="474" column="1" bodyfile="include/core.hpp" bodystart="474" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structsale_1a75f7c022bad8909393daa51e86c970fc" prot="public" static="no" mutable="no">
+        <type>eosio::asset</type>
+        <definition>eosio::asset sale::solded</definition>
+        <argsstring></argsstring>
+        <name>solded</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/core.hpp" line="475" column="1" bodyfile="include/core.hpp" bodystart="475" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structsale_1af1093f1b1348b3a9a91362f3228ee503" prot="public" static="no" mutable="no">
+        <type>eosio::asset</type>
+        <definition>eosio::asset sale::total_solded</definition>
+        <argsstring></argsstring>
+        <name>total_solded</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/core.hpp" line="476" column="1" bodyfile="include/core.hpp" bodystart="476" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="structsale_1ab961633ac6594ad31b8862f2847702f5" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>uint64_t</type>
+        <definition>uint64_t sale::primary_key</definition>
+        <argsstring>() const</argsstring>
+        <name>primary_key</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/core.hpp" line="477" column="1" bodyfile="include/core.hpp" bodystart="477" bodyend="477"/>
+      </memberdef>
+      <memberdef kind="function" id="structsale_1a5d93f15e70be03416e1a2ffa19c58748" prot="public" static="no" const="no" explicit="no" inline="no" virt="non-virtual">
+        <type></type>
+        <definition>sale::EOSLIB_SERIALIZE</definition>
+        <argsstring>(sale,(pool_id)(sell_rate)(solded)(total_solded))</argsstring>
+        <name>EOSLIB_SERIALIZE</name>
+        <param>
+          <type><ref refid="structsale" kindref="compound">sale</ref></type>
+        </param>
+        <param>
+          <type>(pool_id)(sell_rate)(solded)(total_solded)</type>
+        </param>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/core.hpp" line="479" column="1"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Структура истории движения жетона распределения хоста Двойной Спирали. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="146">
+        <label>asset</label>
+      </node>
+      <node id="145">
+        <label>sale</label>
+        <link refid="structsale"/>
+        <childnode refid="146" relation="usage">
+          <edgelabel>solded</edgelabel>
+          <edgelabel>total_solded</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="include/core.hpp" line="472" column="1" bodyfile="include/core.hpp" bodystart="472" bodyend="480"/>
+    <listofallmembers>
+      <member refid="structsale_1a5d93f15e70be03416e1a2ffa19c58748" prot="public" virt="non-virtual"><scope>sale</scope><name>EOSLIB_SERIALIZE</name></member>
+      <member refid="structsale_1a9a9e29e910e7fad4176920b4c5820598" prot="public" virt="non-virtual"><scope>sale</scope><name>pool_id</name></member>
+      <member refid="structsale_1ab961633ac6594ad31b8862f2847702f5" prot="public" virt="non-virtual"><scope>sale</scope><name>primary_key</name></member>
+      <member refid="structsale_1adcf1a6b39d7e7a342974ae39d90a4126" prot="public" virt="non-virtual"><scope>sale</scope><name>sell_rate</name></member>
+      <member refid="structsale_1a75f7c022bad8909393daa51e86c970fc" prot="public" virt="non-virtual"><scope>sale</scope><name>solded</name></member>
+      <member refid="structsale_1af1093f1b1348b3a9a91362f3228ee503" prot="public" virt="non-virtual"><scope>sale</scope><name>total_solded</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

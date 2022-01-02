@@ -1,0 +1,86 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.14">
+  <compounddef id="structrstat" kind="struct" language="C++" prot="public">
+    <compoundname>rstat</compoundname>
+    <includes refid="ref_8hpp" local="no">ref.hpp</includes>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structrstat_1ad16be0649bc5fc500887b1599c8897df" prot="public" static="no" mutable="no">
+        <type>eosio::name</type>
+        <definition>eosio::name rstat::host</definition>
+        <argsstring></argsstring>
+        <name>host</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/ref.hpp" line="67" column="1" bodyfile="include/ref.hpp" bodystart="67" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structrstat_1ae1099534688656a0f758093c41fc7e52" prot="public" static="no" mutable="no">
+        <type>eosio::asset</type>
+        <definition>eosio::asset rstat::withdrawed</definition>
+        <argsstring></argsstring>
+        <name>withdrawed</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/ref.hpp" line="68" column="1" bodyfile="include/ref.hpp" bodystart="68" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structrstat_1a29f284b73dc1a003686498e32f2730b7" prot="public" static="no" mutable="no">
+        <type>double</type>
+        <definition>double rstat::sediment</definition>
+        <argsstring></argsstring>
+        <name>sediment</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/ref.hpp" line="69" column="1" bodyfile="include/ref.hpp" bodystart="69" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="structrstat_1af94b16bcf555b0016b8a0f6c25505031" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>uint64_t</type>
+        <definition>uint64_t rstat::primary_key</definition>
+        <argsstring>() const</argsstring>
+        <name>primary_key</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/ref.hpp" line="71" column="1" bodyfile="include/ref.hpp" bodystart="71" bodyend="71"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Структура статистики реферальных балансов и осадок, доступный на получение по мере накопления. </para>    </briefdescription>
+    <detaileddescription>
+    </detaileddescription>
+    <collaborationgraph>
+      <node id="141">
+        <label>asset</label>
+      </node>
+      <node id="140">
+        <label>rstat</label>
+        <link refid="structrstat"/>
+        <childnode refid="141" relation="usage">
+          <edgelabel>withdrawed</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="include/ref.hpp" line="66" column="1" bodyfile="include/ref.hpp" bodystart="66" bodyend="74"/>
+    <listofallmembers>
+      <member refid="structrstat_1ad16be0649bc5fc500887b1599c8897df" prot="public" virt="non-virtual"><scope>rstat</scope><name>host</name></member>
+      <member refid="structrstat_1af94b16bcf555b0016b8a0f6c25505031" prot="public" virt="non-virtual"><scope>rstat</scope><name>primary_key</name></member>
+      <member refid="structrstat_1a29f284b73dc1a003686498e32f2730b7" prot="public" virt="non-virtual"><scope>rstat</scope><name>sediment</name></member>
+      <member refid="structrstat_1ae1099534688656a0f758093c41fc7e52" prot="public" virt="non-virtual"><scope>rstat</scope><name>withdrawed</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

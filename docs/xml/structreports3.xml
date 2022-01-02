@@ -1,0 +1,420 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<doxygen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="compound.xsd" version="1.8.14">
+  <compounddef id="structreports3" kind="struct" language="C++" prot="public">
+    <compoundname>reports3</compoundname>
+    <includes refid="tasks_8hpp" local="no">tasks.hpp</includes>
+      <sectiondef kind="public-attrib">
+      <memberdef kind="variable" id="structreports3_1a5b95f577b1824aefa16eb0a4ecb3a959" prot="public" static="no" mutable="no">
+        <type>uint64_t</type>
+        <definition>uint64_t reports3::report_id</definition>
+        <argsstring></argsstring>
+        <name>report_id</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="139" column="1" bodyfile="include/tasks.hpp" bodystart="139" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structreports3_1af16a63bc34bf5e07b88f92032808057a" prot="public" static="no" mutable="no">
+        <type>eosio::name</type>
+        <definition>eosio::name reports3::status</definition>
+        <argsstring></argsstring>
+        <name>status</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="140" column="1" bodyfile="include/tasks.hpp" bodystart="140" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structreports3_1a081eedcabc34fc9555fcab1adf4550cf" prot="public" static="no" mutable="no">
+        <type>uint64_t</type>
+        <definition>uint64_t reports3::task_id</definition>
+        <argsstring></argsstring>
+        <name>task_id</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="141" column="1" bodyfile="include/tasks.hpp" bodystart="141" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structreports3_1a85ecdc2d76cf4f3065a02945e542807f" prot="public" static="no" mutable="no">
+        <type>uint64_t</type>
+        <definition>uint64_t reports3::goal_id</definition>
+        <argsstring></argsstring>
+        <name>goal_id</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="142" column="1" bodyfile="include/tasks.hpp" bodystart="142" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structreports3_1a649e983b78278a792ae960440527122f" prot="public" static="no" mutable="no">
+        <type>uint64_t</type>
+        <definition>uint64_t reports3::type</definition>
+        <argsstring></argsstring>
+        <name>type</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="143" column="1" bodyfile="include/tasks.hpp" bodystart="143" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structreports3_1aeab090f34f040bad2642c793e8231328" prot="public" static="no" mutable="no">
+        <type>uint64_t</type>
+        <definition>uint64_t reports3::count</definition>
+        <argsstring></argsstring>
+        <name>count</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="144" column="1" bodyfile="include/tasks.hpp" bodystart="144" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structreports3_1ad863844027d367c8f8d92c467797e1ea" prot="public" static="no" mutable="no">
+        <type>eosio::name</type>
+        <definition>eosio::name reports3::username</definition>
+        <argsstring></argsstring>
+        <name>username</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="145" column="1" bodyfile="include/tasks.hpp" bodystart="145" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structreports3_1ab0008d05f3d601b30ca2db4420ab32f5" prot="public" static="no" mutable="no">
+        <type>eosio::name</type>
+        <definition>eosio::name reports3::curator</definition>
+        <argsstring></argsstring>
+        <name>curator</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="146" column="1" bodyfile="include/tasks.hpp" bodystart="146" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structreports3_1ad70c9e74c31a68bef31e68c4971f2614" prot="public" static="no" mutable="no">
+        <type>eosio::string</type>
+        <definition>eosio::string reports3::data</definition>
+        <argsstring></argsstring>
+        <name>data</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="147" column="1" bodyfile="include/tasks.hpp" bodystart="147" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structreports3_1a8b4a94d6501522c2d25356274de01ef8" prot="public" static="no" mutable="no">
+        <type>eosio::asset</type>
+        <definition>eosio::asset reports3::requested</definition>
+        <argsstring></argsstring>
+        <name>requested</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="148" column="1" bodyfile="include/tasks.hpp" bodystart="148" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structreports3_1abcfc36d73b59d2c8a9f66feb191df5f7" prot="public" static="no" mutable="no">
+        <type>eosio::asset</type>
+        <definition>eosio::asset reports3::balance</definition>
+        <argsstring></argsstring>
+        <name>balance</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="149" column="1" bodyfile="include/tasks.hpp" bodystart="149" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structreports3_1aff965e010c116551b43d97b9e402994f" prot="public" static="no" mutable="no">
+        <type>eosio::asset</type>
+        <definition>eosio::asset reports3::withdrawed</definition>
+        <argsstring></argsstring>
+        <name>withdrawed</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="150" column="1" bodyfile="include/tasks.hpp" bodystart="150" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structreports3_1a219b0d07e6707bde21acbec7d9b49dd7" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool reports3::need_check</definition>
+        <argsstring></argsstring>
+        <name>need_check</name>
+        <initializer>= true</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="151" column="1" bodyfile="include/tasks.hpp" bodystart="151" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structreports3_1a3efe232c9e28e3bdaeabd6713204a88c" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool reports3::approved</definition>
+        <argsstring></argsstring>
+        <name>approved</name>
+        <initializer>= false</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="152" column="1" bodyfile="include/tasks.hpp" bodystart="152" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structreports3_1a0618148885e6db5d37751e1318ce2b1c" prot="public" static="no" mutable="no">
+        <type>bool</type>
+        <definition>bool reports3::distributed</definition>
+        <argsstring></argsstring>
+        <name>distributed</name>
+        <initializer>= false</initializer>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="153" column="1" bodyfile="include/tasks.hpp" bodystart="153" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structreports3_1a71e900f1eb1b73cee55c4cdb0d80c027" prot="public" static="no" mutable="no">
+        <type>eosio::string</type>
+        <definition>eosio::string reports3::comment</definition>
+        <argsstring></argsstring>
+        <name>comment</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="154" column="1" bodyfile="include/tasks.hpp" bodystart="154" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structreports3_1a825f77becac6fd1df509fedcf4ac910e" prot="public" static="no" mutable="no">
+        <type>eosio::time_point_sec</type>
+        <definition>eosio::time_point_sec reports3::created_at</definition>
+        <argsstring></argsstring>
+        <name>created_at</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="155" column="1" bodyfile="include/tasks.hpp" bodystart="155" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structreports3_1ae7cb23c8867ab37df6b257c9e5c43033" prot="public" static="no" mutable="no">
+        <type>eosio::time_point_sec</type>
+        <definition>eosio::time_point_sec reports3::expired_at</definition>
+        <argsstring></argsstring>
+        <name>expired_at</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="156" column="1" bodyfile="include/tasks.hpp" bodystart="156" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structreports3_1a749104ff4d8f14a4cdb1e5eada51cf2d" prot="public" static="no" mutable="no">
+        <type>uint64_t</type>
+        <definition>uint64_t reports3::total_votes</definition>
+        <argsstring></argsstring>
+        <name>total_votes</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="159" column="1" bodyfile="include/tasks.hpp" bodystart="159" bodyend="-1"/>
+      </memberdef>
+      <memberdef kind="variable" id="structreports3_1ad17e01089c5b3d67155663e56a5d58bb" prot="public" static="no" mutable="no">
+        <type>std::vector&lt; eosio::name &gt;</type>
+        <definition>std::vector&lt;eosio::name&gt; reports3::voters</definition>
+        <argsstring></argsstring>
+        <name>voters</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="160" column="1" bodyfile="include/tasks.hpp" bodystart="160" bodyend="-1"/>
+      </memberdef>
+      </sectiondef>
+      <sectiondef kind="public-func">
+      <memberdef kind="function" id="structreports3_1ae691681169805ec57fd02ca779910ed8" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>uint64_t</type>
+        <definition>uint64_t reports3::primary_key</definition>
+        <argsstring>() const</argsstring>
+        <name>primary_key</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="162" column="1" bodyfile="include/tasks.hpp" bodystart="162" bodyend="162"/>
+      </memberdef>
+      <memberdef kind="function" id="structreports3_1a52ab0b2d834ca584b53975e93542f971" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>uint64_t</type>
+        <definition>uint64_t reports3::byusername</definition>
+        <argsstring>() const</argsstring>
+        <name>byusername</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="163" column="1" bodyfile="include/tasks.hpp" bodystart="163" bodyend="163"/>
+      </memberdef>
+      <memberdef kind="function" id="structreports3_1a38d535110bebc76376c8d952b18a6186" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>uint64_t</type>
+        <definition>uint64_t reports3::bytaskid</definition>
+        <argsstring>() const</argsstring>
+        <name>bytaskid</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="164" column="1" bodyfile="include/tasks.hpp" bodystart="164" bodyend="164"/>
+      </memberdef>
+      <memberdef kind="function" id="structreports3_1afd6b06bd9d6a1575f6d37829b132469b" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>uint64_t</type>
+        <definition>uint64_t reports3::bygoalid</definition>
+        <argsstring>() const</argsstring>
+        <name>bygoalid</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="165" column="1" bodyfile="include/tasks.hpp" bodystart="165" bodyend="165"/>
+      </memberdef>
+      <memberdef kind="function" id="structreports3_1aa654e06d991a5e57e3b8e7928c0eed98" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>uint64_t</type>
+        <definition>uint64_t reports3::byvotes</definition>
+        <argsstring>() const</argsstring>
+        <name>byvotes</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="166" column="1" bodyfile="include/tasks.hpp" bodystart="166" bodyend="166"/>
+      </memberdef>
+      <memberdef kind="function" id="structreports3_1ae6b51354e281bfc71d174fb207699afa" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>uint128_t</type>
+        <definition>uint128_t reports3::userwithgoal</definition>
+        <argsstring>() const</argsstring>
+        <name>userwithgoal</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="168" column="1" bodyfile="include/tasks.hpp" bodystart="168" bodyend="168"/>
+      </memberdef>
+      <memberdef kind="function" id="structreports3_1a0944b5d06f8d2c9449dcf7d04f0534e1" prot="public" static="no" const="yes" explicit="no" inline="yes" virt="non-virtual">
+        <type>uint128_t</type>
+        <definition>uint128_t reports3::userwithtask</definition>
+        <argsstring>() const</argsstring>
+        <name>userwithtask</name>
+        <briefdescription>
+        </briefdescription>
+        <detaileddescription>
+        </detaileddescription>
+        <inbodydescription>
+        </inbodydescription>
+        <location file="include/tasks.hpp" line="169" column="1" bodyfile="include/tasks.hpp" bodystart="169" bodyend="169"/>
+      </memberdef>
+      </sectiondef>
+    <briefdescription>
+<para>Структура отчетов по задачам хоста Двойной Спирали. </para>    </briefdescription>
+    <detaileddescription>
+<para>Структура отчетов по задачам хоста Двойной Спирали. </para>    </detaileddescription>
+    <collaborationgraph>
+      <node id="135">
+        <label>asset</label>
+      </node>
+      <node id="134">
+        <label>string</label>
+      </node>
+      <node id="133">
+        <label>reports3</label>
+        <link refid="structreports3"/>
+        <childnode refid="134" relation="usage">
+          <edgelabel>comment</edgelabel>
+          <edgelabel>data</edgelabel>
+        </childnode>
+        <childnode refid="135" relation="usage">
+          <edgelabel>balance</edgelabel>
+          <edgelabel>withdrawed</edgelabel>
+          <edgelabel>requested</edgelabel>
+        </childnode>
+      </node>
+    </collaborationgraph>
+    <location file="include/tasks.hpp" line="138" column="1" bodyfile="include/tasks.hpp" bodystart="138" bodyend="173"/>
+    <listofallmembers>
+      <member refid="structreports3_1a3efe232c9e28e3bdaeabd6713204a88c" prot="public" virt="non-virtual"><scope>reports3</scope><name>approved</name></member>
+      <member refid="structreports3_1abcfc36d73b59d2c8a9f66feb191df5f7" prot="public" virt="non-virtual"><scope>reports3</scope><name>balance</name></member>
+      <member refid="structreports3_1afd6b06bd9d6a1575f6d37829b132469b" prot="public" virt="non-virtual"><scope>reports3</scope><name>bygoalid</name></member>
+      <member refid="structreports3_1a38d535110bebc76376c8d952b18a6186" prot="public" virt="non-virtual"><scope>reports3</scope><name>bytaskid</name></member>
+      <member refid="structreports3_1a52ab0b2d834ca584b53975e93542f971" prot="public" virt="non-virtual"><scope>reports3</scope><name>byusername</name></member>
+      <member refid="structreports3_1aa654e06d991a5e57e3b8e7928c0eed98" prot="public" virt="non-virtual"><scope>reports3</scope><name>byvotes</name></member>
+      <member refid="structreports3_1a71e900f1eb1b73cee55c4cdb0d80c027" prot="public" virt="non-virtual"><scope>reports3</scope><name>comment</name></member>
+      <member refid="structreports3_1aeab090f34f040bad2642c793e8231328" prot="public" virt="non-virtual"><scope>reports3</scope><name>count</name></member>
+      <member refid="structreports3_1a825f77becac6fd1df509fedcf4ac910e" prot="public" virt="non-virtual"><scope>reports3</scope><name>created_at</name></member>
+      <member refid="structreports3_1ab0008d05f3d601b30ca2db4420ab32f5" prot="public" virt="non-virtual"><scope>reports3</scope><name>curator</name></member>
+      <member refid="structreports3_1ad70c9e74c31a68bef31e68c4971f2614" prot="public" virt="non-virtual"><scope>reports3</scope><name>data</name></member>
+      <member refid="structreports3_1a0618148885e6db5d37751e1318ce2b1c" prot="public" virt="non-virtual"><scope>reports3</scope><name>distributed</name></member>
+      <member refid="structreports3_1ae7cb23c8867ab37df6b257c9e5c43033" prot="public" virt="non-virtual"><scope>reports3</scope><name>expired_at</name></member>
+      <member refid="structreports3_1a85ecdc2d76cf4f3065a02945e542807f" prot="public" virt="non-virtual"><scope>reports3</scope><name>goal_id</name></member>
+      <member refid="structreports3_1a219b0d07e6707bde21acbec7d9b49dd7" prot="public" virt="non-virtual"><scope>reports3</scope><name>need_check</name></member>
+      <member refid="structreports3_1ae691681169805ec57fd02ca779910ed8" prot="public" virt="non-virtual"><scope>reports3</scope><name>primary_key</name></member>
+      <member refid="structreports3_1a5b95f577b1824aefa16eb0a4ecb3a959" prot="public" virt="non-virtual"><scope>reports3</scope><name>report_id</name></member>
+      <member refid="structreports3_1a8b4a94d6501522c2d25356274de01ef8" prot="public" virt="non-virtual"><scope>reports3</scope><name>requested</name></member>
+      <member refid="structreports3_1af16a63bc34bf5e07b88f92032808057a" prot="public" virt="non-virtual"><scope>reports3</scope><name>status</name></member>
+      <member refid="structreports3_1a081eedcabc34fc9555fcab1adf4550cf" prot="public" virt="non-virtual"><scope>reports3</scope><name>task_id</name></member>
+      <member refid="structreports3_1a749104ff4d8f14a4cdb1e5eada51cf2d" prot="public" virt="non-virtual"><scope>reports3</scope><name>total_votes</name></member>
+      <member refid="structreports3_1a649e983b78278a792ae960440527122f" prot="public" virt="non-virtual"><scope>reports3</scope><name>type</name></member>
+      <member refid="structreports3_1ad863844027d367c8f8d92c467797e1ea" prot="public" virt="non-virtual"><scope>reports3</scope><name>username</name></member>
+      <member refid="structreports3_1ae6b51354e281bfc71d174fb207699afa" prot="public" virt="non-virtual"><scope>reports3</scope><name>userwithgoal</name></member>
+      <member refid="structreports3_1a0944b5d06f8d2c9449dcf7d04f0534e1" prot="public" virt="non-virtual"><scope>reports3</scope><name>userwithtask</name></member>
+      <member refid="structreports3_1ad17e01089c5b3d67155663e56a5d58bb" prot="public" virt="non-virtual"><scope>reports3</scope><name>voters</name></member>
+      <member refid="structreports3_1aff965e010c116551b43d97b9e402994f" prot="public" virt="non-virtual"><scope>reports3</scope><name>withdrawed</name></member>
+    </listofallmembers>
+  </compounddef>
+</doxygen>

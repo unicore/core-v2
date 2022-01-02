@@ -80,21 +80,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:adbff85b09633fb360200e8571993d43f"><td class="memItemLeft" align="right" valign="top"><a id="adbff85b09633fb360200e8571993d43f"></a>
 uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>primary_key</b> () const</td></tr>
 <tr class="separator:adbff85b09633fb360200e8571993d43f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3feeefb64e7c89474ba70e76277ebd28"><td class="memItemLeft" align="right" valign="top"><a id="a3feeefb64e7c89474ba70e76277ebd28"></a>
+uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>bylimittype</b> () const</td></tr>
+<tr class="separator:a3feeefb64e7c89474ba70e76277ebd28"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
 <tr class="memitem:ae9be077b76903051cf3e9fbafe071bda"><td class="memItemLeft" align="right" valign="top"><a id="ae9be077b76903051cf3e9fbafe071bda"></a>
 eosio::name&#160;</td><td class="memItemRight" valign="bottom"><b>dac</b></td></tr>
 <tr class="separator:ae9be077b76903051cf3e9fbafe071bda"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6b3d8acc4826f5b3d7c0ee75161490ac"><td class="memItemLeft" align="right" valign="top"><a id="a6b3d8acc4826f5b3d7c0ee75161490ac"></a>
-eosio::name&#160;</td><td class="memItemRight" valign="bottom"><b>mode</b></td></tr>
-<tr class="separator:a6b3d8acc4826f5b3d7c0ee75161490ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab60ff845d44976364fa1c90a68fd8082"><td class="memItemLeft" align="right" valign="top"><a id="ab60ff845d44976364fa1c90a68fd8082"></a>
-eosio::name&#160;</td><td class="memItemRight" valign="bottom"><b>circle</b></td></tr>
-<tr class="separator:ab60ff845d44976364fa1c90a68fd8082"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae88a910f895aae33d9cd222cbfa2888e"><td class="memItemLeft" align="right" valign="top"><a id="ae88a910f895aae33d9cd222cbfa2888e"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>role_id</b></td></tr>
-<tr class="separator:ae88a910f895aae33d9cd222cbfa2888e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a88cfdd3de941fb47f104af9ebc62e51c"><td class="memItemLeft" align="right" valign="top"><a id="a88cfdd3de941fb47f104af9ebc62e51c"></a>
+eosio::name&#160;</td><td class="memItemRight" valign="bottom"><b>limit_type</b></td></tr>
+<tr class="separator:a88cfdd3de941fb47f104af9ebc62e51c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abd0b1806d25461cd48b36370bb6e7c09"><td class="memItemLeft" align="right" valign="top"><a id="abd0b1806d25461cd48b36370bb6e7c09"></a>
 uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>weight</b></td></tr>
 <tr class="separator:abd0b1806d25461cd48b36370bb6e7c09"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -104,18 +101,24 @@ eosio::asset&#160;</td><td class="memItemRight" valign="bottom"><b>income</b></t
 <tr class="memitem:a814ea7767e5b315cfc1f3328208e3aba"><td class="memItemLeft" align="right" valign="top"><a id="a814ea7767e5b315cfc1f3328208e3aba"></a>
 uint128_t&#160;</td><td class="memItemRight" valign="bottom"><b>income_in_segments</b></td></tr>
 <tr class="separator:a814ea7767e5b315cfc1f3328208e3aba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeb6036192b4494082811b9e881d3bd92"><td class="memItemLeft" align="right" valign="top"><a id="aeb6036192b4494082811b9e881d3bd92"></a>
-eosio::asset&#160;</td><td class="memItemRight" valign="bottom"><b>limit</b></td></tr>
-<tr class="separator:aeb6036192b4494082811b9e881d3bd92"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abc7762bb445e20f54dc0d447cfc67bce"><td class="memItemLeft" align="right" valign="top"><a id="abc7762bb445e20f54dc0d447cfc67bce"></a>
-eosio::time_point_sec&#160;</td><td class="memItemRight" valign="bottom"><b>last_pay_at</b></td></tr>
-<tr class="separator:abc7762bb445e20f54dc0d447cfc67bce"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad43317ebc8a377915fe01394f74164b8"><td class="memItemLeft" align="right" valign="top"><a id="ad43317ebc8a377915fe01394f74164b8"></a>
 eosio::asset&#160;</td><td class="memItemRight" valign="bottom"><b>withdrawed</b></td></tr>
 <tr class="separator:ad43317ebc8a377915fe01394f74164b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac0ceba57e94b8f3e70e504d85f1f41cd"><td class="memItemLeft" align="right" valign="top"><a id="ac0ceba57e94b8f3e70e504d85f1f41cd"></a>
 eosio::asset&#160;</td><td class="memItemRight" valign="bottom"><b>income_limit</b></td></tr>
 <tr class="separator:ac0ceba57e94b8f3e70e504d85f1f41cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc7762bb445e20f54dc0d447cfc67bce"><td class="memItemLeft" align="right" valign="top"><a id="abc7762bb445e20f54dc0d447cfc67bce"></a>
+eosio::time_point_sec&#160;</td><td class="memItemRight" valign="bottom"><b>last_pay_at</b></td></tr>
+<tr class="separator:abc7762bb445e20f54dc0d447cfc67bce"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a64d9fdad557feddad6be7f4feb2954df"><td class="memItemLeft" align="right" valign="top"><a id="a64d9fdad557feddad6be7f4feb2954df"></a>
+eosio::time_point_sec&#160;</td><td class="memItemRight" valign="bottom"><b>created_at</b></td></tr>
+<tr class="separator:a64d9fdad557feddad6be7f4feb2954df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a797a7e46d89522ddb66581320034eb82"><td class="memItemLeft" align="right" valign="top"><a id="a797a7e46d89522ddb66581320034eb82"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>role</b></td></tr>
+<tr class="separator:a797a7e46d89522ddb66581320034eb82"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb89d957d0f8bda654b149bf04627ddf"><td class="memItemLeft" align="right" valign="top"><a id="afb89d957d0f8bda654b149bf04627ddf"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>description</b></td></tr>
+<tr class="separator:afb89d957d0f8bda654b149bf04627ddf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Структура команды хоста Двойной Спирали. </p>

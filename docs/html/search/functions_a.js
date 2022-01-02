@@ -1,6 +1,21 @@
 var searchData=
 [
-  ['tactivate',['tactivate',['../classunicore.html#a0c35d9830c0c05c8f13be48b8cbdf236',1,'unicore']]],
-  ['tdeactivate',['tdeactivate',['../classunicore.html#a725477908310816ec80cddbf733af04b',1,'unicore']]],
-  ['transfromgf',['transfromgf',['../classunicore.html#a69785f67b90bf9b74e5a6c177cb0e249',1,'unicore']]]
+  ['sellshares',['sellshares',['../classunicore.html#a237ab7bb223b33ba87375e177ced89a2',1,'unicore']]],
+  ['setarch',['setarch',['../classunicore.html#ac5b6ba6e6362cc73943265c750429fd4',1,'unicore']]],
+  ['setcmsconfig',['setcmsconfig',['../classunicore.html#ad0188feae42e22b52afbb6e3c3f70c86',1,'unicore']]],
+  ['setcontent',['setcontent',['../classunicore.html#abab6ddd4a167efde5f0e45a1ffd9dfba',1,'unicore']]],
+  ['setdoer',['setdoer',['../classunicore.html#a4ff597c20fe7071fa4d48a1e6fb4e654',1,'unicore']]],
+  ['setemi',['setemi',['../classunicore.html#affa39993f35c8e2c8838a956c761cbcc',1,'unicore']]],
+  ['setgoal',['setgoal',['../classunicore.html#aa2341c3f2393be329d759ef09f20367f',1,'unicore']]],
+  ['setlevels',['setlevels',['../classunicore.html#a9ebdfe87e84d1a283143d274f2337e84',1,'unicore']]],
+  ['setparams',['setparams',['../classunicore.html#a8898e75bc9abe84fd78c15f9de3731f5',1,'unicore']]],
+  ['setpgoal',['setpgoal',['../classunicore.html#aff7586ddb285e938d5228562eb459234',1,'unicore']]],
+  ['setreport',['setreport',['../classunicore.html#a178fc39ee1d642454bddeaa3f6084d00',1,'unicore']]],
+  ['settask',['settask',['../classunicore.html#aa989f60384b7167e4e1ff2b4d219a1b3',1,'unicore']]],
+  ['settaskmeta',['settaskmeta',['../classunicore.html#a07802302c610d2dc17f77a3019b81838',1,'unicore']]],
+  ['settiming',['settiming',['../classunicore.html#af4454491cb629dc007eed9b6febdd161',1,'unicore']]],
+  ['spread_5faction',['spread_action',['../classunicore.html#a128c65265d5c63d43c16f01220b06946',1,'unicore']]],
+  ['spread_5fto_5frefs',['spread_to_refs',['../classunicore.html#a0c2b0c3fffe564405122f21621aedb78',1,'unicore']]],
+  ['start',['start',['../classunicore.html#ad83b75f3c4afd1ab954d428be8f6f7d7',1,'unicore']]],
+  ['symbol_5fto_5fstring',['symbol_to_string',['../classunicore.html#adb0134644edf42ff41b84bca15e6e8ff',1,'unicore']]]
 ];

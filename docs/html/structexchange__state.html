@@ -64,15 +64,12 @@ $(function() {
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="structexchange__state-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">exchange_state Struct Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
-
-<p><code>#include &lt;<a class="el" href="exchange__state_8hpp_source.html">exchange_state.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
@@ -84,42 +81,21 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a7891948a4c98433065f6297a846770b4"><td class="memItemLeft" align="right" valign="top"><a id="a7891948a4c98433065f6297a846770b4"></a>
 uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>primary_key</b> () const</td></tr>
 <tr class="separator:a7891948a4c98433065f6297a846770b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afdd3a7968aaae22c287e2301f12df8fc"><td class="memItemLeft" align="right" valign="top"><a id="afdd3a7968aaae22c287e2301f12df8fc"></a>
-asset&#160;</td><td class="memItemRight" valign="bottom"><b>convert_to_exchange</b> (<a class="el" href="structexchange__state_1_1connector.html">connector</a> &amp;reserve, const asset &amp;payment)</td></tr>
-<tr class="separator:afdd3a7968aaae22c287e2301f12df8fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a90c01b5b89955787029f151a6c4b134a"><td class="memItemLeft" align="right" valign="top"><a id="a90c01b5b89955787029f151a6c4b134a"></a>
-asset&#160;</td><td class="memItemRight" valign="bottom"><b>convert_from_exchange</b> (<a class="el" href="structexchange__state_1_1connector.html">connector</a> &amp;reserve, const asset &amp;tokens)</td></tr>
-<tr class="separator:a90c01b5b89955787029f151a6c4b134a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abbf59e6671e0432040e20caae7006c54"><td class="memItemLeft" align="right" valign="top"><a id="abbf59e6671e0432040e20caae7006c54"></a>
-asset&#160;</td><td class="memItemRight" valign="bottom"><b>convert</b> (const asset &amp;from, const symbol &amp;to)</td></tr>
-<tr class="separator:abbf59e6671e0432040e20caae7006c54"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab5c2f70f8e3de76e8fdc5ebcabedb4cc"><td class="memItemLeft" align="right" valign="top"><a id="ab5c2f70f8e3de76e8fdc5ebcabedb4cc"></a>
-asset&#160;</td><td class="memItemRight" valign="bottom"><b>direct_convert</b> (const asset &amp;from, const symbol &amp;to)</td></tr>
-<tr class="separator:ab5c2f70f8e3de76e8fdc5ebcabedb4cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
-Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a943b9f6619c754fd673abeee0712be44"><td class="memItemLeft" align="right" valign="top"><a id="a943b9f6619c754fd673abeee0712be44"></a>
-static int64_t&#160;</td><td class="memItemRight" valign="bottom"><b>get_bancor_output</b> (int64_t inp_reserve, int64_t out_reserve, int64_t inp)</td></tr>
-<tr class="separator:a943b9f6619c754fd673abeee0712be44"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a32a222b082994484aadef66aef2211e8"><td class="memItemLeft" align="right" valign="top"><a id="a32a222b082994484aadef66aef2211e8"></a>
-static int64_t&#160;</td><td class="memItemRight" valign="bottom"><b>get_bancor_input</b> (int64_t out_reserve, int64_t inp_reserve, int64_t out)</td></tr>
-<tr class="separator:a32a222b082994484aadef66aef2211e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac3dab3448c9d5bb55770d33d95f688ba"><td class="memItemLeft" align="right" valign="top"><a id="ac3dab3448c9d5bb55770d33d95f688ba"></a>
+asset&#160;</td><td class="memItemRight" valign="bottom"><b>convert_to_exchange</b> (<a class="el" href="structexchange__state_1_1connector.html">connector</a> &amp;c, asset in)</td></tr>
+<tr class="separator:ac3dab3448c9d5bb55770d33d95f688ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a65e34e352f066f1dae0385b2e6aa333e"><td class="memItemLeft" align="right" valign="top"><a id="a65e34e352f066f1dae0385b2e6aa333e"></a>
+asset&#160;</td><td class="memItemRight" valign="bottom"><b>convert_from_exchange</b> (<a class="el" href="structexchange__state_1_1connector.html">connector</a> &amp;c, asset in)</td></tr>
+<tr class="separator:a65e34e352f066f1dae0385b2e6aa333e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa791a6a6eac2f7a8c7b5615bc57f177b"><td class="memItemLeft" align="right" valign="top"><a id="aa791a6a6eac2f7a8c7b5615bc57f177b"></a>
+asset&#160;</td><td class="memItemRight" valign="bottom"><b>convert</b> (asset from, const symbol &amp;to)</td></tr>
+<tr class="separator:aa791a6a6eac2f7a8c7b5615bc57f177b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a611e5c10bf3e43db4d648d61630b78b6"><td class="memItemLeft" align="right" valign="top"><a id="a611e5c10bf3e43db4d648d61630b78b6"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>id</b></td></tr>
-<tr class="separator:a611e5c10bf3e43db4d648d61630b78b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8b788617274dac3c962c8f838037e147"><td class="memItemLeft" align="right" valign="top"><a id="a8b788617274dac3c962c8f838037e147"></a>
-std::string&#160;</td><td class="memItemRight" valign="bottom"><b>name</b></td></tr>
-<tr class="separator:a8b788617274dac3c962c8f838037e147"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad3b052d8c1918f431e2f4a2a82042535"><td class="memItemLeft" align="right" valign="top"><a id="ad3b052d8c1918f431e2f4a2a82042535"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><b>vesting_seconds</b> = 0</td></tr>
-<tr class="separator:ad3b052d8c1918f431e2f4a2a82042535"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a784cc236e2b292519abd4ced4afc6755"><td class="memItemLeft" align="right" valign="top"><a id="a784cc236e2b292519abd4ced4afc6755"></a>
-eosio::asset&#160;</td><td class="memItemRight" valign="bottom"><b>supply</b></td></tr>
-<tr class="separator:a784cc236e2b292519abd4ced4afc6755"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aed724d12bf57c748a1bd1cae697323e3"><td class="memItemLeft" align="right" valign="top"><a id="aed724d12bf57c748a1bd1cae697323e3"></a>
+asset&#160;</td><td class="memItemRight" valign="bottom"><b>supply</b></td></tr>
+<tr class="separator:aed724d12bf57c748a1bd1cae697323e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac347aedb89368530adf4740be02822bd"><td class="memItemLeft" align="right" valign="top"><a id="ac347aedb89368530adf4740be02822bd"></a>
 <a class="el" href="structexchange__state_1_1connector.html">connector</a>&#160;</td><td class="memItemRight" valign="bottom"><b>base</b></td></tr>
 <tr class="separator:ac347aedb89368530adf4740be02822bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -127,9 +103,7 @@ eosio::asset&#160;</td><td class="memItemRight" valign="bottom"><b>supply</b></t
 <a class="el" href="structexchange__state_1_1connector.html">connector</a>&#160;</td><td class="memItemRight" valign="bottom"><b>quote</b></td></tr>
 <tr class="separator:a72f37d7232ee04314ea2096e923c6ad5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>Uses Bancor math to create a 50/50 relay between two asset types. The state of the bancor exchange is entirely contained within this struct. There are no external side effects associated with using this API. </p>
-</div><hr/>The documentation for this struct was generated from the following files:<ul>
+<hr/>The documentation for this struct was generated from the following files:<ul>
 <li>include/<a class="el" href="exchange__state_8hpp_source.html">exchange_state.hpp</a></li>
 <li>src/exchange_state.cpp</li>
 </ul>
