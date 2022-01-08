@@ -2742,9 +2742,9 @@ void unicore::spread_action(eosio::name username, eosio::name host, eosio::asset
 
     unicore::spread_to_funds(host, quantity, username);
     
-    if (username != "eosio"_n){
-        buyshares_action (username, host, quantity, acc -> quote_token_contract, true );
-    };
+    // if (username != "eosio"_n){
+    //     buyshares_action (username, host, quantity, acc -> quote_token_contract, true );
+    // };
 
     unicore::check_burn_status(host, username, quantity);
     
