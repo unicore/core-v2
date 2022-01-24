@@ -108,7 +108,7 @@ using namespace eosio;
         eosio::name keyname = name(key);
 
         auto condition = conditions.find(keyname.value);
-        uint64_t result;
+        uint64_t result = 0;
 
         if (condition != conditions.end()){
             result = condition -> value;

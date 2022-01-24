@@ -224,6 +224,23 @@
     
 
 /*!
+   \brief Расширение структуры хоста Двойной Спирали.
+*/
+
+    struct [[eosio::table, eosio::contract("unicore")]] hosts3 {
+        eosio::name username;
+        eosio::name platform;
+        
+        EOSLIB_SERIALIZE( hosts3, (username)(platform))
+
+        uint64_t primary_key()const { return username.value; }
+      
+    };
+
+    typedef eosio::multi_index <"hosts3"_n, hosts3> account3_index;
+    
+
+/*!
    \brief Структура командных ролей протокола.
 */
 

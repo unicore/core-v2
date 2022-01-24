@@ -833,101 +833,111 @@ void next_pool( eosio::name host){
 [[eosio::action]] void unicore::fixs(eosio::name host, uint64_t pool_num){
     require_auth(_me);
     
-    // vesting_index vests(_me, host.value);
-    // auto vest = vests.find(pool_num);
+    account_index accounts(_me, host.value);
+    auto acc = accounts.find(host.value);
 
-    // account_index accounts(_me, "core"_n.value);
-    // auto acc = accounts.find("core"_n.value);
+    auto root_symbol = acc -> get_root_symbol();
 
-    refbalances_index refbalances(_me, host.value);
-    auto rb = refbalances.find(pool_num);
-    refbalances.erase(rb);
-                    
-    // action(
-    //     permission_level{ _me, "active"_n },
-    //     acc->root_token_contract , "transfer"_n,
-    //     std::make_tuple( _me, vest->owner, vest->amount, std::string("")) 
-    // ).send();
+    bwtradegraph_index bwtradegraph(_me, host.value);
     
-    // vests.erase(vest);
-    // goals3_index goals2(_me, host.value);
-    // auto goal2 = goals2.find(7321892592408944166);
-    // goals2.erase(goal2);
-    
-    // auto root_symbol = acc -> get_root_symbol();
+      auto bwtrade0 = bwtradegraph.find(0);
+      auto bwtrade1 = bwtradegraph.find(1);
+      
+      if (bwtrade0 != bwtradegraph.end()){
+        bwtradegraph.erase(bwtrade0);  
+      }
 
-    // emission_index emis(_me, host.value);
-    // auto emi = emis.find(host.value);
-    
-    // emis.modify(emi, _me, [&](auto &e){
-    //     e.fund = asset(0, root_symbol);
-    // });
+      if (bwtrade1 != bwtradegraph.end()){
+        bwtradegraph.erase(bwtrade1);
+      
+      }
+      
 
-    // bwtradegraph_index bwtradegraph(_me, host.value);
-    // auto bwtrade0 = bwtradegraph.find(0);
-    // auto bwtrade1 = bwtradegraph.find(1);
-    // bwtradegraph.erase(bwtrade0);
-    // bwtradegraph.erase(bwtrade1);
-    
-        // coredhistory_index coredhistory(_me, host.value);
-        // auto coredhist_start = coredhistory.find(pool_num);
-        // coredhistory.erase(coredhist_start);
+      coredhistory_index coredhistory(_me, host.value);
+      auto coredhist_start = coredhistory.find(0);
+      
+      if (coredhist_start != coredhistory.end()){
+          coredhistory.erase(coredhist_start);
+      }
 
-    
-    // market_index market(_me, host.value);
-    // auto itr = market.find(0);
-    
-    // market.modify(itr, _me, [&](auto &m){
-    //     m.base.balance = asset(1000000000, _POWER);
-        
-    //     m.base.weight = 0.1;
-    //     m.quote.weight = 0.1;
+      market_index market(_me, host.value);
+      auto itr = market.find(0);
+      
+      if (itr != market.end()) {
+        market.erase(itr);  
+      }
+      
 
-    //     m.quote.balance = asset(10000000000, acc ->quote_amount.symbol);
-    // });
+      ahosts_index coreahosts(_me, _me.value);
+      auto corehost = coreahosts.find(host.value);
+      
+      if (corehost != coreahosts.end()){
+        coreahosts.erase(corehost);  
+      }
+      
+      
 
-    // market.erase(itr);
+      ahosts_index ahosts(_me, host.value);
+      auto ahost = ahosts.find(host.value);
 
-    // accounts.modify(acc, _me, [&](auto &a){
-    //     a.quote_amount = asset(10000000000, acc ->quote_amount.symbol);
-    //     a.total_shares = acc -> total_shares - 1000000 + 1000000000;
-    //     // a.parameters_setted = false;
-    //     // a.activated = false;
-    //     // a.payed = true;
-    //     // a.sale_is_enabled = false;
-    //     // a.power_market_id = "self"_n;
-    // });
+      if (ahost != ahosts.end()) {
+        ahosts.erase(ahost);  
+      }
+      
+      
+      spiral_index spiral(_me, host.value);
+      auto sp = spiral.find(0);
 
-    // spiral_index spiral(_me, host.value);
-    // auto sp = spiral.find(0);
-    // spiral.erase(sp);
+      if (sp != spiral.end()){
+        spiral.erase(sp);  
+      }
+      
 
-    // cycle_index cycles (_me, host.value);
-    // auto cycle = cycles.find(0);
-    // cycles.erase(cycle);
+      cycle_index cycles(_me, host.value);
 
-    // pool_index pools(_me, host.value);
-    // auto pool1 = pools.find(0);
-    // auto pool2 = pools.find(1);
+      auto cycle = cycles.find(0);
 
-    // pools.erase(pool1);
-    // pools.erase(pool2);
+      if (cycle != cycles.end()) {
+        cycles.erase(cycle);
+      }
+      
+      pool_index pools(_me, host.value);
+      auto pool1 = pools.find(0);
+      auto pool2 = pools.find(1);
 
-    // rate_index rates(_me, host.value);
-    
-    
-    // for (auto i = 0; i < sp->pool_limit; i++){
-    //     auto rate = rates.find(i);
-    //     rates.erase(rate);    
-    // }    
+      if (pool1 != pools.end()){
+        pools.erase(pool1);  
+      }
+      
+      if (pool2 != pools.end()){
+        pools.erase(pool2);
+      }
+      
+      rate_index rates(_me, host.value);
+            
+      for (auto i = 0; i < sp->pool_limit; i++){
+          auto rate = rates.find(i);
+          rates.erase(rate);    
+      }    
 
-    // emission_index emis(_me, host.value);
-    // auto emi = emis.find(host.value);
-    // emis.erase(emi);
+      emission_index emis(_me, host.value);
+      auto emi = emis.find(host.value);
+      
+      if (emi != emis.end()) {
+        emis.erase(emi);  
+      };
+      
 
-    // sincome_index sincome(_me, host.value);
-    // auto s1 = sincome.find(0);
-    // sincome.erase(s1);
+      sincome_index sincome(_me, host.value);
+      auto s1 = sincome.find(0);
+      if (s1 != sincome.end()){
+          sincome.erase(s1);
+      }
+
+      if (acc != accounts.end()){
+        accounts.erase(acc);  
+      }
+      
 
 }
 

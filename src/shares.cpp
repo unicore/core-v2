@@ -781,6 +781,50 @@ using namespace eosio;
 	};
 
   /**
+   * @brief      Disable power market
+   *
+   * @param[in]  host    The host
+   */
+  
+  [[eosio::action]] void unicore::dispmarket(eosio::name host){
+    require_auth(host);
+    
+    account_index account(_me, host.value);
+
+    auto acc = account.find(host.value);
+    eosio::check(acc != account.end(), "Host is not found");
+
+    eosio::check(acc->power_market_id != ""_n, "Power market already disabled");
+
+    account.modify(acc, host, [&](auto &a){
+      a.power_market_id = ""_n;
+    });
+    
+  }
+
+  /**
+   * @brief      Enable power market
+   *
+   * @param[in]  host    The host
+   * @param[in]  status  The status
+   */
+  [[eosio::action]] void unicore::enpmarket(eosio::name host){
+    require_auth(host);
+    
+    account_index account(_me, host.value);
+
+    auto acc = account.find(host.value);
+    eosio::check(acc != account.end(), "Host is not found");
+
+    eosio::check(acc->power_market_id == ""_n, "Power market already enabled");
+
+    account.modify(acc, host, [&](auto &a){
+      a.power_market_id = host;
+    });
+    
+  }
+
+  /**
    * @brief      Приватный метод создания банкор-рынка.
    *
    * @param[in]  host          The host

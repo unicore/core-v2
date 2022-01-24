@@ -995,7 +995,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 					//TODO use parent_goal first!
 					//THEN use CFUND
 					//AND THEN CREATE DEBT
-					//
+					
 					goals.modify(goal, host, [&](auto &g){
 						// g.available -= report -> requested;
 						g.debt_count += 1;
@@ -1032,9 +1032,21 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 
 		if (task -> with_badge == true) {
 			unicore::giftbadge_action(host, report->username, task->badge_id, std::string("Completed task"), true, true, report->goal_id, report->task_id);
+
+			//Выдаём значок создателю действия, если предусмотрено
+			uint64_t creator_badge_id = unicore::getcondition(host, "creatorbadge");
+			
+			if (creator_badge_id > 0){
+
+				unicore::giftbadge_action(host, task->creator, creator_badge_id, std::string("Orginizer badge"), true, true, report->goal_id, report->task_id);					
+			
+			};
+
 		}
 
-		unicore::check_and_gift_netted_badge(report->username, host, task->task_id);
+		// unicore::check_and_gift_netted_badge(report->username, host, task->task_id);
+
+
 
     // accounts.modify(acc, host, [&](auto &a){
     //   a.approved_reports = acc -> approved_reports + 1;

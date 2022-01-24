@@ -502,7 +502,14 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::settype);
                     break;
                 };
-
+                case "enpmarket"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::enpmarket);
+                    break;
+                };
+                case "dispmarket"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::dispmarket);
+                    break;
+                };
 
                 case "settiming"_n.value: {
                   execute_action(name(receiver), name(code), &unicore::settiming);

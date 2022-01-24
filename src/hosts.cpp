@@ -523,9 +523,16 @@ using namespace eosio;
         auto failure_if_root_not_exist1   = eosio::token::get_supply(root_token_contract, root_token.symbol.code() );
         auto failure_if_root_not_exist2   = eosio::token::get_supply(quote_token_contract, quote_amount.symbol.code() );
 
-        
-        auto to_pay = quote_amount;
-        // eosio::asset to_pay = asset(0, quote_amount.symbol);
+                
+        uint64_t to_pay_amount = unicore::getcondition(platform, "hostfee");
+        eosio::asset to_pay = asset(to_pay_amount, quote_amount.symbol);
+
+        //Создаём запись о платформе создания для возврата платежа с оплатой
+        account3_index accounts3(_me, _me.value);
+        accounts3.emplace(_me, [&](auto &cr){
+            cr.username = username;
+            cr.platform = platform;
+        });
 
         auto ref = users.find(username.value);
         eosio::name referer = ref->referer;
@@ -700,6 +707,17 @@ using namespace eosio;
     	{
     		unicore::create_bancor_market("POWER MARKET", 0, username, host->total_shares, host->quote_amount, host->quote_token_contract, _SHARES_VESTING_DURATION);
 		};
+
+        account3_index accounts3(_me, _me.value);
+        auto host3 = accounts3.find(username.value);
+        
+        if (host3 != accounts3.end()){
+            action(
+                permission_level{ _me, "active"_n },
+                host->root_token_contract, "transfer"_n,
+                std::make_tuple( _me, host3->platform, amount, std::string("Payment for host upgrade")) 
+            ).send();
+        }
 
 	  
     };

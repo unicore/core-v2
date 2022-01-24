@@ -78,6 +78,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         
         static void giftbadge_action(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment, bool netted, bool own, uint64_t goal_id, uint64_t task_id);
         static void deposit ( eosio::name username, eosio::name host, eosio::asset amount, eosio::name code, std::string message );
+        [[eosio::action]] void settcrbadge(eosio::name host, uint64_t badge_id);
 
         //CMS
         [[eosio::action]] void setcontent(eosio::name username, eosio::name type, eosio::name lang, eosio::string content);
@@ -200,6 +201,9 @@ class [[eosio::contract]] unicore : public eosio::contract {
         
         [[eosio::action]] void withpbenefit(eosio::name username, eosio::name host);
         [[eosio::action]] void withrsegment(eosio::name username, eosio::name host);
+
+        [[eosio::action]] void dispmarket(eosio::name host);
+        [[eosio::action]] void enpmarket(eosio::name host);
 
         [[eosio::action]] void withrbenefit(eosio::name username, eosio::name host, uint64_t id);
         [[eosio::action]] void refreshpu(eosio::name username, eosio::name host);
