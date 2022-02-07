@@ -686,7 +686,7 @@ using namespace eosio;
       emission_index emis(_me, hostname.value);
       auto emi = emis.find(hostname.value);
       eosio::check(gtop <= 100, "Goal top should be less then 100");
-      eosio::check(percent <= 1000 * ONE_PERCENT, "Emission percent should be less then 100 * ONE_PERCENT");
+      eosio::check(percent <= 1000 * ONE_PERCENT, "Emission percent should be less then 1000 * ONE_PERCENT");
       
       emis.modify(emi, hostname, [&](auto &e){
           e.percent = percent;

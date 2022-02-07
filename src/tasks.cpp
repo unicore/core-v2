@@ -471,7 +471,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
     
     auto payer = has_auth(task->creator) ? task->creator : task->host;
 
-		eosio::check(task -> reports_count == 0, "Cannot delete task with reports. Delete all reports firstly");
+		// eosio::check(task -> reports_count == 0, "Cannot delete task with reports. Delete all reports firstly");
 		
 		eosio::check(task != tasks.end(), "Task is not found");
 
@@ -936,6 +936,41 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		});
 	}
 
+
+
+	/**
+	 * @brief      Публиный метод удаления отчета
+	 * В случае, если действие считается завершенным, отчёт может удалить участник или хост
+	 * @param[in]  op    The operation
+	 */
+	[[eosio::action]] void unicore::delreport(eosio::name host, eosio::name username, uint64_t report_id){
+		
+		if (!has_auth(host)){
+			require_auth(username);
+		} else {
+			require_auth(host);
+		}
+		
+		account_index accounts(_me, host.value);
+		
+		auto acc = accounts.find(host.value);
+		eosio::check(acc != accounts.end(), "Host is not found");
+
+		reports_index reports(_me, host.value);
+		auto report = reports.find(report_id);
+
+		tasks_index tasks(_me, host.value);
+		auto task = tasks.find(report -> task_id);
+
+		tasks.modify(task, _me, [&](auto &t){
+			t.reports_count -= 1;
+		});
+		
+		eosio::check(task -> completed == true, "Only report for a completed task can be removed");
+
+		reports.erase(report);
+	}
+
 	/**
 	 * @brief      Публичный метод одобрения отчета
 	 * Используется хостом для того, чтобы принять задачу как выполненную и выдать вознаграждение / награду в виде значка. 
@@ -1147,8 +1182,8 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 	 * 
 	 * @param[in]  op    The operation
 	 */
-	[[eosio::action]] void unicore::distrepo(eosio::name host, uint64_t report_id) {
-		require_auth(host);
+	[[eosio::action]] void unicore::distrepo(eosio::name username, eosio::name host, uint64_t report_id) {
+		require_auth(username);
 		account_index accounts(_me, host.value);
 		
 		auto acc = accounts.find(host.value);
@@ -1163,14 +1198,16 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		goals3_index goals3(_me, host.value);
 		auto goal2 = goals3.find(report->goal_id);
 		
-		eosio::check(report->distributed == false, "Distribution already happen to a report");
+		// eosio::check(report->distributed == false, "Distribution already happen to a report");
+		eosio::check(goal->finish_at.sec_since_epoch() < eosio::current_time_point().sec_since_epoch() + 86400, "Goal is still under distribution");
+		eosio::check(report -> username == username, "Only funds from your report you can withdraw");
 
-		if ((goal->status == "reported"_n || goal->status == "completed"_n) && goal->finish_at.sec_since_epoch() < eosio::current_time_point().sec_since_epoch()) {
+		if ((goal->status == "reported"_n || goal->status == "completed"_n) && report->distributed == false) {
 
 			double part = (double)report->total_votes / (double)goal->target3.amount * (double)goal2->total_on_distribution.amount;
 			eosio::asset part_asset = asset((uint64_t)part, report->balance.symbol);
 
-			reports.modify(report, host, [&](auto &r){
+			reports.modify(report, username, [&](auto &r){
 				r.balance += part_asset;
 				r.distributed = true;
 			});	

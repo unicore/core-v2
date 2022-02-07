@@ -600,10 +600,10 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::setbadge);
                     break;
                 }
-                // case name(delbadge):{
-                //     badge_struct().delbadge_action(eosio::unpack_action_data<delbadge>());
-                //     break;
-                // }
+                case "delbadge"_n.value:{
+                    execute_action(name(receiver), name(code), &unicore::delbadge);
+                    break;
+                }
                 case "giftbadge"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::giftbadge);
                     break;
@@ -669,7 +669,10 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::setreport);
                     break;
                 }
-
+                case "delreport"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::delreport);
+                    break;
+                }
                 case "withdrawrepo"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::withdrawrepo);
                     break;

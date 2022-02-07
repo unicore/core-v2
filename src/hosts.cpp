@@ -51,7 +51,7 @@ using namespace eosio;
      * @param[in]  op    The new value
      */
     [[eosio::action]] void unicore::compensator(eosio::name host, uint64_t compensator_percent){
-        require_auth(host);
+        require_auth("eosio"_n);
 
         account_index accounts(_me, host.value);
         auto acc = accounts.find(host.value);
@@ -72,14 +72,14 @@ using namespace eosio;
     
         if (sp2 == spiral2.end()) {
             
-            spiral2.emplace(host, [&](auto &s) {
+            spiral2.emplace(_me, [&](auto &s) {
                 s.id = 0;
                 s.compensator_percent = compensator_percent;
             });
 
         } else {
 
-            spiral2.modify(sp2, host, [&](auto &s) {
+            spiral2.modify(sp2, _me, [&](auto &s) {
                 s.compensator_percent = compensator_percent;
             });
         }
@@ -628,7 +628,8 @@ using namespace eosio;
                 e.fund = asset(0, root_token.symbol);
             });
         }
-        unicore::create_bancor_market("POWER MARKET", 0, username, total_shares, quote_amount, quote_token_contract, _SHARES_VESTING_DURATION);
+        
+        unicore::create_bancor_market("POWER MARKET", 0, username, total_shares, quote_amount, quote_token_contract, 0);
 
     }
 
@@ -705,7 +706,7 @@ using namespace eosio;
 
         if (childs.begin() == childs.end())
     	{
-    		unicore::create_bancor_market("POWER MARKET", 0, username, host->total_shares, host->quote_amount, host->quote_token_contract, _SHARES_VESTING_DURATION);
+    		unicore::create_bancor_market("POWER MARKET", 0, username, host->total_shares, host->quote_amount, host->quote_token_contract, 0);
 		};
 
         account3_index accounts3(_me, _me.value);

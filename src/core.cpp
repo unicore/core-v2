@@ -833,8 +833,27 @@ void next_pool( eosio::name host){
 [[eosio::action]] void unicore::fixs(eosio::name host, uint64_t pool_num){
     require_auth(_me);
     
+    // usbadge_index user_badges(_me, "alexant"_n.value);
+    // auto user_badge = user_badges.find(0);
+    // user_badges.erase(user_badge);
+
+    // badge_index badges(_me, host.value);
+    // auto badge = badges.find(0);
+    // badges.modify(badge, _me, [&](auto &b){
+    //     b.remain += 8;
+    // });
+        
+
     account_index accounts(_me, host.value);
     auto acc = accounts.find(host.value);
+
+    account3_index accounts3(_me, _me.value);
+    auto acc3 = accounts3.find(host.value);
+    
+    if (acc3 != accounts3.end()) {
+        accounts3.erase(acc3);    
+    };
+    
 
     auto root_symbol = acc -> get_root_symbol();
 
@@ -891,6 +910,13 @@ void next_pool( eosio::name host){
       if (sp != spiral.end()){
         spiral.erase(sp);  
       }
+
+      spiral2_index spiral2(_me, host.value);
+      auto sp2 = spiral2.find(0);
+      if (sp2 != spiral2.end()){
+        spiral2.erase(sp2);  
+      }
+      
       
 
       cycle_index cycles(_me, host.value);
@@ -1067,7 +1093,7 @@ void next_pool( eosio::name host){
         auto lp = last_params.find(0);
         eosio::check(lp->size_of_pool <= size_of_pool, "Size of pool cannot be decreased in child host");
     } else {
-        // eosio::check(account->activated == false, "Protocol is already active and cannot be changed now.");
+        eosio::check(account->activated == false, "Protocol is already active and cannot be changed now.");
     }
 
     rate_index rates(_me, main_host.value);
@@ -1105,54 +1131,7 @@ void next_pool( eosio::name host){
         s.priority_seconds = priority_seconds;
     });
 
-    spiral2_index spiral2(_me, host.value);
-    auto sp2 = spiral2.find(0);
-    if (compensator_percent > 0) {
-        eosio::check(account->root_token_contract == "eosio.token"_n, "Only eosio.token contract can be used for compesation");
-        eosio::check(root_symbol == _SYM, "Only core symbol can be used for compensation.");
-
-        eosio::check(host == _core_host, "Only core host can access compensator now");
     
-        // producers_table producers("eosio"_n, "eosio"_n.value);
-        // auto idx = producers.get_index<"prototalvote"_n>();
-
-        // std::vector<eosio::name> top_producers;
-        // top_producers.reserve(21);
-
-        // for ( auto it = idx.cbegin(); it != idx.cend() && top_producers.size() < 21 && 0 < it->total_votes && it->active(); ++it ) {
-        //     top_producers.emplace_back(it -> owner);
-        // };
-
-        // uint64_t count = 0;
-        // auto top_producer = top_producers.begin();
-        // bool host_is_producer = false;
-        
-        // while (top_producer != top_producers.end()){
-        //     if (*top_producer == host)
-        //         host_is_producer = true;                
-        //     top_producer++;
-        // };
-        // eosio::check(host_is_producer == true, "Host is not a producer for use a compensator mode");
-        
-        eosio::check(overlap <= 10500, "Overlap should be not more then 5% for compensator mode");
-    
-    };
-
-    if (sp2 == spiral2.end()) {
-        
-        spiral2.emplace(host, [&](auto &s) {
-            s.id = 0;
-            s.compensator_percent = compensator_percent;
-        });
-
-    } else {
-
-        spiral2.modify(sp2, host, [&](auto &s) {
-            s.compensator_percent = compensator_percent;
-        });
-    }
-    
-
     
     double buy_rate[pool_limit+1];
     double sell_rate[pool_limit+1];
@@ -1224,7 +1203,7 @@ void next_pool( eosio::name host){
             total_in_box[i] = i > 1 ? total_in_box[i-1] + live_balance_for_sale[i] : total_in_box[i-1] + pool_cost[i];
             
 
-            // Используем по причине необходимости переработки решения дифференциального уравнения системного дохода. 
+            // Используем по причине необходимости переработки решения дифференциального уравнения системного дохода. Ограничение значительно уменьшает количество возможных конфигураций. 
             eosio::check(system_income[i] >= system_income[i-1], "System income should not decrease");
 
             /**
@@ -1236,7 +1215,7 @@ void next_pool( eosio::name host){
             bool positive = total_in_box[i-1] - payment_to_wins[i] <= payment_to_loss[i] ? false : true;
             
 
-            eosio::check(positive, "The financial model of Protocol is Negative.");
+            eosio::check(positive, "The financial model is negative. Change the 2Helix params.");
 
 
             if (i > 2)
@@ -1274,7 +1253,6 @@ void next_pool( eosio::name host){
     });
 
 }
-
 
 
 void unicore::deposit ( eosio::name username, eosio::name host, eosio::asset amount, eosio::name code, std::string message ){
@@ -1870,8 +1848,10 @@ void unicore::fill_pool(eosio::name username, eosio::name host, uint64_t quants,
                         b.if_convert_to_power = next_if_convert_to_power;
                         double convert_percent = next_if_convert.amount > 0 ? (double)b.if_convert.amount / (double)bal -> start_convert_amount.amount * (double)HUNDR_PERCENT  - (double)HUNDR_PERCENT : 0;
                         b.convert_percent = uint64_t(convert_percent);
-                        b.root_percent = - sp->loss_percent + sp2 -> compensator_percent; 
-
+                        //TODO calculate from deposit to compensate amount;
+                        double root_percent = (double)b.available.amount / (double)bal -> purchase_amount.amount * (double)HUNDR_PERCENT  - (double)HUNDR_PERCENT; 
+                            
+                        b.root_percent = - sp->loss_percent + (bal -> compensator_amount.amount > 0 ? (uint64_t)((double)bal -> compensator_amount.amount / (double)bal -> purchase_amount.amount * (double)HUNDR_PERCENT) : 0); 
                     });
                     
                 };
@@ -2386,12 +2366,23 @@ void unicore::createfund(eosio::name token_contract, eosio::asset fund_asset, st
     auto root_symbol = acc->get_root_symbol();
     eosio::asset to_pay = dac -> income;
 
-    if (to_pay.amount > 0){
-        action(
-            permission_level{ _me, "active"_n },
-            acc->root_token_contract, "transfer"_n,
-            std::make_tuple( _me, username, to_pay, std::string("DAC income before remove")) 
-        ).send();
+    if (to_pay.amount > 0) {
+
+        uint64_t vesting_seconds = unicore::getcondition(host, "teamvestsecs");
+        
+        if (vesting_seconds > 0) {
+
+            make_vesting_action(username, host, acc->root_token_contract, to_pay, vesting_seconds, "teamwithdraw"_n);
+
+        } else {
+
+            action(
+                permission_level{ _me, "active"_n },
+                acc->root_token_contract, "transfer"_n,
+                std::make_tuple( _me, username, to_pay, std::string("DAC income")) 
+            ).send();
+
+        }
 
         dacs.modify(dac, username, [&](auto &d){
             d.income = asset(0, root_symbol);
@@ -2969,9 +2960,9 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         if (bal->compensator_amount.amount > 0){
             action(
                 permission_level{ _me, "active"_n },
-                acc->root_token_contract, "retire"_n,
-                std::make_tuple( _me, bal->compensator_amount, std::string("Retire not compensated amount")) 
-            ).send();  
+                acc->root_token_contract, "transfer"_n,
+                std::make_tuple( _me, _saving, bal -> compensator_amount, std::string("Back not compensated amount")) 
+            ).send();
         };
 
         if (pool -> pool_num < 3){
@@ -3040,12 +3031,18 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
              * Инициирует распределение реферальных вознаграждений и выплаты во все фонды.
              */
 
-            if (bal->compensator_amount.amount > 0){
+            if (bal->compensator_amount.amount > 0) {
                 action(
                     permission_level{ _me, "active"_n },
-                    acc->root_token_contract, "retire"_n,
-                    std::make_tuple( _me, bal->compensator_amount, std::string("Retire not compensated amount")) 
-                ).send();  
+                    "eosio"_n, "inprodincome"_n,
+                    std::make_tuple( acc -> root_token_contract, bal->compensator_amount) 
+                ).send();
+
+                // action(
+                //     permission_level{ _me, "active"_n },
+                //     acc->root_token_contract, "retire"_n,
+                //     std::make_tuple( _me, bal->compensator_amount, std::string("Retire not compensated amount")) 
+                // ).send();  
             };
             
 
@@ -3158,13 +3155,16 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                         std::make_tuple( _me, username, bal->compensator_amount, std::string("Compensator Withdraw")) 
                     ).send();    
                 } else {
+
+                    //Если хотим заблокировать вывод до следующего цикла
                     eosio::check(false, "Cannot withdraw until saturation event");
 
+                    //Если разрешаем вывод в текущем цикле, то делаем его со штрафом (т.е. ничего не делаем здесь, кроме возвращения суммы компенсации в резервный фонд)
                     action(
                         permission_level{ _me, "active"_n },
-                        acc->root_token_contract, "retire"_n,
-                        std::make_tuple( _me, bal->compensator_amount, std::string("Retire not compensated amount")) 
-                    ).send();  
+                        "eosio"_n, "inprodincome"_n,
+                        std::make_tuple( acc -> root_token_contract, bal->compensator_amount) 
+                    ).send();
 
                 }
                 
@@ -3245,6 +3245,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                     refbalances_index refbalances(_me, referer.value);
                     
                     refbalances.emplace(_me, [&](auto &rb){
+                        print("on emplace");
                         rb.id = refbalances.available_primary_key();
                         rb.timepoint_sec = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
                         rb.host = host;
@@ -3258,7 +3259,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                         rb.segments = (double)to_ref_segments * TOTAL_SEGMENTS;
                     });
 
- 
+                    print("after emplace");
                     paid += to_ref_amount;
                     
                     ref = refs.find(referer.value);
@@ -3405,10 +3406,6 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         }
         
         if (total_dac_asset.amount > 0) {
-            //TODO check enabled condition auto buy shares from market here?
-            //TO WHO?!?!
-            //uint64_t asset_minpower2 = buyshares_action (referal, host, total_dac_asset, acc -> quote_token_contract, true );
-
             unicore::spread_to_dacs(host, total_dac_asset);
         }
         
@@ -3429,9 +3426,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                 "eosio"_n, "inprodincome"_n,
                 std::make_tuple( acc -> root_token_contract, total_sys_asset) 
             ).send();
-
         };
-
 
 
         market_index market(_me, host.value);
@@ -3441,9 +3436,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         sincome_index sincome(_me, host.value);
         auto sinc = sincome.find(acc->current_pool_id);
 
-        
-        if (sinc == sincome.end()){
-            
+        if (sinc == sincome.end()) {
             sincome.emplace(_me, [&](auto &s){
                 s.pool_id = acc->current_pool_id;
                 s.max = start_rate -> system_income;
@@ -3460,9 +3453,9 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                 s.hfund_in_segments = total_hfund_asset.amount * TOTAL_SEGMENTS;
                 s.distributed_segments = 0;
             }); 
-
+            
         } else {
-
+            
             sincome.modify(sinc, _me, [&](auto &s){
                 s.total += total;
                 s.paid_to_refs += asset_ref_amount;
@@ -3473,7 +3466,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                 s.hfund_in_segments += total_hfund_asset.amount * TOTAL_SEGMENTS;
                 
             });
-
+            
         }
 
     }
@@ -3492,7 +3485,6 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         
         if (dac != dacs.end()){
             while(dac != dacs.end()) {
-                
                 eosio::asset amount_for_dac = asset(amount.amount * dac -> weight / acc-> total_dacs_weight, root_symbol);
                 
                 dacs.modify(dac, _me, [&](auto &d){
@@ -3505,12 +3497,12 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                     d.income_in_segments += amount_for_dac.amount * TOTAL_SEGMENTS;
                 
                 });
-
+                
                 dac++;
-
+                
             }
         }  else {
-
+            
             dacs.emplace(_me, [&](auto &d){
                 d.dac = host;
                 d.weight = 1;
@@ -3521,6 +3513,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                 d.last_pay_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
                 d.created_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
             });
+            
 
             accounts.modify(acc, _me, [&](auto &h){
                 h.total_dacs_weight = 1;

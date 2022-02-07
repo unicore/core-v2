@@ -763,17 +763,20 @@ using namespace eosio;
 		market.modify( itr, _me, [&]( auto& es ) {
         	tokens_out = es.direct_convert( asset(shares,eosio::symbol(eosio::symbol_code("POWER"), 0)), exist -> quote_amount.symbol);
 	    });
-		eosio::check( tokens_out.amount > 1, "token amount received from selling shares is too low" );
-	    
-	    make_vesting_action(username, host, exist -> quote_token_contract, tokens_out, itr->vesting_seconds, "powersell"_n);
-	    
-	    unicore::propagate_votes_changes(host, username, userpower->power, userpower-> power - shares);
-      log_event_with_shares(username, host, userpower->power - shares);
 
-	    power.modify(userpower, username, [&](auto &p){
-	    	p.power = userpower->power - shares;
-	    	p.staked = userpower->staked - shares;
-	    });
+		eosio::check( tokens_out.amount > 1, "token amount received from selling shares is too low" );
+	   
+    uint64_t vesting_seconds = unicore::getcondition(host, "vestingsecs");
+
+    make_vesting_action(username, host, exist -> quote_token_contract, tokens_out, vesting_seconds, "powersell"_n);
+    
+    unicore::propagate_votes_changes(host, username, userpower->power, userpower-> power - shares);
+    log_event_with_shares(username, host, userpower->power - shares);
+
+    power.modify(userpower, username, [&](auto &p){
+    	p.power = userpower->power - shares;
+    	p.staked = userpower->staked - shares;
+    });
 
       // unicore::checkminpwr(host, username);
     

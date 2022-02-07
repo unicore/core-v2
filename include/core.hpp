@@ -75,7 +75,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void setbadge(uint64_t id, eosio::name host, eosio::string caption, eosio::string description, eosio::string iurl, eosio::string pic, uint64_t total, uint64_t power);
         [[eosio::action]] void giftbadge(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment, bool netted, uint64_t goal_id, uint64_t task_id);
         [[eosio::action]] void backbadge(eosio::name host, eosio::name from, uint64_t usbadge_id, eosio::string comment);
-        
+        [[eosio::action]] void delbadge(eosio::name host, uint64_t badge_id);
+
         static void giftbadge_action(eosio::name host, eosio::name to, uint64_t badge_id, eosio::string comment, bool netted, bool own, uint64_t goal_id, uint64_t task_id);
         static void deposit ( eosio::name username, eosio::name host, eosio::asset amount, eosio::name code, std::string message );
         [[eosio::action]] void settcrbadge(eosio::name host, uint64_t badge_id);
@@ -249,9 +250,10 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void editreport(eosio::name host, eosio::name username, uint64_t report_id, eosio::string data);
         [[eosio::action]] void approver(eosio::name host, uint64_t report_id, eosio::string comment); 
         [[eosio::action]] void disapprover(eosio::name host, uint64_t report_id, eosio::string comment);
+        [[eosio::action]] void delreport(eosio::name host, eosio::name username, uint64_t report_id);
 
         [[eosio::action]] void withdrawrepo(eosio::name username, eosio::name host, uint64_t report_id);
-        [[eosio::action]] void distrepo(eosio::name host, uint64_t report_id);
+        [[eosio::action]] void distrepo(eosio::name username, eosio::name host, uint64_t report_id);
 
 
         //VOTING

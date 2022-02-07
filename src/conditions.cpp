@@ -25,28 +25,22 @@ using namespace eosio;
         uint64_t twelvemburn = unicore::getcondition(host, "twelvemburn");
 
         uint64_t burnperiod = unicore::getcondition(host, "burnperiod");
-
+        
         uint64_t times = 0;
         
-        if (burn_amount.amount >= twelvemburn * 12){
+        if (twelvemburn > 0 && burn_amount.amount >= twelvemburn * 12){
             times = burn_amount.amount / twelvemburn;
-            print("times: ", 12, times);
-        } else if (burn_amount.amount >= ninemburn * 9){
+        } else if (ninemburn > 0 && burn_amount.amount >= ninemburn * 9){
             times = burn_amount.amount / ninemburn;
-            print("times: ", 9, times);
-        } else if (burn_amount.amount >= sixmburn * 6) {
+        } else if (sixmburn > 0 && burn_amount.amount >= sixmburn * 6) {
             times = burn_amount.amount / sixmburn;
-            print("times: ", 6, times);
-        } else if (burn_amount.amount >= threemburn * 3){
+        } else if (threemburn > 0 && burn_amount.amount >= threemburn * 3){
             times = burn_amount.amount / threemburn;
-            print("times: ", 3, times);
-        } else if (burn_amount.amount >= minburn) {
+        } else if (minburn > 0 && burn_amount.amount >= minburn) {
             times = burn_amount.amount / minburn;
-            print("times: ", 1, times);
         } 
         
         if (times > 0 && username != "eosio"_n) {
-
             cpartners2_index partners(_me, host.value);
             auto partner = partners.find(username.value);
             
@@ -65,6 +59,7 @@ using namespace eosio;
                 });
             }
         }
+        
     }
 
     void unicore::rmfromhostwl(eosio::name host, eosio::name username){

@@ -54,18 +54,31 @@
 	 * @brief      Метод установки значка создателю действия
 	 *
 	 * @param[in]  host      The host
-	 * @param[in]  to        { parameter_description }
 	 * @param[in]  badge_id  The badge identifier
-	 * @param[in]  comment   The comment
-	 * @param[in]  netted    Indicates if netted
-	 * @param[in]  goal_id   The goal identifier
-	 * @param[in]  task_id   The task identifier
 	 */
 	[[eosio::action]] void unicore::settcrbadge(eosio::name host, uint64_t badge_id){
 		
 		require_auth(host);
 		eosio::check(badge_id >0, "badge id should be more then zero");
 		unicore::setcondition(host, "creatorbadge", badge_id);
+
+	}
+
+
+
+	/**
+	 * @brief      Метод удаления значка
+	 *
+	 * @param[in]  host      The host
+	 * @param[in]  badge_id  The badge identifier
+	 */
+	[[eosio::action]] void unicore::delbadge(eosio::name host, uint64_t badge_id){
+		
+		require_auth(host);
+		badge_index badges(_me, host.value);
+		auto badge = badges.find(badge_id);
+		eosio::check(badge->total == badge->remain, "Cannot delete this badge in reason that badge type is already gifted");
+		badges.erase(badge);
 
 	}
 
