@@ -201,7 +201,12 @@ class [[eosio::contract]] unicore : public eosio::contract {
         // [[eosio::action]] void incrusersegm(eosio::name host, uint64_t pool_id, uint64_t user_segments);
         
         [[eosio::action]] void withpbenefit(eosio::name username, eosio::name host);
-        [[eosio::action]] void withrsegment(eosio::name username, eosio::name host);
+
+        [[eosio::action]] void withrbalance(eosio::name username, eosio::name host);
+        [[eosio::action]] void setwithdrwal(eosio::name username, eosio::name host, eosio::string wallet);
+
+        [[eosio::action]] void cancrefwithd(eosio::name host, uint64_t id, eosio::string comment);
+        [[eosio::action]] void complrefwith(eosio::name host, uint64_t id, eosio::string comment);
 
         [[eosio::action]] void dispmarket(eosio::name host);
         [[eosio::action]] void enpmarket(eosio::name host);
@@ -673,6 +678,35 @@ class [[eosio::contract]] unicore : public eosio::contract {
    typedef eosio::multi_index< "producers"_n, producer_info,
        indexed_by<"prototalvote"_n, const_mem_fun<producer_info, double, &producer_info::by_votes>  >
     > producers_table;
+
+
+
+        /**
+     * @brief      Таблица содержит курсы конвертации к доллару.
+     * @ingroup public_tables
+     * @table usdrates
+     * @contract _me
+     * @scope _me
+     * @details    Курсы обновляются аккаунтом rater методом setrate или системным контрактом eosio методом uprate. 
+    */
+    
+    struct [[eosio::table]] usdrates {
+        uint64_t id;                        /*!< идентификатор курса */
+        eosio::name out_contract;           /*!< контракт выхода; если в конвертации используется внешняя валюта (например, фиатный RUB), контракт не устанавливается. Во внутренних конвертациях используется только при указании курса жетона ядра системы к доллару. */
+        eosio::asset out_asset;             /*!< токен выхода */
+        double rate;                        /*!< курс токена выхода к доллару */
+        eosio::time_point_sec updated_at;   /*!< дата последнего обновления курса */
+        
+        uint64_t primary_key() const {return id;} /*!< return id - primary_key */
+        uint128_t byconsym() const {return combine_ids(out_contract.value, out_asset.symbol.code().raw());} /*!< (out_contract, out_asset.symbol) - комбинированный secondary_key для получения курса по имени выходного контракта и символу */
+
+    };
+
+    typedef eosio::multi_index<"usdrates"_n, usdrates,
+    
+      eosio::indexed_by< "byconsym"_n, eosio::const_mem_fun<usdrates, uint128_t, &usdrates::byconsym>>
+    
+    > usdrates_index;
 
 
 

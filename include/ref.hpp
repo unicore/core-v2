@@ -60,6 +60,59 @@
     typedef eosio::multi_index<"refbalances"_n, refbalances> refbalances_index;
 
 
+
+/*!
+   \brief Структура кошелька реферальных балансов для выплат в USDT
+*/
+
+    struct [[eosio::table, eosio::contract("unicore")]] refbalances2{
+        eosio::name host;
+        eosio::asset available;
+        eosio::asset withdrawed;
+        eosio::string wallet;
+        uint64_t primary_key() const {return host.value;}
+
+        EOSLIB_SERIALIZE(refbalances2, (host)(available)(withdrawed)(wallet))
+    };
+
+    typedef eosio::multi_index<"refbalances2"_n, refbalances2> refbalances2_index;
+
+
+
+/*!
+   \brief Структура кошелька реферальных балансов для выплат в USDT
+*/
+
+    struct [[eosio::table, eosio::contract("unicore")]] usdtwithdraw {
+        uint64_t id;
+        eosio::time_point_sec created_at;
+        eosio::name host;
+        eosio::name username;
+        eosio::name status;
+        eosio::asset to_withdraw;
+        eosio::string wallet;
+        eosio::string comment;
+
+        uint64_t primary_key() const {return id;}
+        uint64_t byusername() const{return username.value;}
+        uint64_t byhost() const{return host.value;}
+        uint64_t bystatus() const{return status.value;}
+        uint64_t bycreated() const{return created_at.sec_since_epoch();}
+        
+
+        EOSLIB_SERIALIZE(usdtwithdraw, (id)(created_at)(host)(username)(status)(to_withdraw)(wallet)(comment))
+    };
+
+    typedef eosio::multi_index<"usdtwithdraw"_n, usdtwithdraw,
+        eosio::indexed_by<"byusername"_n, eosio::const_mem_fun<usdtwithdraw, uint64_t, &usdtwithdraw::byusername>>,
+        eosio::indexed_by<"byhost"_n, eosio::const_mem_fun<usdtwithdraw, uint64_t, &usdtwithdraw::byhost>>,
+        eosio::indexed_by<"bystatus"_n, eosio::const_mem_fun<usdtwithdraw, uint64_t, &usdtwithdraw::bystatus>>,
+        eosio::indexed_by<"bycreated"_n, eosio::const_mem_fun<usdtwithdraw, uint64_t, &usdtwithdraw::bycreated>>
+    
+    > usdtwithdraw_index;
+
+
+
 /*!
    \brief Структура статистики реферальных балансов и осадок, доступный на получение по мере накопления.
 */

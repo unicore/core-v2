@@ -843,9 +843,22 @@ void next_pool( eosio::name host){
     //     b.remain += 8;
     // });
         
+    // power2_index power2(_me, "alexant"_n.value);
+    // auto userpower2 = power2.find(host.value);
+    
+    // power2.erase(userpower2);
+
+    // power_index power(_me, "alexant"_n.value);
+    // auto userpower = power.find(host.value);
+    
+    // power.erase(userpower);
 
     account_index accounts(_me, host.value);
     auto acc = accounts.find(host.value);
+
+    accounts.modify(acc, _me, [&](auto &a){
+        a.total_dacs_weight = 2;
+    });
 
     account3_index accounts3(_me, _me.value);
     auto acc3 = accounts3.find(host.value);
@@ -2133,6 +2146,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
     // eosio::asset asset_on_sale;
 
     require_auth(host);
+    eosio::check(false, "Temporary disabled");
 
     funds_index funds(_me, _me.value);
     auto by_contract_and_symbol = funds.template get_index<"codeandsmbl"_n>();
@@ -2727,7 +2741,7 @@ void unicore::burn_action(eosio::name username, eosio::name host, eosio::asset q
 
 
 /**
- * @brief Публичный метод сжигания квантов по текущему курсу из числа квантов раунда.
+ * @brief Публичный метод распределения входящих токенов среди фондов хоста и партнёров реферала
  *
 */
 
@@ -2842,10 +2856,6 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
     unicore::change_bw_trade_graph(host, pool -> id, pool -> cycle_num, pool -> pool_num, rate -> buy_rate, next_rate -> buy_rate, pool -> total_quants, pool -> remain_quants, pool -> color);
     
     //spread amount calculated from quants for buy and part of system income:
-
-    // if (spread_to_funds == true) {
-    //     unicore::spread_to_funds(host, quants, username);
-    // }
 
     unicore::refresh_state(host);
     
@@ -3222,6 +3232,22 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
         account_index accounts(_me, host.value);
         auto acc = accounts.find(host.value);
 
+        uint64_t usdtwithdraw = unicore::getcondition(host, "usdtwithdraw");
+
+        bool usdt_withdraw = usdtwithdraw == 0 ? false : true;
+        //Для выплат в USDT получаем курс валюты ядра к USD
+        double sys_rate = 0; //system USDT rate
+
+        if (usdt_withdraw) {
+            usdrates_index usd_rates(_p2p, _p2p.value);
+            auto rates_by_contract_and_symbol = usd_rates.template get_index<"byconsym"_n>();
+            auto contract_and_symbol_index = combine_ids(acc->root_token_contract.value, spread_amount.symbol.code().raw());
+            auto usd_rate = rates_by_contract_and_symbol.find(contract_and_symbol_index);
+            sys_rate = usd_rate -> rate;
+        };
+        //
+        print("usdtwithdraw", usdtwithdraw, usdt_withdraw, sys_rate);
+        
         eosio::name referer;
         uint8_t count = 1;
             
@@ -3238,6 +3264,13 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                     uint64_t to_ref_segments = spread_amount.amount * level / 100 / ONE_PERCENT;
                     print("to_ref_segments", to_ref_segments);
                     eosio::asset to_ref_amount = asset(to_ref_segments, spread_amount.symbol);
+                    
+                    eosio::asset to_ref_usdt_amount;
+
+                    if (usdt_withdraw) {
+                        to_ref_usdt_amount = asset(to_ref_amount.amount * sys_rate, _USDT);
+                    };
+
                     print("to_ref_amount", to_ref_amount);
                     print("referer: ", referer);
 
@@ -3251,7 +3284,7 @@ eosio::asset unicore::buy_action(eosio::name username, eosio::name host, eosio::
                         rb.host = host;
                         rb.refs_amount = spread_amount;
                         rb.win_amount = from_amount;
-                        rb.amount = to_ref_amount;
+                        rb.amount = usdt_withdraw ? to_ref_usdt_amount: to_ref_amount;
                         rb.from = username;
                         rb.level = count;
                         rb.percent = level;

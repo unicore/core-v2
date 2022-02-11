@@ -450,16 +450,28 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::withrbenefit);
                     break;
                 };
-                case "withrsegment"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::withrsegment);
+                case "withrbalance"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::withrbalance);
                     break;  
-                }
+                };
+                case "cancrefwithd"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::cancrefwithd);
+                    break;  
+                };
+                case "complrefwith"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::complrefwith);
+                    break;  
+                };
+
+                case "setwithdrwal"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::setwithdrwal);
+                    break;  
+                };
+
                 case "refreshpu"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::refreshpu);
                     break;
                 };
-                
-            
 
                 //HOSTS
                 case "upgrade"_n.value: {

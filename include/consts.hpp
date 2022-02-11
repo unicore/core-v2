@@ -8,6 +8,7 @@
 
   static constexpr eosio::symbol _SYM     = eosio::symbol(eosio::symbol_code("FLOWER"), 4);
   static constexpr eosio::symbol _POWER     = eosio::symbol(eosio::symbol_code("POWER"), 0);
+  static constexpr eosio::symbol _USDT     = eosio::symbol(eosio::symbol_code("USDT"), 4);
 
   static constexpr uint64_t _DATA_ORDER_EXPIRATION = 86400;
   static constexpr uint64_t _SHARES_VESTING_DURATION = 604800;
@@ -22,5 +23,5 @@
   static constexpr eosio::name _gateway = "gateway"_n;
   static constexpr eosio::name _saving = "eosio.saving"_n;
   static constexpr eosio::name _core_host = "core"_n;
-
+  static constexpr eosio::name _p2p = "p2p"_n;
 // }
