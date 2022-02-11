@@ -138,7 +138,7 @@ using namespace eosio;
     
 
     print("on_withdraw: ", on_withdraw);
-    eosio::asset on_widthdraw_asset = asset(on_withdraw, root_symbol);
+    eosio::asset on_widthdraw_asset = asset(on_withdraw, amount.symbol);
     
     uint64_t usdtwithdraw = unicore::getcondition(host, "usdtwithdraw");
     bool usdt_withdraw = refbalance->amount.symbol == _USDT && usdtwithdraw > 0;
