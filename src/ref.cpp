@@ -78,6 +78,7 @@ using namespace eosio;
 
     uint64_t min_amount = unicore::getcondition(host, "minusdtwithd");
     eosio::check(rbalance->available.amount >= min_amount, "Amount for withdraw should be more or equal minimum withdraw amount");
+    eosio::check(rbalance->available.amount > 0, "Amount for withdraw should be more then zero");
 
     eosio::check(rbalance -> wallet.size() > 0, "Wallet for withdraw is not setted");
 
