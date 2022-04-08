@@ -192,6 +192,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         
         // static void buydata_action(eosio::name owner, uint64_t data_id, eosio::name buyer, eosio::asset quantity, eosio::name code);
 
+        static void add_user_stat(eosio::name type, eosio::name username, eosio::name contract, eosio::asset nominal_amount, eosio::asset withdraw_amount);
 
 
 
@@ -284,6 +285,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         
         static void add_coredhistory(eosio::name host, eosio::name username, uint64_t pool_id, eosio::asset amount, std::string action, std::string message);
 
+        static void make_vesting_action(eosio::name owner, eosio::name host, eosio::name contract, eosio::asset amount, uint64_t vesting_seconds, eosio::name type);
         static void create_bancor_market(std::string name, uint64_t id, eosio::name host, uint64_t total_shares, eosio::asset quote_amount, eosio::name quote_token_contract, uint64_t vesting_seconds);
         static std::vector <eosio::asset> calculate_forecast(eosio::name username, eosio::name host, uint64_t quants, uint64_t pool_num, eosio::asset purchase_amount, bool calculate_first, bool calculate_zero);
         static void fill_pool(eosio::name username, eosio::name host, uint64_t quants, eosio::asset amount, uint64_t filled_pool_id);
@@ -362,6 +364,45 @@ class [[eosio::contract]] unicore : public eosio::contract {
     typedef eosio::multi_index<"balance"_n, balance,
         eosio::indexed_by<"byhost"_n, eosio::const_mem_fun<balance, uint64_t, &balance::byhost>>
     > balance_index;
+
+
+
+/*!
+   \brief Структура статистики балансов пользователя у всех хостов Двойной Спирали
+*/
+    
+struct [[eosio::table, eosio::contract("unicore")]] userstat {
+    uint64_t id;
+    eosio::name username;
+    eosio::name contract;
+
+    std::string symbol;
+    uint64_t precision;
+
+    eosio::asset blocked_now;
+    eosio::asset total_nominal;
+    eosio::asset total_withdraw;
+    
+    uint64_t primary_key() const {return id;}
+    uint64_t byusername() const {return username.value;}
+    uint128_t byconuser() const {return combine_ids(contract.value, username.value);} /*!< (contract, blocked_now.symbol) - комбинированный secondary_key для получения курса по имени выходного контракта и символу */
+
+    uint128_t byusernom() const {return combine_ids(username.value, -total_nominal.amount);} /*!< (contract, blocked_now.symbol) - комбинированный secondary_key для получения курса по имени выходного контракта и символу */
+    uint128_t byuserblock() const {return combine_ids(username.value, -blocked_now.amount);} /*!< (contract, blocked_now.symbol) - комбинированный secondary_key для получения курса по имени выходного контракта и символу */
+
+
+    EOSLIB_SERIALIZE(userstat, (id)(username)(contract)(symbol)(precision)(blocked_now)(total_nominal)(total_withdraw))        
+
+};
+
+    typedef eosio::multi_index<"userstat"_n, userstat,
+        eosio::indexed_by<"byusername"_n, eosio::const_mem_fun<userstat, uint64_t, &userstat::byusername>>,
+        eosio::indexed_by<"byconuser"_n, eosio::const_mem_fun<userstat, uint128_t, &userstat::byconuser>>,
+        eosio::indexed_by<"byusernom"_n, eosio::const_mem_fun<userstat, uint128_t, &userstat::byusernom>>,
+        eosio::indexed_by<"byuserblock"_n, eosio::const_mem_fun<userstat, uint128_t, &userstat::byuserblock>>
+    
+    > userstat_index;
+
 
 
 /*!

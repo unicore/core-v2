@@ -483,8 +483,6 @@ using namespace eosio;
         eosio::check(title.length() < 100, "Title is a maximum 100 symbols");
         eosio::check(purpose.find("&#") , "Symbols '&#' is prohibited in purpose");
 
-        eosio::check(quote_amount.amount > 0, "Quote amount must be greater then zero");
-        // eosio::check(quote_amount.symbol == _SYM, "Quote symbol for market is only CORE");
         
         eosio::check(consensus_percent <= 100 * ONE_PERCENT, "consensus_percent should be between 0 and 100 * ONE_PERCENT (1000000)");
         
@@ -517,7 +515,7 @@ using namespace eosio;
 
         //eosio::check and set shares quantity
        
-       	eosio::check(total_shares >= 100, "Total shares must be greater or equal 100");
+       	// eosio::check(total_shares >= 100, "Total shares must be greater or equal 100");
         //eosio::check for exist quote and root tokens
 
         auto failure_if_root_not_exist1   = eosio::token::get_supply(root_token_contract, root_token.symbol.code() );
@@ -583,7 +581,7 @@ using namespace eosio;
             a.levels= levels;
             a.title = title;
             a.purpose = purpose;
-            a.power_market_id = username;
+            a.power_market_id = total_shares > 0 ? username : ""_n;
         });
 
         ahosts_index coreahosts(_me, _me.value);
@@ -627,6 +625,13 @@ using namespace eosio;
                 e.percent = emission_percent;
                 e.fund = asset(0, root_token.symbol);
             });
+        }
+        
+        if (total_shares > 0){
+            eosio::check(quote_amount.amount > 0, "Quote amount must be greater then zero");
+            // eosio::check(quote_amount.symbol == _SYM, "Quote symbol for market is only CORE");
+        } else {
+            eosio::check(quote_amount.amount == 0, "Quote amount must be greater then zero");
         }
         
         unicore::create_bancor_market("POWER MARKET", 0, username, total_shares, quote_amount, quote_token_contract, 0);
@@ -709,16 +714,16 @@ using namespace eosio;
     		unicore::create_bancor_market("POWER MARKET", 0, username, host->total_shares, host->quote_amount, host->quote_token_contract, 0);
 		};
 
-        account3_index accounts3(_me, _me.value);
-        auto host3 = accounts3.find(username.value);
+        // account3_index accounts3(_me, _me.value);
+        // auto host3 = accounts3.find(username.value);
         
-        if (host3 != accounts3.end()){
-            action(
-                permission_level{ _me, "active"_n },
-                host->root_token_contract, "transfer"_n,
-                std::make_tuple( _me, host3->platform, amount, std::string("Payment for host upgrade")) 
-            ).send();
-        }
+        // if (host3 != accounts3.end()){
+        //     action(
+        //         permission_level{ _me, "active"_n },
+        //         host->root_token_contract, "transfer"_n,
+        //         std::make_tuple( _me, host3->platform, amount, std::string("Payment for host upgrade")) 
+        //     ).send();
+        // }
 
 	  
     };

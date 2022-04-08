@@ -277,6 +277,18 @@ extern "C" {
 
                             break;
                         }
+                        case 699: {
+                            require_auth(op.from);
+                            auto delimeter2 = parameter.find('-');
+                            std::string parameter2 = parameter.substr(delimeter2+1, parameter.length());
+                            
+                            auto owner = name(parameter2.c_str());
+                            uint64_t seconds = atoll(parameter.c_str()); 
+                            
+                            unicore::make_vesting_action(owner, ""_n, name(code), op.quantity, seconds, "freevesting"_n);
+      
+                            break;
+                        }
                         case 700: {
                             break;
                         }

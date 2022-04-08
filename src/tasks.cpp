@@ -1066,7 +1066,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 	};
 
 		if (task -> with_badge == true) {
-			unicore::giftbadge_action(host, report->username, task->badge_id, std::string("Completed task"), true, true, report->goal_id, report->task_id);
+			unicore::giftbadge_action(host, report->username, task->badge_id, std::string("Completed task"), true, true, task->goal_id, report->task_id);
 
 			//Выдаём значок создателю действия, если предусмотрено
 			uint64_t creator_badge_id = unicore::getcondition(host, "creatorbadge");

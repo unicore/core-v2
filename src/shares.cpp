@@ -7,7 +7,7 @@ using namespace eosio;
    * @param[in]  owner   The owner
    * @param[in]  amount  The amount
    */
-	void make_vesting_action(eosio::name owner, eosio::name host, eosio::name contract, eosio::asset amount, uint64_t vesting_seconds, eosio::name type){
+	void unicore::make_vesting_action(eosio::name owner, eosio::name host, eosio::name contract, eosio::asset amount, uint64_t vesting_seconds, eosio::name type){
 	    eosio::check(amount.is_valid(), "Amount not valid");
 	    // eosio::check(amount.symbol == _SYM, "Not valid symbol for this vesting contract");
 	    eosio::check(is_account(owner), "Owner account does not exist");
@@ -29,6 +29,7 @@ using namespace eosio;
 
 	}
 
+  
   /**
    * @brief      Метод обновления вестинг-баланса.  
    * Обновляет вестинг-баланс до актуальных параметров продолжительности. 
@@ -117,11 +118,12 @@ using namespace eosio;
       ).send();
 
 
-      pstats.modify(pstat, _me, [&](auto &ps){
+      pstats.modify(pstat, _me, [&](auto &ps) {
+        double segments = (pstat -> pflow_available_in_asset).amount * TOTAL_SEGMENTS;
         
         ps.total_available_in_asset -= on_withdraw;
         
-        ps.pflow_available_segments -= (pstat -> pflow_available_in_asset).amount * TOTAL_SEGMENTS;
+        ps.pflow_available_segments = pstat -> pflow_available_segments - segments > 0 ? pstat -> pflow_available_segments - segments : 0;
         ps.pflow_available_in_asset = asset(0, root_symbol);
         ps.pflow_withdrawed += on_withdraw;
       });    
@@ -170,26 +172,30 @@ using namespace eosio;
     sincome_index sincomes(_me, host.value);
     auto sincome = sincomes.lower_bound(min_pool_id);
     
-    print("here1");
+    
 
     if ((min_pool_id != 0) && (sincome != sincomes.end()))
       sincome++;
 
+    print("here1 ", sincome->pool_id);
     uint64_t count2 = 0;
     
     while(sincome != sincomes.end() && count2 < 50) {
     // if (sincome != sincomes.end()){
 
+      print(" in while ");
       plog_index plogs(_me, username.value);
 
       auto pool_idwithhost_idx = plogs.template get_index<"hostpoolid"_n>();
       auto log_id = combine_ids(host.value, sincome-> pool_id);
 
 
+
       auto plog = pool_idwithhost_idx.find(log_id);  
       
-      if (plog == pool_idwithhost_idx.end()){
-        if (plog != pool_idwithhost_idx.begin()){
+      if (plog == pool_idwithhost_idx.end()) {
+
+        if (plog != pool_idwithhost_idx.begin()) {
           plog--;
 
           if ( plog == pool_idwithhost_idx.end())
@@ -200,7 +206,12 @@ using namespace eosio;
         }
       } 
 
-      if (plog -> pool_id < sincome -> pool_id) { //Только те plog принимаем в распределение, которые были преобретены до текущего раунда
+      print(" skip: ", skip);
+      print(" plog_id: ", plog -> id, plog -> host);
+
+
+    
+      if (plog -> host == host && plog -> pool_id < sincome -> pool_id) { //Только те plog принимаем в распределение, которые были преобретены до текущего раунда
         if ( sincome->liquid_power > 0 && sincome-> hfund_in_segments > 0 && !skip ) { 
           
           eosio::check(plog -> power <= sincome->liquid_power, "System error2");
@@ -291,6 +302,7 @@ using namespace eosio;
       }
       sincome++;
       count2++;
+      
     }  
 
 
@@ -486,21 +498,21 @@ using namespace eosio;
     market_index market(_me, host.value);
     auto itr = market.find(0);
     
-    uint64_t emitbdgspwr = unicore::getcondition(host, "emitbdgspwr");
+    // uint64_t emitbdgspwr = unicore::getcondition(host, "emitbdgspwr");
 
-    if (emitbdgspwr == 0) {
+    // if (emitbdgspwr == 0) {
       
-      market.modify( itr, _me, [&]( auto& es ) {
-        es.base.balance = asset((itr -> base).balance.amount + shares, eosio::symbol(eosio::symbol_code("POWER"), 0));
-      });
+      // market.modify( itr, _me, [&]( auto& es ) {
+      //   es.base.balance = asset((itr -> base).balance.amount + shares, eosio::symbol(eosio::symbol_code("POWER"), 0));
+      // });
 
-    } else {
+    // } else {
 
       accounts.modify(acc, _me, [&](auto &a){
         a.total_shares -= shares;
       });  
 
-    }
+    // }
     
 
     // unicore::checkminpwr(host, from);
@@ -523,32 +535,13 @@ using namespace eosio;
     power3_index power_to_idx (_me, host.value);
     auto power_to = power_to_idx.find(reciever.value);
     
-    // SEPARATE BADGES AND MARKET
     market_index market(_me, host.value);
     
-    uint64_t emitbdgspwr = unicore::getcondition(host, "emitbdgspwr");
-  
-    if (emitbdgspwr == 0){
-      auto itr = market.find(0);
-  
-      eosio::check((itr->base).balance.amount >= shares, "Not enought shares on market");    
-      
-      market.modify( itr, _me, [&]( auto& es ) {
-        es.base.balance = asset((itr -> base).balance.amount - shares, eosio::symbol(eosio::symbol_code("POWER"), 0));
-      });
-
-    } 
-
     accounts.modify(acc, _me, [&](auto &a){
-      if (emitbdgspwr > 0){
         a.total_shares += shares;
-      }
-      a.approved_reports = acc -> approved_reports + 1;
     }); 
 
     
-    
-
 
     //Emplace or modify power object of reciever and propagate votes changes;
     if (power_to == power_to_idx.end()) {
