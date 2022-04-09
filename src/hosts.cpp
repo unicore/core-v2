@@ -544,6 +544,9 @@ using namespace eosio;
 
 
         accounts.emplace(_me, [&](auto &a){
+            a.sale_mode = "direct"_n;
+            a.sale_is_enabled = true;
+
             a.username = username;
             a.architect = username;
             a.hoperator = username;
@@ -558,9 +561,9 @@ using namespace eosio;
             a.quote_token_contract = quote_token_contract;
             a.quote_precision = quote_amount.symbol.precision();
             a.root_token = root_token;
-            a.asset_on_sale = asset(0, root_token.symbol);
-            a.asset_on_sale_precision = a.asset_on_sale.symbol.precision();
-            a.asset_on_sale_symbol = a.asset_on_sale.symbol.code().to_string();
+            a.asset_on_sale = asset(0, _POWER);
+            a.asset_on_sale_precision = _POWER.precision();
+            a.asset_on_sale_symbol = _POWER.code().to_string();
             a.voting_only_up = voting_only_up;
             a.symbol = root_token.symbol.code().to_string();
             a.precision = root_token.symbol.precision();
@@ -581,7 +584,7 @@ using namespace eosio;
             a.levels= levels;
             a.title = title;
             a.purpose = purpose;
-            a.power_market_id = total_shares > 0 ? username : ""_n;
+            a.power_market_id = username;
         });
 
         ahosts_index coreahosts(_me, _me.value);

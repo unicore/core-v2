@@ -29,7 +29,144 @@ using namespace eosio;
 
 	}
 
+
   
+  void add_base_to_market(eosio::name host, eosio::asset amount){
+      
+      market_index market(_me, host.value);
+      auto itr = market.find(0);
+        
+      market.modify(itr, _me, [&](auto &m){
+        m.base.balance += amount;
+      });
+  }
+  
+  void add_quote_to_market(eosio::name host, eosio::asset amount){
+      
+      market_index market(_me, host.value);
+      auto itr = market.find(0);
+        
+      market.modify(itr, _me, [&](auto &m){
+        m.quote.balance += amount;
+      });
+  }
+
+  void sub_base_from_market(eosio::name host, eosio::asset amount) {
+      
+      market_index market(_me, host.value);
+      auto itr = market.find(0);
+      
+      eosio::check(itr -> base.balance >= amount, "Cannot substrate base balance");
+
+      market.modify(itr, _me, [&](auto &m){
+        m.base.balance -= amount;
+      });
+  }
+  
+  void sub_quote_from_market(eosio::name host, eosio::asset amount){
+      
+      market_index market(_me, host.value);
+      auto itr = market.find(0);
+      
+      eosio::check(itr -> quote.balance >= amount, "Cannot substrate quote balance");
+
+      market.modify(itr, _me, [&](auto &m){
+        m.quote.balance -= amount;
+      });
+  }
+
+
+  /**
+   * @brief      Публичный метод продажи силы рынку за котировочный токен
+   *
+   * @param[in]  op    The operation
+   */
+  [[eosio::action]] void unicore::sellshares(eosio::name username, eosio::name host, uint64_t shares){
+    require_auth(username);
+    
+    power3_index power(_me, host.value);
+    auto pexist = power.find(username.value);
+    
+    account_index account(_me, host.value);
+    auto acc = account.find(host.value);
+
+
+    uint64_t max_power_on_sale = pexist -> power - pexist -> with_badges;
+
+    eosio::check(max_power_on_sale >= shares, "Cannot back more power then you have");
+
+    if (pexist != power.end() && pexist -> power > 0) {
+      
+      market_index market(_me, host.value);
+      auto itr = market.find(0);
+      
+      double available = (double)shares / (double)acc -> total_shares * (double)itr -> quote.balance.amount;
+      eosio::asset available_asset = asset((uint64_t)available, itr -> quote.balance.symbol);
+
+      if (available_asset.amount > 0) {
+        
+        account.modify(acc, _me, [&](auto &a){
+          a.total_shares -= shares;
+        });
+
+        sub_quote_from_market(username, host, available_asset);
+        //TRANSFER
+        sub_base_from_market(host, asset(shares, _POWER));
+
+        print("on sell shares: ", shares);
+        
+        power.modify(pexist, username, [&](auto &p){
+          p.power -= shares;
+          p.staked -= shares;
+        });
+
+        action(
+            permission_level{ _me, "active"_n },
+            acc->root_token_contract, "transfer"_n,
+            std::make_tuple( _me, username, available_asset, std::string("PFLOW-" + (name{username}.to_string() + "-" + (name{host}).to_string()) ))
+        ).send();
+
+      };
+
+
+    }
+
+    //   account_index accounts(_me, host.value);
+    //   auto exist = accounts.find(host.value);
+      
+      // power3_index power(_me, host.value);
+      // auto userpower = power.find(username.value);
+      // auto upower = (userpower->staked);
+      // eosio::check(upower >= shares, "Not enought power available for sell");
+
+      // market_index market(_me, host.value);
+      // auto itr = market.find(0);
+      // auto tmp = *itr;
+
+      // eosio::asset tokens_out;
+      // market.modify( itr, _me, [&]( auto& es ) {
+    //        tokens_out = es.direct_convert( asset(shares,eosio::symbol(eosio::symbol_code("POWER"), 0)), exist -> quote_amount.symbol);
+     //    });
+
+      // eosio::check( tokens_out.amount > 1, "token amount received from selling shares is too low" );
+       
+    //   uint64_t vesting_seconds = unicore::getcondition(host, "vestingsecs");
+
+    //   make_vesting_action(username, host, exist -> quote_token_contract, tokens_out, vesting_seconds, "powersell"_n);
+      
+    //   unicore::propagate_votes_changes(host, username, userpower->power, userpower-> power - shares);
+    //   log_event_with_shares(username, host, userpower->power - shares);
+
+    //   power.modify(userpower, username, [&](auto &p){
+    //    p.power = userpower->power - shares;
+    //    p.staked = userpower->staked - shares;
+    //   });
+
+        // unicore::checkminpwr(host, username);
+  
+  };
+
+
   /**
    * @brief      Метод обновления вестинг-баланса.  
    * Обновляет вестинг-баланс до актуальных параметров продолжительности. 
@@ -92,52 +229,6 @@ using namespace eosio;
     
   };
 
-  /**
-   * @brief      Метод вывода силового финансового потока
-   * withdraw power quant (withpowerun)
-   * Позволяет вывести часть финансового потока, направленного на держателя силы
-  */
-  [[eosio::action]] void unicore::withpbenefit(eosio::name username, eosio::name host){
-    require_auth(username);
-    pstats_index pstats(_me, username.value);
-    auto pstat = pstats.find(host.value);
-    eosio::check(pstat != pstats.end(), "Power Stat Object is not found. Refresh your balances first.");
-    eosio::check((pstat -> pflow_available_in_asset).amount > 0, "Not enough tokens for transfer");
-    account_index account(_me, host.value);
-
-    auto acc = account.find(host.value);
-    auto root_symbol = acc->get_root_symbol();
-    auto on_withdraw = pstat -> pflow_available_in_asset;
-    
-    if (on_withdraw.amount > 0){
-
-      action(
-          permission_level{ _me, "active"_n },
-          acc->root_token_contract, "transfer"_n,
-          std::make_tuple( _me, username, on_withdraw, std::string("PFLOW-" + (name{username}.to_string() + "-" + (name{host}).to_string()) ))
-      ).send();
-
-
-      pstats.modify(pstat, _me, [&](auto &ps) {
-        double segments = (pstat -> pflow_available_in_asset).amount * TOTAL_SEGMENTS;
-        
-        ps.total_available_in_asset -= on_withdraw;
-        
-        ps.pflow_available_segments = pstat -> pflow_available_segments - segments > 0 ? pstat -> pflow_available_segments - segments : 0;
-        ps.pflow_available_in_asset = asset(0, root_symbol);
-        ps.pflow_withdrawed += on_withdraw;
-      });    
-    }
-
-  }
-
-
-
-
-  // [[eosio::action]] void unicore::refreshru(eosio::name username, eosio::name host){
-
-
-  // }
 
 
 
@@ -148,178 +239,7 @@ using namespace eosio;
    * а так же собрать доступные реферальные балансы в один объект
   */
   [[eosio::action]] void unicore::refreshpu(eosio::name username, eosio::name host){
-    require_auth(username);
     
-    account_index account(_me, host.value);
-
-    auto acc = account.find(host.value);
-    auto root_symbol = acc->get_root_symbol();
-    eosio::check(acc != account.end(), "Host is not found");
-    
-
-    pstats_index pstats(_me, username.value);
-    auto pstat = pstats.find(host.value);
-    auto min_pool_id = 0;
-
-    bool skip = false;
-
-    if (pstat != pstats.end())
-      min_pool_id = pstat -> pflow_last_withdrawed_pool_id;
-
-    
-
-   
-    sincome_index sincomes(_me, host.value);
-    auto sincome = sincomes.lower_bound(min_pool_id);
-    
-    
-
-    if ((min_pool_id != 0) && (sincome != sincomes.end()))
-      sincome++;
-
-    print("here1 ", sincome->pool_id);
-    uint64_t count2 = 0;
-    
-    while(sincome != sincomes.end() && count2 < 50) {
-    // if (sincome != sincomes.end()){
-
-      print(" in while ");
-      plog_index plogs(_me, username.value);
-
-      auto pool_idwithhost_idx = plogs.template get_index<"hostpoolid"_n>();
-      auto log_id = combine_ids(host.value, sincome-> pool_id);
-
-
-
-      auto plog = pool_idwithhost_idx.find(log_id);  
-      
-      if (plog == pool_idwithhost_idx.end()) {
-
-        if (plog != pool_idwithhost_idx.begin()) {
-          plog--;
-
-          if ( plog == pool_idwithhost_idx.end())
-            skip = true;
-
-        } else {
-          skip = true;
-        }
-      } 
-
-      print(" skip: ", skip);
-      print(" plog_id: ", plog -> id, plog -> host);
-
-
-    
-      if (plog -> host == host && plog -> pool_id < sincome -> pool_id) { //Только те plog принимаем в распределение, которые были преобретены до текущего раунда
-        if ( sincome->liquid_power > 0 && sincome-> hfund_in_segments > 0 && !skip ) { 
-          
-          eosio::check(plog -> power <= sincome->liquid_power, "System error2");
-          uint128_t user_segments = (double)plog -> power / (double)sincome -> liquid_power * sincome -> hfund_in_segments;
-          
-          uint64_t user_segments_64 = (uint64_t)user_segments / TOTAL_SEGMENTS;
-          eosio::asset segment_asset = asset(user_segments_64, root_symbol);
-          
-          print(" usegments: ", (double)user_segments);
-          print(" hfund_in_segments: ", (double)sincome->hfund_in_segments);
-          print(" is_equal: ", (double)sincome->hfund_in_segments == (double)user_segments);
-          print(" distr_segmnts: ", (double)sincome->distributed_segments);
-
-          eosio::check((double)sincome->distributed_segments + (double)user_segments <= (double)sincome->hfund_in_segments, "Overflow fund on distibution event.");
-
-          sincomes.modify(sincome, _me, [&](auto &s){
-            s.distributed_segments += user_segments;
-          });
-          
-          if (pstat == pstats.end()){
-            print("here1");
-            pstats.emplace(_me, [&](auto &ps){
-              ps.host = host;
-              ps.total_available_in_asset = segment_asset;
-          
-              ps.pflow_last_withdrawed_pool_id = sincome -> pool_id;
-              ps.pflow_available_segments = user_segments;
-              ps.pflow_available_in_asset = segment_asset;
-              ps.pflow_withdrawed = asset(0, root_symbol);
-
-              ps.ref_available_in_asset = asset(0, root_symbol);
-              ps.ref_available_segments = 0;
-              ps.ref_withdrawed = asset(0, root_symbol);
-            });
-
-            pstat = pstats.find(host.value);
-
-          } else {
-            pstats.modify(pstat, _me, [&](auto &ps){
-              ps.total_available_in_asset += segment_asset;
-              ps.pflow_last_withdrawed_pool_id = sincome -> pool_id;
-              ps.pflow_available_segments += user_segments;
-              ps.pflow_available_in_asset += segment_asset;
-            });    
-
-          }
-          dlog_index dlogs(_me, username.value);
-          print("here2");
-          dlogs.emplace(_me, [&](auto &dl){
-            dl.id = dlogs.available_primary_key();
-            dl.host = host;
-            dl.pool_id = sincome -> pool_id;
-            dl.segments = user_segments;
-            dl.amount = segment_asset;
-          });
-
-
-          //TODO Удалить все устаревшие plog
-          //Устаревшие это те, которые больше никогда не будут учитываться в распределении.
-          //(есть более новые актуальные записи)
-          
-        } else { 
-              print(" on skip: ", skip);
-              if (pstat == pstats.end()){
-                pstats.emplace(_me, [&](auto &ps){
-                  ps.host = host;
-                  ps.total_available_in_asset = asset(0, root_symbol);
-                  ps.pflow_last_withdrawed_pool_id = sincome -> pool_id;
-                  ps.pflow_available_segments = 0;
-                  ps.pflow_available_in_asset = asset(0, root_symbol);
-                  ps.pflow_withdrawed = asset(0, root_symbol);
-
-                  ps.ref_available_in_asset = asset(0, root_symbol);
-                  ps.ref_available_segments = 0;
-                  ps.ref_withdrawed = asset(0, root_symbol);
-
-                });
-
-                pstat = pstats.begin();
-              } else {
-                pstats.modify(pstat, _me, [&](auto &ps){
-                  ps.pflow_last_withdrawed_pool_id = sincome -> pool_id;
-                });          
-              }
-            
-          //TODO чистим plog слева
-        }
-      }
-      sincome++;
-      count2++;
-      
-    }  
-
-
-    //Расчет выплат произвоить только для объектов sincome с айди, меньше чем текущий в объекте хоста
-    //by host and cycle
-    //Проверка лога. Получаем объект измененной силы на пуле. 
-    //Его объекта нет, то получаем первый и последний объект на текущем цикле.
-    //Если объектов нет, используем силу.  
-    //Если в логе под текущим номером пула ничего нет, то провяем последний вывод
-    //записи из лога все, кроме первой, если она в текущем цикле.
-    //Проверяем выводились ли токены прежде
-    //Если нет, расчитываем объем токенов из фонда. 
-    //Где храним объект фонда распределения? На хосте. 
-    //записываем последний вывод и сколько всего получено
-    //считать долю в сегментах
-    //выдаю долю в сегментах
-    //проверка на новом цикле
   }
 
 
@@ -329,145 +249,9 @@ using namespace eosio;
    *
   */
    void log_event_with_shares (eosio::name username, eosio::name host, int64_t new_power){
-      account_index accounts(_me, host.value);
-      auto acc = accounts.find(host.value);
-
-      plog_index plogs(_me, username.value);
- 
-      auto pool_idwithhost_idx = plogs.template get_index<"hostpoolid"_n>();
-      auto log_ids = combine_ids(host.value, acc->current_pool_id);
-      
-      auto log = pool_idwithhost_idx.find(log_ids);
-
-
-      if (log == pool_idwithhost_idx.end()){
-        plogs.emplace(_me, [&](auto &l){
-          l.id = plogs.available_primary_key();
-          l.host = host;
-          l.pool_id = acc->current_pool_id;
-          l.power = new_power;
-          l.cycle_num = acc->current_cycle_num;
-          l.pool_num = acc->current_pool_num;
-        });
-
-      } else {
-        pool_idwithhost_idx.modify(log, _me, [&](auto &l){
-          l.power = new_power;
-        });
-      }
-
-      sincome_index sincome(_me, host.value);
-      auto sinc = sincome.find(acc->current_pool_id);
-      
-      rate_index rates(_me, host.value);
-      auto rate = rates.find(acc->current_pool_num - 1);
-      eosio::name main_host = acc->get_ahost();
-      auto root_symbol = acc->get_root_symbol();
-
-      market_index market(_me, host.value);
-      auto itr = market.find(0);
-      auto liquid_power = acc->total_shares - itr->base.balance.amount;
-
-      if (sinc == sincome.end()){
-        sincome.emplace(_me, [&](auto &s){
-            s.max = rate -> system_income;
-            s.pool_id = acc->current_pool_id;
-            s.ahost = main_host;
-            s.cycle_num = acc->current_cycle_num;
-            s.pool_num = acc->current_pool_num;
-            s.liquid_power = liquid_power;
-            s.total = asset(0, root_symbol);
-            s.paid_to_sys = asset(0, root_symbol);
-            s.paid_to_dacs = asset(0, root_symbol);
-            s.paid_to_cfund = asset(0, root_symbol);
-            s.paid_to_hfund = asset(0, root_symbol);
-            s.paid_to_refs = asset(0, root_symbol);
-            s.hfund_in_segments = 0;
-            s.distributed_segments = 0;
-        }); 
-
-      } else {
-
-        sincome.modify(sinc, _me, [&](auto &s){
-          s.liquid_power = liquid_power;
-        });
-      } 
-      // auto idx = votes.template get_index<"host"_n>();
-      // auto i_bv = idx.lower_bound(host.value);
-
+     
 
    } 
-
-
-  /**
-   * @brief      Метод покупки силы сообщества
-   * Обеспечивает покупку силы сообщества за котировочный токен по внутренней рыночной цене, определяемой с помощью алгоритма банкор. 
-   * @param[in]  buyer   The buyer
-   * @param[in]  host    The host
-   * @param[in]  amount  The amount
-   */
-	uint64_t unicore::buyshares_action ( eosio::name buyer, eosio::name host, eosio::asset amount, eosio::name code, bool is_frozen ){
-		account_index accounts(_me, host.value);
-		partners2_index users(_partners,_partners.value);
-    auto user = users.find(buyer.value);
-    print("buyer is: ", user->username);
-    // eosio::check(user != users.end(), "User is not registered");
-
-
-		auto exist = accounts.find(host.value);
-		eosio::check(exist != accounts.end(), "Host is not founded");
-		eosio::check(exist -> quote_token_contract == code, "Wrong quote token contract");
-    eosio::check(exist -> quote_amount.symbol == amount.symbol, "Wrong quote token symbol");
-		eosio::check(exist -> power_market_id != ""_n, "Can buy shares only when power market is enabled");
-
-    market_index market(_me, host.value);
-		auto itr = market.find(0);
-		auto tmp = *itr;
-		uint64_t shares_out;
-		market.modify( itr, _me, [&]( auto &es ) {
-	    	shares_out = (es.direct_convert( amount, eosio::symbol(eosio::symbol_code("POWER"), 0))).amount;
-	    });
-
-    eosio::check( shares_out > 0, "Amount is not enought for buy 1 share" );
-
-    power3_index power(_me, host.value);
-
-    auto pexist = power.find(buyer.value);
-    
-
-    if (pexist == power.end()){
-
-      power.emplace(_me, [&](auto &p){
-      	p.username = buyer;
-      	p.power = shares_out;
-      	if (is_frozen == false){
-          p.staked = shares_out;	
-        } else {
-          p.frozen = shares_out;
-        }
-      });
-
-      log_event_with_shares(buyer, host, shares_out);
-		
-    } else {
-			unicore::propagate_votes_changes(host, buyer, pexist->power, pexist->power + shares_out);
-		  
-      log_event_with_shares(buyer, host, pexist->power + shares_out);
-
-			power.modify(pexist, _me, [&](auto &p){
-				p.power += shares_out;
-        if (is_frozen == false){
-				  p.staked += shares_out;
-        } else {
-          p.frozen += shares_out;
-        }
-			});
-		};
-
-    // unicore::checkminpwr(host, buyer);
-		
-    return shares_out;
-	};
 
 
 
@@ -488,7 +272,8 @@ using namespace eosio;
       
     //modify
     unicore::propagate_votes_changes(host, from, power_to->power, power_to->power - shares);
-    log_event_with_shares(from, host, power_to->power - shares);
+
+    sub_base_from_market(host, asset(shares, _POWER));
 
     power_to_idx.modify(power_to, _me, [&](auto &pt){
       pt.power -= shares;
@@ -497,25 +282,10 @@ using namespace eosio;
 
     market_index market(_me, host.value);
     auto itr = market.find(0);
-    
-    // uint64_t emitbdgspwr = unicore::getcondition(host, "emitbdgspwr");
-
-    // if (emitbdgspwr == 0) {
-      
-      // market.modify( itr, _me, [&]( auto& es ) {
-      //   es.base.balance = asset((itr -> base).balance.amount + shares, eosio::symbol(eosio::symbol_code("POWER"), 0));
-      // });
-
-    // } else {
-
-      accounts.modify(acc, _me, [&](auto &a){
-        a.total_shares -= shares;
-      });  
-
-    // }
-    
-
-    // unicore::checkminpwr(host, from);
+  
+    accounts.modify(acc, _me, [&](auto &a){
+      a.total_shares -= shares;
+    });  
 
   }
 
@@ -541,12 +311,12 @@ using namespace eosio;
         a.total_shares += shares;
     }); 
 
-    
+    add_base_to_market(host, asset(shares, _POWER));
+      
 
     //Emplace or modify power object of reciever and propagate votes changes;
     if (power_to == power_to_idx.end()) {
 
-      log_event_with_shares(reciever, host, shares);
       power_to_idx.emplace(_me, [&](auto &pt){
         pt.username = reciever;
         pt.power = shares;
@@ -559,89 +329,14 @@ using namespace eosio;
       //modify
       unicore::propagate_votes_changes(host, reciever, power_to->power, power_to->power + shares);
       
-      log_event_with_shares(reciever, host, power_to->power + shares);
-
+      
       power_to_idx.modify(power_to, _me, [&](auto &pt){
         pt.power += shares;
         pt.with_badges += shares; 
       });      
     }   
-
-    // unicore::checkminpwr(host, reciever);
-    
   }
 
-  /**
-   * @brief      Метод делегирования силы.
-   * Позволяет делегировать купленную силу для принятия каких-либо решений в пользу любого аккаунта. 
-   *
-   * @param[in]  op    The operation
-   */
-
-	void unicore::delegate_shares_action(eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares){
-	 	require_auth(from);
-		power3_index power_from_idx (_me, host.value);
-		power3_index power_to_idx (_me, host.value);
-
-		delegation_index delegations(_me, from.value);
-		
-		account_index accounts(_me, host.value);
-		auto acc = accounts.find(host.value);
-
-		auto power_from = power_from_idx.find(from.value);
-		eosio::check(power_from != power_from_idx.end(),"Nothing to delegatee");
-		eosio::check(power_from -> power > 0, "Nothing to delegate");
-		eosio::check(shares > 0, "Delegate amount must be greater then zero");
-		eosio::check(shares <= power_from->staked, "Not enough staked power for delegate");
-		
-		auto dlgtns = delegations.find(reciever.value);
-		auto power_to = power_to_idx.find(reciever.value);
-
-		if (dlgtns == delegations.end()){
-
-			delegations.emplace(_me, [&](auto &d){
-				d.reciever = reciever;
-				d.shares = shares;
-			});
-
-		} else {
-			delegations.modify(dlgtns, _me, [&](auto &d){
-				d.shares += shares;
-			});
-		};
-
-		//modify power object of sender and propagate votes changes;
-		unicore::propagate_votes_changes(host, from, power_from->power, power_from->power - shares);
-		
-    log_event_with_shares(from, host, power_from->power - shares);
-
-		power_from_idx.modify(power_from, _me, [&](auto &pf){
-			pf.staked -= shares;
-			pf.power  -= shares;
-
-		});
-
-		//Emplace or modify power object of reciever and propagate votes changes;
-		if (power_to == power_to_idx.end()){
-			power_to_idx.emplace(_me, [&](auto &pt){
-				pt.username = reciever;
-				pt.power = shares;
-				pt.delegated = shares;		
-			});
-		} else {
-			//modify
-			unicore::propagate_votes_changes(host, reciever, power_to->power, power_to->power + shares);
-			
-      log_event_with_shares(reciever, host, power_from->power + shares);
-      
-      power_to_idx.modify(power_to, _me, [&](auto &pt){
-				pt.power += shares;
-				pt.delegated += shares;
-			});
-
-			
-		}		
-	}
 
   /**
    * @brief      Обновление счетчика голосов
@@ -677,104 +372,6 @@ using namespace eosio;
 		};	
 	}
 
-
-
-  /**
-   * @brief      Метод возврата делегированной силы
-   *
-   * @param[in]  op    The operation
-   */
-	[[eosio::action]] void unicore::undelshares(eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares){
-		require_auth(reciever);
-
-		power3_index power_from_idx (_me, host.value);
-		power3_index power_to_idx (_me, host.value);
-
-		delegation_index delegations(_me, reciever.value);
-		auto dlgtns = delegations.find(from.value);
-
-		eosio::check(dlgtns != delegations.end(), "Nothing to undelegate");
-		eosio::check(dlgtns -> shares >= shares, "Not enought shares for undelegate");
-		eosio::check(shares > 0, "Undelegate amount must be greater then zero");
-		
-		auto power_from = power_from_idx.find(from.value);
-		auto power_to = power_to_idx.find(reciever.value);
-
-		if (dlgtns->shares - shares == 0){
-			delegations.erase(dlgtns);
-		} else {
-			delegations.modify(dlgtns, reciever, [&](auto &d){
-				d.shares -= shares;
-			});
-		}
-
-		//modify power object of sender and propagate votes changes;
-		unicore::propagate_votes_changes(host, from, power_from->power, power_from->power - shares);
-		log_event_with_shares(from, host, power_from->power - shares);
-
-		power_from_idx.modify(power_from, reciever, [&](auto &pf){
-			pf.power -= shares;
-			pf.delegated -= shares;
-
-		});
-
-		//modify
-		unicore::propagate_votes_changes(host, reciever, power_to->power, power_to->power + shares);
-		log_event_with_shares(reciever, host, power_from->power + shares);
-
-		power_to_idx.modify(power_to, reciever, [&](auto &pt){
-			pt.staked += shares;
-			pt.power  += shares;
-		});
-
-		
-		
-
-	}
-
-  /**
-   * @brief      Публичный метод продажи силы рынку за котировочный токен
-   *
-   * @param[in]  op    The operation
-   */
-	[[eosio::action]] void unicore::sellshares(eosio::name username, eosio::name host, uint64_t shares){
-		require_auth(username);
-		
-    account_index accounts(_me, host.value);
-    auto exist = accounts.find(host.value);
-    
-		power3_index power(_me, host.value);
-		auto userpower = power.find(username.value);
-		auto upower = (userpower->staked);
-		eosio::check(upower >= shares, "Not enought power available for sell");
-
-		market_index market(_me, host.value);
-		auto itr = market.find(0);
-		auto tmp = *itr;
-
-		eosio::asset tokens_out;
-		market.modify( itr, _me, [&]( auto& es ) {
-        	tokens_out = es.direct_convert( asset(shares,eosio::symbol(eosio::symbol_code("POWER"), 0)), exist -> quote_amount.symbol);
-	    });
-
-		eosio::check( tokens_out.amount > 1, "token amount received from selling shares is too low" );
-	   
-    uint64_t vesting_seconds = unicore::getcondition(host, "vestingsecs");
-
-    make_vesting_action(username, host, exist -> quote_token_contract, tokens_out, vesting_seconds, "powersell"_n);
-    
-    unicore::propagate_votes_changes(host, username, userpower->power, userpower-> power - shares);
-    log_event_with_shares(username, host, userpower->power - shares);
-
-    power.modify(userpower, username, [&](auto &p){
-    	p.power = userpower->power - shares;
-    	p.staked = userpower->staked - shares;
-    });
-
-      // unicore::checkminpwr(host, username);
-    
-	    
-	};
 
   /**
    * @brief      Disable power market
@@ -830,22 +427,238 @@ using namespace eosio;
 	void unicore::create_bancor_market(std::string name, uint64_t id, eosio::name host, uint64_t total_shares, eosio::asset quote_amount, eosio::name quote_token_contract, uint64_t vesting_seconds){
 		market_index market(_me, host.value);
 		auto itr = market.find(id);
-		if (itr == market.end()){
-			itr = market.emplace( _me, [&]( auto& m ) {
-               m.id = id;
-               m.vesting_seconds = vesting_seconds;
-               m.name = name;
-               m.supply.amount = 100000000000000ll;
-               m.supply.symbol = eosio::symbol(eosio::symbol_code("BANCORE"), 0);
-               m.base.balance.amount = total_shares;
-               m.base.balance.symbol = eosio::symbol(eosio::symbol_code("POWER"), 0);
+		
+    if (itr == market.end()){
 
-               m.quote.balance.amount = quote_amount.amount;
-               m.quote.balance.symbol = quote_amount.symbol;
-               m.quote.contract = quote_token_contract;
-            });
+			itr = market.emplace( _me, [&]( auto& m ) {
+         m.id = id;
+         m.vesting_seconds = vesting_seconds;
+         m.name = name;
+         m.supply.amount = 100000000000000ll;
+         m.supply.symbol = eosio::symbol(eosio::symbol_code("BANCORE"), 0);
+         m.base.balance.amount = total_shares;
+         m.base.balance.symbol = eosio::symbol(eosio::symbol_code("POWER"), 0);
+         m.quote.balance.amount = quote_amount.amount;
+         m.quote.balance.symbol = quote_amount.symbol;
+         m.quote.contract = quote_token_contract;
+      });
 		} else {
 			// eosio::check(false, "Market already created");
     }
 	};
-// };
+
+
+
+
+
+
+//PREPARE TO DELETE
+
+  /**
+   * @brief      Метод делегирования силы.
+   * Позволяет делегировать купленную силу для принятия каких-либо решений в пользу любого аккаунта. 
+   *
+   * @param[in]  op    The operation
+   */
+
+  void unicore::delegate_shares_action(eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares){
+   //   require_auth(from);
+    // power3_index power_from_idx (_me, host.value);
+    // power3_index power_to_idx (_me, host.value);
+
+    // delegation_index delegations(_me, from.value);
+    
+    // account_index accounts(_me, host.value);
+    // auto acc = accounts.find(host.value);
+
+    // auto power_from = power_from_idx.find(from.value);
+    // eosio::check(power_from != power_from_idx.end(),"Nothing to delegatee");
+    // eosio::check(power_from -> power > 0, "Nothing to delegate");
+    // eosio::check(shares > 0, "Delegate amount must be greater then zero");
+    // eosio::check(shares <= power_from->staked, "Not enough staked power for delegate");
+    
+    // auto dlgtns = delegations.find(reciever.value);
+    // auto power_to = power_to_idx.find(reciever.value);
+
+    // if (dlgtns == delegations.end()) {
+
+    //  delegations.emplace(_me, [&](auto &d){
+    //    d.reciever = reciever;
+    //    d.shares = shares;
+    //  });
+
+    // } else {
+    //  delegations.modify(dlgtns, _me, [&](auto &d){
+    //    d.shares += shares;
+    //  });
+    // };
+
+    // //modify power object of sender and propagate votes changes;
+    // unicore::propagate_votes_changes(host, from, power_from->power, power_from->power - shares);
+    
+  //   log_event_with_shares(from, host, power_from->power - shares);
+
+    // power_from_idx.modify(power_from, _me, [&](auto &pf){
+    //  pf.staked -= shares;
+    //  pf.power  -= shares;
+
+    // });
+
+    // //Emplace or modify power object of reciever and propagate votes changes;
+    // if (power_to == power_to_idx.end()){
+    //  power_to_idx.emplace(_me, [&](auto &pt){
+    //    pt.username = reciever;
+    //    pt.power = shares;
+    //    pt.delegated = shares;    
+    //  });
+    // } else {
+    //  //modify
+    //  unicore::propagate_votes_changes(host, reciever, power_to->power, power_to->power + shares);
+      
+  //     log_event_with_shares(reciever, host, power_from->power + shares);
+      
+  //     power_to_idx.modify(power_to, _me, [&](auto &pt){
+    //    pt.power += shares;
+    //    pt.delegated += shares;
+    //  });
+
+      
+    // }    
+  }
+
+
+
+
+  /**
+   * @brief      Метод вывода силового финансового потока
+   * withdraw power quant (withpowerun)
+   * Позволяет вывести часть финансового потока, направленного на держателя силы
+  */
+  [[eosio::action]] void unicore::withpbenefit(eosio::name username, eosio::name host){
+    
+
+  }
+  
+
+
+
+  /**
+   * @brief      Метод возврата делегированной силы
+   *
+   * @param[in]  op    The operation
+   */
+  [[eosio::action]] void unicore::undelshares(eosio::name from, eosio::name reciever, eosio::name host, uint64_t shares){
+    require_auth(reciever);
+
+    // power3_index power_from_idx (_me, host.value);
+    // power3_index power_to_idx (_me, host.value);
+
+    // delegation_index delegations(_me, reciever.value);
+    // auto dlgtns = delegations.find(from.value);
+
+    // eosio::check(dlgtns != delegations.end(), "Nothing to undelegate");
+    // eosio::check(dlgtns -> shares >= shares, "Not enought shares for undelegate");
+    // eosio::check(shares > 0, "Undelegate amount must be greater then zero");
+    
+    // auto power_from = power_from_idx.find(from.value);
+    // auto power_to = power_to_idx.find(reciever.value);
+
+    // if (dlgtns->shares - shares == 0){
+    //  delegations.erase(dlgtns);
+    // } else {
+    //  delegations.modify(dlgtns, reciever, [&](auto &d){
+    //    d.shares -= shares;
+    //  });
+    // }
+
+    // //modify power object of sender and propagate votes changes;
+    // unicore::propagate_votes_changes(host, from, power_from->power, power_from->power - shares);
+    // log_event_with_shares(from, host, power_from->power - shares);
+
+    // power_from_idx.modify(power_from, reciever, [&](auto &pf){
+    //  pf.power -= shares;
+    //  pf.delegated -= shares;
+
+    // });
+
+    // //modify
+    // unicore::propagate_votes_changes(host, reciever, power_to->power, power_to->power + shares);
+    // log_event_with_shares(reciever, host, power_from->power + shares);
+
+    // power_to_idx.modify(power_to, reciever, [&](auto &pt){
+    //  pt.staked += shares;
+    //  pt.power  += shares;
+    // });
+
+
+  }
+
+
+
+
+  /**
+   * @brief      Метод покупки силы сообщества
+   * Обеспечивает покупку силы сообщества за котировочный токен по внутренней рыночной цене, определяемой с помощью алгоритма банкор. 
+   * @param[in]  buyer   The buyer
+   * @param[in]  host    The host
+   * @param[in]  amount  The amount
+   */
+  uint64_t unicore::buyshares_action ( eosio::name buyer, eosio::name host, eosio::asset amount, eosio::name code, bool is_frozen ){
+    account_index accounts(_me, host.value);
+    partners2_index users(_partners,_partners.value);
+    auto user = users.find(buyer.value);
+    print("buyer is: ", user->username);
+    // eosio::check(user != users.end(), "User is not registered");
+
+
+    auto exist = accounts.find(host.value);
+    eosio::check(exist != accounts.end(), "Host is not founded");
+    eosio::check(exist -> quote_token_contract == code, "Wrong quote token contract");
+    eosio::check(exist -> quote_amount.symbol == amount.symbol, "Wrong quote token symbol");
+    eosio::check(exist -> power_market_id != ""_n, "Can buy shares only when power market is enabled");
+
+    market_index market(_me, host.value);
+    auto itr = market.find(0);
+    auto tmp = *itr;
+    uint64_t shares_out;
+
+    market.modify( itr, _me, [&]( auto &es ) {
+       shares_out = (es.convert( amount, eosio::symbol(eosio::symbol_code("POWER"), 0))).amount;
+    });
+
+    eosio::check( shares_out > 0, "Amount is not enought for buy 1 share" );
+
+    power3_index power(_me, host.value);
+
+    auto pexist = power.find(buyer.value);
+    
+    add_base_to_market(host, asset(shares_out, _POWER));
+
+    if (pexist == power.end()) {
+
+      power.emplace(_me, [&](auto &p){
+       p.username = buyer;
+       p.power = shares_out;
+       p.staked = shares_out; 
+      });
+      
+    
+    } else {
+     unicore::propagate_votes_changes(host, buyer, pexist->power, pexist->power + shares_out);
+      
+      add_base_to_market(host, asset(shares, _POWER));
+
+      power.modify(pexist, _me, [&](auto &p){
+        p.power += shares_out;
+        p.staked += shares_out;
+        
+     });
+    };
+
+    
+    return shares_out;
+    
+  };
+
+
+

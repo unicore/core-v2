@@ -126,36 +126,6 @@
 		}
 		
 		
-		if (netted == true) {
-			eosio::check(goal_id != 0, "Netted badge should have a goal and task ids");
-			
-			//modify goal and task to increse badge_count
-			goals_index goals(_me, host.value);
-			auto goal = goals.find(goal_id);
-			goals.modify(goal, _me, [&](auto &g){
-				g.gifted_badges += 1;
-				g.gifted_power += host_badge -> power;
-			});
-
-			if (goal -> parent_id != 0) {
-				auto parent_goal = goals.find(goal->parent_id);
-				goals.modify(parent_goal, _me, [&](auto &pg){
-					pg.gifted_badges += 1;
-					pg.gifted_power += host_badge -> power;
-				});
-			}
-
-			if (own == true){
-				tasks_index tasks(_me, host.value);
-				auto task = tasks.find(task_id);
-				tasks.modify(task, _me, [&](auto &t){
-					t.gifted_badges += 1;
-					t.gifted_power += host_badge -> power;
-				});	
-			};
-			
-		}
-
 		if (user_badge == hostandbadge_idx.end()){
 
 			user_badges.emplace(_me, [&](auto &ub){
