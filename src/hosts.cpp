@@ -53,36 +53,37 @@ using namespace eosio;
     [[eosio::action]] void unicore::compensator(eosio::name host, uint64_t compensator_percent){
         require_auth("eosio"_n);
 
-        account_index accounts(_me, host.value);
-        auto acc = accounts.find(host.value);
-        eosio::check(acc != accounts.end(), "Host is not found");
+        // account_index accounts(_me, host.value);
+        // auto acc = accounts.find(host.value);
+        // eosio::check(acc != accounts.end(), "Host is not found");
         
-        spiral_index spiral(_me, host.value);
-        auto sp = spiral.find(0);
-        spiral2_index spiral2(_me, host.value);
-        auto sp2 = spiral2.find(0);
+        // eosio::name main_host = acc->get_ahost();
+        // spiral_index spiral(_me, main_host.value);
+        // auto sp = spiral.find(0);
+        // spiral2_index spiral2(_me, main_host.value);
+        // auto sp2 = spiral2.find(0);
     
-        eosio::check(acc->root_token_contract == "eosio.token"_n, "Only eosio.token contract can be used for compesation");
-        eosio::check(acc->root_token.symbol == _SYM, "Only core symbol can be used for compensation.");
+        // eosio::check(acc->root_token_contract == "eosio.token"_n, "Only eosio.token contract can be used for compesation");
+        // eosio::check(acc->root_token.symbol == _SYM, "Only core symbol can be used for compensation.");
 
-        eosio::check(host == _core_host, "Only core host can access compensator now");
+        // eosio::check(host == _core_host, "Only core host can access compensator now");
     
-        eosio::check(sp -> overlap <= 10500, "Overlap should be not more then 5% for compensator mode");
-        eosio::check(compensator_percent <= sp -> loss_percent, "Compensator Percent must be greater then 0 (0%) and less or equal 10000 (100%)");
+        // eosio::check(sp -> overlap <= 10500, "Overlap should be not more then 5% for compensator mode");
+        // eosio::check(compensator_percent <= sp -> loss_percent, "Compensator Percent must be greater then 0 (0%) and less or equal 10000 (100%)");
     
-        if (sp2 == spiral2.end()) {
+        // if (sp2 == spiral2.end()) {
             
-            spiral2.emplace(_me, [&](auto &s) {
-                s.id = 0;
-                s.compensator_percent = compensator_percent;
-            });
+        //     spiral2.emplace(_me, [&](auto &s) {
+        //         s.id = 0;
+        //         s.compensator_percent = compensator_percent;
+        //     });
 
-        } else {
+        // } else {
 
-            spiral2.modify(sp2, _me, [&](auto &s) {
-                s.compensator_percent = compensator_percent;
-            });
-        }
+        //     spiral2.modify(sp2, _me, [&](auto &s) {
+        //         s.compensator_percent = compensator_percent;
+        //     });
+        // }
         
 
     };
@@ -513,17 +514,11 @@ using namespace eosio;
         auto itr = accounts.find(username.value);
         eosio::check(itr == accounts.end(), "Account is already upgraded to Host");
 
-        //eosio::check and set shares quantity
-       
-       	// eosio::check(total_shares >= 100, "Total shares must be greater or equal 100");
-        //eosio::check for exist quote and root tokens
-
         auto failure_if_root_not_exist1   = eosio::token::get_supply(root_token_contract, root_token.symbol.code() );
-        auto failure_if_root_not_exist2   = eosio::token::get_supply(quote_token_contract, quote_amount.symbol.code() );
 
                 
         uint64_t to_pay_amount = unicore::getcondition(platform, "hostfee");
-        eosio::asset to_pay = asset(to_pay_amount, quote_amount.symbol);
+        eosio::asset to_pay = asset(to_pay_amount, root_token.symbol);
 
         //Создаём запись о платформе создания для возврата платежа с оплатой
         account3_index accounts3(_me, _me.value);
@@ -556,18 +551,23 @@ using namespace eosio;
             a.dac_mode = 0;
             a.total_dacs_weight = 0;
             a.total_shares = total_shares;
-            a.quote_amount = quote_amount;
-            a.quote_symbol = quote_amount.symbol.code().to_string();
-            a.quote_token_contract = quote_token_contract;
-            a.quote_precision = quote_amount.symbol.precision();
-            a.root_token = root_token;
+
+            a.quote_amount = asset(0, root_token.symbol);
+            a.quote_symbol = root_token.symbol.code().to_string();
+            a.quote_token_contract = root_token_contract;
+            a.quote_precision = root_token.symbol.precision();
+            
             a.asset_on_sale = asset(0, _POWER);
             a.asset_on_sale_precision = _POWER.precision();
             a.asset_on_sale_symbol = _POWER.code().to_string();
+            
             a.voting_only_up = voting_only_up;
+            
+            a.root_token = root_token;
             a.symbol = root_token.symbol.code().to_string();
             a.precision = root_token.symbol.precision();
             a.root_token_contract = root_token_contract;
+            
             a.meta = meta;
             a.registered_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
             a.payed = to_pay.amount == 0 ? true : false;
@@ -604,18 +604,6 @@ using namespace eosio;
                 a.meta = meta;
             });
 
-            // if (platform != _self){
-            //     ahosts_index ahosts(_me, platform.value);
-            //     ahosts.emplace(username, [&](auto &a){
-            //         a.username = username;
-            //         a.title = title;
-            //         a.purpose = purpose;
-            //         a.is_host = true;
-            //         a.manifest = "";
-            //         a.comments_is_enabled = false;
-            //         a.meta = meta;
-            //     });
-            // }
         }
 
         emission_index emis(_me, username.value);
@@ -630,15 +618,6 @@ using namespace eosio;
             });
         }
         
-        if (total_shares > 0){
-            eosio::check(quote_amount.amount > 0, "Quote amount must be greater then zero");
-            // eosio::check(quote_amount.symbol == _SYM, "Quote symbol for market is only CORE");
-        } else {
-            eosio::check(quote_amount.amount == 0, "Quote amount must be greater then zero");
-        }
-        
-        unicore::create_bancor_market("POWER MARKET", 0, username, total_shares, quote_amount, quote_token_contract, 0);
-
     }
 
     /**
@@ -697,9 +676,9 @@ using namespace eosio;
     	auto host = hosts.find(username.value);
     	eosio::check(host != hosts.end(), "Host is not founded");
         
-   		eosio::check(amount.symbol == host->quote_amount.symbol, "Wrong symbol for market");
+   		eosio::check(amount.symbol == host->to_pay.symbol, "Wrong symbol for market");
         
-        eosio::check(code == host->quote_token_contract, "Wrong symbol for market");
+        eosio::check(code == host->root_token_contract, "Wrong symbol for market");
         
 	   	//eosio::check for enough upgrade amount for quote asset
     	eosio::check(amount == host->to_pay, "Amount is not equal amount for upgrade");
@@ -712,23 +691,7 @@ using namespace eosio;
 			h.to_pay = asset(0, _SYM);
 		});    	
 
-        if (childs.begin() == childs.end())
-    	{
-    		unicore::create_bancor_market("POWER MARKET", 0, username, host->total_shares, host->quote_amount, host->quote_token_contract, 0);
-		};
-
-        // account3_index accounts3(_me, _me.value);
-        // auto host3 = accounts3.find(username.value);
         
-        // if (host3 != accounts3.end()){
-        //     action(
-        //         permission_level{ _me, "active"_n },
-        //         host->root_token_contract, "transfer"_n,
-        //         std::make_tuple( _me, host3->platform, amount, std::string("Payment for host upgrade")) 
-        //     ).send();
-        // }
-
-	  
     };
 
     /**
@@ -746,7 +709,8 @@ using namespace eosio;
         eosio::check((pool_timeout >= 60) && (pool_timeout < 7884000),"Pool Timeout must be greater or equal then 1 sec and less then 7884000 sec");
         eosio::check(acc -> current_pool_num < 3, "Timing changes only possible on the waiting mode");
 
-        spiral_index spiral(_me, host.value);
+        eosio::name main_host = acc->get_ahost();
+        spiral_index spiral(_me, main_host.value);
         auto sp = spiral.find(0);
 
         spiral.modify(sp, host, [&](auto &s){
@@ -798,7 +762,7 @@ using namespace eosio;
             h.purpose = purpose;
             h.meta = meta;
             h.title = title;
-            h.power_market_id = power_market_id;
+            // h.power_market_id = power_market_id;
         });
 
         ahosts_index coreahosts(_me, _me.value);

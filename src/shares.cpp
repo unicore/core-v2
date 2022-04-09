@@ -43,36 +43,36 @@ using namespace eosio;
   
   void add_quote_to_market(eosio::name host, eosio::asset amount){
       
-      market_index market(_me, host.value);
-      auto itr = market.find(0);
+      // market_index market(_me, host.value);
+      // auto itr = market.find(0);
         
-      market.modify(itr, _me, [&](auto &m){
-        m.quote.balance += amount;
-      });
+      // market.modify(itr, _me, [&](auto &m){
+      //   m.quote.balance += amount;
+      // });
   }
 
   void sub_base_from_market(eosio::name host, eosio::asset amount) {
       
-      market_index market(_me, host.value);
-      auto itr = market.find(0);
+      // market_index market(_me, host.value);
+      // auto itr = market.find(0);
       
-      eosio::check(itr -> base.balance >= amount, "Cannot substrate base balance");
+      // eosio::check(itr -> base.balance >= amount, "Cannot substrate base balance");
 
-      market.modify(itr, _me, [&](auto &m){
-        m.base.balance -= amount;
-      });
+      // market.modify(itr, _me, [&](auto &m){
+      //   m.base.balance -= amount;
+      // });
   }
   
   void sub_quote_from_market(eosio::name host, eosio::asset amount){
       
-      market_index market(_me, host.value);
-      auto itr = market.find(0);
+      // market_index market(_me, host.value);
+      // auto itr = market.find(0);
       
-      eosio::check(itr -> quote.balance >= amount, "Cannot substrate quote balance");
+      // eosio::check(itr -> quote.balance >= amount, "Cannot substrate quote balance");
 
-      market.modify(itr, _me, [&](auto &m){
-        m.quote.balance -= amount;
-      });
+      // market.modify(itr, _me, [&](auto &m){
+      //   m.quote.balance -= amount;
+      // });
   }
 
 
@@ -97,21 +97,21 @@ using namespace eosio;
 
     if (pexist != power.end() && pexist -> power > 0) {
       
-      market_index market(_me, host.value);
-      auto itr = market.find(0);
       
-      double available = (double)shares / (double)acc -> total_shares * (double)itr -> quote.balance.amount;
-      eosio::asset available_asset = asset((uint64_t)available, itr -> quote.balance.symbol);
+      double available = (double)shares / (double)acc -> total_shares * (double)acc->quote_amount.amount;
+      eosio::asset available_asset = asset((uint64_t)available, acc -> quote_amount.symbol);
 
       if (available_asset.amount > 0) {
         
         account.modify(acc, _me, [&](auto &a){
           a.total_shares -= shares;
+          a.quote_amount -= available_asset;
         });
 
-        sub_quote_from_market(username, host, available_asset);
+
+        // sub_quote_from_market(username, host, available_asset);
         //TRANSFER
-        sub_base_from_market(host, asset(shares, _POWER));
+        // sub_base_from_market(host, asset(shares, _POWER));
 
         print("on sell shares: ", shares);
         
@@ -273,7 +273,7 @@ using namespace eosio;
     //modify
     unicore::propagate_votes_changes(host, from, power_to->power, power_to->power - shares);
 
-    sub_base_from_market(host, asset(shares, _POWER));
+    // sub_base_from_market(host, asset(shares, _POWER));
 
     power_to_idx.modify(power_to, _me, [&](auto &pt){
       pt.power -= shares;
@@ -311,7 +311,7 @@ using namespace eosio;
         a.total_shares += shares;
     }); 
 
-    add_base_to_market(host, asset(shares, _POWER));
+    // add_base_to_market(host, asset(shares, _POWER));
       
 
     //Emplace or modify power object of reciever and propagate votes changes;
@@ -425,26 +425,26 @@ using namespace eosio;
    * @param[in]  quote_amount  The quote amount
    */
 	void unicore::create_bancor_market(std::string name, uint64_t id, eosio::name host, uint64_t total_shares, eosio::asset quote_amount, eosio::name quote_token_contract, uint64_t vesting_seconds){
-		market_index market(_me, host.value);
-		auto itr = market.find(id);
+		// market_index market(_me, host.value);
+		// auto itr = market.find(id);
 		
-    if (itr == market.end()){
+  //   if (itr == market.end()){
 
-			itr = market.emplace( _me, [&]( auto& m ) {
-         m.id = id;
-         m.vesting_seconds = vesting_seconds;
-         m.name = name;
-         m.supply.amount = 100000000000000ll;
-         m.supply.symbol = eosio::symbol(eosio::symbol_code("BANCORE"), 0);
-         m.base.balance.amount = total_shares;
-         m.base.balance.symbol = eosio::symbol(eosio::symbol_code("POWER"), 0);
-         m.quote.balance.amount = quote_amount.amount;
-         m.quote.balance.symbol = quote_amount.symbol;
-         m.quote.contract = quote_token_contract;
-      });
-		} else {
-			// eosio::check(false, "Market already created");
-    }
+		// 	itr = market.emplace( _me, [&]( auto& m ) {
+  //        m.id = id;
+  //        m.vesting_seconds = vesting_seconds;
+  //        m.name = name;
+  //        m.supply.amount = 100000000000000ll;
+  //        m.supply.symbol = eosio::symbol(eosio::symbol_code("BANCORE"), 0);
+  //        m.base.balance.amount = total_shares;
+  //        m.base.balance.symbol = eosio::symbol(eosio::symbol_code("POWER"), 0);
+  //        m.quote.balance.amount = quote_amount.amount;
+  //        m.quote.balance.symbol = quote_amount.symbol;
+  //        m.quote.contract = quote_token_contract;
+  //     });
+		// } else {
+		// 	// eosio::check(false, "Market already created");
+  //   }
 	};
 
 
@@ -607,56 +607,54 @@ using namespace eosio;
     account_index accounts(_me, host.value);
     partners2_index users(_partners,_partners.value);
     auto user = users.find(buyer.value);
-    print("buyer is: ", user->username);
-    // eosio::check(user != users.end(), "User is not registered");
-
-
+    
     auto exist = accounts.find(host.value);
+    auto root_symbol = exist -> get_root_symbol();
+
     eosio::check(exist != accounts.end(), "Host is not founded");
     eosio::check(exist -> quote_token_contract == code, "Wrong quote token contract");
     eosio::check(exist -> quote_amount.symbol == amount.symbol, "Wrong quote token symbol");
-    eosio::check(exist -> power_market_id != ""_n, "Can buy shares only when power market is enabled");
+    // eosio::check(exist -> power_market_id != ""_n, "Can buy shares only when power market is enabled");
 
-    market_index market(_me, host.value);
-    auto itr = market.find(0);
-    auto tmp = *itr;
-    uint64_t shares_out;
+    eosio::name main_host = exist->get_ahost();
 
-    market.modify( itr, _me, [&]( auto &es ) {
-       shares_out = (es.convert( amount, eosio::symbol(eosio::symbol_code("POWER"), 0))).amount;
+    spiral_index spiral(_me, main_host.value);
+    auto sp = spiral.find(0);
+
+    uint64_t new_shares = amount.amount * (HUNDR_PERCENT - sp -> loss_percent) / HUNDR_PERCENT;
+
+    print("new_shares: ", new_shares);
+    
+    accounts.modify(exist, _me, [&](auto &a){
+      a.total_shares += new_shares;
+      a.quote_amount += amount;
     });
-
-    eosio::check( shares_out > 0, "Amount is not enought for buy 1 share" );
 
     power3_index power(_me, host.value);
 
     auto pexist = power.find(buyer.value);
     
-    add_base_to_market(host, asset(shares_out, _POWER));
-
     if (pexist == power.end()) {
 
       power.emplace(_me, [&](auto &p){
        p.username = buyer;
-       p.power = shares_out;
-       p.staked = shares_out; 
+       p.power = new_shares;
+       p.staked = new_shares; 
       });
       
     
     } else {
-     unicore::propagate_votes_changes(host, buyer, pexist->power, pexist->power + shares_out);
+     unicore::propagate_votes_changes(host, buyer, pexist->power, pexist->power + new_shares);
       
-      add_base_to_market(host, asset(shares, _POWER));
-
       power.modify(pexist, _me, [&](auto &p){
-        p.power += shares_out;
-        p.staked += shares_out;
+        p.power += new_shares;
+        p.staked += new_shares;
         
      });
     };
 
     
-    return shares_out;
+    return amount.amount;
     
   };
 

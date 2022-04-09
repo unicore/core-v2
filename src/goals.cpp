@@ -441,10 +441,12 @@ using namespace eosio;
 		goals_index goals(_me, host.value);
 		account_index accounts(_me, host.value);
 		auto acc = accounts.find(host.value);
-    spiral_index spiral(_me, host.value);
+
+    eosio::name main_host = acc->get_ahost();
+    spiral_index spiral(_me, main_host.value);
     auto sp = spiral.find(0);
 
-    rate_index rates(_me, host.value);
+    rate_index rates(_me, main_host.value);
 
     auto rate = rates.find(acc -> current_pool_num -1);
 		if (code != _me) //For direct donate from fund and by architects action
