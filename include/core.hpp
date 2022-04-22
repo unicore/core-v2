@@ -45,13 +45,16 @@ class [[eosio::contract]] unicore : public eosio::contract {
         // uint128_t unicore::combine_ids(const uint64_t &x, const uint64_t &y);
         // uint128_t unicore::combine_ids2(const uint64_t &x, const uint64_t &y);
 
+        static void cut_tail(uint64_t current_pool_id, eosio::name host);
         
+        [[eosio::action]] void pull(eosio::name host, eosio::name username, eosio::asset amount);
+        [[eosio::action]] void cut(eosio::name host);
+
         static eosio::asset convert_to_power(eosio::asset quantity, eosio::name host);
         [[eosio::action]] void convert(eosio::name username, eosio::name host, uint64_t balance_id);
 
         static eosio::asset calculate_asset_from_power(eosio::asset quantity, eosio::name host);
 
-        
         [[eosio::action]] void setparams(eosio::name host, eosio::name chost, uint64_t size_of_pool,
             uint64_t quants_precision, uint64_t overlap, uint64_t profit_growth, uint64_t base_rate,
             uint64_t loss_percent, uint64_t compensator_percent, uint64_t pool_limit, uint64_t pool_timeout, uint64_t priority_seconds);
@@ -69,7 +72,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
         [[eosio::action]] void init(uint64_t system_income);
 
-        [[eosio::action]] void refreshst(eosio::name host);
+        [[eosio::action]] void refreshst(eosio::name username, eosio::name host);
 
         //BADGES
         [[eosio::action]] void setbadge(uint64_t id, eosio::name host, eosio::string caption, eosio::string description, eosio::string iurl, eosio::string pic, uint64_t total, uint64_t power);
@@ -193,7 +196,9 @@ class [[eosio::contract]] unicore : public eosio::contract {
         // static void buydata_action(eosio::name owner, uint64_t data_id, eosio::name buyer, eosio::asset quantity, eosio::name code);
 
         static void add_user_stat(eosio::name type, eosio::name username, eosio::name contract, eosio::asset nominal_amount, eosio::asset withdraw_amount);
-
+        static void add_ref_stat(eosio::name username, eosio::name contract, eosio::asset withdrawed);
+        static void add_host_stat(eosio::name type, eosio::name username, eosio::name host, eosio::asset amount);
+        
 
 
 
@@ -294,7 +299,6 @@ class [[eosio::contract]] unicore : public eosio::contract {
         static void back_shares_with_badge_action (eosio::name host, eosio::name from, uint64_t shares);
         static void add_sale_history(hosts acc, rate rate, spiral sp, eosio::asset amount);
 
-        
 };
 
 // }
@@ -366,6 +370,25 @@ class [[eosio::contract]] unicore : public eosio::contract {
     > balance_index;
 
 
+/*!
+   \brief Структура2 балансов пользователя у всех хостов Двойной Спирали
+*/
+    
+    struct [[eosio::table, eosio::contract("unicore")]] balance2 {
+        uint64_t id;
+        double quants_for_sale;
+        double next_quants_for_sale;
+        
+        uint64_t primary_key() const {return id;}
+        
+        EOSLIB_SERIALIZE(balance2, (id)(quants_for_sale)(next_quants_for_sale))
+    
+        
+    };
+
+    typedef eosio::multi_index<"balance2"_n, balance2> balance2_index;
+
+
 
 /*!
    \brief Структура статистики балансов пользователя у всех хостов Двойной Спирали
@@ -403,6 +426,62 @@ struct [[eosio::table, eosio::contract("unicore")]] userstat {
     
     > userstat_index;
 
+
+
+/*!
+   \brief Структура статистики балансов пользователя у одного хоста Двойной Спирали
+*/
+    
+struct [[eosio::table, eosio::contract("unicore")]] hoststat {
+    eosio::name username;
+    eosio::asset blocked_now;
+    
+    uint64_t primary_key() const {return username.value;}
+    
+    uint128_t byuserblock() const {return combine_ids(username.value, -blocked_now.amount);} /*!< (contract, blocked_now.symbol) - комбинированный secondary_key для получения курса по имени выходного контракта и символу */
+
+
+    EOSLIB_SERIALIZE(hoststat, (username)(blocked_now))        
+
+};
+
+    typedef eosio::multi_index<"hoststat"_n, hoststat,
+        eosio::indexed_by<"byuserblock"_n, eosio::const_mem_fun<hoststat, uint128_t, &hoststat::byuserblock>>
+    > hoststat_index;
+
+
+
+/*!
+   \brief Структура статистики балансов пользователя у всех хостов Двойной Спирали
+*/
+    
+struct [[eosio::table, eosio::contract("unicore")]] refstat {
+    uint64_t id;
+    eosio::name username;
+    eosio::name contract;
+
+    std::string symbol;
+    uint64_t precision;
+
+    eosio::asset withdrawed;
+    
+    uint64_t primary_key() const {return id;}
+    uint64_t byusername() const {return username.value;}
+    uint128_t byconuser() const {return combine_ids(contract.value, username.value);} /*!< (contract, blocked_now.symbol) - комбинированный secondary_key для получения курса по имени выходного контракта и символу */
+
+    uint128_t byuserwith() const {return combine_ids(username.value, -withdrawed.amount);} /*!< (contract, blocked_now.symbol) - комбинированный secondary_key для получения курса по имени выходного контракта и символу */
+    
+
+    EOSLIB_SERIALIZE(refstat, (id)(username)(contract)(symbol)(precision)(withdrawed))        
+
+};
+
+    typedef eosio::multi_index<"refstat"_n, refstat,
+        eosio::indexed_by<"byusername"_n, eosio::const_mem_fun<refstat, uint64_t, &refstat::byusername>>,
+        eosio::indexed_by<"byconuser"_n, eosio::const_mem_fun<refstat, uint128_t, &refstat::byconuser>>,
+        eosio::indexed_by<"byuserwith"_n, eosio::const_mem_fun<refstat, uint128_t, &refstat::byuserwith>>
+        
+    > refstat_index;
 
 
 /*!
@@ -470,7 +549,7 @@ struct [[eosio::table, eosio::contract("unicore")]] userstat {
 /*!
    \brief Структура для учёта распределения бассейнов внутренней учетной единицы хоста Двойной Спирали.
 */
-    struct [[eosio::table, eosio::contract("unicore")]] pool{
+    struct [[eosio::table, eosio::contract("unicore")]] pool {
         uint64_t id;
         eosio::name ahost;
         uint64_t cycle_num;
@@ -500,6 +579,25 @@ struct [[eosio::table, eosio::contract("unicore")]] userstat {
     
 
 /*!
+   \brief Структура для учёта распределения бассейнов внутренней учетной единицы хоста Двойной Спирали.
+*/
+    struct [[eosio::table, eosio::contract("unicore")]] pool2 {
+        uint64_t id;
+        double total_quants; 
+        double remain_quants;
+        eosio::asset filled;
+        eosio::asset remain;
+        uint64_t filled_percent;
+        
+        uint64_t primary_key() const {return id;}
+        
+        EOSLIB_SERIALIZE(pool2,(id)(total_quants)(remain_quants)(filled)(remain)(filled_percent))
+    };
+
+    typedef eosio::multi_index<"pool2"_n, pool2> pool2_index;
+    
+
+/*!
    \brief Структура для хранения сообщений в режиме чата ограниченной длинны от спонсоров хоста Двойной Спирали.
 */
     struct [[eosio::table, eosio::contract("unicore")]] coredhistory{
@@ -516,6 +614,38 @@ struct [[eosio::table, eosio::contract("unicore")]] userstat {
     };
     
     typedef eosio::multi_index<"coredhistory"_n, coredhistory> coredhistory_index;
+    
+
+
+
+/*!
+   \brief Структура для хранения живой очереди приоритетных участников
+*/
+    struct [[eosio::table, eosio::contract("unicore")]] tail {
+        uint64_t id;
+        
+        eosio::name username;
+        eosio::time_point_sec enter_at;
+        eosio::asset amount;
+        uint64_t exit_pool_id;
+
+        uint64_t primary_key() const {return id;}
+        uint64_t byenter() const {return enter_at.sec_since_epoch();}
+        uint64_t byamount() const {return amount.amount;}
+
+        uint64_t byusername() const {return username.value;}
+
+
+        EOSLIB_SERIALIZE(tail, (id)(username)(enter_at)(amount)(exit_pool_id));
+    
+    };
+
+    
+    typedef eosio::multi_index<"tail"_n, tail,
+        eosio::indexed_by<"byusername"_n, eosio::const_mem_fun<tail, uint64_t, &tail::byusername>>,
+        eosio::indexed_by<"byexpr"_n, eosio::const_mem_fun<tail, uint64_t, &tail::byenter>>,
+        eosio::indexed_by<"byamount"_n, eosio::const_mem_fun<tail, uint64_t, &tail::byamount>>
+    > tail_index;
     
 
 /*!

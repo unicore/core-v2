@@ -563,13 +563,15 @@ extern "C" {
                     break;
                 };
                 case "refreshst"_n.value: {
-                    struct refreshstruct {
-                        eosio::name host;
-                    };
+                    execute_action(name(receiver), name(code), &unicore::refreshst);
+                    // break;
+                    // struct refreshstruct {
+                    //     eosio::name host;
+                    // };
                     
-                    auto op = eosio::unpack_action_data<refreshstruct>();
+                    // auto op = eosio::unpack_action_data<refreshstruct>();
                     
-                    unicore::refresh_state(op.host);
+                    // unicore::refresh_state(op.host);
                     break;
                 };
                 
