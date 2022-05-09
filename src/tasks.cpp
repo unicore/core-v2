@@ -166,15 +166,13 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 	 */
 	[[eosio::action]] void unicore::settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id, bool is_regular, std::vector<uint64_t> calendar, eosio::time_point_sec start_at,eosio::time_point_sec expired_at, std::string meta){
 		
-		eosio::check(has_auth(creator) || has_auth(host) || has_auth(doer), "missing required authority");
+		eosio::check(has_auth(creator) || has_auth(host), "missing required authority");
     
-    auto payer = has_auth(creator) ? creator : (has_auth(host) ? host : doer);
-
+    auto payer = has_auth(creator) ? creator : host;
 
 		account_index accounts(_me, host.value);
 		auto acc = accounts.find(host.value);
 		eosio::check(acc != accounts.end(), "Host is not found");
-
 
 		auto root_symbol = acc->get_root_symbol();
 		
@@ -185,65 +183,26 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 			eosio::check(for_each.amount == 0, "Wrong amount for current host and task mode" );
 		}
 		
-		validate_permlink(permlink);
-    
-    //check for uniq permlink
-    auto hash = hash64(permlink);
-    
-    std::vector<uint64_t> batch;
-		tasks_index tasks(_me, host.value);
-		
+    tasks_index tasks(_me, host.value);
+		uint64_t id = get_global_id("tasks"_n);
+
+
 		if (with_badge == true) {
 			badge_index badges(_me, host.value);
 			auto badge = badges.find(badge_id);
 			eosio::check(badge != badges.end(), "Badge with current ID is not found");
 		}
 
-		auto exist_task = tasks.find(hash);
-
-		if (exist_task == tasks.end()) {
 
 			if (parent_batch_id != 0) {
 				auto parent_task = tasks.find(parent_batch_id);
 				eosio::check(parent_task != tasks.end(), "Parent batch is not founded");
-				// eosio::check(parent_task -> is_batch == true, "Parent task is not a batch");
-
-				batch = parent_task -> batch;
-				
-				//TODO check for batch length
-				auto itr = std::find(batch.begin(), batch.end(), hash);
-				
-				if (itr == batch.end()){
-					batch.push_back(hash);
-				};
-
-				tasks.modify(parent_task, payer, [&](auto &t){
-					t.batch = batch;
-				});
-
 			};
+
 
 			goals_index goals(_me, host.value);
 			auto goal = goals.find(goal_id);
-			// eosio::check(goal != goals.end(), "Goal is not found");
 			
-
-
-			if (goal != goals.end()){
-				// eosio::check(goal -> who_can_create_tasks == creator || goal->who_can_create_tasks.value == 0, "Only creator can create task for current goal");
-				eosio::check(goal -> status != "completed"_n, "Cannot add task to completed goal");
-				eosio::check(goal -> target.symbol == requested.symbol, "Requested symbol and goal symbol should equal");
-
-				goals.modify(goal, payer, [&](auto &g){
-		    	g.total_tasks = goal -> total_tasks + 1;
-		    	g.target += requested;
-		    	g.filled = goal -> available + goal -> withdrawed > goal -> target + requested;		
-		    });
-
-			} 
-
-			bool validated = false;
-
 			if (doer != ""_n) {
 				eosio::check( is_account( doer ), "user account does not exist");
 
@@ -251,55 +210,52 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 				bool doer_is_host = doer_host == accounts.end() ? false: true;
 
 				doers_index doers(_me, host.value);
-				auto doers_with_tasks_index = doers.template get_index<"doerwithtask"_n>();
-				auto task_ids = combine_ids(doer.value, hash);
-				auto is_exist = doers_with_tasks_index.find(task_ids);
+				
+				// auto doers_with_tasks_index = doers.template get_index<"doerwithtask"_n>();
+				// auto task_ids = combine_ids(doer.value, hash);
+				// auto is_exist = doers_with_tasks_index.find(task_ids);
 
 
-				if (is_exist == doers_with_tasks_index.end()){
+				// if (is_exist == doers_with_tasks_index.end()){
 					
-					doers.emplace(payer,[&](auto &d){
-						d.id = doers.available_primary_key();
-						d.task_id = hash;
-						d.doer = doer;
-						d.is_host = doer_is_host;
-						d.doer_goal_id = 0;
-						d.doer_badge_id = 0;
-						d.comment = "";
-					});
+				doers.emplace(payer,[&](auto &d){
+					d.id = get_global_id("doers"_n);
+					d.task_id = id;
+					d.doer = doer;
+					d.is_host = doer_is_host;
+					d.doer_goal_id = 0;
+					d.doer_badge_id = 0;
+					d.comment = "";
+				});
 
-				} else {
+				// } else {
 
-					doers_with_tasks_index.modify(is_exist, payer, [&](auto &d){
-						d.doer = doer;
-						d.is_host = doer_is_host;
-					});
+				// 	doers_with_tasks_index.modify(is_exist, payer, [&](auto &d){
+				// 		d.doer = doer;
+				// 		d.is_host = doer_is_host;
+				// 	});
 
-				}
+				// }
 			} 
 
 			
-			validated = creator == acc->architect ? true : false;	
-			
-			if (goal_id == 0)
-				validated = false;
-
+			bool validated = creator == acc->architect ? true : false;	
 			
 			//todo check calendar for 7 days
-
 			//TODO add incoming goal for doer			
 			if (doer != host && doer != ""_n) {
-				setincoming(doer, host, 0, hash);	
+				setincoming(doer, host, 0, id);	
 			};
 
 
 			tasks.emplace(payer, [&](auto &t){
+				t.id = id;
+				t.parent_id = parent_batch_id;
+				t.goal_id = goal_id;
+				
 				t.type = goal != goals.end() ? goal -> type : "goal"_n;
-
 				t.host = host;
 				t.creator = creator;
-				t.task_id = hash;
-				t.goal_id = goal_id;
 				t.title = title;
 				t.data = data;
 				t.priority = priority;
@@ -315,9 +271,8 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 				t.with_badge = with_badge;
 				t.badge_id = badge_id;
 				t.duration = duration;
-				t.is_batch = is_batch;
 				t.meta = meta;
-				t.parent_batch_id = parent_batch_id;
+				
 				t.expired_at = expired_at;
 				t.created_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch());
 				t.start_at = start_at;
@@ -331,63 +286,63 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 
 
 	    
-		} else {
+		// } else {
 
-			eosio::check(exist_task -> status != "completed"_n, "Only not completed tasks can be modified");
+		// 	eosio::check(exist_task -> status != "completed"_n, "Only not completed tasks can be modified");
 			
 
-			goals_index goals(_me, host.value);
-			auto goal = goals.find(goal_id);
+		// 	goals_index goals(_me, host.value);
+		// 	auto goal = goals.find(goal_id);
 			
-			if (goal != goals.end()){
-				eosio::check(goal -> target.symbol == requested.symbol, "Requested symbol and goal symbol should equal");
+		// 	if (goal != goals.end()){
+		// 		eosio::check(goal -> target.symbol == requested.symbol, "Requested symbol and goal symbol should equal");
 				
-				eosio::asset change = requested - exist_task -> requested;
+		// 		eosio::asset change = requested - exist_task -> requested;
 
-				goals.modify(goal, payer, [&](auto &g){
-		    	g.target += change;
-		    	g.filled = goal -> available + goal -> withdrawed > goal -> target + change;		
-		    });
+		// 		goals.modify(goal, payer, [&](auto &g){
+		//     	g.target += change;
+		//     	g.filled = goal -> available + goal -> withdrawed > goal -> target + change;		
+		//     });
 
-			}
+		// 	}
 			
 			
-			if (exist_task -> doer != doer && doer != ""_n) {
-				delincoming(exist_task -> doer, host, 0, hash);	
-				setincoming(doer, host, 0, hash);	
-			};
+		// 	if (exist_task -> doer != doer && doer != ""_n) {
+		// 		delincoming(exist_task -> doer, host, 0, hash);	
+		// 		setincoming(doer, host, 0, hash);	
+		// 	};
 
 
-			tasks.modify(exist_task, payer, [&](auto &t){
-				t.type = goal != goals.end() ? goal -> type : "goal"_n;
+		// 	tasks.modify(exist_task, payer, [&](auto &t){
+		// 		t.type = goal != goals.end() ? goal -> type : "goal"_n;
 
-				if (payer == doer && payer != host) {
+		// 		if (payer == doer && payer != host) {
 
-					t.start_at = start_at;
-					t.expired_at = expired_at;
+		// 			t.start_at = start_at;
+		// 			t.expired_at = expired_at;
 				
-				} else {
-					t.title = title;
-					t.doer = doer;
-					t.data = data;
-					t.priority = priority;
-					t.requested = requested;
-					t.for_each = for_each;
-					t.is_public = is_public;
-					t.with_badge = with_badge;
-					t.badge_id = badge_id;
-					t.batch = batch;
-					t.calendar = calendar;
-					t.is_regular = is_regular;
-					t.start_at = start_at;
-					t.expired_at = expired_at;
-					t.meta = meta;
-				}
+		// 		} else {
+		// 			t.title = title;
+		// 			t.doer = doer;
+		// 			t.data = data;
+		// 			t.priority = priority;
+		// 			t.requested = requested;
+		// 			t.for_each = for_each;
+		// 			t.is_public = is_public;
+		// 			t.with_badge = with_badge;
+		// 			t.badge_id = badge_id;
+		// 			t.batch = batch;
+		// 			t.calendar = calendar;
+		// 			t.is_regular = is_regular;
+		// 			t.start_at = start_at;
+		// 			t.expired_at = expired_at;
+		// 			t.meta = meta;
+		// 		}
 				
-			});
+		// 	});
 
 
-		}
+		// }
 
 		
 
@@ -471,22 +426,19 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
     
     auto payer = has_auth(task->creator) ? task->creator : task->host;
 
-		// eosio::check(task -> reports_count == 0, "Cannot delete task with reports. Delete all reports firstly");
-		
 		eosio::check(task != tasks.end(), "Task is not found");
-
 
 		goals_index goals(_me, host.value);
 		auto goal = goals.find(task->goal_id);
 		
 		// eosio::check(goal != goals.end(), "Goal is not found");
 		
-		if (goal != goals.end()) {
-			goals.modify(goal, payer, [&](auto &g){
-	    	g.total_tasks -= 1;
-	    	g.target -= task->requested - task->funded;
-	    });
-		}
+		// if (goal != goals.end()) {
+		// 	goals.modify(goal, payer, [&](auto &g){
+	 //    	g.total_tasks -= 1;
+	 //    	g.target -= task->requested - task->funded;
+	 //    });
+		// }
 
 		delincoming(task -> doer, host, 0, task_id);	
 
@@ -604,7 +556,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 
 		doers_index doers(_me, host.value);
 		auto doers_with_tasks_index = doers.template get_index<"doerwithtask"_n>();
-		auto task_ids = combine_ids(doer.value, task->task_id);
+		auto task_ids = combine_ids(doer.value, task->id);
 		auto is_exist = doers_with_tasks_index.find(task_ids);
 		eosio::check(is_exist != doers_with_tasks_index.end(), "Doer is not found");
 		
@@ -639,7 +591,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 
 		doers_index doers(_me, host.value);
 		auto doers_with_tasks_index = doers.template get_index<"doerwithtask"_n>();
-		auto task_ids = combine_ids(doer.value, task->task_id);
+		auto task_ids = combine_ids(doer.value, task->id);
 		auto is_exist = doers_with_tasks_index.find(task_ids);
 
 		if (doer != host)
@@ -826,23 +778,23 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		auto task = tasks.find(task_id);
 		eosio::check(task != tasks.end(), "Task is not found");
 		eosio::check(task -> active == true, "Task is not active");
-		// eosio::check(task -> is_public == true, "Only public tasks is accessable for now");
-	
+		
+
 		if (task -> is_public == false){
 			eosio::check(task -> doer == username, "Wrong doer for the private task");
 		};
 
-		goals_index goals(_me, host.value);
-		auto goal = goals.find(task-> goal_id);
+		// goals_index goals(_me, host.value);
+		// auto goal = goals.find(task-> goal_id);
 		
-		if (goal -> type == "marathon"_n) {
-			goalspartic_index gparticipants(_me, host.value);
-      auto users_with_id = gparticipants.template get_index<"byusergoal"_n>();
-			auto goal_ids = combine_ids(username.value, task->goal_id);
-      auto participant = users_with_id.find(goal_ids);
+		// if (goal -> type == "marathon"_n) {
+		// 	goalspartic_index gparticipants(_me, host.value);
+  //     auto users_with_id = gparticipants.template get_index<"byusergoal"_n>();
+		// 	auto goal_ids = combine_ids(username.value, task->goal_id);
+  //     auto participant = users_with_id.find(goal_ids);
 
-      // eosio::check(participant != users_with_id.end(), "Username not participant of the current marathon");
-		};
+  //     // eosio::check(participant != users_with_id.end(), "Username not participant of the current marathon");
+		// };
 
 		
 		reports_index reports(_me, host.value);
@@ -855,16 +807,13 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		// eosio::check(user_report == users_with_id.end(), "Report for this task already exist");
 		
 		bool need_check = username == host ? false : true;
-		uint64_t report_id;
-
-
+		
 		if (user_report == users_with_id.end() || task -> is_regular == true){
 			
 			eosio::asset requested = task -> is_public == false ? task->requested : task->for_each;
 
-			report_id = acc->total_reports + 1;
 			reports.emplace(username, [&](auto &r) {
-				r.report_id = report_id;
+				r.report_id = get_global_id("reports"_n);
 				r.task_id = task_id;
 				r.goal_id = task->goal_id;
 				r.count = 1;
@@ -883,32 +832,26 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 	      a.total_reports = acc -> total_reports + 1;
 	    });
 
-			if (goal != goals.end()){
-				goals.modify(goal, username, [&](auto &g){
-					g.reports_count += 1;
-				});
-			}
-			
-	    tasks.modify(task, username, [&](auto &t){
-				t.reports_count += 1;
-			});
+		
 
-		} else {
-			eosio::check(task -> is_regular == true, "Task is not regular, but report is exist");
-			eosio::check(user_report -> need_check == false, "Previous report is not checked yet");
-			report_id = user_report -> report_id;
+		} 
+		// else {
+		// 	eosio::check(task -> is_regular == true, "Task is not regular, but report is exist");
+		// 	eosio::check(user_report -> need_check == false, "Previous report is not checked yet");
+		// 	report_id = user_report -> report_id;
 
-			users_with_id.modify(user_report, username, [&](auto &r){
-				r.count += 1;
-				r.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + 30 * 86400);
-				r.created_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch());
+		// 	users_with_id.modify(user_report, username, [&](auto &r){
+		// 		r.count += 1;
+		// 		r.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + 30 * 86400);
+		// 		r.created_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch());
 				
-			});
-		}
+		// 	});
+		// }
 
-    if (need_check == false) {
-    	unicore::approver(host, report_id, "");
-		};
+  //   if (need_check == false) {
+  //   	unicore::approver(host, report_id, "");
+		// };
+
 	}
 
 	/**
@@ -1079,9 +1022,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 
 		}
 
-		// unicore::check_and_gift_netted_badge(report->username, host, task->task_id);
-
-
+		// unicore::check_and_gift_netted_badge(report->username, host, task->id);
 
     // accounts.modify(acc, host, [&](auto &a){
     //   a.approved_reports = acc -> approved_reports + 1;
@@ -1204,7 +1145,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 
 		if ((goal->status == "reported"_n || goal->status == "completed"_n) && report->distributed == false) {
 
-			double part = (double)report->total_votes / (double)goal->target3.amount * (double)goal2->total_on_distribution.amount;
+			double part = (double)report->positive_votes / (double)goal->target3.amount * (double)goal2->total_on_distribution.amount;
 			eosio::asset part_asset = asset((uint64_t)part, report->balance.symbol);
 
 			reports.modify(report, username, [&](auto &r){

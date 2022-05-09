@@ -651,11 +651,11 @@ using namespace eosio;
 
         auto root_symbol = acc->get_root_symbol();
         
-    	eosio::asset to_pay = asset(10000, root_symbol);
+    	eosio::asset to_pay = asset(0, root_symbol);
         
     	hosts.modify(acc, parent_host, [&](auto &h){
     		h.chosts = childs;
-    		h.payed = false;
+    		h.payed = true;
     		h.to_pay = to_pay;
     		h.parameters_setted = false;
     		h.non_active_chost = true;

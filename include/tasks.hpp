@@ -2,7 +2,9 @@
    \brief Структура задач хоста Двойной Спирали.
 */
 	struct [[eosio::table, eosio::contract("unicore")]] tasks {
-		uint64_t task_id;
+		uint64_t id;
+        uint64_t parent_id;
+        
 		uint64_t goal_id;
         eosio::name host;
         eosio::name creator;
@@ -36,40 +38,42 @@
         eosio::time_point_sec created_at;
         eosio::time_point_sec start_at;
 		eosio::time_point_sec expired_at;
-        bool is_batch = false;
-        std::vector<uint64_t> batch;
-        uint64_t parent_batch_id;
+        
         uint64_t duration;
         bool is_encrypted = false;
         std::string public_key;
-        int64_t total_votes;
+        uint64_t positive_votes;
+        uint64_t negative_votes;
         std::vector<eosio::name> voters;
 
         std::string meta;
 
 
-		uint64_t primary_key()const { return task_id; }
+		uint64_t primary_key()const { return id; }
         
         uint64_t bycreator() const {return creator.value;}
         uint64_t bycurator() const {return curator.value;}
         uint64_t bydoer() const {return doer.value;}
         uint64_t bybenefactor() const {return benefactor.value;}
         uint64_t bygoal() const {return goal_id; }
-        uint128_t goalandtask() const { return combine_ids(goal_id, task_id); }
+        uint128_t goalandtask() const { return combine_ids(goal_id, id); }
         uint64_t byhost() const {return host.value; }
         uint64_t bytype() const {return type.value; }
         uint64_t bystatus() const {return status.value; }
         uint64_t bypriority() const {return priority; }
         uint64_t byhasbadge() const {return with_badge; }
         uint64_t bybadge() const {return badge_id; }
-        uint128_t crewithtask() const { return combine_ids(creator.value, task_id); }
+        uint128_t crewithtask() const { return combine_ids(creator.value, id); }
         uint128_t crewithgoal() const { return combine_ids(creator.value, goal_id); }
         
         uint64_t byvotes() const { 
-            return pow(2, 63) + total_votes;
+            return positive_votes;
+        }
+        uint64_t bynvotes() const{
+            return negative_votes;
         }
 
-	    EOSLIB_SERIALIZE( tasks, (task_id)(goal_id)(host)(creator)(benefactor)(suggester)(permlink)(type)(status)(priority)(is_regular)(calendar)(is_public)(doer)(role)(level)(title)(data)(requested)(funded)(remain)(for_each)(curator)(gifted_badges)(gifted_power)(reports_count)(with_badge)(badge_id)(validated)(completed)(active)(created_at)(start_at)(expired_at)(is_batch)(batch)(parent_batch_id)(duration)(is_encrypted)(public_key)(total_votes)(voters)(meta))
+	    EOSLIB_SERIALIZE( tasks, (id)(parent_id)(goal_id)(host)(creator)(benefactor)(suggester)(permlink)(type)(status)(priority)(is_regular)(calendar)(is_public)(doer)(role)(level)(title)(data)(requested)(funded)(remain)(for_each)(curator)(gifted_badges)(gifted_power)(reports_count)(with_badge)(badge_id)(validated)(completed)(active)(created_at)(start_at)(expired_at)(duration)(is_encrypted)(public_key)(positive_votes)(negative_votes)(voters)(meta))
     };
 
     typedef eosio::multi_index< "tasks"_n, tasks,
@@ -85,6 +89,7 @@
         eosio::indexed_by<"bycreator"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bycreator>>,
         eosio::indexed_by<"bydoer"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bydoer>>,
         eosio::indexed_by<"byvotes"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::byvotes>>,
+        eosio::indexed_by<"bynvotes"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bynvotes>>,
         eosio::indexed_by<"bystatus"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bystatus>>
         // eosio::indexed_by<"bydoer"_n, eosio::const_mem_fun<tasks, uint64_t, &tasks::bydoer>>
     
@@ -156,20 +161,22 @@
         eosio::time_point_sec expired_at;
 
 
-        uint64_t total_votes;
+        uint64_t positive_votes;
+        uint64_t negative_votes;
         std::vector<eosio::name> voters;
 
         uint64_t primary_key() const {return report_id;}
         uint64_t byusername() const {return username.value;}
         uint64_t bytaskid() const {return task_id;}
         uint64_t bygoalid() const {return goal_id;}
-        uint64_t byvotes() const {return total_votes;}
+        uint64_t byvotes() const {return positive_votes;}
+        uint64_t bynvotes() const {return negative_votes;}
 
         uint128_t userwithgoal() const { return combine_ids(username.value, goal_id); }
         uint128_t userwithtask() const { return combine_ids(username.value, task_id); }
         
 
-        EOSLIB_SERIALIZE(reports3, (report_id)(status)(task_id)(goal_id)(type)(count)(username)(curator)(data)(requested)(balance)(withdrawed)(need_check)(approved)(distributed)(comment)(created_at)(expired_at)(total_votes)(voters))
+        EOSLIB_SERIALIZE(reports3, (report_id)(status)(task_id)(goal_id)(type)(count)(username)(curator)(data)(requested)(balance)(withdrawed)(need_check)(approved)(distributed)(comment)(created_at)(expired_at)(positive_votes)(negative_votes)(voters))
     };
 
     typedef eosio::multi_index< "reports3"_n, reports3,

@@ -9,7 +9,7 @@ using namespace eosio;
 
 		while (idx !=votes.end()){
 			auto goal = goals.find(idx->goal_id);
-			if (goal->filled){
+			if (goal->status == "filled"_n){
 				list_for_delete.push_back(idx->goal_id);
 			};
 			idx++;
@@ -120,11 +120,17 @@ using namespace eosio;
       voters.push_back(voter);
       
       goals.modify(goal, voter, [&](auto &g){
-       	up == true ? g.total_votes = goal->total_votes + pow -> power : g.total_votes =  goal->total_votes - pow->power;
-       	
+       	if (goal -> status == "waiting"_n || goal -> status == "validated"_n) {
+					up == true ? g.positive_votes = goal->positive_votes + pow -> power : g.negative_votes =  goal->negative_votes + pow->power;
+       	}
+
        	g.voters = voters;
-       	int64_t votes_percent = g.total_votes * 100 * ONE_PERCENT / liquid_shares;
-       	g.validated = votes_percent >= acc->consensus_percent && g.total_votes > 0;
+
+       	int64_t votes_percent = g.positive_votes * 100 * ONE_PERCENT / liquid_shares;
+       	if (goal -> status == "waiting"_n) {
+       		g.status = (votes_percent >= acc->consensus_percent && g.positive_votes > 0) ? "validated"_n : "waiting"_n;	
+       	}
+       	
 		
       });
 
@@ -142,11 +148,18 @@ using namespace eosio;
 			voters.erase(itr);
 			goals.modify(goal, voter, [&](auto &g){
 				g.voters = voters;
-				vote->power < 0 ? g.total_votes = goal->total_votes + abs(vote->power) : g.total_votes = goal->total_votes - vote->power;
-				int64_t votes_percent = g.total_votes * ONE_PERCENT / liquid_shares;
+
+				if (goal -> status == "waiting"_n || goal -> status == "validated"_n) {
+					vote->power < 0 ? g.negative_votes = goal->negative_votes + vote->power : g.positive_votes = goal->positive_votes - vote->power;
+				}
+
+				int64_t votes_percent = g.positive_votes * ONE_PERCENT / liquid_shares;
 				
-				g.validated = goal->filled ? true : votes_percent >= acc->consensus_percent / 100 && g.total_votes > 0;
 				
+				if (goal -> status == "waiting"_n) {
+       		g.status = (votes_percent >= acc->consensus_percent / 100 && g.positive_votes > 0) ? "validated"_n : "waiting"_n;	
+       	}
+       	
 			});
 
 			goal_idwithhost_idx.erase(vote);
@@ -214,12 +227,12 @@ using namespace eosio;
       voters.push_back(voter);
       
       reports.modify(report, voter, [&](auto &r) {
-				up == true ? r.total_votes = report->total_votes + pow -> power : r.total_votes =  report->total_votes - pow->power;
+				up == true ? r.positive_votes = report->positive_votes + pow -> power : r.negative_votes =  report->negative_votes + pow->power;
        	r.voters = voters;
 			});   
 
       tasks.modify(task, voter, [&](auto &g){
-       	up == true ? g.total_votes = task->total_votes + pow -> power : g.total_votes =  task->total_votes - pow->power;
+       	up == true ? g.positive_votes = task->positive_votes + pow -> power : g.negative_votes =  task->negative_votes + pow->power;
       });
 
 			
@@ -236,26 +249,29 @@ using namespace eosio;
       });
 
 		} else {
+
 			auto voters = report -> voters;
 			auto itr = std::find(voters.begin(), voters.end(), voter);
 
 			voters.erase(itr);
 
 			reports.modify(report, voter, [&](auto &r) {
-       	vote->power < 0 ? r.total_votes = report->total_votes + abs(vote->power) : r.total_votes = report->total_votes - vote->power;
+       	vote -> power < 0 ? r.negative_votes = report->negative_votes + vote->power : r.positive_votes = report->positive_votes - vote->power;
        	r.voters = voters;
 			}); 
 
 			tasks.modify(task, voter, [&](auto &g) {
-				vote->power < 0 ? g.total_votes = task->total_votes + abs(vote->power) : g.total_votes = task->total_votes - vote->power;
+				vote -> power < 0 ? g.negative_votes = task->negative_votes + vote->power : g.positive_votes = task->positive_votes - vote->power;
 			});
 
 			goals.modify(goal, voter, [&](auto &g) {
-				vote->power < 0 ? g.target3 = asset(goal->target3.amount + abs(vote->power), _VOTES) : g.target3 = asset(goal->target3.amount - vote->power, _VOTES);
+				vote -> power < 0 ? g.target3 = asset(goal->target3.amount + abs(vote->power), _VOTES) : g.target3 = asset(goal->target3.amount - vote->power, _VOTES);
       });
 
 			reports_by_task_idx.erase(vote);
+
 		}
+
 		// clear_old_votes_action(voter, host);
 		
 		

@@ -48,7 +48,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         static void cut_tail(uint64_t current_pool_id, eosio::name host);
         
         [[eosio::action]] void pull(eosio::name host, eosio::name username, eosio::asset amount);
-        [[eosio::action]] void cut(eosio::name host);
+        [[eosio::action]] void exittail(eosio::name username, eosio::name host, uint64_t id);
 
         static eosio::asset convert_to_power(eosio::asset quantity, eosio::name host);
         [[eosio::action]] void convert(eosio::name username, eosio::name host, uint64_t balance_id);
@@ -90,7 +90,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void setcmsconfig(eosio::name username, eosio::string config);
 
         //GOALS
-        [[eosio::action]] void setgoal(eosio::name creator, eosio::name host, eosio::name type, std::string title, std::string permlink, std::string description, eosio::asset target, uint64_t duration, uint64_t cashback, bool activated, bool is_batch, uint64_t parent_batch_id, std::string meta);
+        [[eosio::action]] void setgoal(eosio::name creator, eosio::name host, uint64_t parent_id, std::string title, std::string description, eosio::asset target, std::string meta);
         [[eosio::action]] void dfundgoal(eosio::name architect, eosio::name host, uint64_t goal_id, eosio::asset amount, std::string comment);
         [[eosio::action]] void fundchildgoa(eosio::name architect, eosio::name host, uint64_t goal_id, eosio::asset amount);
         
@@ -110,6 +110,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
         static void fund_emi_pool ( eosio::name host, eosio::asset amount, eosio::name code );
         static void add_asset_to_fund_action(eosio::name username, eosio::asset quantity, eosio::name code);
 
+        [[eosio::action]] void emission2(eosio::name host, eosio::asset host_income, eosio::asset max_income);
+        static eosio::asset emit(eosio::name host, eosio::asset host_income, eosio::asset max_income);
         //POT
         [[eosio::action]] void enablesale(eosio::name host, eosio::name token_contract, eosio::asset asset_on_sale, int64_t sale_shift, eosio::name sale_mode);
         [[eosio::action]] void addhostofund(uint64_t fund_id, eosio::name host);
@@ -298,8 +300,40 @@ class [[eosio::contract]] unicore : public eosio::contract {
         static void give_shares_with_badge_action (eosio::name host, eosio::name reciever, uint64_t shares);
         static void back_shares_with_badge_action (eosio::name host, eosio::name from, uint64_t shares);
         static void add_sale_history(hosts acc, rate rate, spiral sp, eosio::asset amount);
+        
+        static uint64_t get_global_id(eosio::name key);
 
 };
+
+
+
+    /**
+     * @brief      Таблица хранения счётчиков
+     * @contract _me
+     * @scope nft | _me
+     * @table counts
+     * @ingroup public_tables
+     * @details Таблица хранит категории событий хоста. 
+     */
+    struct [[eosio::table, eosio::contract("nft")]] counts {
+      eosio::name key;
+      eosio::name secondary_key;
+      uint64_t value;
+      double   double_value;
+
+      uint64_t primary_key() const {return key.value;}       /*!< return id - primary_key */
+      uint128_t keyskey() const {return combine_ids(key.value, secondary_key.value);} /*!< (contract, blocked_now.symbol) - комбинированный secondary_key для получения курса по имени выходного контракта и символу */
+      uint128_t keyvalue() const {return combine_ids(key.value, value);} /*!< (contract, blocked_now.symbol) - комбинированный secondary_key для получения курса по имени выходного контракта и символу */
+      
+
+      EOSLIB_SERIALIZE(counts, (key)(secondary_key)(value)(double_value))
+    };
+
+    typedef eosio::multi_index< "counts"_n, counts,
+        eosio::indexed_by<"keyskey"_n, eosio::const_mem_fun<counts, uint128_t, &counts::keyskey>>,
+        eosio::indexed_by<"keyvalue"_n, eosio::const_mem_fun<counts, uint128_t, &counts::keyvalue>>
+    > counts_index;
+
 
 // }
 

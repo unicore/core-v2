@@ -358,10 +358,12 @@ using namespace eosio;
 
     while(matched_itr != idx.end() && matched_itr->host == host){
 			auto goal = goals.find(matched_itr -> goal_id);
-				
-			goals.modify(goal, _me, [&](auto &g){
-				g.total_votes = goal->total_votes - old_power + new_power;
-			});
+			
+      if (goal -> status == "waiting"_n || goal -> status == "validated"_n){
+      	goals.modify(goal, _me, [&](auto &g){
+  				g.positive_votes = goal->positive_votes - old_power + new_power;
+  			});
+      }
 
 			idx.modify(matched_itr, _me, [&](auto &v) {
 				v.power = v.power - old_power + new_power;

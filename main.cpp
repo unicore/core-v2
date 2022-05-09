@@ -306,12 +306,21 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::init);
                     break;
                  }
-                
+                 case "exittail"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::exittail);
+                    break;
+                 }
                 //GOALS
                  case "setgoal"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::setgoal);
                     break;
                  }
+
+                 case "emission2"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::emission2);
+                    break;  
+                 }
+                 
                  case "setgcreator"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::setgcreator);
                     break;

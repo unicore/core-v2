@@ -8,79 +8,89 @@
         uint64_t parent_id;
         eosio::name type;
         eosio::name creator;
+
         eosio::name benefactor;
         eosio::name host;
+        
         eosio::name status;
-        bool is_batch = false;
-        std::vector<uint64_t> batch;
+        eosio::name who_can_create_tasks;
+        
         uint64_t benefactors_weight;
-        eosio::time_point_sec created;
-        eosio::time_point_sec start_at;
-        eosio::time_point_sec finish_at;
-        eosio::time_point_sec expired_at;
+        
         uint64_t duration;
         uint64_t priority;
-        uint64_t cashback;
-        uint64_t participants_count;
-        std::string parent_permlink;
-        std::string permlink;
+        
         std::string title;
         std::string description;
         
         eosio::asset target;
-        uint64_t debt_count;
+        
         eosio::asset target1;
         eosio::asset target2;
         eosio::asset target3;
+        
         eosio::asset available;
-        eosio::asset debt_amount;
-        int64_t total_votes;
-        uint64_t total_tasks;
-        bool validated = false;
-        bool activated = false;
-        bool filled = false;
-        bool reported = false;
-        bool checked = false;
-        bool comments_is_enabled = true;
-        eosio::name who_can_create_tasks;
-        std::string report;
         eosio::asset withdrawed;
+        
+        uint64_t debt_count;
+        eosio::asset debt_amount;
 
-        std::vector<eosio::name> voters;
-        std::string meta;
+        uint64_t positive_votes;
+        uint64_t negative_votes;
+        uint64_t filled_votes;
+        uint64_t total_tasks;
+        
+       
         uint64_t gifted_badges = 0;
         uint64_t gifted_power = 0;
         uint64_t reports_count = 0;
+        
         bool is_encrypted = false;
         std::string public_key;
 
+        eosio::time_point_sec created;
+        eosio::time_point_sec start_at;
+        eosio::time_point_sec finish_at;
+        eosio::time_point_sec expired_at;
+
+        std::vector<eosio::name> voters;        
+
+        std::string report;
+        std::string meta;
+
         uint64_t primary_key()const { return id; }
+      
+        uint64_t byvotes() const { 
+            return positive_votes;
+        }
+
+        uint64_t bynvotes() const { 
+            return negative_votes;
+        }
+
         // double byvotes() const { 
         //     return (double)total_votes; 
         // }
         
         // uint64_t byvotes() const { 
-        //     return pow(2, 63) + total_votes;
+        //     return -uint64_t(uint128_t(total_votes) + pow(2, 63));
         // }
-
-        uint64_t byvotes() const { 
-            return total_votes;
-        }
-
 
         uint64_t bytype() const {return type.value;}
         uint64_t bystatus() const {return status.value;}
         uint64_t byparentid() const {return parent_id;}
 
-        uint64_t byfilled() const {return filled; }
+        
         uint64_t bycreated() const {return created.sec_since_epoch(); }
         uint64_t bypriority() const {return priority; }
         uint64_t byusername() const {return creator.value; }
         uint64_t byhost() const {return host.value;}
-        uint128_t by_username_and_host() const { return combine_ids(creator.value, host.value); }
         
-        EOSLIB_SERIALIZE( goals, (id)(parent_id)(type)(creator)(benefactor)(host)(status)(is_batch)(batch)(benefactors_weight)(created)(start_at)(finish_at)(expired_at)(duration)(priority)(cashback)(participants_count)(parent_permlink)(permlink)(title)(description)(target)(debt_count)(target1)(target2)(target3)(available)(debt_amount)(total_votes)(total_tasks)(validated)(activated)(filled)(reported)
-            (checked)(comments_is_enabled)(who_can_create_tasks)(report)(withdrawed)(voters)(meta)(gifted_badges)(gifted_power)(reports_count)(is_encrypted)(public_key))
+        uint128_t by_username_and_host() const { return combine_ids(creator.value, host.value); }
+
+        
+        EOSLIB_SERIALIZE( goals, (id)(parent_id)(type)(creator)(benefactor)(host)(status)(who_can_create_tasks)(benefactors_weight)(duration)(priority)(title)(description)(target)(target1)(target2)(target3)(available)(withdrawed)(debt_count)(debt_amount)(positive_votes)(negative_votes)(filled_votes)(total_tasks)
+            (gifted_badges)(gifted_power)(reports_count)(is_encrypted)(public_key)(created)(start_at)(finish_at)(expired_at)(voters)(report)(meta))
     };
 
     typedef eosio::multi_index <"goals"_n, goals,
@@ -88,8 +98,8 @@
         eosio::indexed_by<"bystatus"_n, eosio::const_mem_fun<goals, uint64_t, &goals::bystatus>>,
         eosio::indexed_by<"type"_n, eosio::const_mem_fun<goals, uint64_t, &goals::bytype>>,
         eosio::indexed_by<"votes"_n, eosio::const_mem_fun<goals, uint64_t, &goals::byvotes>>,
+        eosio::indexed_by<"nvotes"_n, eosio::const_mem_fun<goals, uint64_t, &goals::bynvotes>>,
         eosio::indexed_by<"byparentid"_n, eosio::const_mem_fun<goals, uint64_t, &goals::byparentid>>,
-        eosio::indexed_by<"filled"_n, eosio::const_mem_fun<goals, uint64_t, &goals::byfilled>>,
         eosio::indexed_by<"creator"_n, eosio::const_mem_fun<goals, uint64_t, &goals::byusername>>,
         eosio::indexed_by<"created"_n, eosio::const_mem_fun<goals, uint64_t, &goals::bycreated>>,
         eosio::indexed_by<"bypriority"_n, eosio::const_mem_fun<goals, uint64_t, &goals::bypriority>>
