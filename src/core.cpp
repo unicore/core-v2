@@ -3068,6 +3068,81 @@ void unicore::buy_account(eosio::name username, eosio::name host, eosio::asset q
 
 void unicore::burn_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code){
     
+    account_index accounts(_me, host.value);
+    auto acc = accounts.find(host.value);
+    
+    eosio::check(acc != accounts.end(), "Host is not found");
+    
+    eosio::name main_host = acc->get_ahost();
+    auto root_symbol = acc->get_root_symbol();
+
+    eosio::check(code == acc->root_token_contract, "Wrong root token for this host");
+    eosio::check(quantity.symbol == root_symbol, "Wrong root symbol for this host");
+
+    pool_index pools(_me, host.value);
+    rate_index rates(_me, host.value);
+
+    spiral_index spiral(_me, host.value);
+    auto sp = spiral.find(0);
+
+    // auto cycle = cycles.find(pool -> cycle_num - 1);
+    auto pool = pools.find(acc->current_pool_id);
+    auto rate = rates.find(acc->current_pool_num - 1);
+    auto next_rate = rates.find(acc->current_pool_num);
+
+    auto quant_cost = pool -> quant_cost;
+
+    
+    // eosio::check(quantity.amount >= quant_cost.amount, "Not enought quantity for buy 1 quant");
+    // eosio::check(quantity.amount % quant_cost.amount == 0, "You can purchase only whole quant");
+    
+    uint128_t dquants = (uint128_t)quantity.amount * (uint128_t)sp->quants_precision / (uint128_t)rate->buy_rate;
+    uint64_t quants = dquants;
+   
+
+    //TODO make recursive and return summ of buys
+    // eosio::check(pool->remain_quants >= quants, "Not enought quants in target pool");
+
+    uint64_t quants_for_buy;
+
+    eosio::asset remain_asset = asset(0, root_symbol);
+    uint64_t remain_quants = 0;
+
+    if (pool->remain_quants < quants) {
+
+        quants_for_buy = pool->remain_quants;
+        remain_asset = quantity - pool->remain;
+        remain_quants = quants - pool->remain_quants;
+        
+    } else {
+        
+        quants_for_buy = quants;
+    
+    };
+
+    
+    pools.modify(pool, _me, [&](auto &p) {
+        p.remain_quants = pool -> remain_quants - quants_for_buy;
+        p.filled = asset(( pool -> total_quants - p.remain_quants) / sp -> quants_precision * pool->quant_cost.amount, root_symbol);
+        p.filled_percent = (pool -> total_quants - p.remain_quants) * HUNDR_PERCENT / pool->total_quants;
+        p.remain = p.pool_cost - p.filled;
+        // p.creserved_quants += quants_for_buy; 
+    });
+    
+
+    unicore::add_coredhistory(host, username, pool -> id, quantity, "burn", "");    
+    unicore::change_bw_trade_graph(host, pool -> id, pool -> cycle_num, pool -> pool_num, rate -> buy_rate, next_rate -> buy_rate, pool -> total_quants, pool -> remain_quants, pool -> color);
+    unicore::check_burn_status(host, username, quantity);
+    
+    
+    if (remain_asset.amount > 0) {
+        unicore::spread_to_dacs(host, remain_asset);
+    }
+    
+    unicore::refresh_state(host);
+
+    
+    
     
 }
 

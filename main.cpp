@@ -248,7 +248,6 @@ extern "C" {
                         case 800: {
                             //BURN QUANTS
                             
-                            //direct buy saled quants
                             require_auth(op.from);
 
                             auto host = name(parameter.c_str());
