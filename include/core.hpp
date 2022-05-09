@@ -110,8 +110,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
         static void fund_emi_pool ( eosio::name host, eosio::asset amount, eosio::name code );
         static void add_asset_to_fund_action(eosio::name username, eosio::asset quantity, eosio::name code);
 
-        [[eosio::action]] void emission2(eosio::name host, eosio::asset host_income, eosio::asset max_income);
         static eosio::asset emit(eosio::name host, eosio::asset host_income, eosio::asset max_income);
+        
         //POT
         [[eosio::action]] void enablesale(eosio::name host, eosio::name token_contract, eosio::asset asset_on_sale, int64_t sale_shift, eosio::name sale_mode);
         [[eosio::action]] void addhostofund(uint64_t fund_id, eosio::name host);

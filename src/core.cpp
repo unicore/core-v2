@@ -118,10 +118,7 @@ using namespace eosio;
      */
     // void unicore::priorenter(eosio::name username, eosio::name host, uint64_t balance_id){
 
-    [[eosio::action]]  void unicore::emission2(eosio::name host, eosio::asset host_income, eosio::asset max_income){
-        eosio::asset res = unicore::emit(host, host_income, max_income);
-    };
-
+    
     eosio::asset unicore::emit(eosio::name host, eosio::asset host_income, eosio::asset max_income){
         account_index accounts(_me, host.value);
         auto acc = accounts.find(host.value);
