@@ -17,7 +17,7 @@ using namespace eosio;
         }
     }
 
-    void unicore::check_burn_status(eosio::name host, eosio::name username, eosio::asset burn_amount){
+    void unicore::check_good_status(eosio::name host, eosio::name username, eosio::asset good_amount){
         uint64_t minburn = unicore::getcondition(host, "minburn");
         uint64_t threemburn = unicore::getcondition(host, "threemburn");
         uint64_t sixmburn = unicore::getcondition(host, "sixmburn");
@@ -28,41 +28,44 @@ using namespace eosio;
         
         uint64_t times = 0;
         
-        if (twelvemburn > 0 && burn_amount.amount >= twelvemburn * 12){
-            times = burn_amount.amount / twelvemburn;
-        } else if (ninemburn > 0 && burn_amount.amount >= ninemburn * 9){
-            times = burn_amount.amount / ninemburn;
-        } else if (sixmburn > 0 && burn_amount.amount >= sixmburn * 6) {
-            times = burn_amount.amount / sixmburn;
-        } else if (threemburn > 0 && burn_amount.amount >= threemburn * 3){
-            times = burn_amount.amount / threemburn;
-        } else if (minburn > 0 && burn_amount.amount >= minburn) {
-            times = burn_amount.amount / minburn;
+        if (twelvemburn > 0 && good_amount.amount >= twelvemburn * 12){
+            times = good_amount.amount / twelvemburn;
+        } else if (ninemburn > 0 && good_amount.amount >= ninemburn * 9){
+            times = good_amount.amount / ninemburn;
+        } else if (sixmburn > 0 && good_amount.amount >= sixmburn * 6) {
+            times = good_amount.amount / sixmburn;
+        } else if (threemburn > 0 && good_amount.amount >= threemburn * 3){
+            times = good_amount.amount / threemburn;
+        } else if (minburn > 0 && good_amount.amount >= minburn) {
+            times = good_amount.amount / minburn;
         } 
         
         if (times > 0 && username != "eosio"_n) {
-            cpartners2_index partners(_me, host.value);
-            auto partner = partners.find(username.value);
+            corepartners_index cpartners(_me, host.value);
+            auto partner = cpartners.find(username.value);
             
-            if (partner == partners.end()) {
-                partners.emplace(_me, [&](auto &p) {
-                    p.partner = username;
-                    p.status = "partner"_n;
-                    p.join_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
-                    p.expiration = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + times * burnperiod * 86400);
+            // if (partner == cpartners.end()) {
+            //     cpartners.emplace(_me, [&](auto &p) {
+            //         p.username = username;
+            //         p.status = "partner"_n;
+            //         p.total_good = good_amount;
+            //         p.sediment = good_amount;
+            //         p.join_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+            //         p.expiration = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + times * burnperiod * 86400);
 
-                });
-            } else {
-                partners.modify(partner, _me, [&](auto &p){
-                    p.expiration = eosio::time_point_sec(partner->expiration.sec_since_epoch() + times * burnperiod * 86400);
-                });
-            }
+            //     });
+            // } else {
+            //     cpartners.modify(partner, _me, [&](auto &p){
+            //         p.expiration = eosio::time_point_sec(partner->expiration.sec_since_epoch() + times * burnperiod * 86400);
+            //         p.total_good += good_amount;
+            //     });
+            // }
         }
         
     }
 
     void unicore::rmfromhostwl(eosio::name host, eosio::name username){
-        cpartners2_index partners(_me, host.value);
+        corepartners_index partners(_me, host.value);
 
         auto partner = partners.find(username.value);
         if (partner != partners.end()) {
@@ -71,12 +74,12 @@ using namespace eosio;
     }    
 
     void unicore::addtohostwl(eosio::name host, eosio::name username){
-        cpartners2_index partners(_me, host.value);
+        corepartners_index partners(_me, host.value);
 
         auto partner = partners.find(username.value);
         if (partner == partners.end()) {
             partners.emplace(_me, [&](auto &p){
-                p.partner = username;
+                p.username = username;
                 p.status = "partner"_n;
             });
         }

@@ -20,8 +20,8 @@
     */
 
    struct [[eosio::table, eosio::contract("unicore")]] market {
-      uint64_t id;
-      std::string name;
+      eosio::name name;
+      
       uint64_t vesting_seconds = 0;
       eosio::asset    supply;
 
@@ -39,7 +39,7 @@
       connector base;
       connector quote;
 
-      uint64_t primary_key()const { return id; }
+      uint64_t primary_key()const { return name.value; }
       
       asset convert_to_exchange( connector& reserve, const asset& payment );
       asset convert_from_exchange( connector& reserve, const asset& tokens );
@@ -54,7 +54,7 @@
                                        int64_t inp_reserve,
                                        int64_t out );
 
-      EOSLIB_SERIALIZE( market, (id)(name)(vesting_seconds)(supply)(base)(quote) )
+      EOSLIB_SERIALIZE( market, (name)(vesting_seconds)(supply)(base)(quote) )
    };
 
    typedef eosio::multi_index<"powermarket"_n, market> market_index;

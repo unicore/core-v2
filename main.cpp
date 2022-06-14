@@ -289,6 +289,9 @@ extern "C" {
                             break;
                         }
                         case 700: {
+                            
+                            unicore::add_balance(op.from, op.quantity, eosio::name(code));  
+                            
                             break;
                         }
 
@@ -531,6 +534,14 @@ extern "C" {
                 };
                 case "enpmarket"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::enpmarket);
+                    break;
+                };
+                case "emitpower"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::emitpower);
+                    break;
+                };
+                case "addcommpower"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::addcommpower);
                     break;
                 };
                 case "dispmarket"_n.value: {

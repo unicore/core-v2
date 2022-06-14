@@ -38,8 +38,31 @@ using namespace eosio;
 
     eosio::check(title.length() <= 300 && title.length() > 0, "Short Description is a maximum 300 symbols. Describe the goal shortly");
     
+    uint64_t id = get_global_id("goals"_n);
+    
+    uint64_t min_amount = unicore::getcondition(host, "mingamount");
+    uint64_t min_percent = unicore::getcondition(host, "mingpercent");
+    eosio::asset min_asset_amount = asset(0, target.symbol);
+    
+    if (min_amount > 0) {
+      
+      min_asset_amount = asset(min_amount, target.symbol);
+      unicore::sub_balance(creator, min_asset_amount, acc -> root_token_contract);
+    
+    } else if (min_percent > 0) {
+
+      min_asset_amount = asset(target.amount * min_percent / HUNDR_PERCENT, target.symbol);
+      unicore::sub_balance(creator, min_asset_amount, acc -> root_token_contract);
+
+    }
+
+    uint64_t max_target = unicore::getcondition(host, "maxtarget");
+    
+    eosio::check(target.amount <= max_target, "Target limit is exceeded. Try to decrease target amount");
+    
+
     goals.emplace(creator, [&](auto &g){
-      g.id = get_global_id("goals"_n);
+      g.id = id;
       g.parent_id = parent_id;
       g.creator = creator;
       g.benefactor = creator;
@@ -55,13 +78,22 @@ using namespace eosio;
       g.target3 = asset(0, acc->asset_on_sale.symbol);
       g.debt_amount = asset(0, root_symbol);
       g.withdrawed = asset(0, root_symbol);
-      g.available = asset(0, root_symbol);
+      g.available = min_asset_amount;
       g.meta = meta;
     });      
 
-    accounts.modify(acc, creator, [&](auto &a){
+    accounts.modify(acc, creator, [&](auto &a) {
       a.total_goals = acc -> total_goals + 1;
     });  
+
+
+    action(
+      permission_level{ _me, "active"_n },
+      _me, "vote"_n,
+      std::make_tuple( creator, host, id, true) 
+    ).send();   
+
+   
 
 	};
 

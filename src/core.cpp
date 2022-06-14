@@ -1,6 +1,57 @@
 using namespace eosio;
     
+    
+void unicore::add_balance(eosio::name payer, eosio::asset quantity, eosio::name contract){
+    require_auth(payer);
 
+    ubalances_index ubalances(_me, payer.value);
+    
+    auto balances_by_contract_and_symbol = ubalances.template get_index<"byconsym"_n>();
+    auto contract_and_symbol_index = combine_ids(contract.value, quantity.symbol.code().raw());
+
+    auto balance = balances_by_contract_and_symbol.find(contract_and_symbol_index);
+
+    if (balance  == balances_by_contract_and_symbol.end()){
+      ubalances.emplace(_me, [&](auto &b) {
+        b.id = ubalances.available_primary_key();
+        b.contract = contract;
+        b.quantity = quantity;
+      }); 
+    } else {
+      balances_by_contract_and_symbol.modify(balance, _me, [&](auto &b) {
+        b.quantity += quantity;
+      });
+    };
+  
+}
+
+
+
+void unicore::sub_balance(eosio::name username, eosio::asset quantity, eosio::name contract){
+    ubalances_index ubalances(_me, username.value);
+    
+    auto balances_by_contract_and_symbol = ubalances.template get_index<"byconsym"_n>();
+    auto contract_and_symbol_index = combine_ids(contract.value, quantity.symbol.code().raw());
+
+    auto balance = balances_by_contract_and_symbol.find(contract_and_symbol_index);
+    
+    eosio::check(balance != balances_by_contract_and_symbol.end(), "Balance is not found");
+    
+    eosio::check(balance -> quantity >= quantity, "Not enought user balance for create order");
+
+    if (balance -> quantity == quantity) {
+
+      balances_by_contract_and_symbol.erase(balance);
+
+    } else {
+
+      balances_by_contract_and_symbol.modify(balance, _me, [&](auto &b) {
+        b.quantity -= quantity;
+      });  
+
+    }
+    
+}
 
   uint64_t unicore::get_global_id(eosio::name key) {
 
@@ -996,11 +1047,11 @@ void next_pool( eosio::name host){
     //     goal = goals.erase(goal);
     // }
 
-     hoststat_index hoststat(_me, host.value);
-     auto hstat = hoststat.begin();
-    while (hstat != hoststat.end()) {
-        hstat = hoststat.erase(hstat);
-    }
+    //  hoststat_index hoststat(_me, host.value);
+    //  auto hstat = hoststat.begin();
+    // while (hstat != hoststat.end()) {
+    //     hstat = hoststat.erase(hstat);
+    // }
 
 
     // tasks_index tasks(_me, host.value);
@@ -1120,13 +1171,20 @@ void next_pool( eosio::name host){
     // }    
 
 
-    //   emission_index emis(_me, host.value);
-    //   auto emi = emis.find(host.value);
+      emission_index emis(_me, host.value);
+      // auto emi = emis.find(host.value);
       
-    //   if (emi != emis.end()) {
-    //     emis.erase(emi);  
-    //   };
-      
+      // if (emi != emis.end()) {
+      //   emis.erase(emi);  
+      // };
+      emis.emplace(_me, [&](auto &e){
+        e.host = host;
+        e.percent = 1000000;
+        e.gtop = 0;
+        e.fund = asset(0, _SYM);
+        e.power_fund = 0;
+      });
+
 
     //   sincome_index sincome(_me, host.value);
     //   auto s1 = sincome.begin();
@@ -2365,7 +2423,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
     auto sp = spiral.find(0);
     
     
-
+    print("here1");
     eosio::check(bal != balance.end(), "Balance is not found");
     
     auto pool = pools.find(bal->global_pool_id);
@@ -2384,7 +2442,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
     auto rate = rates.find(last_pool -> pool_num - 1 );
     auto next_rate = rates.find(last_pool -> pool_num );
     auto prev_rate = rates.find(last_pool -> pool_num - 2);
-
+    print("here2");
     eosio::check(last_pool -> remain_quants <= pool->total_quants, "Prevented withdraw. Only BP can restore this balance");
     // eosio::check(bal->available.amount == 0 && sp -> loss_percent != HUNDR_PERCENT, "Cannot withdraw a zero balance. Please, write to help-center for resolve it");
 
@@ -2398,9 +2456,8 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
 
      * 
      */
-    print("here1");
     // eosio::check(bal->available.amount > 0, "Cannot withdraw zero balance. Please, write to help-center for resolve it");
-
+    print("here3");
     if (((acc -> current_pool_num == pool -> pool_num ) && (acc -> current_cycle_num == pool -> cycle_num)) || \
         ((pool -> pool_num < 3) && (pools_in_cycle < 3)) || (has_new_cycle && (pool->pool_num == last_pool -> pool_num)))
 
@@ -2461,7 +2518,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
      * 
      */
         auto amount = bal -> available;
-        print(" bal -> available: ", bal -> available);
+        
         if (amount.amount > 0){
             
                 action(
@@ -2492,7 +2549,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
             }
             
             auto sinc = sincome.find(acc->current_pool_id);
-            print("here4");
+            
             //TODO may be corrent max with total prev element
             //(if payed before, max should decrease)
     
@@ -2530,7 +2587,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
             /**
              * Все кванты победителей должны быть возвращены в пулы. 
              */
-            print("here5");
+            
             uint64_t remain_quants = std::min(last_pool -> remain_quants + converted_quants, last_pool->total_quants);
             pools.modify(last_pool, _me, [&](auto &p){
                 p.total_win_withdraw = last_pool -> total_win_withdraw + amount;
@@ -2543,7 +2600,10 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
 
             unicore::change_bw_trade_graph(host, last_pool->id, last_pool->cycle_num, last_pool->pool_num, rate->buy_rate, next_rate->buy_rate, last_pool->total_quants, remain_quants, last_pool -> color);
             unicore::add_coredhistory(host, username, last_pool -> id, amount, "w-withdraw", "");
-            print("here6");
+            
+            unicore::add_user_stat("withdraw"_n, username, acc->root_token_contract, bal->purchase_amount, bal->available);
+            unicore::add_host_stat("withdraw"_n, username, host, bal->purchase_amount);
+        
         } else {
 
             pools.modify(last_pool, _me, [&](auto &p){
@@ -2554,6 +2614,9 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
     
             unicore::add_coredhistory(host, username, last_pool -> id, bal->if_convert, "convert", "");    
             
+            unicore::add_user_stat("withdraw"_n, username, acc->root_token_contract, bal->purchase_amount, bal->available);
+            unicore::add_host_stat("withdraw"_n, username, host, bal->purchase_amount);
+        
             if (bal -> if_convert.symbol == _POWER) {
                 
                 //проверка на убыточность
@@ -2604,9 +2667,9 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
 
         }
         
-        unicore::add_user_stat("withdraw"_n, username, acc->root_token_contract, bal->purchase_amount, bal->available);
-        unicore::add_host_stat("withdraw"_n, username, host, bal->purchase_amount);
         
+        check_good_status(host, username, bal -> purchase_amount - bal -> available);
+
         balance.erase(bal);
     
     }
@@ -3132,13 +3195,39 @@ void unicore::burn_action(eosio::name username, eosio::name host, eosio::asset q
 
     unicore::add_coredhistory(host, username, pool -> id, quantity, "burn", "");    
     unicore::change_bw_trade_graph(host, pool -> id, pool -> cycle_num, pool -> pool_num, rate -> buy_rate, next_rate -> buy_rate, pool -> total_quants, pool -> remain_quants, pool -> color);
-    unicore::check_burn_status(host, username, quantity);
     
+    unicore::check_good_status(host, username, quantity);
     
     if (remain_asset.amount > 0) {
         unicore::spread_to_dacs(host, remain_asset);
     }
     
+
+    //ADD USER POWER
+
+
+    power3_index power(_me, host.value);
+    auto pexist = power.find(username.value);
+    
+    if (pexist == power.end()) {
+
+      power.emplace(_me, [&](auto &p) {
+        p.username = username;
+        p.power = quantity.amount;
+        p.staked = quantity.amount;    
+      });
+
+        
+    } else {
+        unicore::propagate_votes_changes(host, username, pexist->power, pexist->power + quantity.amount);
+        
+        power.modify(pexist, _me, [&](auto &p) {
+            p.power += quantity.amount;
+            p.staked += quantity.amount;
+        });
+    };
+
+
     unicore::refresh_state(host);
 
     

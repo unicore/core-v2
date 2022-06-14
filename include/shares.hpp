@@ -173,19 +173,27 @@
   typedef eosio::multi_index<"vesting"_n, vesting> vesting_index;
 
 
+
+
 /*!
    \brief Структура учёта партнёров и их статусов у хоста Двойной Спирали.
 */
-    struct  [[eosio::table, eosio::contract("unicore")]] cpartners2 {
-        eosio::name partner;
+    struct  [[eosio::table, eosio::contract("unicore")]] corepartners {
+        eosio::name username;
         eosio::name status;
+        eosio::asset total_good;
+        eosio::asset sediment;
         eosio::time_point_sec join_at;
         eosio::time_point_sec expiration;
 
-        uint64_t primary_key() const {return partner.value;}
-        EOSLIB_SERIALIZE(cpartners2, (partner)(status)(join_at)(expiration))
+        uint64_t primary_key() const {return username.value;}
+        uint64_t bygood() const {return total_good.amount;}
+
+        EOSLIB_SERIALIZE(corepartners, (username)(status)(total_good)(sediment)(join_at)(expiration))
     };
 
-    typedef eosio::multi_index<"cpartners2"_n, cpartners2> cpartners2_index;
+    typedef eosio::multi_index<"corepartners"_n, corepartners,
+      eosio::indexed_by<"bygood"_n, eosio::const_mem_fun<corepartners, uint64_t, &corepartners::bygood>>  
+    > corepartners_index;
 
 

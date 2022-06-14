@@ -12,7 +12,7 @@
 
   static constexpr uint64_t _DATA_ORDER_EXPIRATION = 86400;
   static constexpr uint64_t _SHARES_VESTING_DURATION = 604800;
-  static constexpr uint64_t _TOTAL_VOTES = 7;
+  static constexpr uint64_t _TOTAL_VOTES = 12;
   static constexpr uint64_t _MAX_LEVELS = 26;
   static constexpr uint64_t _VOTING_TIME_EXPIRATION = 86400; //
 

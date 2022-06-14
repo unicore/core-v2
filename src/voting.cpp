@@ -68,7 +68,14 @@ using namespace eosio;
 
 //Метод голосования за цель
 	[[eosio::action]] void unicore::vote(eosio::name voter, eosio::name host, uint64_t goal_id, bool up){
-		require_auth(voter);
+		eosio::check(has_auth(voter) || has_auth(_me), "missing required authority");
+    
+    eosio::name payer;
+
+    if (has_auth(voter)) {
+        payer = voter;
+    } else payer = _me;
+
 		
 		partners2_index users(_partners,_partners.value);
     auto user = users.find(voter.value);
@@ -109,7 +116,9 @@ using namespace eosio;
 
 		if (vote == goal_idwithhost_idx.end()){
 			//ADD VOTE
-			eosio::check(vote_count < _TOTAL_VOTES, "Votes limit is exceeded");
+			uint64_t max_votes = unicore::getcondition(host, "maxuvotes");
+			
+			eosio::check(vote_count <= max_votes, "Votes limit is exceeded");
 
       // eosio::check(goal->filled == false, "You cant vote for filled goal");
       
@@ -119,7 +128,7 @@ using namespace eosio;
 
       voters.push_back(voter);
       
-      goals.modify(goal, voter, [&](auto &g){
+      goals.modify(goal, payer, [&](auto &g){
        	if (goal -> status == "waiting"_n || goal -> status == "validated"_n) {
 					up == true ? g.positive_votes = goal->positive_votes + pow -> power : g.negative_votes =  goal->negative_votes + pow->power;
        	}
@@ -134,7 +143,7 @@ using namespace eosio;
 		
       });
 
-      votes.emplace(voter, [&](auto &v){
+      votes.emplace(payer, [&](auto &v){
       	v.id = votes.available_primary_key();
       	v.goal_id = goal->id;
       	v.host = goal->host;
@@ -146,7 +155,7 @@ using namespace eosio;
 			auto voters = goal -> voters;
 			auto itr = std::find(voters.begin(), voters.end(), voter);
 			voters.erase(itr);
-			goals.modify(goal, voter, [&](auto &g){
+			goals.modify(goal, payer, [&](auto &g){
 				g.voters = voters;
 
 				if (goal -> status == "waiting"_n || goal -> status == "validated"_n) {

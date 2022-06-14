@@ -353,6 +353,20 @@
     typedef eosio::multi_index <"dacs"_n, dacs> dacs_index;
 
 
+// /*!
+//    \brief Структура параметров эмиссии целевого фонда хоста Двойной Спирали
+// */
+//     struct [[eosio::table, eosio::contract("unicore")]] emission { //legacy
+//         eosio::name host;
+//         uint64_t percent;
+//         uint64_t gtop;
+//         eosio::asset fund;
+//         uint64_t primary_key() const {return host.value;}
+        
+//         EOSLIB_SERIALIZE(emission, (host)(percent)(gtop)(fund))
+//     };
+
+
 /*!
    \brief Структура параметров эмиссии целевого фонда хоста Двойной Спирали
 */
@@ -361,11 +375,13 @@
         uint64_t percent;
         uint64_t gtop;
         eosio::asset fund;
+        uint64_t power_fund;
 
         uint64_t primary_key() const {return host.value;}
         
-        EOSLIB_SERIALIZE(emission, (host)(percent)(gtop)(fund))
+        EOSLIB_SERIALIZE(emission, (host)(percent)(gtop)(fund)(power_fund))
     };
+
 
     typedef eosio::multi_index<"emission"_n, emission> emission_index;
 

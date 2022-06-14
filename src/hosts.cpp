@@ -727,7 +727,7 @@ using namespace eosio;
         auto acc = hosts.find(host.value);
         
         eosio::check(ref_percent + dacs_percent + cfund_percent + hfund_percent == HUNDR_PERCENT, "All payment percents should equal 100 * ONE_PERCENT (1000000)");
-        eosio::check(acc -> current_pool_num < 3, "Flows changes only possible on the waiting mode");
+        // eosio::check(acc -> current_pool_num < 3, "Flows changes only possible on the waiting mode");
 
         hosts.modify(acc, host, [&](auto &h){
             h.referral_percent = ref_percent;

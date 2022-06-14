@@ -7,6 +7,7 @@ using namespace eosio;
    * @param[in]  owner   The owner
    * @param[in]  amount  The amount
    */
+
 	void unicore::make_vesting_action(eosio::name owner, eosio::name host, eosio::name contract, eosio::asset amount, uint64_t vesting_seconds, eosio::name type){
 	    eosio::check(amount.is_valid(), "Amount not valid");
 	    // eosio::check(amount.symbol == _SYM, "Not valid symbol for this vesting contract");
@@ -31,49 +32,147 @@ using namespace eosio;
 
 
   
-  void add_base_to_market(eosio::name host, eosio::asset amount){
+  void add_base_to_market(eosio::name id, eosio::name host, eosio::asset amount){
       
       market_index market(_me, host.value);
-      auto itr = market.find(0);
+      auto itr = market.find(id.value);
         
       market.modify(itr, _me, [&](auto &m){
         m.base.balance += amount;
       });
   }
   
-  void add_quote_to_market(eosio::name host, eosio::asset amount){
+  void add_quote_to_market(eosio::name id, eosio::name host, eosio::asset amount){
       
-      // market_index market(_me, host.value);
-      // auto itr = market.find(0);
+      market_index market(_me, host.value);
+      auto itr = market.find(id.value);
         
-      // market.modify(itr, _me, [&](auto &m){
-      //   m.quote.balance += amount;
-      // });
+      market.modify(itr, _me, [&](auto &m){
+        m.quote.balance += amount;
+      });
   }
 
-  void sub_base_from_market(eosio::name host, eosio::asset amount) {
+  void sub_base_from_market(eosio::name id, eosio::name host, eosio::asset amount) {
       
-      // market_index market(_me, host.value);
-      // auto itr = market.find(0);
-      
-      // eosio::check(itr -> base.balance >= amount, "Cannot substrate base balance");
+      market_index market(_me, host.value);
 
-      // market.modify(itr, _me, [&](auto &m){
-      //   m.base.balance -= amount;
-      // });
+      auto itr = market.find(id.value);
+      
+      eosio::check(itr -> base.balance >= amount, "Cannot substrate base balance");
+
+      market.modify(itr, _me, [&](auto &m){
+        m.base.balance -= amount;
+      });
   }
   
-  void sub_quote_from_market(eosio::name host, eosio::asset amount){
+  void sub_quote_from_market(eosio::name id, eosio::name host, eosio::asset amount){
       
-      // market_index market(_me, host.value);
-      // auto itr = market.find(0);
+      market_index market(_me, host.value);
+      auto itr = market.find(id.value);
       
-      // eosio::check(itr -> quote.balance >= amount, "Cannot substrate quote balance");
+      eosio::check(itr -> quote.balance >= amount, "Cannot substrate quote balance");
 
-      // market.modify(itr, _me, [&](auto &m){
-      //   m.quote.balance -= amount;
-      // });
+      market.modify(itr, _me, [&](auto &m){
+        m.quote.balance -= amount;
+      });
   }
+
+
+
+
+
+  /**
+   * @brief      Метод эмиссии силы с аукциона
+   * Обновляет вестинг-баланс до актуальных параметров продолжительности. 
+   * @param[in]  op    The operation
+   */
+  [[eosio::action]] void unicore::addcommpower(eosio::name host, uint64_t shares_on_period) {
+    require_auth("auction"_n);
+
+    account_index account(_me, host.value);
+    auto acc = account.find(host.value);
+    
+    action(
+        permission_level{ _saving, "active"_n },
+        acc->root_token_contract, "transfer"_n,
+        std::make_tuple( _saving, _me, asset(10000 * shares_on_period, acc -> quote_amount.symbol), std::string("")) 
+    ).send();
+
+
+    add_base_to_market("power"_n, host, asset(shares_on_period, _POWER));
+    add_quote_to_market("power"_n, host, asset(10000 * shares_on_period, acc -> quote_amount.symbol));
+
+    // emission_index emis(_me, host.value);
+    // auto em = emis.find(host.value);
+    
+    // if (em == emis.end()) {
+      
+    //   emis.emplace(_me, [&](auto &e){
+    //     e.host = host;
+    //     e.percent = HUNDR_PERCENT;
+    //     e.fund = asset(0, acc -> root_token.symbol);
+    //     e.power_fund = shares_on_period;
+    //   });
+
+    // } else {
+
+    //   emis.modify(em, _me, [&](auto &e){
+    //     e.power_fund += shares_on_period;
+    //   });
+
+    // }
+  }
+
+
+
+  /**
+   * @brief      Метод эмиссии силы с аукциона
+   * Обновляет вестинг-баланс до актуальных параметров продолжительности. 
+   * @param[in]  op    The operation
+   */
+  [[eosio::action]] void unicore::emitpower(eosio::name host, eosio::name username, uint64_t user_shares){
+    require_auth("auction"_n);
+
+    account_index account(_me, host.value);
+    auto acc = account.find(host.value);
+    print("on power emit: ", user_shares);
+
+    // eosio::check(acc -> sale_mode == "auction"_n, "Wrong sale type");
+    
+    action(
+        permission_level{ _saving, "active"_n },
+        acc->root_token_contract, "transfer"_n,
+        std::make_tuple( _saving, _me, asset(10000 * user_shares, acc -> quote_amount.symbol), std::string("")) 
+    ).send();
+
+
+    add_base_to_market("power"_n, host, asset(user_shares, _POWER));
+    add_quote_to_market("power"_n, host, asset(10000 * user_shares, acc -> quote_amount.symbol));
+
+    power3_index power(_me, host.value);
+    auto pexist = power.find(username.value);
+    
+    if (pexist == power.end()) {
+
+      power.emplace(_me, [&](auto &p) {
+        p.username = username;
+        p.power = user_shares;
+        p.staked = user_shares;    
+      });
+
+        
+    } else {
+        unicore::propagate_votes_changes(host, username, pexist->power, pexist->power + user_shares);
+        
+        power.modify(pexist, _me, [&](auto &p) {
+            p.power += user_shares;
+            p.staked += user_shares;
+        });
+    };
+
+
+  }
+
 
 
   /**
@@ -91,42 +190,48 @@ using namespace eosio;
     auto acc = account.find(host.value);
 
 
-    uint64_t max_power_on_sale = pexist -> power - pexist -> with_badges;
+    uint64_t max_power_on_sale = pexist -> staked; 
 
     eosio::check(max_power_on_sale >= shares, "Cannot back more power then you have");
 
-    if (pexist != power.end() && pexist -> power > 0) {
+    if (pexist != power.end() && pexist -> staked > 0) {
       
       
-      double available = (double)shares / (double)acc -> total_shares * (double)acc->quote_amount.amount;
-      eosio::asset available_asset = asset((uint64_t)available, acc -> quote_amount.symbol);
+      // double available = (double)shares / (double)acc -> total_shares * (double)acc->quote_amount.amount;
+      // eosio::asset available_asset = asset((uint64_t)available, acc -> quote_amount.symbol);
 
-      if (available_asset.amount > 0) {
-        
-        account.modify(acc, _me, [&](auto &a){
-          a.total_shares -= shares;
-          a.quote_amount -= available_asset;
-        });
+      market_index market(_me, host.value);
+      auto itr = market.find("power"_n.value);
+      auto tmp = *itr;
+
+      eosio::asset tokens_out;
+
+      market.modify( itr, _me, [&]( auto& es ) {
+         tokens_out = es.direct_convert( asset(shares,eosio::symbol(eosio::symbol_code("POWER"), 0)), acc -> quote_amount.symbol);
+      });
 
 
-        // sub_quote_from_market(username, host, available_asset);
-        //TRANSFER
-        // sub_base_from_market(host, asset(shares, _POWER));
+      print("on sell shares: ", shares);
+      
+      power.modify(pexist, username, [&](auto &p){
+        p.power -= shares;
+        p.staked -= shares;
+      });
 
-        print("on sell shares: ", shares);
-        
-        power.modify(pexist, username, [&](auto &p){
-          p.power -= shares;
-          p.staked -= shares;
-        });
 
-        action(
-            permission_level{ _me, "active"_n },
-            acc->root_token_contract, "transfer"_n,
-            std::make_tuple( _me, username, available_asset, std::string("PFLOW-" + (name{username}.to_string() + "-" + (name{host}).to_string()) ))
-        ).send();
+     if (tokens_out.amount > 0) {
+      //TODO precision?!
+        if (itr -> vesting_seconds == 0) {
 
-      };
+          action(
+              permission_level{ _me, "active"_n },
+              acc->root_token_contract, "transfer"_n,
+              std::make_tuple( _me, username, tokens_out, std::string("PWITHDRAW-" + (name{username}.to_string() + "-" + (name{host}).to_string()) ))
+          ).send();
+
+        } else make_vesting_action(username, host, acc -> quote_token_contract, tokens_out, itr -> vesting_seconds, "powersell"_n);
+      
+     } else eosio::check(false, "Token amount is too low");
 
 
     }
@@ -411,12 +516,14 @@ using namespace eosio;
     auto acc = account.find(host.value);
     eosio::check(acc != account.end(), "Host is not found");
 
-    eosio::check(acc->power_market_id == ""_n, "Power market already enabled");
+    // eosio::check(acc->power_market_id == ""_n, "Power market already enabled");
 
     account.modify(acc, host, [&](auto &a){
       a.power_market_id = host;
     });
     
+    unicore::create_bancor_market("power"_n, host, acc -> total_shares, acc->quote_amount, acc -> quote_token_contract, 0); 
+  
   }
 
   /**
@@ -426,27 +533,27 @@ using namespace eosio;
    * @param[in]  total_shares  The total shares
    * @param[in]  quote_amount  The quote amount
    */
-	void unicore::create_bancor_market(std::string name, uint64_t id, eosio::name host, uint64_t total_shares, eosio::asset quote_amount, eosio::name quote_token_contract, uint64_t vesting_seconds){
-		// market_index market(_me, host.value);
-		// auto itr = market.find(id);
-		
-  //   if (itr == market.end()){
+	void unicore::create_bancor_market(eosio::name name, eosio::name host, uint64_t total_shares, eosio::asset quote_amount, eosio::name quote_token_contract, uint64_t vesting_seconds){
+		market_index market(_me, host.value);
 
-		// 	itr = market.emplace( _me, [&]( auto& m ) {
-  //        m.id = id;
-  //        m.vesting_seconds = vesting_seconds;
-  //        m.name = name;
-  //        m.supply.amount = 100000000000000ll;
-  //        m.supply.symbol = eosio::symbol(eosio::symbol_code("BANCORE"), 0);
-  //        m.base.balance.amount = total_shares;
-  //        m.base.balance.symbol = eosio::symbol(eosio::symbol_code("POWER"), 0);
-  //        m.quote.balance.amount = quote_amount.amount;
-  //        m.quote.balance.symbol = quote_amount.symbol;
-  //        m.quote.contract = quote_token_contract;
-  //     });
-		// } else {
-		// 	// eosio::check(false, "Market already created");
-  //   }
+		auto itr = market.find(name.value);
+		
+    if (itr == market.end()){
+
+			itr = market.emplace( _me, [&]( auto& m ) {
+         m.name = name;
+         m.vesting_seconds = vesting_seconds;
+         m.supply.amount = 100000000000000ll;
+         m.supply.symbol = eosio::symbol(eosio::symbol_code("BANCORE"), 0);
+         m.base.balance.amount = total_shares;
+         m.base.balance.symbol = eosio::symbol(eosio::symbol_code("POWER"), 0);
+         m.quote.balance.amount = quote_amount.amount;
+         m.quote.balance.symbol = quote_amount.symbol;
+         m.quote.contract = quote_token_contract;
+      });
+		} else {
+			// eosio::check(false, "Market already created");
+    }
 	};
 
 

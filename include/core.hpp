@@ -219,6 +219,10 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void dispmarket(eosio::name host);
         [[eosio::action]] void enpmarket(eosio::name host);
 
+        [[eosio::action]] void emitpower(eosio::name host, eosio::name username, uint64_t user_shares);
+        [[eosio::action]] void addcommpower(eosio::name host, uint64_t shares_on_period);
+        
+
         [[eosio::action]] void withrbenefit(eosio::name username, eosio::name host, uint64_t id);
         [[eosio::action]] void refreshpu(eosio::name username, eosio::name host);
         [[eosio::action]] void refreshsh (eosio::name owner, uint64_t id);
@@ -279,7 +283,11 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void setcondition(eosio::name host, eosio::string key, uint64_t value);
         [[eosio::action]] void rmcondition(eosio::name host, uint64_t key); 
         static void rmfromhostwl(eosio::name host, eosio::name username);
-        static void check_burn_status(eosio::name host, eosio::name username, eosio::asset quants_for_user_in_asset);
+        static void check_good_status(eosio::name host, eosio::name username, eosio::asset good_amount);
+
+        static void add_balance(eosio::name payer, eosio::asset quantity, eosio::name contract);   
+        static void sub_balance(eosio::name username, eosio::asset quantity, eosio::name contract);
+    
 
         static uint64_t getcondition(eosio::name host, eosio::string key);
 
@@ -293,7 +301,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         static void add_coredhistory(eosio::name host, eosio::name username, uint64_t pool_id, eosio::asset amount, std::string action, std::string message);
 
         static void make_vesting_action(eosio::name owner, eosio::name host, eosio::name contract, eosio::asset amount, uint64_t vesting_seconds, eosio::name type);
-        static void create_bancor_market(std::string name, uint64_t id, eosio::name host, uint64_t total_shares, eosio::asset quote_amount, eosio::name quote_token_contract, uint64_t vesting_seconds);
+        static void create_bancor_market(eosio::name name, eosio::name host, uint64_t total_shares, eosio::asset quote_amount, eosio::name quote_token_contract, uint64_t vesting_seconds);
         static std::vector <eosio::asset> calculate_forecast(eosio::name username, eosio::name host, uint64_t quants, uint64_t pool_num, eosio::asset purchase_amount, bool calculate_first, bool calculate_zero);
         static void fill_pool(eosio::name username, eosio::name host, uint64_t quants, eosio::asset amount, uint64_t filled_pool_id);
         static void check_and_modify_sale_fund(eosio::asset amount, hosts acc);
@@ -304,6 +312,35 @@ class [[eosio::contract]] unicore : public eosio::contract {
         static uint64_t get_global_id(eosio::name key);
 
 };
+
+    
+    /**
+     * @brief      Таблица промежуточного хранения балансов пользователей.
+     * @ingroup public_tables
+     * @table balance
+     * @contract _me
+     * @scope username
+     * @details Таблица баланса пользователя пополняется им путём совершения перевода на аккаунт контракта p2p. При создании ордера используется баланс пользователя из этой таблицы. Чтобы исключить необходимость пользователю контролировать свой баланс в контракте p2p, терминал доступа вызывает транзакцию с одновременно двумя действиями: перевод на аккаунт p2p и создание ордера на ту же сумму. 
+     */
+
+    struct [[eosio::table, eosio::contract("unicore")]] ubalance {
+        uint64_t id;                    /*!< идентификатор баланса */
+        eosio::name contract;           /*!< имя контракта токена */
+        eosio::asset quantity;          /*!< количество токенов на балансе */
+
+        uint64_t primary_key() const {return id;} /*!< return id - primary_key */
+        uint128_t byconsym() const {return combine_ids(contract.value, quantity.symbol.code().raw());} /*!< return combine_ids(contract, quantity) - комбинированный secondary_index 2 */
+
+        EOSLIB_SERIALIZE(ubalance, (id)(contract)(quantity))
+    };
+
+
+    typedef eosio::multi_index<"ubalance"_n, ubalance,
+    
+      eosio::indexed_by< "byconsym"_n, eosio::const_mem_fun<ubalance, uint128_t, &ubalance::byconsym>>
+    
+    > ubalances_index;
+
 
 
 
