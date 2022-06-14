@@ -1174,16 +1174,16 @@ void next_pool( eosio::name host){
       emission_index emis(_me, host.value);
       auto emi = emis.find(host.value);
       
-      if (emi != emis.end()) {
-        emis.erase(emi);  
-      };
-      // emis.emplace(_me, [&](auto &e){
-      //   e.host = host;
-      //   e.percent = 1000000;
-      //   e.gtop = 0;
-      //   e.fund = asset(0, _SYM);
-      //   e.power_fund = 0;
-      // });
+      // if (emi != emis.end()) {
+      //   emis.erase(emi);  
+      // };
+      emis.emplace(_me, [&](auto &e){
+        e.host = host;
+        e.percent = 1000000;
+        e.gtop = 0;
+        e.fund = asset(0, _SYM);
+
+      });
 
 
     //   sincome_index sincome(_me, host.value);
