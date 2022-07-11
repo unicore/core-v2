@@ -181,23 +181,6 @@
 		});
 		
 		unicore::back_shares_with_badge_action(host, from, badge->power);
-		
-		if (usbadge -> netted == true){
-			//modify goal and task to increse badge_count
-			goals_index goals(_me, host.value);
-			auto goal = goals.find(usbadge -> goal_id);
-			goals.modify(goal, _me, [&](auto &g){
-				g.gifted_badges -= 1;
-				g.gifted_power -= usbadge -> power;
-			});
-
-			tasks_index tasks(_me, host.value);
-			auto task = tasks.find(usbadge -> task_id);
-			tasks.modify(task, _me, [&](auto &t){
-				t.gifted_badges -= 1;
-				t.gifted_power -= usbadge -> power;
-			});
-		}
 
 		if (usbadge -> count > 1) {
 			
@@ -206,7 +189,9 @@
 			});
 
 		} else {
+
 			user_badges.erase(usbadge);	
+			
 		}
 		
 

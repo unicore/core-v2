@@ -39,7 +39,7 @@
 		uint64_t primary_key()const { return id; }
 		uint64_t byhost() const {return host.value;}
 		
-		uint128_t idwithhost() const { return combine_ids(host.value, task_id); }
+		uint128_t idwithhost() const { return combine_ids(host.value, report_id); }
 		uint64_t bytaskid() const {return task_id;}
 
 	   EOSLIB_SERIALIZE( rvotes, (id)(task_id)(report_id)(host)(power))

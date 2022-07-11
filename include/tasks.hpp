@@ -13,7 +13,7 @@
         std::string permlink;
         eosio::name type;
         eosio::name status;
-		uint64_t priority;
+		uint64_t priority = 1;
 		bool is_regular;
         std::vector<uint64_t> calendar;
 		bool is_public = true;
@@ -27,9 +27,7 @@
 		eosio::asset remain;
 		eosio::asset for_each;
 		eosio::name curator;
-		uint64_t gifted_badges = 0;
-        uint64_t gifted_power = 0;
-        uint64_t reports_count = 0;
+		
         bool with_badge;
 		uint64_t badge_id;
         bool validated = false;
@@ -73,7 +71,7 @@
             return negative_votes;
         }
 
-	    EOSLIB_SERIALIZE( tasks, (id)(parent_id)(goal_id)(host)(creator)(benefactor)(suggester)(permlink)(type)(status)(priority)(is_regular)(calendar)(is_public)(doer)(role)(level)(title)(data)(requested)(funded)(remain)(for_each)(curator)(gifted_badges)(gifted_power)(reports_count)(with_badge)(badge_id)(validated)(completed)(active)(created_at)(start_at)(expired_at)(duration)(is_encrypted)(public_key)(positive_votes)(negative_votes)(voters)(meta))
+	    EOSLIB_SERIALIZE( tasks, (id)(parent_id)(goal_id)(host)(creator)(benefactor)(suggester)(permlink)(type)(status)(priority)(is_regular)(calendar)(is_public)(doer)(role)(level)(title)(data)(requested)(funded)(remain)(for_each)(curator)(with_badge)(badge_id)(validated)(completed)(active)(created_at)(start_at)(expired_at)(duration)(is_encrypted)(public_key)(positive_votes)(negative_votes)(voters)(meta))
     };
 
     typedef eosio::multi_index< "tasks"_n, tasks,
@@ -153,6 +151,8 @@
         eosio::asset requested;
         eosio::asset balance;
         eosio::asset withdrawed;
+        uint64_t power_balance;
+        uint64_t withdrawed_power;
         bool need_check = true;
         bool approved = false;
         bool distributed = false;
@@ -176,7 +176,7 @@
         uint128_t userwithtask() const { return combine_ids(username.value, task_id); }
         
 
-        EOSLIB_SERIALIZE(reports3, (report_id)(status)(task_id)(goal_id)(type)(count)(username)(curator)(data)(requested)(balance)(withdrawed)(need_check)(approved)(distributed)(comment)(created_at)(expired_at)(positive_votes)(negative_votes)(voters))
+        EOSLIB_SERIALIZE(reports3, (report_id)(status)(task_id)(goal_id)(type)(count)(username)(curator)(data)(requested)(balance)(withdrawed)(power_balance)(withdrawed_power)(need_check)(approved)(distributed)(comment)(created_at)(expired_at)(positive_votes)(negative_votes)(voters))
     };
 
     typedef eosio::multi_index< "reports3"_n, reports3,

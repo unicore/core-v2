@@ -1500,7 +1500,7 @@ void unicore::deposit ( eosio::name username, eosio::name host, eosio::asset amo
     eosio::check( amount.is_valid(), "Rejected. Invalid quantity" );
 
     partners2_index users(_partners,_partners.value);
-    
+    print("on deposit");
     pool_index pools(_me, host.value);
 
     account_index accounts(_me, host.value);
@@ -1518,7 +1518,7 @@ void unicore::deposit ( eosio::name username, eosio::name host, eosio::asset amo
 
     auto root_symbol = acc->get_root_symbol();
 
-    
+    print("1");
     eosio::check ( amount.symbol == root_symbol, "Rejected. Invalid symbol for this contract.");
     eosio::check(acc != accounts.end(), "Rejected. Host is not founded.");
     eosio::check(acc -> activated == true, "Rejected. Protocol is not active");
@@ -1526,7 +1526,7 @@ void unicore::deposit ( eosio::name username, eosio::name host, eosio::asset amo
     auto pool = pools.find( acc -> current_pool_id );
 
     eosio::check(pool -> remain_quants <= pool->total_quants, "System Error");
-    
+    print("2");
     hoststat_index hoststat(_me, host.value);
     auto ustat = hoststat.find(username.value);
 
@@ -1539,7 +1539,7 @@ void unicore::deposit ( eosio::name username, eosio::name host, eosio::asset amo
             eosio::check(amount.amount + ustat -> blocked_now.amount <= max_deposit , "Вы достигли предела вкладов в этой кассе.");
         }
     }
-
+    print("3");
 
     // eosio::check( acc-> priority_flag == false, "This is a Priority Time");
 
@@ -1549,13 +1549,13 @@ void unicore::deposit ( eosio::name username, eosio::name host, eosio::asset amo
         eosio::check( pool -> pool_started_at <= eosio::time_point_sec(eosio::current_time_point().sec_since_epoch()), "Pool is not started yet");
     };
 
-
+    print("4");
     auto rate = rates.find( pool-> pool_num - 1 );
     // eosio::check(amount.amount % rate -> buy_rate == 0, "You can purchase only whole Quant");
 
     uint128_t dquants = uint128_t(sp -> quants_precision * (uint128_t)amount.amount / (uint128_t)rate -> buy_rate);
     uint64_t quants = dquants;
-   
+    print("5");
     eosio::check(pool -> remain_quants >= quants, "Not enought Quants in target pool");
     print("here0");
     unicore::fill_pool(username, host, quants, amount, acc -> current_pool_id);

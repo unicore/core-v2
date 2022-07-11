@@ -18,7 +18,7 @@
         uint64_t benefactors_weight;
         
         uint64_t duration;
-        uint64_t priority;
+        uint64_t priority = 1;
         
         std::string title;
         std::string description;
@@ -27,7 +27,7 @@
         
         eosio::asset target1;
         eosio::asset target2;
-        eosio::asset target3;
+        
         
         eosio::asset available;
         eosio::asset withdrawed;
@@ -39,11 +39,8 @@
         uint64_t negative_votes;
         uint64_t filled_votes;
         uint64_t total_tasks;
-        
-       
-        uint64_t gifted_badges = 0;
-        uint64_t gifted_power = 0;
-        uint64_t reports_count = 0;
+        uint64_t total_reports;
+        uint64_t approved_reports;
         
         bool is_encrypted = false;
         std::string public_key;
@@ -58,6 +55,16 @@
         std::string report;
         std::string meta;
 
+        uint64_t second_circuit_votes;
+        eosio::asset total_asset_on_distribution;
+        eosio::asset remain_asset_on_distribution;
+        
+        uint64_t total_power_on_distribution;
+        uint64_t remain_power_on_distribution;
+
+
+
+        
         uint64_t primary_key()const { return id; }
       
         uint64_t byvotes() const { 
@@ -89,8 +96,9 @@
         uint128_t by_username_and_host() const { return combine_ids(creator.value, host.value); }
 
         
-        EOSLIB_SERIALIZE( goals, (id)(parent_id)(type)(creator)(benefactor)(host)(status)(who_can_create_tasks)(benefactors_weight)(duration)(priority)(title)(description)(target)(target1)(target2)(target3)(available)(withdrawed)(debt_count)(debt_amount)(positive_votes)(negative_votes)(filled_votes)(total_tasks)
-            (gifted_badges)(gifted_power)(reports_count)(is_encrypted)(public_key)(created)(start_at)(finish_at)(expired_at)(voters)(report)(meta))
+        EOSLIB_SERIALIZE( goals, (id)(parent_id)(type)(creator)(benefactor)(host)(status)(who_can_create_tasks)(benefactors_weight)(duration)(priority)(title)(description)(target)(target1)(target2)(available)(withdrawed)(debt_count)(debt_amount)(positive_votes)(negative_votes)(filled_votes)(total_tasks)
+            (total_reports)(approved_reports)(is_encrypted)(public_key)(created)(start_at)(finish_at)(expired_at)(voters)(report)(meta)
+            (second_circuit_votes)(total_asset_on_distribution)(remain_asset_on_distribution)(total_power_on_distribution)(remain_power_on_distribution))
     };
 
     typedef eosio::multi_index <"goals"_n, goals,
@@ -107,21 +115,21 @@
     > goals_index;
 
 
-/*!
-   \brief Структура целей хоста Двойной Спирали.
-*/
+// /*!
+//    \brief Структура целей хоста Двойной Спирали.
+// */
 
-    struct [[eosio::table, eosio::contract("unicore")]]  goals3 {
-        uint64_t id;
-        eosio::asset total_on_distribution;
-        eosio::asset remain_on_distribution;
+//     struct [[eosio::table, eosio::contract("unicore")]]  goals3 {
+//         uint64_t id;
+//         eosio::asset total_on_distribution;
+//         eosio::asset remain_on_distribution;
 
-        uint64_t primary_key()const { return id; }
+//         uint64_t primary_key()const { return id; }
         
-        EOSLIB_SERIALIZE( goals3, (id)(total_on_distribution)(remain_on_distribution))
-    };
+//         EOSLIB_SERIALIZE( goals3, (id)(total_on_distribution)(remain_on_distribution))
+//     };
 
-    typedef eosio::multi_index <"goals3"_n, goals3> goals3_index;
+//     typedef eosio::multi_index <"goals3"_n, goals3> goals3_index;
 
 
 

@@ -34,7 +34,7 @@ using namespace eosio;
 
     eosio::check(target.symbol == root_symbol, "Wrong symbol for this host");
     
-    eosio::check(target.amount > 0, "Target should be more then zero");
+    // eosio::check(target.amount > 0, "Target should be more then zero");
 
     eosio::check(title.length() <= 300 && title.length() > 0, "Short Description is a maximum 300 symbols. Describe the goal shortly");
     
@@ -75,7 +75,7 @@ using namespace eosio;
       g.target = target;
       g.target1 = asset(0, acc->asset_on_sale.symbol);
       g.target2 = asset(0, acc->asset_on_sale.symbol);
-      g.target3 = asset(0, acc->asset_on_sale.symbol);
+      g.second_circuit_votes = 0;
       g.debt_amount = asset(0, root_symbol);
       g.withdrawed = asset(0, root_symbol);
       g.available = min_asset_amount;
@@ -268,33 +268,48 @@ using namespace eosio;
 	
   	account_index accounts(_me, host.value);
 		auto acc = accounts.find(host.value);
+    auto root_symbol = acc->get_root_symbol();
+
 		eosio::check(acc != accounts.end(), "Host is not found");
 
 		auto goal = goals.find(goal_id);
 
-    eosio::check("filled"_n == goal->status, "Only processed goals can be completed");
+    // eosio::check("filled"_n == goal->status, "Only processed goals can be completed");
     
 		eosio::check(username == goal->benefactor, "Only benefactor can set report");
 		
-    goals3_index goals2(_me, host.value);
-    auto goal2 = goals2.find(goal_id);
-
-    if (goal->available.amount > 0){
-      goals2.emplace(username, [&](auto &g){
-        g.id = goal -> id;
-        g.total_on_distribution = goal->available;
-        g.remain_on_distribution = goal -> available;
-      });
-    
-    }
-    
 
 		goals.modify(goal, username, [&](auto &g) {
       g.status = "reported"_n;  
       g.finish_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + _VOTING_TIME_EXPIRATION);
       g.available = asset(0, goal -> available.symbol);
       g.report = report;
+      g.total_asset_on_distribution = goal->available;
+      g.remain_asset_on_distribution = goal -> available;
+      g.second_circuit_votes += _START_VOTES * goal -> priority;
 		});
+
+    reports_index reports(_me, host.value);
+
+    reports.emplace(username, [&](auto &r) {
+      r.report_id = get_global_id("reports"_n);
+      r.task_id = 0;
+      r.goal_id = goal -> id;
+      r.count = 1;
+      r.username = username;
+      r.data = report;
+      r.need_check = false;
+      r.approved = true;
+      r.requested = asset(0, root_symbol);;
+      r.balance = asset(0, root_symbol);
+      r.withdrawed = asset(0, root_symbol);
+      r.curator = host;
+      r.positive_votes = _START_VOTES * goal -> priority;
+      r.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + 30 * 86400);
+      r.created_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch());
+    });
+
+
 	}
 
   /**
@@ -315,14 +330,30 @@ using namespace eosio;
 		eosio::check(architect == acc->architect, "Only architect can eosio::check report for now");
 		eosio::check(goal->status == "reported"_n, "Goals without reports cannot be eosio::checked");
 
-		goals.modify(goal, architect, [&](auto &g){
+		goals.modify(goal, architect, [&](auto &g) {
 			g.status = "completed"_n;
+      g.finish_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + _VOTING_TIME_EXPIRATION);
 		});
 
-    accounts.modify(acc, architect, [&](auto &a){
+    accounts.modify(acc, architect, [&](auto &a) {
       a.achieved_goals = acc -> achieved_goals + 1;
     });
+
+    uint64_t votes = goal -> positive_votes > 0 ? goal -> positive_votes : (goal -> filled_votes > 0 ? goal -> filled_votes : 1) ;
+
+    uint64_t weight = votes * goal -> priority;
+
+    //TODO 
+    // add to distribution
+    action(
+      permission_level{ _me, "active"_n },
+      "auction"_n, "addlbrobj"_n,
+      std::make_tuple( host , goal -> benefactor, "goal"_n, goal -> id, weight) 
+    ).send();
+    
+
 	};
+
 
 
 

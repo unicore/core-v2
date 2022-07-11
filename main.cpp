@@ -540,8 +540,8 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::emitpower);
                     break;
                 };
-                case "addcommpower"_n.value: {
-                    execute_action(name(receiver), name(code), &unicore::addcommpower);
+                case "emitpower2"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::emitpower2);
                     break;
                 };
                 case "dispmarket"_n.value: {

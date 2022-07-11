@@ -220,9 +220,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void enpmarket(eosio::name host);
 
         [[eosio::action]] void emitpower(eosio::name host, eosio::name username, uint64_t user_shares);
-        [[eosio::action]] void addcommpower(eosio::name host, uint64_t shares_on_period);
+        [[eosio::action]] void emitpower2(eosio::name host, uint64_t goal_id, uint64_t shares);
         
-
         [[eosio::action]] void withrbenefit(eosio::name username, eosio::name host, uint64_t id);
         [[eosio::action]] void refreshpu(eosio::name username, eosio::name host);
         [[eosio::action]] void refreshsh (eosio::name owner, uint64_t id);
@@ -352,7 +351,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
      * @ingroup public_tables
      * @details Таблица хранит категории событий хоста. 
      */
-    struct [[eosio::table, eosio::contract("nft")]] counts {
+    struct [[eosio::table, eosio::contract("unicore")]] counts {
       eosio::name key;
       eosio::name secondary_key;
       uint64_t value;

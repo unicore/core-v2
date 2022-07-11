@@ -784,9 +784,12 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 			eosio::check(task -> doer == username, "Wrong doer for the private task");
 		};
 
-		// goals_index goals(_me, host.value);
-		// auto goal = goals.find(task-> goal_id);
-		
+		goals_index goals(_me, host.value);
+		auto goal = goals.find(task-> goal_id);
+
+		eosio::check(goal -> status != "reported"_n && goal->status != "completed"_n, "Goal is already completed");
+
+
 		// if (goal -> type == "marathon"_n) {
 		// 	goalspartic_index gparticipants(_me, host.value);
   //     auto users_with_id = gparticipants.template get_index<"byusergoal"_n>();
@@ -834,20 +837,23 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 
 		
 
-		} 
-		// else {
-		// 	eosio::check(task -> is_regular == true, "Task is not regular, but report is exist");
-		// 	eosio::check(user_report -> need_check == false, "Previous report is not checked yet");
-		// 	report_id = user_report -> report_id;
-
-		// 	users_with_id.modify(user_report, username, [&](auto &r){
-		// 		r.count += 1;
-		// 		r.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + 30 * 86400);
-		// 		r.created_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch());
+		} else {
+			eosio::check(task -> is_regular == true, "Task is not regular, but report is exist");
+			eosio::check(user_report -> need_check == false, "Previous report is not checked yet");
+			
+			users_with_id.modify(user_report, username, [&](auto &r){
+				r.count += 1;
+				r.need_check = true;
+				r.approved = false;
+				r.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + 30 * 86400);
+				r.created_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch());
 				
-		// 	});
-		// }
+			});
+		}
 
+		goals.modify(goal, _me, [&](auto &g){
+			g.approved_reports += 1 ;
+		});
   //   if (need_check == false) {
   //   	unicore::approver(host, report_id, "");
 		// };
@@ -905,10 +911,6 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		tasks_index tasks(_me, host.value);
 		auto task = tasks.find(report -> task_id);
 
-		tasks.modify(task, _me, [&](auto &t){
-			t.reports_count -= 1;
-		});
-		
 		eosio::check(task -> completed == true, "Only report for a completed task can be removed");
 
 		reports.erase(report);
@@ -934,6 +936,12 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		tasks_index tasks(_me, host.value);
 		auto task = tasks.find(report->task_id);
 		
+		eosio::check(task != tasks.end(), "Task is not found");
+		
+		goals_index goals(_me, host.value);
+		auto goal = goals.find(task -> goal_id);
+		eosio::check(goal != goals.end(), "Goal is not found");
+
 		if (report -> username != host)
 			eosio::check(report->approved == false, "Task is already approved");
 
@@ -942,24 +950,25 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 			r.comment = comment;
 			r.approved = true;
 			r.withdrawed = report->requested;
+			r.positive_votes = _START_VOTES * task -> priority;
 		});
 
 		// eosio::check(report->requested <= task->remain, "Not enough funds for pay to this task");
 		
-		if (report->requested.amount > 0){
+		if (report->requested.amount > 0) {
 			if (report->requested > task->remain) {
 				//if available in goal - minus it
 				//or modify goal debt which will be payed on the next donation to the debt object
 				
-				goals_index goals(_me, host.value);
-				auto goal = goals.find(task -> goal_id);
-				eosio::check(goal != goals.end(), "Goal is not found");
+				
 
 				if (goal -> available >= report -> requested && goal -> status == "process"_n) {
 					
 					goals.modify(goal, host, [&](auto &g){
 						g.available -= report -> requested;
 						g.withdrawed += report -> requested;
+						g.approved_reports += 1;
+						g.second_circuit_votes += _START_VOTES * task -> priority;
 					});
 
 					action(
@@ -978,6 +987,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 						// g.available -= report -> requested;
 						g.debt_count += 1;
 						g.debt_amount += report -> requested;
+						g.approved_reports += 1;
 					});
 					
 					debts_index debts(_me, host.value);
@@ -998,6 +1008,11 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 					t.remain = task -> remain - report->requested;
 				});
 
+				goals.modify(goal, host, [&](auto &g){
+					g.approved_reports += 1;
+					g.second_circuit_votes += _START_VOTES * task -> priority;
+				});
+
 				action(
           permission_level{ _me, "active"_n },
           acc->root_token_contract, "transfer"_n,
@@ -1006,7 +1021,15 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 				
 		};
 
-	};
+	} else {
+
+		goals.modify(goal, host, [&](auto &g){
+			g.second_circuit_votes += _START_VOTES * task -> priority;
+		});
+
+	}
+
+
 
 		if (task -> with_badge == true) {
 			unicore::giftbadge_action(host, report->username, task->badge_id, std::string("Completed task"), true, true, task->goal_id, report->task_id);
@@ -1021,6 +1044,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 			};
 
 		}
+
 
 		// unicore::check_and_gift_netted_badge(report->username, host, task->id);
 
@@ -1074,26 +1098,21 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		
 		eosio::check(report->username == username, "wrong username");
 
-		eosio::check(report->balance.amount > 0, "Report does not have a balance for withdraw");
+		eosio::check(report->balance.amount > 0 || report -> power_balance > 0, "Report does not have a balance for withdraw");
 		
-		goals3_index goals2(_me, host.value);
 		goals_index goals(_me, host.value);
-		auto goal2 = goals2.find(report->goal_id);
 		auto goal = goals.find(report->goal_id);
 
 		goals.modify(goal, username, [&](auto &g) {
 			g.withdrawed += report -> balance;
-		});
-
-		goals2.modify(goal2, username, [&](auto &g) {
-			eosio::check(goal2->remain_on_distribution >= report->balance, "System error on distribution");
-			g.remain_on_distribution -= report->balance;
+			eosio::check(goal->remain_asset_on_distribution >= report->balance, "System error on distribution");
+			g.remain_asset_on_distribution -= report->balance;
+			g.remain_power_on_distribution -= report->power_balance;
 		});
 
 		uint64_t task_freeze_seconds = unicore::getcondition(host, "tafreezesecs");
 
-
-		if (task_freeze_seconds == 0){
+		if (task_freeze_seconds == 0) {
 
 			action(
 	      permission_level{ _me, "active"_n },
@@ -1107,9 +1126,18 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 
 		}
 
+		action(
+        permission_level{ _me, "active"_n },
+        _me, "emitpower"_n,
+        std::make_tuple( host , username, report -> power_balance) 
+    ).send();
+
+
 		reports.modify(report, username, [&](auto &r){
 			r.withdrawed = report->balance;
 			r.balance = asset(0, report->balance.symbol);
+			r.withdrawed_power = report -> power_balance;
+			r.power_balance = 0;
 		});
 
 
@@ -1136,28 +1164,24 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		goals_index goals(_me, host.value);
 		auto goal = goals.find(report->goal_id);
 		
-		goals3_index goals3(_me, host.value);
-		auto goal2 = goals3.find(report->goal_id);
-		
 		// eosio::check(report->distributed == false, "Distribution already happen to a report");
-		eosio::check(goal->finish_at.sec_since_epoch() < eosio::current_time_point().sec_since_epoch() + 86400, "Goal is still under distribution");
-		eosio::check(report -> username == username, "Only funds from your report you can withdraw");
+		eosio::check(goal->finish_at.sec_since_epoch() < eosio::current_time_point().sec_since_epoch(), "Goal is still under distribution");
+		// eosio::check(report -> username == username, "Only funds from your report you can withdraw");
 
 		if ((goal->status == "reported"_n || goal->status == "completed"_n) && report->distributed == false) {
 
-			double part = (double)report->positive_votes / (double)goal->target3.amount * (double)goal2->total_on_distribution.amount;
+			double part = (double)report->positive_votes / (double)goal->second_circuit_votes * (double)goal->total_asset_on_distribution.amount;
 			eosio::asset part_asset = asset((uint64_t)part, report->balance.symbol);
 
-			reports.modify(report, username, [&](auto &r){
+			uint64_t upower = uint64_t((double)report->positive_votes / (double)goal->second_circuit_votes * (double)goal->total_power_on_distribution);
+		
+			reports.modify(report, username, [&](auto &r) {
 				r.balance += part_asset;
+				r.power_balance += upower;
 				r.distributed = true;
 			});	
 
-		}
-		
-
-		
-
+		}	
 	};
 
 	

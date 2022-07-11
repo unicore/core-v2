@@ -78,60 +78,13 @@ using namespace eosio;
   }
 
 
-
-
-
   /**
    * @brief      Метод эмиссии силы с аукциона
-   * Обновляет вестинг-баланс до актуальных параметров продолжительности. 
-   * @param[in]  op    The operation
-   */
-  [[eosio::action]] void unicore::addcommpower(eosio::name host, uint64_t shares_on_period) {
-    require_auth("auction"_n);
-
-    account_index account(_me, host.value);
-    auto acc = account.find(host.value);
-    
-    action(
-        permission_level{ _saving, "active"_n },
-        acc->root_token_contract, "transfer"_n,
-        std::make_tuple( _saving, _me, asset(10000 * shares_on_period, acc -> quote_amount.symbol), std::string("")) 
-    ).send();
-
-
-    add_base_to_market("power"_n, host, asset(shares_on_period, _POWER));
-    add_quote_to_market("power"_n, host, asset(10000 * shares_on_period, acc -> quote_amount.symbol));
-
-    // emission_index emis(_me, host.value);
-    // auto em = emis.find(host.value);
-    
-    // if (em == emis.end()) {
-      
-    //   emis.emplace(_me, [&](auto &e){
-    //     e.host = host;
-    //     e.percent = HUNDR_PERCENT;
-    //     e.fund = asset(0, acc -> root_token.symbol);
-    //     e.power_fund = shares_on_period;
-    //   });
-
-    // } else {
-
-    //   emis.modify(em, _me, [&](auto &e){
-    //     e.power_fund += shares_on_period;
-    //   });
-
-    // }
-  }
-
-
-
-  /**
-   * @brief      Метод эмиссии силы с аукциона
-   * Обновляет вестинг-баланс до актуальных параметров продолжительности. 
+   * 
    * @param[in]  op    The operation
    */
   [[eosio::action]] void unicore::emitpower(eosio::name host, eosio::name username, uint64_t user_shares){
-    require_auth("auction"_n);
+    eosio::check(has_auth("auction"_n) || has_auth(_me), "missing required authority");
 
     account_index account(_me, host.value);
     auto acc = account.find(host.value);
@@ -148,6 +101,11 @@ using namespace eosio;
 
     add_base_to_market("power"_n, host, asset(user_shares, _POWER));
     add_quote_to_market("power"_n, host, asset(10000 * user_shares, acc -> quote_amount.symbol));
+
+    account.modify(acc, _me, [&](auto &a){
+      a.total_shares += user_shares;
+      a.quote_amount += asset(10000 * user_shares, acc -> quote_amount.symbol);
+    });
 
     power3_index power(_me, host.value);
     auto pexist = power.find(username.value);
@@ -171,6 +129,45 @@ using namespace eosio;
     };
 
 
+  }
+
+
+
+  /**
+   * @brief      Метод эмиссии силы с аукциона на цель
+   * 
+   * @param[in]  op    The operation
+   */
+
+  [[eosio::action]] void unicore::emitpower2(eosio::name host, uint64_t goal_id, uint64_t shares) {
+    eosio::check(has_auth("auction"_n) || has_auth(_me), "missing required authority");
+
+    account_index account(_me, host.value);
+    auto acc = account.find(host.value);
+    
+    // eosio::check(acc -> sale_mode == "auction"_n, "Wrong sale type");
+    
+    action(
+        permission_level{ _saving, "active"_n },
+        acc->root_token_contract, "transfer"_n,
+        std::make_tuple( _saving, _me, asset(10000 * shares, acc -> quote_amount.symbol), std::string("")) 
+    ).send();
+
+
+    add_base_to_market("power"_n, host, asset(shares, _POWER));
+    add_quote_to_market("power"_n, host, asset(10000 * shares, acc -> quote_amount.symbol));
+
+    account.modify(acc, _me, [&](auto &a){
+      a.total_shares += shares;
+      a.quote_amount += asset(10000 * shares, acc -> quote_amount.symbol);
+    });
+
+    goals_index goals(_me, host.value);
+    auto goal = goals.find(goal_id);
+    goals.modify(goal, _me, [&](auto &g){
+      g.total_power_on_distribution += shares;
+      g.remain_power_on_distribution += shares;
+    });
   }
 
 
@@ -723,7 +720,7 @@ using namespace eosio;
     eosio::check(exist != accounts.end(), "Host is not founded");
     eosio::check(exist -> quote_token_contract == code, "Wrong quote token contract");
     eosio::check(exist -> quote_amount.symbol == amount.symbol, "Wrong quote token symbol");
-    // eosio::check(exist -> power_market_id != ""_n, "Can buy shares only when power market is enabled");
+    eosio::check(exist -> power_market_id != ""_n, "Can buy shares only when power market is enabled");
 
     eosio::name main_host = exist->get_ahost();
 
@@ -731,6 +728,12 @@ using namespace eosio;
     auto sp = spiral.find(0);
 
     uint64_t new_shares = amount.amount * (HUNDR_PERCENT - sp -> loss_percent) / HUNDR_PERCENT;
+
+    //TODO buy_shares check!
+    // market.modify( itr, _me, [&]( auto& es ) {
+    //        tokens_out = es.direct_convert( asset(shares,eosio::symbol(eosio::symbol_code("POWER"), 0)), exist -> quote_amount.symbol);
+     //    });
+
 
     print("new_shares: ", new_shares);
     
@@ -746,13 +749,14 @@ using namespace eosio;
     if (pexist == power.end()) {
 
       power.emplace(_me, [&](auto &p){
-       p.username = buyer;
-       p.power = new_shares;
-       p.staked = new_shares; 
+         p.username = buyer;
+         p.power = new_shares;
+         p.staked = new_shares; 
       });
       
     
     } else {
+      
      unicore::propagate_votes_changes(host, buyer, pexist->power, pexist->power + new_shares);
       
       power.modify(pexist, _me, [&](auto &p){
