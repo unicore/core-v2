@@ -119,17 +119,17 @@
 //    \brief Структура целей хоста Двойной Спирали.
 // */
 
-//     struct [[eosio::table, eosio::contract("unicore")]]  goals3 {
-//         uint64_t id;
-//         eosio::asset total_on_distribution;
-//         eosio::asset remain_on_distribution;
+    struct [[eosio::table, eosio::contract("unicore")]]  goals3 {
+        uint64_t id;
+        eosio::asset total_on_distribution;
+        eosio::asset remain_on_distribution;
 
-//         uint64_t primary_key()const { return id; }
+        uint64_t primary_key()const { return id; }
         
-//         EOSLIB_SERIALIZE( goals3, (id)(total_on_distribution)(remain_on_distribution))
-//     };
+        EOSLIB_SERIALIZE( goals3, (id)(total_on_distribution)(remain_on_distribution))
+    };
 
-//     typedef eosio::multi_index <"goals3"_n, goals3> goals3_index;
+    typedef eosio::multi_index <"goals3"_n, goals3> goals3_index;
 
 
 
