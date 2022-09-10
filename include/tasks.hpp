@@ -145,6 +145,8 @@
         uint64_t goal_id;
         uint64_t type;
         uint64_t count;
+        uint64_t duration_secs;
+        eosio::asset asset_per_hour;
         eosio::name username;
         eosio::name curator;
         eosio::string data;
@@ -176,7 +178,7 @@
         uint128_t userwithtask() const { return combine_ids(username.value, task_id); }
         
 
-        EOSLIB_SERIALIZE(reports3, (report_id)(status)(task_id)(goal_id)(type)(count)(username)(curator)(data)(requested)(balance)(withdrawed)(power_balance)(withdrawed_power)(need_check)(approved)(distributed)(comment)(created_at)(expired_at)(positive_votes)(negative_votes)(voters))
+        EOSLIB_SERIALIZE(reports3, (report_id)(status)(task_id)(goal_id)(type)(count)(duration_secs)(asset_per_hour)(username)(curator)(data)(requested)(balance)(withdrawed)(power_balance)(withdrawed_power)(need_check)(approved)(distributed)(comment)(created_at)(expired_at)(positive_votes)(negative_votes)(voters))
     };
 
     typedef eosio::multi_index< "reports3"_n, reports3,
@@ -188,6 +190,26 @@
         eosio::indexed_by<"byvotes"_n, eosio::const_mem_fun<reports3, uint64_t, &reports3::byvotes>>
         
     > reports_index;
+
+
+
+/*!
+   \brief Структура статистики интеллектуальной собственности пользователя
+*/
+    
+struct [[eosio::table, eosio::contract("unicore")]] intelown {
+    eosio::name username;
+    uint64_t total_reports;
+    uint64_t approved_reports;
+    
+    uint64_t primary_key() const {return username.value;}
+    
+
+    EOSLIB_SERIALIZE(intelown, (username)(total_reports)(approved_reports))        
+
+};
+
+    typedef eosio::multi_index<"intelown"_n, intelown> intelown_index;
 
 
 

@@ -111,7 +111,7 @@
         eosio::asset asset_on_sale;
         uint64_t asset_on_sale_precision;
         std::string asset_on_sale_symbol;
-        int64_t sale_shift = 0;
+        int64_t sale_shift = 1;
         
         //Метод добавления хоста в фонд
         //Метод включения сейла хостом

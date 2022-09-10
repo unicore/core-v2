@@ -959,11 +959,16 @@ void next_pool( eosio::name host){
         });
         
         eosio::asset quote_amount = unicore::emit(host, host_income, rate -> system_income);
-        
+        //TODO
+        //add_convert_rate here
+        //
         accounts.modify(acc, _me, [&](auto &dp){
            dp.current_pool_num = pool -> pool_num + 1;
            dp.current_pool_id  = pool -> id + 1;
            dp.quote_amount += quote_amount;
+           dp.sale_shift = rate -> buy_rate / sp -> base_rate;
+           
+           print("new sale shift: ", dp.sale_shift);
         });
 
         print("on next pool000");
@@ -1014,6 +1019,8 @@ void next_pool( eosio::name host){
         accounts.modify(acc, _me, [&](auto &a){
            a.current_pool_num = pool -> pool_num + 1;
            a.current_pool_id  = pool -> id + 1;
+           a.sale_shift = rate -> buy_rate / sp -> base_rate;
+           
            // a.priority_flag = false;     
         });
 
@@ -1081,9 +1088,11 @@ void next_pool( eosio::name host){
     //     rates.erase(rate);  
     //   };
 
-    // account_index accounts(_me, host.value);
-    // auto acc = accounts.find(host.value);
-
+    account_index accounts(_me, host.value);
+    auto acc = accounts.find(host.value);
+    accounts.modify(acc, _me, [&](auto &a){
+        a.sale_shift = 1;
+    });
 
     // account3_index accounts3(_me, _me.value);
     // auto acc3 = accounts3.find(host.value);
@@ -1171,19 +1180,19 @@ void next_pool( eosio::name host){
     // }    
 
 
-      emission_index emis(_me, host.value);
-      auto emi = emis.find(host.value);
+      // emission_index emis(_me, host.value);
+      // auto emi = emis.find(host.value);
       
       // if (emi != emis.end()) {
       //   emis.erase(emi);  
       // };
-      emis.emplace(_me, [&](auto &e){
-        e.host = host;
-        e.percent = 1000000;
-        e.gtop = 0;
-        e.fund = asset(0, _SYM);
+      // emis.emplace(_me, [&](auto &e){
+      //   e.host = host;
+      //   e.percent = 1000000;
+      //   e.gtop = 0;
+      //   e.fund = asset(0, _SYM);
 
-      });
+      // });
 
 
     //   sincome_index sincome(_me, host.value);
@@ -1511,14 +1520,12 @@ void unicore::deposit ( eosio::name username, eosio::name host, eosio::asset amo
     eosio::check(acc->root_token_contract == code, "Wrong token contract for this host");
     
     rate_index rates(_me, main_host.value);
-    
 
     spiral_index spiral(_me, main_host.value);
     auto sp = spiral.find(0);
 
     auto root_symbol = acc->get_root_symbol();
 
-    print("1");
     eosio::check ( amount.symbol == root_symbol, "Rejected. Invalid symbol for this contract.");
     eosio::check(acc != accounts.end(), "Rejected. Host is not founded.");
     eosio::check(acc -> activated == true, "Rejected. Protocol is not active");
@@ -1526,7 +1533,6 @@ void unicore::deposit ( eosio::name username, eosio::name host, eosio::asset amo
     auto pool = pools.find( acc -> current_pool_id );
 
     eosio::check(pool -> remain_quants <= pool->total_quants, "System Error");
-    print("2");
     hoststat_index hoststat(_me, host.value);
     auto ustat = hoststat.find(username.value);
 
@@ -1539,8 +1545,7 @@ void unicore::deposit ( eosio::name username, eosio::name host, eosio::asset amo
             eosio::check(amount.amount + ustat -> blocked_now.amount <= max_deposit , "Вы достигли предела вкладов в этой кассе.");
         }
     }
-    print("3");
-
+    
     // eosio::check( acc-> priority_flag == false, "This is a Priority Time");
 
     if (pool -> pool_num > 2){
@@ -1549,25 +1554,21 @@ void unicore::deposit ( eosio::name username, eosio::name host, eosio::asset amo
         eosio::check( pool -> pool_started_at <= eosio::time_point_sec(eosio::current_time_point().sec_since_epoch()), "Pool is not started yet");
     };
 
-    print("4");
     auto rate = rates.find( pool-> pool_num - 1 );
     // eosio::check(amount.amount % rate -> buy_rate == 0, "You can purchase only whole Quant");
 
     uint128_t dquants = uint128_t(sp -> quants_precision * (uint128_t)amount.amount / (uint128_t)rate -> buy_rate);
     uint64_t quants = dquants;
-    print("5");
     eosio::check(pool -> remain_quants >= quants, "Not enought Quants in target pool");
-    print("here0");
     unicore::fill_pool(username, host, quants, amount, acc -> current_pool_id);
-    print("here2");
     unicore::add_coredhistory(host, username, acc -> current_pool_id, amount, "deposit", message);
     unicore::add_user_stat("deposit"_n, username, acc->root_token_contract, amount, asset(0, amount.symbol));
-    
     unicore::add_host_stat("deposit"_n, username, host, amount);
-    
-    print("here3");
+    unicore::add_host_stat2("deposit"_n, username, host, amount);
+    unicore::add_core_stat("deposit"_n, host, amount);
+        
     unicore::refresh_state(host);
-    print("here4");
+    
 };
 
 /**
@@ -1732,8 +1733,22 @@ void unicore::fill_pool(eosio::name username, eosio::name host, uint64_t quants,
     
     unicore::change_bw_trade_graph(host, filled_pool_id, pool->cycle_num, pool->pool_num, ratem1->buy_rate, ratep1->buy_rate, total_quants, remain_quants, pool->color);
     
-    uint64_t if_convert_amount = uint64_t((double)amount.amount * (double)sp -> loss_percent / (double)HUNDR_PERCENT);         
+    double convert_rate = (double)ratem1 -> buy_rate / (double)sp -> base_rate;
+    print("convert_rate1: ", convert_rate, (double)ratem1 -> buy_rate, (double)sp -> base_rate);
+
+    if (acc -> sale_shift == 0 || acc -> sale_shift < uint64_t(convert_rate)) {
+        accounts.modify(acc, _me, [&](auto &a) {
+            a.sale_shift = uint64_t(convert_rate);
+        });
+    } else {
+        convert_rate = acc -> sale_shift;
+    }
+    print("convert_rate2: ", convert_rate);
+    uint64_t if_convert_amount = uint64_t((double)amount.amount / convert_rate);         
     
+    
+    print("if_convert_amount: ", if_convert_amount);
+
     spiral2_index spiral2(_me, host.value);
     auto sp2 = spiral2.find(0);
     
@@ -1753,6 +1768,7 @@ void unicore::fill_pool(eosio::name username, eosio::name host, uint64_t quants,
         b.available = amount;
         b.compensator_amount = amount;
         b.if_convert = asset(if_convert_amount, _POWER);
+        b.if_convert_to_power = asset(if_convert_amount, _POWER);
         b.start_convert_amount = asset(if_convert_amount, _POWER);
         
         double convert_percent = (double)b.if_convert.amount  * (double)HUNDR_PERCENT / (double)amount.amount - (double)HUNDR_PERCENT;
@@ -2508,7 +2524,9 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
         
         unicore::add_user_stat("withdraw"_n, username, acc->root_token_contract, bal->purchase_amount, bal->available);
         unicore::add_host_stat("withdraw"_n, username, host, bal -> purchase_amount);
-    
+        unicore::add_host_stat2("nominal"_n, username, host, bal -> purchase_amount);
+        unicore::add_core_stat("nominal"_n, host, bal -> purchase_amount);
+
         balance.erase(bal);
         
     } else  { 
@@ -2544,7 +2562,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
             auto converted_quants = bal->quants_for_sale * rate -> sell_rate / rate -> buy_rate;
             
             if ((bal->ref_amount).amount > 0) {
-                unicore::spread_to_refs(host, username, bal->ref_amount, bal->available);
+                unicore::spread_to_refs(host, username, bal->ref_amount, bal->available, acc -> root_token_contract);
                 
             }
             
@@ -2675,12 +2693,14 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
     }
 };
 
-    void unicore::spread_to_refs(eosio::name host, eosio::name username, eosio::asset spread_amount, eosio::asset from_amount){
+    void unicore::spread_to_refs(eosio::name host, eosio::name username, eosio::asset spread_amount, eosio::asset from_amount, eosio::name token_contract){
         partners2_index refs(_partners, _partners.value);
         auto ref = refs.find(username.value);
 
         account_index accounts(_me, host.value);
         auto acc = accounts.find(host.value);
+        
+        eosio::check(acc -> root_token_contract == token_contract, "Wrong token contract");
 
         uint64_t usdtwithdraw = unicore::getcondition(host, "usdtwithdraw");
 
@@ -2696,7 +2716,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
             sys_rate = usd_rate -> rate;
         };
         //
-        
+        print("ON HERE!: ", host);
         eosio::name referer;
         uint8_t count = 1;
             
@@ -2709,6 +2729,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
              */
 
             for (auto level : acc->levels) {
+                print("on level: ", level);
                 if ((ref != refs.end()) && ((ref->referer).value != 0)) { 
                     uint64_t to_ref_segments = spread_amount.amount * level / 100 / ONE_PERCENT;
                     eosio::asset to_ref_amount = asset(to_ref_segments, spread_amount.symbol);
@@ -2719,7 +2740,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
                         to_ref_usdt_amount = asset(to_ref_amount.amount * sys_rate, _USDT);
                     };
 
-                    
+                    print("to_ref_usdt_amount: ", to_ref_usdt_amount);
                     refbalances_index refbalances(_me, referer.value);
                     
                     refbalances.emplace(_me, [&](auto &rb){
@@ -2873,6 +2894,29 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
 
     }
 
+     void unicore::add_core_stat(eosio::name type, eosio::name host, eosio::asset amount){
+        corestat_index corestat(_me, _me.value);
+
+        auto stat = corestat.find(host.value);
+
+        if (stat == corestat.end()){
+            if (type == "deposit"_n) {
+                corestat.emplace(_me, [&](auto &u){
+                    u.hostname = host;
+                    u.volume = amount;
+                });
+            };
+        } else {
+            
+            corestat.modify(stat, _me, [&](auto &u) {
+                if (type == "nominal"_n) {
+                    u.volume =  -amount;
+                };
+            });
+        }
+    }
+
+
      void unicore::add_host_stat(eosio::name type, eosio::name username, eosio::name host, eosio::asset amount){
         hoststat_index hoststat(_me, host.value);
 
@@ -2897,6 +2941,30 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
             });
         }
     }
+
+
+
+     void unicore::add_host_stat2(eosio::name type, eosio::name username, eosio::name host, eosio::asset amount){
+        hoststat_index2 hoststat2(_me, host.value);
+
+        auto stat = hoststat2.find(username.value);
+
+        if (stat == hoststat2.end()){
+            if (type == "deposit"_n) {
+                hoststat2.emplace(_me, [&](auto &u){
+                    u.username = username;
+                    u.volume = amount;
+                });
+            };
+        } else {
+            hoststat2.modify(stat, _me, [&](auto &u) {
+                if (type == "nominal"_n) {
+                    u.volume =  - amount;
+                };
+            });
+        }
+    }
+
 
 
      void unicore::add_user_stat(eosio::name type, eosio::name username, eosio::name contract, eosio::asset nominal_amount, eosio::asset withdraw_amount){
@@ -3203,29 +3271,35 @@ void unicore::burn_action(eosio::name username, eosio::name host, eosio::asset q
     }
     
 
-    //ADD USER POWER
+    double power = (double)quantity.amount / (double)acc -> sale_shift;
+    uint64_t user_power = uint64_t(power);
 
+    action(
+        permission_level{ _me, "active"_n },
+        _me, "emitpower"_n,
+        std::make_tuple( host , username, user_power) 
+    ).send();
 
-    power3_index power(_me, host.value);
-    auto pexist = power.find(username.value);
+    // power3_index power(_me, host.value);
+    // auto pexist = power.find(username.value);
     
-    if (pexist == power.end()) {
+    // if (pexist == power.end()) {
 
-      power.emplace(_me, [&](auto &p) {
-        p.username = username;
-        p.power = quantity.amount;
-        p.staked = quantity.amount;    
-      });
+    //   power.emplace(_me, [&](auto &p) {
+    //     p.username = username;
+    //     p.power = quantity.amount;
+    //     p.staked = quantity.amount;    
+    //   });
 
         
-    } else {
-        unicore::propagate_votes_changes(host, username, pexist->power, pexist->power + quantity.amount);
+    // } else {
+    //     unicore::propagate_votes_changes(host, username, pexist->power, pexist->power + quantity.amount);
         
-        power.modify(pexist, _me, [&](auto &p) {
-            p.power += quantity.amount;
-            p.staked += quantity.amount;
-        });
-    };
+    //     power.modify(pexist, _me, [&](auto &p) {
+    //         p.power += quantity.amount;
+    //         p.staked += quantity.amount;
+    //     });
+    // };
 
 
     unicore::refresh_state(host);

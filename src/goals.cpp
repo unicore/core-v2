@@ -36,7 +36,7 @@ using namespace eosio;
     
     // eosio::check(target.amount > 0, "Target should be more then zero");
 
-    eosio::check(title.length() <= 300 && title.length() > 0, "Short Description is a maximum 300 symbols. Describe the goal shortly");
+    // eosio::check(title.length() <= 300 && title.length() > 0, "Short Description is a maximum 300 symbols. Describe the goal shortly");
     
     uint64_t id = get_global_id("goals"_n);
     
@@ -59,14 +59,18 @@ using namespace eosio;
     uint64_t max_target = unicore::getcondition(host, "maxtarget");
     
     eosio::check(target.amount <= max_target, "Target limit is exceeded. Try to decrease target amount");
-    
+  
+    eosio::name status = creator == host ? "process"_n :  "waiting"_n;
+
+    if (acc -> consensus_percent > 0)
+      status = "waiting"_n;
 
     goals.emplace(creator, [&](auto &g){
       g.id = id;
       g.parent_id = parent_id;
       g.creator = creator;
-      g.benefactor = creator;
-      g.status = "waiting"_n;
+      // g.benefactor = creator;
+      g.status = status;
       g.created = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
       g.finish_at = eosio::time_point_sec(-1);
       g.host = host;
@@ -87,16 +91,81 @@ using namespace eosio;
     });  
 
 
-    action(
-      permission_level{ _me, "active"_n },
-      _me, "vote"_n,
-      std::make_tuple( creator, host, id, true) 
-    ).send();   
+    // action(
+    //   permission_level{ _me, "active"_n },
+    //   _me, "vote"_n,
+    //   std::make_tuple( creator, host, id, true) 
+    // ).send();   
 
-   
+    print("GOAL_ID:", id);
 
 	};
 
+
+
+/**
+ * @brief      Модуль целей. 
+ * Использует долю потока эмиссии для финансирования целей сообщества. 
+ * Каждый участник может предложить цель к финансированию. Суть и смысл цели ограничен только желаниями сообщества.
+ * Каждая цель должна пройти минимальный порог процента собранных голосов от держателей силы сообщества.
+ * Цели, прошедшие порог консенсуса сообщества, попадают в лист финансирования. 
+ * Все цели в листе финансирования получают равный поток финансирования относительно друг друга.
+ * Финансирование поступает в объект баланса цели в момент перехода на каждый следующий пул, или напрямую из фонда сообщества по подписи архитектора.  
+ * 
+ */
+
+  /**
+   * @brief      Метод создания цели
+   * 
+   * @param[in]  op    The new value
+   */
+  [[eosio::action]] void unicore::editgoal(eosio::name editor, eosio::name host, uint64_t goal_id, std::string title, std::string description, std::string meta){
+    require_auth(editor);
+    
+    goals_index goals(_me, host.value);
+    account_index accounts(_me, host.value);
+
+    auto acc = accounts.find(host.value);
+    auto goal = goals.find(goal_id);
+
+    eosio::check(goal != goals.end(), "Goal is not found");
+
+    eosio::check(goal ->creator == editor || goal -> benefactor == editor || acc -> architect == editor, "Only creator, benefactor or architect of the goal can edit the goal");
+
+    goals.modify(goal, editor, [&](auto &g){
+      g.title = title;
+      g.description = description;
+      g.meta = meta;
+    });      
+    
+    print("ok");
+  };
+
+  /**
+   * @brief      Метод прямого финансирования цели
+   * Используется архитектором для финансирования цели из фонда 
+   *
+   * @param[in]  op    The operation
+   */
+
+  [[eosio::action]] void unicore::setbenefac(eosio::name host, uint64_t goal_id, eosio::name benefactor){
+    
+    account_index accounts(_me, host.value);
+    auto acc = accounts.find(host.value);
+
+    require_auth(acc -> architect);
+    
+    goals_index goals(_me, host.value);
+
+    auto goal = goals.find(goal_id);
+
+    eosio::check(goal != goals.end(), "goal is not found");
+
+    goals.modify(goal, acc -> architect, [&](auto &g) {
+      g.benefactor = benefactor;
+    });
+
+  }
 
   /**
    * @brief      Метод прямого финансирования цели
@@ -185,7 +254,7 @@ using namespace eosio;
     auto goal = goals.find(goal_id);
     eosio::check(goal != goals.end(), "Goal is not exist");
     
-    eosio::check(goal->status == ""_n, "Only not accepted goals can be accepted");
+    eosio::check(goal->status == ""_n || goal -> status == "waiting"_n, "Only not accepted goals can be accepted");
 
     goals.modify(goal, host, [&](auto &g) {
       g.benefactor = status == true ? host : ""_n;
@@ -274,7 +343,7 @@ using namespace eosio;
 
 		auto goal = goals.find(goal_id);
 
-    // eosio::check("filled"_n == goal->status, "Only processed goals can be completed");
+    eosio::check("process"_n == goal -> status || "filled"_n == goal->status || "validated"_n == goal -> status, "Only processed goals can be completed");
     
 		eosio::check(username == goal->benefactor, "Only benefactor can set report");
 		
@@ -286,7 +355,7 @@ using namespace eosio;
       g.report = report;
       g.total_asset_on_distribution = goal->available;
       g.remain_asset_on_distribution = goal -> available;
-      g.second_circuit_votes += _START_VOTES * goal -> priority;
+      g.second_circuit_votes += _START_VOTES;
 		});
 
     reports_index reports(_me, host.value);
@@ -304,7 +373,7 @@ using namespace eosio;
       r.balance = asset(0, root_symbol);
       r.withdrawed = asset(0, root_symbol);
       r.curator = host;
-      r.positive_votes = _START_VOTES * goal -> priority;
+      r.positive_votes = _START_VOTES;
       r.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + 30 * 86400);
       r.created_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch());
     });
@@ -327,8 +396,8 @@ using namespace eosio;
 		goals_index goals(_me, host.value);
 		auto goal = goals.find(goal_id);
 		eosio::check(goal != goals.end(), "Goal is not found");
-		eosio::check(architect == acc->architect, "Only architect can eosio::check report for now");
-		eosio::check(goal->status == "reported"_n, "Goals without reports cannot be eosio::checked");
+		eosio::check(architect == acc->architect, "Only architect can check report for now");
+		eosio::check(goal->status == "reported"_n, "Goals without reports cannot be checked");
 
 		goals.modify(goal, architect, [&](auto &g) {
 			g.status = "completed"_n;
@@ -339,17 +408,17 @@ using namespace eosio;
       a.achieved_goals = acc -> achieved_goals + 1;
     });
 
-    uint64_t votes = goal -> positive_votes > 0 ? goal -> positive_votes : (goal -> filled_votes > 0 ? goal -> filled_votes : 1) ;
+    // uint64_t votes = goal -> positive_votes > 0 ? goal -> positive_votes : (goal -> filled_votes > 0 ? goal -> filled_votes : 1) ;
 
-    uint64_t weight = votes * goal -> priority;
+    // uint64_t weight = votes * goal -> priority;
 
     //TODO 
     // add to distribution
-    action(
-      permission_level{ _me, "active"_n },
-      "auction"_n, "addlbrobj"_n,
-      std::make_tuple( host , goal -> benefactor, "goal"_n, goal -> id, weight) 
-    ).send();
+    // action(
+    //   permission_level{ _me, "active"_n },
+    //   "auction"_n, "addlbrobj"_n,
+    //   std::make_tuple( host , goal -> benefactor, "goal"_n, goal -> id, weight) 
+    // ).send();
     
 
 	};
@@ -463,29 +532,39 @@ using namespace eosio;
 		
 		eosio::check(goal != goals.end(), "Goal is not founded");
 		
+    eosio::check(goal -> benefactor == username, "Only coordinator can withdraw goal funds");
+
 		account_index accounts(_me, (goal->host).value);
 		auto acc = accounts.find((goal->host).value);
 		eosio::check(acc != accounts.end(), "Host is not founded");
 
 		auto root_symbol = (acc->root_token).symbol;
-    eosio::check(goal -> status == "filled"_n, "Only filled goals can be withdrawed");
-    eosio::check(acc->direct_goal_withdraw == true, "Direct withdraw from goal is prohibited.");
+    // eosio::check(goal -> status == "filled"_n, "Only filled goals can be withdrawed");
+    // eosio::check(acc->direct_goal_withdraw == true, "Direct withdraw from goal is prohibited.");
 		eosio::check(goal->creator == username, "You are not owner of this goal");
 		eosio::check((goal->available).amount > 0, "Cannot withdraw a zero amount");
     // eosio::check(goal->type == "goal"_n, "Only goal type can be withdrawed by this method");
 
-    eosio::asset on_withdraw = goal->available;
-    	
-  	action(
-      permission_level{ _me, "active"_n },
-      acc->root_token_contract, "transfer"_n,
-      std::make_tuple( _me, goal->benefactor, on_withdraw, std::string("Goal Withdraw")) 
-    ).send();
+    
+    eosio::asset cashback = goal->available * 10 / 100;
+    eosio::asset on_withdraw = goal->available - cashback;
 
-    goals.modify(goal, username, [&](auto &g){
-    	g.available = asset(0, root_symbol);
-    	g.withdrawed += on_withdraw;
-    });
+    if (on_withdraw.amount > 0){
+    	action(
+        permission_level{ _me, "active"_n },
+        acc->root_token_contract, "transfer"_n,
+        std::make_tuple( _me, goal->benefactor, on_withdraw, std::string("Goal Withdraw")) 
+      ).send();
+
+      goals.modify(goal, username, [&](auto &g){
+      	g.available = asset(0, root_symbol);
+      	g.withdrawed += on_withdraw;
+      });
+    };
+
+    if (cashback.amount > 0){
+      burn_action(username, host, cashback, acc -> root_token_contract);
+    };
 
 	};
 
@@ -521,8 +600,79 @@ using namespace eosio;
    * @param[in]  quantity  The quantity
    * @param[in]  code      The code
    */
-  void unicore::donate_action(eosio::name from, eosio::name host, uint64_t goal_id, eosio::asset quantity, eosio::name code){
+    void unicore::donate_action(eosio::name from, eosio::name host, uint64_t goal_id, eosio::asset quantity, eosio::name code){
+    // require_auth(from);
 
+    goals_index goals(_me, host.value);
+    account_index accounts(_me, host.value);
+    auto acc = accounts.find(host.value);
+
+    eosio::name main_host = acc->get_ahost();
+    spiral_index spiral(_me, main_host.value);
+    auto sp = spiral.find(0);
+
+    rate_index rates(_me, main_host.value);
+
+    auto rate = rates.find(acc -> current_pool_num -1);
+
+    if (code != _me) //For direct donate from fund and by architects action
+      eosio::check(acc->root_token_contract == code, "Wrong root token contract for this host");
+
+    eosio::check((acc->root_token).symbol == quantity.symbol, "Wrong root symbol for this host");
+
+    auto goal = goals.find(goal_id);
+
+    eosio::check(goal != goals.end(), "Goal is not exist");
+
+    // bool filled = goal->available + goal->withdrawed + quantity >= goal->target;    
+
+    auto root_symbol = acc->get_root_symbol();
+
+    // if (from != host) {
+
+      // eosio::asset core_quantity = quantity * (HUNDR_PERCENT - goal -> cashback) / HUNDR_PERCENT;
+
+      // eosio::asset refs_quantity = quantity - core_quantity;
+
+      // print(" quantity: ", quantity);
+      // print(" core_quantity: ", core_quantity);
+      // print(" refs_quantity: ", refs_quantity);
+
+      double power = (double)quantity.amount / (double)acc -> sale_shift;
+      uint64_t user_power = uint64_t(power);
+
+      action(
+          permission_level{ _me, "active"_n },
+          _me, "emitpower"_n,
+          std::make_tuple( host , from, user_power) 
+      ).send();
+
+
+      goals.modify(goal, _me, [&](auto &g){
+        g.available += quantity;
+        // g.withdrawed += refs_quantity;
+
+        // g.filled = filled;
+        g.target1 += asset(user_power, acc -> asset_on_sale.symbol);
+        // g.target2= target2;
+      });
+
+
+      // if (refs_quantity.amount > 0) {
+      //   unicore::spread_to_refs(host, from, quantity, refs_quantity);
+      // }
+
+
+    // } 
+    // else {
+
+
+    //     goals.modify(goal, _me, [&](auto &g){
+    //       g.available += quantity;
+    //       g.filled = filled;
+    //     });
+
+    // }
 
   }
 

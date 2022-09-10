@@ -164,7 +164,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 	 *
 	 * @param[in]  op    The operation
 	 */
-	[[eosio::action]] void unicore::settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id, bool is_regular, std::vector<uint64_t> calendar, eosio::time_point_sec start_at,eosio::time_point_sec expired_at, std::string meta){
+	[[eosio::action]] void unicore::settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, bool is_batch, uint64_t parent_batch_id, bool is_regular, std::vector<uint64_t> calendar, eosio::time_point_sec start_at,eosio::time_point_sec expired_at, std::string meta){
 		
 		eosio::check(has_auth(creator) || has_auth(host), "missing required authority");
     
@@ -176,12 +176,15 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 
 		auto root_symbol = acc->get_root_symbol();
 		
+		eosio::check(requested.amount == 0 , "Requested amount should be zero now");
+		
 		if (is_public == true) {
 			eosio::check(requested.symbol == root_symbol, "Wrong token for current host" );
 			eosio::check(for_each.symbol == root_symbol, "Wrong token for current host" );
 		} else {
 			eosio::check(for_each.amount == 0, "Wrong amount for current host and task mode" );
 		}
+		
 		
     tasks_index tasks(_me, host.value);
 		uint64_t id = get_global_id("tasks"_n);
@@ -194,179 +197,173 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		}
 
 
-			if (parent_batch_id != 0) {
-				auto parent_task = tasks.find(parent_batch_id);
-				eosio::check(parent_task != tasks.end(), "Parent batch is not founded");
-			};
+		if (parent_batch_id != 0) {
+			auto parent_task = tasks.find(parent_batch_id);
+			eosio::check(parent_task != tasks.end(), "Parent batch is not founded");
+		};
 
+		goals_index goals(_me, host.value);
+		auto goal = goals.find(goal_id);
+		eosio::check(goal != goals.end(), "Goal is not found");
 
-			goals_index goals(_me, host.value);
-			auto goal = goals.find(goal_id);
+		if (doer != ""_n) {
+			eosio::check( is_account( doer ), "user account does not exist");
+			auto doer_host = accounts.find(doer.value);
+			bool doer_is_host = doer_host == accounts.end() ? false: true;
+			doers_index doers(_me, host.value);
 			
-			if (doer != ""_n) {
-				eosio::check( is_account( doer ), "user account does not exist");
-
-				auto doer_host = accounts.find(doer.value);
-				bool doer_is_host = doer_host == accounts.end() ? false: true;
-
-				doers_index doers(_me, host.value);
+			// auto doers_with_tasks_index = doers.template get_index<"doerwithtask"_n>();
+			// auto task_ids = combine_ids(doer.value, hash);
+			// auto is_exist = doers_with_tasks_index.find(task_ids);
+			// if (is_exist == doers_with_tasks_index.end()){
 				
-				// auto doers_with_tasks_index = doers.template get_index<"doerwithtask"_n>();
-				// auto task_ids = combine_ids(doer.value, hash);
-				// auto is_exist = doers_with_tasks_index.find(task_ids);
-
-
-				// if (is_exist == doers_with_tasks_index.end()){
-					
-				doers.emplace(payer,[&](auto &d){
-					d.id = get_global_id("doers"_n);
-					d.task_id = id;
-					d.doer = doer;
-					d.is_host = doer_is_host;
-					d.doer_goal_id = 0;
-					d.doer_badge_id = 0;
-					d.comment = "";
-				});
-
-				// } else {
-
-				// 	doers_with_tasks_index.modify(is_exist, payer, [&](auto &d){
-				// 		d.doer = doer;
-				// 		d.is_host = doer_is_host;
-				// 	});
-
-				// }
-			} 
-
-			
-			bool validated = creator == acc->architect ? true : false;	
-			
-			//todo check calendar for 7 days
-			//TODO add incoming goal for doer			
-			if (doer != host && doer != ""_n) {
-				setincoming(doer, host, 0, id);	
-			};
-
-
-			tasks.emplace(payer, [&](auto &t){
-				t.id = id;
-				t.parent_id = parent_batch_id;
-				t.goal_id = goal_id;
-				
-				t.type = goal != goals.end() ? goal -> type : "goal"_n;
-				t.host = host;
-				t.creator = creator;
-				t.title = title;
-				t.data = data;
-				t.priority = priority;
-				t.permlink = permlink;
-				t.requested = requested;
-				t.for_each = for_each;
-				t.funded = asset(0, root_symbol);
-				t.remain = asset(0, root_symbol);
-				t.is_public  = is_public;
-				t.doer = doer;
-				t.is_encrypted = false;
-				t.validated = validated;
-				t.with_badge = with_badge;
-				t.badge_id = badge_id;
-				t.duration = duration;
-				t.meta = meta;
-				
-				t.expired_at = expired_at;
-				t.created_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch());
-				t.start_at = start_at;
-				t.is_regular = is_regular;
-				t.calendar = calendar;
+			doers.emplace(payer,[&](auto &d){
+				d.id = get_global_id("doers"_n);
+				d.task_id = id;
+				d.doer = doer;
+				d.is_host = doer_is_host;
+				d.doer_goal_id = 0;
+				d.doer_badge_id = 0;
+				d.comment = "";
 			});
-			
-	    accounts.modify(acc, payer, [&](auto &a){
-	      a.total_tasks = acc -> total_tasks + 1;
-	    });
 
+			// } else {
 
-	    
-		// } else {
+			// 	doers_with_tasks_index.modify(is_exist, payer, [&](auto &d){
+			// 		d.doer = doer;
+			// 		d.is_host = doer_is_host;
+			// 	});
 
-		// 	eosio::check(exist_task -> status != "completed"_n, "Only not completed tasks can be modified");
-			
-
-		// 	goals_index goals(_me, host.value);
-		// 	auto goal = goals.find(goal_id);
-			
-		// 	if (goal != goals.end()){
-		// 		eosio::check(goal -> target.symbol == requested.symbol, "Requested symbol and goal symbol should equal");
-				
-		// 		eosio::asset change = requested - exist_task -> requested;
-
-		// 		goals.modify(goal, payer, [&](auto &g){
-		//     	g.target += change;
-		//     	g.filled = goal -> available + goal -> withdrawed > goal -> target + change;		
-		//     });
-
-		// 	}
-			
-			
-		// 	if (exist_task -> doer != doer && doer != ""_n) {
-		// 		delincoming(exist_task -> doer, host, 0, hash);	
-		// 		setincoming(doer, host, 0, hash);	
-		// 	};
-
-
-		// 	tasks.modify(exist_task, payer, [&](auto &t){
-		// 		t.type = goal != goals.end() ? goal -> type : "goal"_n;
-
-		// 		if (payer == doer && payer != host) {
-
-		// 			t.start_at = start_at;
-		// 			t.expired_at = expired_at;
-				
-		// 		} else {
-		// 			t.title = title;
-		// 			t.doer = doer;
-		// 			t.data = data;
-		// 			t.priority = priority;
-		// 			t.requested = requested;
-		// 			t.for_each = for_each;
-		// 			t.is_public = is_public;
-		// 			t.with_badge = with_badge;
-		// 			t.badge_id = badge_id;
-		// 			t.batch = batch;
-		// 			t.calendar = calendar;
-		// 			t.is_regular = is_regular;
-		// 			t.start_at = start_at;
-		// 			t.expired_at = expired_at;
-		// 			t.meta = meta;
-		// 		}
-				
-		// 	});
-
-
-		// }
+			// }
+		} 
 
 		
+		bool validated = creator == acc->architect ? true : false;	
+		
+		//todo check calendar for 7 days
+		//TODO add incoming goal for doer			
+		if (doer != host && doer != ""_n) {
+			setincoming(doer, host, 0, id);	
+		};
 
-		
 
-		// uint64_t task_id = acc -> total_tasks + 1;
+		tasks.emplace(payer, [&](auto &t){
+			t.id = id;
+			t.parent_id = parent_batch_id;
+			t.goal_id = goal_id;	
+			t.type = goal != goals.end() ? goal -> type : "goal"_n;
+			t.host = host;
+			t.creator = creator;
+			t.title = title;
+			t.data = data;
+			t.priority = priority;
+			t.permlink = permlink;
+			t.requested = asset(0, root_symbol);
+			t.for_each = asset(0, root_symbol);
+			t.funded = asset(0, root_symbol);
+			t.remain = asset(0, root_symbol);
+			t.is_public  = is_public;
+			t.doer = doer;
+			t.is_encrypted = false;
+			t.validated = validated;
+			t.with_badge = with_badge;
+			t.badge_id = badge_id;
+			t.duration = 0;
+			t.meta = meta;
+			t.expired_at = expired_at;
+			t.created_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch());
+			t.start_at = start_at;
+			t.is_regular = is_regular;
+			t.calendar = calendar;
+		});
 		
-		
+    accounts.modify(acc, payer, [&](auto &a){
+      a.total_tasks = acc -> total_tasks + 1;
+    });
 
-		
+
     
-    // auto idx_bv = goals.template get_index<"hash"_n>();
-    // auto exist_permlink = idx_bv.find(hash);
+	// } else {
 
-    // eosio::check(exist_task == tasks.end(), "Goal with current permlink is already exist");
-    
-    //TODO check batch for exist every task
+	// 	eosio::check(exist_task -> status != "completed"_n, "Only not completed tasks can be modified");
+		
+
+	// 	goals_index goals(_me, host.value);
+	// 	auto goal = goals.find(goal_id);
+		
+	// 	if (goal != goals.end()){
+	// 		eosio::check(goal -> target.symbol == requested.symbol, "Requested symbol and goal symbol should equal");
+			
+	// 		eosio::asset change = requested - exist_task -> requested;
+
+	// 		goals.modify(goal, payer, [&](auto &g){
+	//     	g.target += change;
+	//     	g.filled = goal -> available + goal -> withdrawed > goal -> target + change;		
+	//     });
+
+	// 	}
+		
+		
+	// 	if (exist_task -> doer != doer && doer != ""_n) {
+	// 		delincoming(exist_task -> doer, host, 0, hash);	
+	// 		setincoming(doer, host, 0, hash);	
+	// 	};
+
+
+	// 	tasks.modify(exist_task, payer, [&](auto &t){
+	// 		t.type = goal != goals.end() ? goal -> type : "goal"_n;
+
+	// 		if (payer == doer && payer != host) {
+
+	// 			t.start_at = start_at;
+	// 			t.expired_at = expired_at;
+			
+	// 		} else {
+	// 			t.title = title;
+	// 			t.doer = doer;
+	// 			t.data = data;
+	// 			t.priority = priority;
+	// 			t.requested = requested;
+	// 			t.for_each = for_each;
+	// 			t.is_public = is_public;
+	// 			t.with_badge = with_badge;
+	// 			t.badge_id = badge_id;
+	// 			t.batch = batch;
+	// 			t.calendar = calendar;
+	// 			t.is_regular = is_regular;
+	// 			t.start_at = start_at;
+	// 			t.expired_at = expired_at;
+	// 			t.meta = meta;
+	// 		}
+			
+	// 	});
+
+
+	// }
+
+	
+
+	
+
+	// uint64_t task_id = acc -> total_tasks + 1;
+	
+	
+
+	
+  
+  // auto idx_bv = goals.template get_index<"hash"_n>();
+  // auto exist_permlink = idx_bv.find(hash);
+
+  // eosio::check(exist_task == tasks.end(), "Goal with current permlink is already exist");
+  
+  //TODO check batch for exist every task
 
 
 
-		// if (creator == acc->architect) {
-		// 	unicore::fundtask(host, task_id, requested, "fund on set by architect");
-		// }
-
+	// if (creator == acc->architect) {
+	// 	unicore::fundtask(host, task_id, requested, "fund on set by architect");
+	// }
+    print("TASK_ID:", id);
 	}
 
 	/**
@@ -393,7 +390,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 
 		eosio::check(goal->available >= amount, "Not enough tokens for fund in the goal object");
 
-		eosio::check(task->funded + amount <= task->requested, "Fund amounts is more then requested");
+		// eosio::check(task->funded + amount <= task->requested, "Fund amounts is more then requested");
 
 		goals.modify(goal, host, [&](auto &g){
 			g.available = goal->available - amount;
@@ -638,6 +635,33 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 
 	}
 
+
+
+	/**
+	 * @brief      Метод ручной валидации задачи
+	 * 
+	 * 
+	 * @param[in]  op    The operation
+	 */
+	[[eosio::action]] void unicore::setpriority(eosio::name host, uint64_t task_id, uint64_t priority){
+		
+		account_index accounts(_me, host.value);
+		auto acc = accounts.find(host.value);
+		eosio::check(acc != accounts.end(), "Host is not found");
+		require_auth(acc -> architect);
+
+		tasks_index tasks(_me, host.value);
+
+		auto task = tasks.find(task_id);
+
+		eosio::check(task != tasks.end(), "Task is not found");
+		eosio::check(priority > 0 && priority <= 3, "Priority should be between 0 and 3");
+
+		tasks.modify(task, acc -> architect, [&](auto &t){
+			t.priority = priority;
+		});
+
+	}
 	/**
 	 * @brief      Метод ручной валидации задачи
 	 * 
@@ -761,12 +785,11 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 	 * 
 	 * @param[in]  op    The operation
 	 */
-	[[eosio::action]] void unicore::setreport(eosio::name host, eosio::name username, uint64_t task_id, eosio::string data){
+	[[eosio::action]] void unicore::setreport(eosio::name host, eosio::name username, uint64_t task_id, eosio::string data, uint64_t duration_secs, eosio::asset asset_per_hour){
 		
 		require_auth(username);
 		account_index accounts(_me, host.value);
 		partners2_index users(_partners, _partners.value);
-
 
 		auto acc = accounts.find(host.value);
 		auto root_symbol = acc->get_root_symbol();
@@ -778,7 +801,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		auto task = tasks.find(task_id);
 		eosio::check(task != tasks.end(), "Task is not found");
 		eosio::check(task -> active == true, "Task is not active");
-		
+		eosio::check(duration_secs > 0, "Duration should be more then zero");
 
 		if (task -> is_public == false){
 			eosio::check(task -> doer == username, "Wrong doer for the private task");
@@ -787,8 +810,9 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		goals_index goals(_me, host.value);
 		auto goal = goals.find(task-> goal_id);
 
-		eosio::check(goal -> status != "reported"_n && goal->status != "completed"_n, "Goal is already completed");
-
+		// eosio::check(goal -> status != "reported"_n && goal->status != "completed"_n, "Goal is already completed");
+		eosio::check(asset_per_hour.symbol == root_symbol, "Wrong symbol per hour");
+		eosio::check(asset_per_hour.amount <= 1000000, "Maximum limit is 100 token per hour for now");
 
 		// if (goal -> type == "marathon"_n) {
 		// 	goalspartic_index gparticipants(_me, host.value);
@@ -810,13 +834,21 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		// eosio::check(user_report == users_with_id.end(), "Report for this task already exist");
 		
 		bool need_check = username == host ? false : true;
-		
+		uint64_t report_id;
+
 		if (user_report == users_with_id.end() || task -> is_regular == true){
-			
-			eosio::asset requested = task -> is_public == false ? task->requested : task->for_each;
+			eosio::check(task -> priority >= 0, "task priority should be more then zero");
+
+			eosio::asset asset_per_hour2 = (task -> priority == 0 || task -> priority == 1) ? asset(10*10000, root_symbol) : (task -> priority == 2 ? asset(20*10000, root_symbol) : asset(40*10000, root_symbol));
+
+			double req = ((double)duration_secs * (double)asset_per_hour2.amount / 3600) / (double)acc -> sale_shift;
+
+			eosio::asset requested = task -> is_public == false ? task->requested : asset(req, _POWER);
+			eosio::symbol sym = task -> is_public == false ? root_symbol : _POWER;
+			report_id = get_global_id("reports"_n);
 
 			reports.emplace(username, [&](auto &r) {
-				r.report_id = get_global_id("reports"_n);
+				r.report_id = report_id;
 				r.task_id = task_id;
 				r.goal_id = task->goal_id;
 				r.count = 1;
@@ -827,6 +859,8 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 				r.balance = asset(0, root_symbol);
 				r.withdrawed = asset(0, root_symbol);
 				r.curator = host;
+				r.duration_secs = duration_secs;
+				r.asset_per_hour = asset_per_hour2;
 				r.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + 30 * 86400);
 				r.created_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch());
 			});
@@ -835,9 +869,9 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 	      a.total_reports = acc -> total_reports + 1;
 	    });
 
-		
-
 		} else {
+			report_id = user_report -> report_id;
+
 			eosio::check(task -> is_regular == true, "Task is not regular, but report is exist");
 			eosio::check(user_report -> need_check == false, "Previous report is not checked yet");
 			
@@ -845,19 +879,37 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 				r.count += 1;
 				r.need_check = true;
 				r.approved = false;
+				r.duration_secs += duration_secs;
 				r.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + 30 * 86400);
 				r.created_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch());
-				
+				r.asset_per_hour = asset_per_hour;
 			});
 		}
 
+		
 		goals.modify(goal, _me, [&](auto &g){
-			g.approved_reports += 1 ;
+			g.total_reports += 1 ;
 		});
+		
+		intelown_index intelown(_me, host.value);
+		auto io = intelown.find(username.value);
+		
+		if (io == intelown.end()) {
+			intelown.emplace(username, [&](auto &i){
+				i.username = username;
+				i.total_reports = 1;
+			});
+		} else {
+			intelown.modify(io, username, [&](auto &i){
+				i.total_reports += 1;
+			});
+		}
+		
+
   //   if (need_check == false) {
   //   	unicore::approver(host, report_id, "");
 		// };
-
+		print("REPORT_ID:", report_id);
 	}
 
 	/**
@@ -911,8 +963,11 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		tasks_index tasks(_me, host.value);
 		auto task = tasks.find(report -> task_id);
 
-		eosio::check(task -> completed == true, "Only report for a completed task can be removed");
-
+		// eosio::check(task -> completed == true, "Only report for a completed task can be removed");
+		accounts.modify(acc, host, [&](auto &a){
+			a.total_reports -= 1;
+		});
+		
 		reports.erase(report);
 	}
 
@@ -923,13 +978,14 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 	 * @param[in]  op    The operation
 	 */
 	[[eosio::action]] void unicore::approver(eosio::name host, uint64_t report_id, eosio::string comment){
-		require_auth(host);
+		
 		
 		account_index accounts(_me, host.value);
 		
 		auto acc = accounts.find(host.value);
 		eosio::check(acc != accounts.end(), "Host is not found");
 
+		
 		reports_index reports(_me, host.value);
 		auto report = reports.find(report_id);
 		
@@ -942,106 +998,187 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		auto goal = goals.find(task -> goal_id);
 		eosio::check(goal != goals.end(), "Goal is not found");
 
+		//AUTH CHECK
+		eosio::check(has_auth(acc -> architect) || has_auth(goal -> benefactor), "missing required authority");
+    auto payer = has_auth(acc -> architect) ? acc -> architect : goal -> benefactor;
+		
+		
+		
 		if (report -> username != host)
 			eosio::check(report->approved == false, "Task is already approved");
 
-		reports.modify(report, host, [&](auto &r){
-			r.need_check = false;
-			r.comment = comment;
-			r.approved = true;
-			r.withdrawed = report->requested;
-			r.positive_votes = _START_VOTES * task -> priority;
-		});
+		
+		if (goal -> status == "process"_n || goal -> status == "validated"_n || goal -> status == "filled"_n || goal -> status == "reported"_n || goal -> status == "completed"_n){
+
+			double power_per_hour = (double)report -> asset_per_hour.amount / (double)acc -> sale_shift;
+			
+			print("power_per_hour: ", power_per_hour);
+
+			uint64_t user_power = power_per_hour * report -> duration_secs / 3600;
+
+			uint64_t bonus_power = user_power * 10 * ONE_PERCENT / HUNDR_PERCENT;
+
+			print("user_power: ", user_power);
+			print("bonus_power: ", bonus_power);
+
+			action(
+	        permission_level{ _me, "active"_n },
+	        _me, "emitpower"_n,
+	        std::make_tuple( host , report->username, user_power) 
+	    ).send();
+
+			
+
+			reports.modify(report, payer, [&](auto &r){
+				r.need_check = false;
+				r.comment = comment;
+				r.approved = true;
+				r.withdrawed = report->requested;
+				r.positive_votes += _START_VOTES;
+			});
+
+			goals.modify(goal, payer, [&](auto &g) {
+				g.second_circuit_votes += _START_VOTES + report -> positive_votes;
+				g.total_power_on_distribution += bonus_power; 
+				g.approved_reports += 1;
+				g.target1 += asset(user_power + bonus_power, acc -> asset_on_sale.symbol);
+			});
+
+			accounts.modify(acc, payer, [&](auto &a){
+				a.approved_reports +=1;
+			});
+
+			intelown_index intelown(_me, host.value);
+			auto io = intelown.find(report -> username.value);
+			
+			if (io == intelown.end()) {
+				intelown.emplace(payer, [&](auto &i){
+					i.username = report->username;
+					i.approved_reports = 1;
+				});
+			} else {
+				intelown.modify(io, payer, [&](auto &i){
+					i.approved_reports += 1;
+				});
+			}
+
+		} else {
+			eosio::check(false, "Goal is not validated");
+			// reports.modify(report, payer, [&](auto &r){
+			// 	r.need_check = false;
+			// 	r.comment = comment;
+			// 	r.approved = true;
+			// 	r.distributed = true;
+			// });
+			
+			// goals.modify(goal, payer, [&](auto &g){
+			// 	g.approved_reports = 1;
+			// })
+
+			// accounts.modify(acc, payer, [&](auto &a){
+			// 	a.approved_reports +=1;
+			// });
+
+			// intelown_index intelown(_me, host.value);
+			// auto io = intelown.find(report -> username);
+			
+			// intelown.modify(io, payer, [&](auto &i){
+			// 	i.approved_reports += 1;
+			// })
+
+			//TODO если цель не валидирована, то фракции не распределяем
+		}
 
 		// eosio::check(report->requested <= task->remain, "Not enough funds for pay to this task");
 		
-		if (report->requested.amount > 0) {
-			if (report->requested > task->remain) {
-				//if available in goal - minus it
-				//or modify goal debt which will be payed on the next donation to the debt object
+	// 	if (report->requested.amount > 0) {
+	// 		if (report->requested > task->remain) {
+	// 			//if available in goal - minus it
+	// 			//or modify goal debt which will be payed on the next donation to the debt object
 				
 				
 
-				if (goal -> available >= report -> requested && goal -> status == "process"_n) {
+	// 			if (goal -> available >= report -> requested && goal -> status == "process"_n) {
 					
-					goals.modify(goal, host, [&](auto &g){
-						g.available -= report -> requested;
-						g.withdrawed += report -> requested;
-						g.approved_reports += 1;
-						g.second_circuit_votes += _START_VOTES * task -> priority;
-					});
+	// 				goals.modify(goal, host, [&](auto &g){
+	// 					g.available -= report -> requested;
+	// 					g.withdrawed += report -> requested;
+	// 					g.approved_reports += 1;
+	// 					g.second_circuit_votes += _START_VOTES * task -> priority * report -> duration_secs;
+	// 				});
 
-					action(
-	          permission_level{ _me, "active"_n },
-	          acc->root_token_contract, "transfer"_n,
-	          std::make_tuple( _me, report->username, report->requested, comment) 
-		      ).send();
+	// 				action(
+	//           permission_level{ _me, "active"_n },
+	//           acc->root_token_contract, "transfer"_n,
+	//           std::make_tuple( _me, report->username, report->requested, comment) 
+	// 	      ).send();
 
-				} else {
-
-					//TODO use parent_goal first!
-					//THEN use CFUND
-					//AND THEN CREATE DEBT
+	// 			} else {
+	// 				//MODIFY NOT CREATE A DEBTS NOW
 					
-					goals.modify(goal, host, [&](auto &g){
-						// g.available -= report -> requested;
-						g.debt_count += 1;
-						g.debt_amount += report -> requested;
-						g.approved_reports += 1;
-					});
+	// 				//TODO use parent_goal first!
+	// 				//THEN use CFUND
+	// 				//AND THEN CREATE DEBT
 					
-					debts_index debts(_me, host.value);
+	// 				goals.modify(goal, host, [&](auto &g){
+	// 					// g.available -= report -> requested;
+	// 					g.debt_count += 1;
+	// 					g.debt_amount += report -> requested;
+	// 					g.approved_reports += 1;
+	// 				});
 					
-					debts.emplace(host, [&](auto &d){
-						d.id = debts.available_primary_key();
-						d.amount = report -> requested;
-						d.goal_id = goal->id;
-						d.username = report -> username;
-					});
+	// 				debts_index debts(_me, host.value);
+					
+	// 				debts.emplace(host, [&](auto &d){
+	// 					d.id = debts.available_primary_key();
+	// 					d.amount = report -> requested;
+	// 					d.goal_id = goal->id;
+	// 					d.username = report -> username;
+	// 				});
 				
-				}
+	// 			}
 
-			} else {
-				print("imhere2");
+	// 		} else {
+	// 			print("imhere2");
 
-				tasks.modify(task, host, [&](auto &t){
-					t.remain = task -> remain - report->requested;
-				});
+	// 			tasks.modify(task, host, [&](auto &t){
+	// 				t.remain = task -> remain - report->requested;
+	// 			});
 
-				goals.modify(goal, host, [&](auto &g){
-					g.approved_reports += 1;
-					g.second_circuit_votes += _START_VOTES * task -> priority;
-				});
+	// 			goals.modify(goal, host, [&](auto &g){
+	// 				g.approved_reports += 1;
+	// 				g.second_circuit_votes += _START_VOTES * task -> priority * report -> duration_secs;
+	// 			});
 
-				action(
-          permission_level{ _me, "active"_n },
-          acc->root_token_contract, "transfer"_n,
-          std::make_tuple( _me, report->username, report->requested, comment) 
-	      ).send();
+	// 			action(
+ //          permission_level{ _me, "active"_n },
+ //          acc->root_token_contract, "transfer"_n,
+ //          std::make_tuple( _me, report->username, report->requested, comment) 
+	//       ).send();
 				
-		};
+	// 	};
 
-	} else {
+	// } else {
 
-		goals.modify(goal, host, [&](auto &g){
-			g.second_circuit_votes += _START_VOTES * task -> priority;
-		});
+		// goals.modify(goal, host, [&](auto &g){
+		// 	g.second_circuit_votes += _START_VOTES * task -> priority * report -> duration_secs;
+		// });
 
-	}
+	// }
 
 
 
 		if (task -> with_badge == true) {
 			unicore::giftbadge_action(host, report->username, task->badge_id, std::string("Completed task"), true, true, task->goal_id, report->task_id);
 
-			//Выдаём значок создателю действия, если предусмотрено
-			uint64_t creator_badge_id = unicore::getcondition(host, "creatorbadge");
+			// //Выдаём значок создателю действия, если предусмотрено
+			// uint64_t creator_badge_id = unicore::getcondition(host, "creatorbadge");
 			
-			if (creator_badge_id > 0){
+			// if (creator_badge_id > 0){
 
-				unicore::giftbadge_action(host, task->creator, creator_badge_id, std::string("Orginizer badge"), true, true, report->goal_id, report->task_id);					
+			// 	unicore::giftbadge_action(host, task->creator, creator_badge_id, std::string("Orginizer badge"), true, true, report->goal_id, report->task_id);					
 			
-			};
+			// };
 
 		}
 
@@ -1112,25 +1249,24 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 
 		uint64_t task_freeze_seconds = unicore::getcondition(host, "tafreezesecs");
 
-		if (task_freeze_seconds == 0) {
+		if (report->balance.amount > 0) {
+			if (task_freeze_seconds == 0) {
+					action(
+			      permission_level{ _me, "active"_n },
+			      acc->root_token_contract, "transfer"_n,
+			      std::make_tuple( _me, report->username, report->balance, std::string("")) 
+			    ).send();
+			} else {
+				make_vesting_action(username, host, acc -> root_token_contract, report->balance, task_freeze_seconds, "distwithdraw"_n);
+			};
+		};
 
+		if (report -> power_balance > 0)
 			action(
-	      permission_level{ _me, "active"_n },
-	      acc->root_token_contract, "transfer"_n,
-	      std::make_tuple( _me, report->username, report->balance, std::string("")) 
+	        permission_level{ _me, "active"_n },
+	        _me, "emitpower"_n,
+	        std::make_tuple( host , username, report -> power_balance) 
 	    ).send();
-
-		} else {
-
-			make_vesting_action(username, host, acc -> root_token_contract, report->balance, task_freeze_seconds, "distwithdraw"_n);
-
-		}
-
-		action(
-        permission_level{ _me, "active"_n },
-        _me, "emitpower"_n,
-        std::make_tuple( host , username, report -> power_balance) 
-    ).send();
 
 
 		reports.modify(report, username, [&](auto &r){
@@ -1139,8 +1275,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 			r.withdrawed_power = report -> power_balance;
 			r.power_balance = 0;
 		});
-
-
+	
 	};
 
 
@@ -1170,6 +1305,21 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 
 		if ((goal->status == "reported"_n || goal->status == "completed"_n) && report->distributed == false) {
 
+			//TODO!
+			
+			auto liquid_shares = acc->total_shares > 0 ? acc -> total_shares : 1;
+
+			uint64_t votes = goal -> positive_votes > goal -> filled_votes ? goal -> positive_votes : goal -> filled_votes; 
+			
+			int64_t votes_percent = votes * 100 * ONE_PERCENT / liquid_shares;
+	    // print("votes_percent: ", votes_percent);
+
+	    // print("acc -> consensus_percent: ", acc -> consensus_percent);
+	    // print("goal -> positive_votes: ", goal -> positive_votes);
+	    // print("liquid_shares -> :", liquid_shares);
+
+	    eosio::check(votes_percent >= acc -> consensus_percent, "Goal is not validated!");  
+			
 			double part = (double)report->positive_votes / (double)goal->second_circuit_votes * (double)goal->total_asset_on_distribution.amount;
 			eosio::asset part_asset = asset((uint64_t)part, report->balance.symbol);
 

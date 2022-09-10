@@ -91,6 +91,10 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
         //GOALS
         [[eosio::action]] void setgoal(eosio::name creator, eosio::name host, uint64_t parent_id, std::string title, std::string description, eosio::asset target, std::string meta);
+        [[eosio::action]] void editgoal(eosio::name editor, eosio::name host, uint64_t goal_id, std::string title, std::string description, std::string meta);
+
+
+
         [[eosio::action]] void dfundgoal(eosio::name architect, eosio::name host, uint64_t goal_id, eosio::asset amount, std::string comment);
         [[eosio::action]] void fundchildgoa(eosio::name architect, eosio::name host, uint64_t goal_id, eosio::asset amount);
         
@@ -98,7 +102,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
         
         [[eosio::action]] void gaccept(eosio::name host, uint64_t goal_id, uint64_t parent_goal_id, bool status);
         [[eosio::action]] void gpause(eosio::name host, uint64_t goal_id);
-
+        [[eosio::action]] void setbenefac(eosio::name host, uint64_t goal_id, eosio::name benefactor);
+  
         [[eosio::action]] void delgoal(eosio::name username, eosio::name host, uint64_t goal_id);
         [[eosio::action]] void report(eosio::name username, eosio::name host, uint64_t goal_id, std::string report);
         [[eosio::action]] void check(eosio::name architect, eosio::name host, uint64_t goal_id);
@@ -129,6 +134,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
         //HOST
         [[eosio::action]] void setarch(eosio::name host, eosio::name architect);
+        [[eosio::action]] void setconsensus(eosio::name host, uint64_t consensus_percent, bool voting_only_up);
+        
         [[eosio::action]] void upgrade(eosio::name username, eosio::name platform, std::string title, std::string purpose, uint64_t total_shares, eosio::asset quote_amount, eosio::name quote_token_contract, eosio::asset root_token, eosio::name root_token_contract, bool voting_only_up, uint64_t consensus_percent, uint64_t referral_percent, uint64_t dacs_percent, uint64_t cfund_percent, uint64_t hfund_percent, std::vector<uint64_t> levels, uint64_t emission_percent, uint64_t gtop, std::string meta);
         [[eosio::action]] void cchildhost(eosio::name parent_host, eosio::name chost);
         [[eosio::action]] void compensator(eosio::name host, uint64_t compensator_percent);
@@ -174,7 +181,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
         static void spread_to_funds(eosio::name host, eosio::asset quantity, eosio::name referal);
 
-        static void spread_to_refs(eosio::name host, eosio::name username, eosio::asset spread_amount, eosio::asset from_amount);
+        static void spread_to_refs(eosio::name host, eosio::name username, eosio::asset spread_amount, eosio::asset from_amount, eosio::name token_contract);
 
         static void spread_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code);
 
@@ -201,6 +208,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
         static void add_ref_stat(eosio::name username, eosio::name contract, eosio::asset withdrawed);
         static void add_host_stat(eosio::name type, eosio::name username, eosio::name host, eosio::asset amount);
         
+        static void add_core_stat(eosio::name type, eosio::name host, eosio::asset amount);
+        static void add_host_stat2(eosio::name type, eosio::name username, eosio::name host, eosio::asset amount);
 
 
 
@@ -233,7 +242,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         
 
         //TASKS
-        [[eosio::action]] void settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, uint64_t duration, bool is_batch, uint64_t parent_batch_id, bool is_regular, std::vector<uint64_t> calendar, eosio::time_point_sec start_at,eosio::time_point_sec expired_at, std::string meta);
+        [[eosio::action]] void settask(eosio::name host, eosio::name creator, std::string permlink, uint64_t goal_id, uint64_t priority, eosio::string title, eosio::string data, eosio::asset requested, bool is_public, eosio::name doer, eosio::asset for_each, bool with_badge, uint64_t badge_id, bool is_batch, uint64_t parent_batch_id, bool is_regular, std::vector<uint64_t> calendar, eosio::time_point_sec start_at,eosio::time_point_sec expired_at, std::string meta);
         [[eosio::action]] void fundtask(eosio::name host, uint64_t task_id, eosio::asset amount, eosio::string comment);
         [[eosio::action]] void tactivate(eosio::name host, uint64_t task_id);
         [[eosio::action]] void tdeactivate(eosio::name host, uint64_t task_id);
@@ -243,6 +252,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void setpgoal(eosio::name host, uint64_t task_id, uint64_t goal_id);
         [[eosio::action]] void setdoer(eosio::name host, uint64_t task_id, eosio::name doer);
         
+        [[eosio::action]] void setpriority(eosio::name host, uint64_t task_id, uint64_t priority);
 
         [[eosio::action]] void validate(eosio::name host, uint64_t task_id, uint64_t goal_id, eosio::name doer);
         [[eosio::action]] void jointask(eosio::name host, uint64_t task_id, eosio::name doer, std::string comment);
@@ -262,7 +272,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void deltask(eosio::name host, uint64_t task_id);
         [[eosio::action]] void paydebt(eosio::name host, uint64_t goal_id);
 
-        [[eosio::action]] void setreport(eosio::name host, eosio::name username, uint64_t task_id, eosio::string data);
+        [[eosio::action]] void setreport(eosio::name host, eosio::name username, uint64_t task_id, eosio::string data, uint64_t duration_secs, eosio::asset asset_per_hour);
         [[eosio::action]] void editreport(eosio::name host, eosio::name username, uint64_t report_id, eosio::string data);
         [[eosio::action]] void approver(eosio::name host, uint64_t report_id, eosio::string comment); 
         [[eosio::action]] void disapprover(eosio::name host, uint64_t report_id, eosio::string comment);
@@ -518,6 +528,48 @@ struct [[eosio::table, eosio::contract("unicore")]] hoststat {
     typedef eosio::multi_index<"hoststat"_n, hoststat,
         eosio::indexed_by<"byuserblock"_n, eosio::const_mem_fun<hoststat, uint128_t, &hoststat::byuserblock>>
     > hoststat_index;
+
+
+
+/*!
+   \brief Структура статистики балансов пользователя у одного хоста Двойной Спирали
+*/
+    
+struct [[eosio::table, eosio::contract("unicore")]] hoststat2 {
+    eosio::name username;
+    eosio::asset volume;
+    
+    uint64_t primary_key() const {return username.value;}
+    
+
+    EOSLIB_SERIALIZE(hoststat2, (username)(volume))        
+
+};
+
+    typedef eosio::multi_index<"hoststat2"_n, hoststat2> hoststat_index2;
+
+
+/*!
+   \brief Структура статистики балансов пользователя у одного хоста Двойной Спирали
+*/
+    
+struct [[eosio::table, eosio::contract("unicore")]] corestat {
+    eosio::name hostname;
+    eosio::asset volume;
+    
+    uint64_t primary_key() const {return hostname.value;}
+    
+    uint64_t byvolume() const {return volume.amount;} 
+
+
+    EOSLIB_SERIALIZE(corestat, (hostname)(volume))        
+
+};
+
+    typedef eosio::multi_index<"corestat"_n, corestat,
+        eosio::indexed_by<"byvolume"_n, eosio::const_mem_fun<corestat, uint64_t, &corestat::byvolume>>
+    > corestat_index;
+
 
 
 

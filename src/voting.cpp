@@ -91,9 +91,10 @@ using namespace eosio;
 		account_index accounts (_me, (goal->host).value);
 		auto acc = accounts.find((goal->host).value);
 
-		market_index market(_me, host.value);
-		auto itr = market.find(0);
-		auto liquid_shares = acc->total_shares - itr->base.balance.amount;
+		// market_index market(_me, host.value);
+		// auto itr = market.find(0);
+		auto liquid_shares = acc->total_shares;
+		 // - itr->base.balance.amount;
 
 		// print("LIQUIDSHARES ", liquid_shares);
 
@@ -130,7 +131,7 @@ using namespace eosio;
 	      voters.push_back(voter);
 	      
 	      goals.modify(goal, payer, [&](auto &g){
-	       	if (goal -> status == "waiting"_n || goal -> status == "validated"_n) {
+	       	if (goal -> status == "waiting"_n || goal -> status == "validated"_n || goal -> status == "reported"_n || goal -> status == "completed"_n) {
 						up == true ? g.positive_votes = goal->positive_votes + pow -> power : g.negative_votes =  goal->negative_votes + pow->power;
 	       	}
 
@@ -159,9 +160,10 @@ using namespace eosio;
 				goals.modify(goal, payer, [&](auto &g){
 					g.voters = voters;
 
-					if (goal -> status == "waiting"_n || goal -> status == "validated"_n) {
+					if (goal -> status == "waiting"_n || goal -> status == "validated"_n || goal -> status == "reported"_n || goal -> status == "completed"_n){
 						vote->power < 0 ? g.negative_votes = goal->negative_votes + vote->power : g.positive_votes = goal->positive_votes - vote->power;
 					}
+					
 
 					int64_t votes_percent = g.positive_votes * ONE_PERCENT / liquid_shares;
 					
@@ -182,7 +184,8 @@ using namespace eosio;
 
 //Метод голосования за отчёт
 	[[eosio::action]] void unicore::rvote(eosio::name voter, eosio::name host, uint64_t report_id, bool up){
-		require_auth(voter);
+		eosio::check(has_auth(voter) || has_auth(_me), "missing required authority");
+    
 		
 		// partners2_index users(_partners,_partners.value);
     // auto user = users.find(voter.value);
@@ -205,14 +208,19 @@ using namespace eosio;
 
 		
 		// eosio::check(task != tasks.end(), "Task is not found");
-
-		eosio::check(report -> approved == true, "Report is not approved and cant participate on the voting");
+		eosio::check(report -> distributed == false, "Report is already distributed or goal was not validated");
+		// eosio::check(report -> approved == true, "Report is not approved and cant participate on the voting");
 
 		uint64_t vote_count = count_rvotes(voter, host, task_id);
 
 		auto pow = power.find(voter.value);
-		
-		if (pow != power.end() && pow -> power > 0) {
+		uint64_t upower = 0;
+
+		if (pow != power.end())
+			upower = pow -> power;
+
+
+		// if (pow != power.end()) {
 
 			auto voters = report -> voters;
 
@@ -227,7 +235,7 @@ using namespace eosio;
 				
 				eosio::check(goal->finish_at.sec_since_epoch() > eosio::current_time_point().sec_since_epoch(), "Voting is completed");
 
-				eosio::check(vote_count < _TOTAL_VOTES, "Votes limit is exceeded");
+				// eosio::check(vote_count < _TOTAL_VOTES, "Votes limit is exceeded");
 
 	      // eosio::check(goal->filled == false, "You cant vote for filled goal");
 	      
@@ -238,12 +246,12 @@ using namespace eosio;
 	      voters.push_back(voter);
 	      
 	      reports.modify(report, voter, [&](auto &r) {
-					up == true ? r.positive_votes = report->positive_votes + pow -> power : r.negative_votes =  report->negative_votes + pow->power;
+					up == true ? r.positive_votes = report->positive_votes + upower : r.negative_votes =  report->negative_votes + upower;
 	       	r.voters = voters;
 				});   
 	      
 	      // tasks.modify(task, voter, [&](auto &g){
-	      //  	up == true ? g.positive_votes = task->positive_votes + pow -> power : g.negative_votes =  task->negative_votes + pow->power;
+	      //  	up == true ? g.positive_votes = task->positive_votes +  upower : g.negative_votes =  task->negative_votes + upower;
 	      // });
 	      
 				
@@ -252,14 +260,14 @@ using namespace eosio;
 	      	v.task_id = task_id;
 	      	v.report_id = report_id;
 	      	v.host = host;
-	      	v.power = up == true ? pow -> power : -pow->power;
+	      	v.power = up == true ? upower : -upower;
 	      });
 
-	      
-	      goals.modify(goal, voter, [&](auto &g) {
-	      	g.second_circuit_votes = goal->second_circuit_votes + pow -> power;
-	      });
-	      
+	      if (report -> approved == true)
+		      goals.modify(goal, voter, [&](auto &g) {
+		      	g.second_circuit_votes = goal->second_circuit_votes + upower;
+		      });
+		      
 			} else {
 
 				auto voters = report -> voters;
@@ -275,17 +283,17 @@ using namespace eosio;
 				// tasks.modify(task, voter, [&](auto &g) {
 				// 	vote -> power < 0 ? g.negative_votes = task->negative_votes + vote->power : g.positive_votes = task->positive_votes - vote->power;
 				// });
-				
-				goals.modify(goal, voter, [&](auto &g) {
-					vote -> power < 0 ? g.second_circuit_votes = goal->second_circuit_votes + abs(vote->power) : g.second_circuit_votes = goal->second_circuit_votes - vote->power;
-	      });
-				
+				if (report -> approved == true)
+					goals.modify(goal, voter, [&](auto &g) {
+						vote -> power < 0 ? g.second_circuit_votes = goal->second_circuit_votes + abs(vote->power) : g.second_circuit_votes = goal->second_circuit_votes - vote->power;
+		      });
+					
 				reports_by_task_idx.erase(vote);
 
 			}
 			
 			// clear_old_votes_action(voter, host);
-		}
+		// }
 		
 		
 	}

@@ -271,8 +271,8 @@ extern "C" {
                             auto username_string = parameter.substr(delimeter2+1, parameter.length());
                             auto username = name(username_string.c_str());
 
-
-                            unicore::spread_action(username, host, op.quantity, name(code));
+                            print("ON SPREAD");
+                            unicore::spread_to_refs(host, username, op.quantity, op.quantity, name(code));
 
                             break;
                         }
@@ -317,7 +317,10 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::setgoal);
                     break;
                  }
-                 
+                 case "editgoal"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::editgoal);
+                    break;
+                 }
                  case "setgcreator"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::setgcreator);
                     break;
@@ -326,7 +329,10 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::gaccept);
                     break;
                  }
-                 
+                case "setbenefac"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::setbenefac);
+                    break;
+                 }
                  case "gpause"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::gpause);
                     break;
@@ -494,6 +500,10 @@ extern "C" {
                 //HOSTS
                 case "upgrade"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::upgrade);
+                    break;
+                };
+                case "setconsensus"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::setconsensus);
                     break;
                 };
                 case "compensator"_n.value: {
@@ -690,6 +700,10 @@ extern "C" {
                 }
                 case "validate"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::validate);
+                    break;
+                }
+                case "setpriority"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::setpriority);
                     break;
                 }
                 case "jointask"_n.value: {

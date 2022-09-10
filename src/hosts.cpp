@@ -461,6 +461,22 @@ using namespace eosio;
 
     }
 
+    [[eosio::action]] void unicore::setconsensus(eosio::name host, uint64_t consensus_percent, bool voting_only_up){
+        account_index accounts(_me, host.value);
+        
+        auto acc = accounts.find(host.value);
+        eosio::check(acc != accounts.end(), "Account is not a host");
+
+        require_auth(acc -> architect);
+
+        eosio::check(consensus_percent >=0 && consensus_percent <= HUNDR_PERCENT, "Consensus should be more then zero and less then 100 * one_percent");
+
+        accounts.modify(acc, acc -> architect, [&](auto &a){
+            a.consensus_percent = consensus_percent;
+            a.voting_only_up = voting_only_up;
+        });
+    }
+        
     /**
      * @brief      Метод апгрейда аккаунта до статуса сообщества
      * Принимает ряд параметров, такие как процент консенсуса, реферальный процент, уровни вознаграждений финансовых партнеров, 
@@ -560,7 +576,7 @@ using namespace eosio;
             a.asset_on_sale = asset(0, _POWER);
             a.asset_on_sale_precision = _POWER.precision();
             a.asset_on_sale_symbol = _POWER.code().to_string();
-            
+            a.sale_shift = 1;
             a.voting_only_up = voting_only_up;
             
             a.root_token = root_token;

@@ -92,19 +92,19 @@ using namespace eosio;
 
     // eosio::check(acc -> sale_mode == "auction"_n, "Wrong sale type");
     
-    action(
-        permission_level{ _saving, "active"_n },
-        acc->root_token_contract, "transfer"_n,
-        std::make_tuple( _saving, _me, asset(10000 * user_shares, acc -> quote_amount.symbol), std::string("")) 
-    ).send();
+    // action(
+    //     permission_level{ _saving, "active"_n },
+    //     acc->root_token_contract, "transfer"_n,
+    //     std::make_tuple( _saving, _me, asset(10000 * user_shares, acc -> quote_amount.symbol), std::string("")) 
+    // ).send();
 
 
-    add_base_to_market("power"_n, host, asset(user_shares, _POWER));
-    add_quote_to_market("power"_n, host, asset(10000 * user_shares, acc -> quote_amount.symbol));
+    // add_base_to_market("power"_n, host, asset(user_shares, _POWER));
+    // add_quote_to_market("power"_n, host, asset(10000 * user_shares, acc -> quote_amount.symbol));
 
     account.modify(acc, _me, [&](auto &a){
       a.total_shares += user_shares;
-      a.quote_amount += asset(10000 * user_shares, acc -> quote_amount.symbol);
+      // a.quote_amount += asset(10000 * user_shares, acc -> quote_amount.symbol);
     });
 
     power3_index power(_me, host.value);
