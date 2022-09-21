@@ -276,6 +276,23 @@ extern "C" {
 
                             break;
                         }
+                        case 222: {
+                            //SPREAD
+                            
+                            //
+                            require_auth(op.from);
+
+                            auto delimeter2 = parameter.find('-');
+                    
+                            auto host_string = op.memo.substr(4, delimeter2);
+                            
+                            auto host = name(host_string.c_str());
+
+                            print("ON SPREAD to DAC");
+                            unicore::spread_to_dacs(host, op.quantity, name(code));
+
+                            break;
+                        }
                         case 699: {
                             require_auth(op.from);
                             auto delimeter2 = parameter.find('-');

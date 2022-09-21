@@ -120,7 +120,9 @@ using namespace eosio;
 				//ADD VOTE
 				uint64_t max_votes = unicore::getcondition(host, "maxuvotes");
 				
-				eosio::check(vote_count <= max_votes, "Votes limit is exceeded");
+				max_votes = 12;
+			
+				eosio::check(vote_count <= max_votes, "Максимально можно проголосовать одновременно только за 12 целей.");
 
 	      // eosio::check(goal->filled == false, "You cant vote for filled goal");
 	      

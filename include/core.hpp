@@ -177,7 +177,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         // [[eosio::action]] void editrole(eosio::name username, eosio::name host, uint64_t weight);
         // [[eosio::action]] void rmrole(eosio::name username, eosio::name host, uint64_t weight);
 
-        static void spread_to_dacs(eosio::name host, eosio::asset amount);
+        static void spread_to_dacs(eosio::name host, eosio::asset amount, eosio::name contract);
 
         static void spread_to_funds(eosio::name host, eosio::asset quantity, eosio::name referal);
 

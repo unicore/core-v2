@@ -239,7 +239,7 @@ void unicore::sub_balance(eosio::name username, eosio::asset quantity, eosio::na
             print("on total_sys_asset: ", total_sys_asset);
 
             if (total_dac_asset.amount > 0) {
-                unicore::spread_to_dacs(host, total_dac_asset);
+                unicore::spread_to_dacs(host, total_dac_asset, acc -> root_token_contract);
             }
             
             if (total_cfund_asset.amount > 0) {
@@ -2793,7 +2793,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
                 //     rb.segments = (double)to_ref_segments;
                 // });
 
-                unicore::spread_to_dacs(host, back_to_host);
+                unicore::spread_to_dacs(host, back_to_host, acc -> root_token_contract);
             }
 
 
@@ -2804,7 +2804,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
              * * Если рефералов у пользователя нет, то переводим все реферальные средства компании.
              */
             if (spread_amount.amount > 0){
-                unicore::spread_to_dacs(host, spread_amount);
+                unicore::spread_to_dacs(host, spread_amount, acc -> root_token_contract);
                 // refbalances_index refbalances(_me, username.value);
                 
                 // uint128_t to_ref_segments = spread_amount.amount * TOTAL_SEGMENTS;
@@ -2830,13 +2830,13 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
 
 
 
-    void unicore::spread_to_dacs(eosio::name host, eosio::asset amount) {
+    void unicore::spread_to_dacs(eosio::name host, eosio::asset amount, eosio::name contract) {
 
         dacs_index dacs(_me, host.value);
         account_index accounts(_me, host.value);
         auto acc = accounts.find(host.value);
         auto root_symbol = acc->get_root_symbol();
-
+        eosio::check(contract == acc -> root_token_contract, "Wrong token contract for spread");
         eosio::check(amount.symbol == root_symbol, "System error on spead to dacs");
 
         auto dac = dacs.begin();
@@ -3267,7 +3267,7 @@ void unicore::burn_action(eosio::name username, eosio::name host, eosio::asset q
     unicore::check_good_status(host, username, quantity);
     
     if (remain_asset.amount > 0) {
-        unicore::spread_to_dacs(host, remain_asset);
+        unicore::spread_to_dacs(host, remain_asset, acc -> root_token_contract);
     }
     
 
