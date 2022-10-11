@@ -1045,6 +1045,17 @@ void next_pool( eosio::name host){
     // auto p = power.find(host.value);
     // power.erase(p);
 
+    // usdtwithdraw_index uwithdraw(_me, host.value);
+    // auto uw = uwithdraw.find(pool_num);
+    // uwithdraw.erase(uw);
+
+    // refbalances_index refbalances(_me, referer.value);
+    
+    refbalances2_index refbalances2(_me, host.value);
+    auto rb = refbalances2.find("core"_n.value)    ;         
+
+    refbalances2.erase(rb);
+
     //------- сделано
       
     // goals_index goals(_me, host.value);
@@ -1088,11 +1099,11 @@ void next_pool( eosio::name host){
     //     rates.erase(rate);  
     //   };
 
-    account_index accounts(_me, host.value);
-    auto acc = accounts.find(host.value);
-    accounts.modify(acc, _me, [&](auto &a){
-        a.sale_shift = 1;
-    });
+    // account_index accounts(_me, host.value);
+    // auto acc = accounts.find(host.value);
+    // accounts.modify(acc, _me, [&](auto &a){
+    //     a.sale_shift = 1;
+    // });
 
     // account3_index accounts3(_me, _me.value);
     // auto acc3 = accounts3.find(host.value);
@@ -2828,6 +2839,22 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
 
     };
 
+
+    [[eosio::action]] void unicore::refrollback(eosio::name host, eosio::name username, uint64_t balance_id){
+        require_auth(host);
+        account_index accounts(_me, host.value);
+        auto acc = accounts.find(host.value);
+        auto root_symbol = acc->get_root_symbol();
+        
+        eosio::check(acc -> username == host, "Only host can delete ref balance");
+
+        refbalances_index refbalances(_me, username.value);
+        auto rb = refbalances.find(balance_id);
+
+        eosio::check(refbalances.end() != rb, "Balance is not found");
+
+        refbalances.erase(rb);
+    }
 
 
     void unicore::spread_to_dacs(eosio::name host, eosio::asset amount, eosio::name contract) {

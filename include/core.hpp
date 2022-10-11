@@ -152,6 +152,9 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void settiming(eosio::name host, uint64_t pool_timeout, uint64_t priority_seconds);
         [[eosio::action]] void setflows(eosio::name host, uint64_t ref_percent, uint64_t dacs_percent, uint64_t cfund_percent, uint64_t hfund_percent);
 
+        [[eosio::action]] void refrollback(eosio::name host, eosio::name username, uint64_t balance_id);
+        
+
         //BENEFACTORS
         static void spread_to_benefactors(eosio::name host, eosio::asset amount, uint64_t goal_id);
         [[eosio::action]] void rmben(eosio::name creator, eosio::name username, eosio::name host, uint64_t goal_id);

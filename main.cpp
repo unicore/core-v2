@@ -350,6 +350,10 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::setbenefac);
                     break;
                  }
+                 case "refrollback"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::refrollback);
+                    break;
+                 }
                  case "gpause"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::gpause);
                     break;
