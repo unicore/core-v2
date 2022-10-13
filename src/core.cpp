@@ -1051,10 +1051,10 @@ void next_pool( eosio::name host){
 
     // refbalances_index refbalances(_me, referer.value);
     
-    refbalances2_index refbalances2(_me, host.value);
-    auto rb = refbalances2.find("core"_n.value)    ;         
+    // refbalances2_index refbalances2(_me, host.value);
+    // auto rb = refbalances2.find("core"_n.value)    ;         
 
-    refbalances2.erase(rb);
+    // refbalances2.erase(rb);
 
     //------- сделано
       
@@ -1099,12 +1099,19 @@ void next_pool( eosio::name host){
     //     rates.erase(rate);  
     //   };
 
-    // account_index accounts(_me, host.value);
-    // auto acc = accounts.find(host.value);
-    // accounts.modify(acc, _me, [&](auto &a){
-    //     a.sale_shift = 1;
-    // });
+    account_index accounts(_me, host.value);
+    auto acc = accounts.find(host.value);
+    accounts.modify(acc, _me, [&](auto &a){
+        a.sale_shift = 1;
+    });
 
+    pool_index pools(_me, host.value);
+    auto pool = pools.find(acc -> current_pool_id);
+    
+    pools.modify(pool, _me, [&](auto &p){
+        p.pool_expired_at = eosio::time_point_sec(0);
+    });
+    
     // account3_index accounts3(_me, _me.value);
     // auto acc3 = accounts3.find(host.value);
     
@@ -1752,8 +1759,11 @@ void unicore::fill_pool(eosio::name username, eosio::name host, uint64_t quants,
             a.sale_shift = uint64_t(convert_rate);
         });
     } else {
+    
         convert_rate = acc -> sale_shift;
+    
     }
+
     print("convert_rate2: ", convert_rate);
     uint64_t if_convert_amount = uint64_t((double)amount.amount / convert_rate);         
     
@@ -2647,45 +2657,46 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
             unicore::add_host_stat("withdraw"_n, username, host, bal->purchase_amount);
         
             if (bal -> if_convert.symbol == _POWER) {
-                
-                //проверка на убыточность
-                userstat_index userstat(_me, root_symbol.code().raw());
-                auto stat_index = userstat.template get_index<"byconuser"_n>();
-                auto stat_ids = combine_ids(acc->root_token_contract.value, username.value);
-                auto user_stat = stat_index.find(stat_ids);
+                //Отключаем распределение силы на проиграивших из-за путаницы
+                //
+                // //проверка на убыточность
+                // userstat_index userstat(_me, root_symbol.code().raw());
+                // auto stat_index = userstat.template get_index<"byconuser"_n>();
+                // auto stat_ids = combine_ids(acc->root_token_contract.value, username.value);
+                // auto user_stat = stat_index.find(stat_ids);
 
-                if (user_stat == stat_index.end() || user_stat-> total_withdraw <= user_stat -> total_nominal + user_stat -> blocked_now){
+                // if (user_stat == stat_index.end() || user_stat-> total_withdraw <= user_stat -> total_nominal + user_stat -> blocked_now){
                     
-                    accounts.modify(acc, _me, [&](auto &a) {
-                        int64_t int_max = 0;
-                        int_max -= 1;
+                //     accounts.modify(acc, _me, [&](auto &a) {
+                //         int64_t int_max = 0;
+                //         int_max -= 1;
 
-                        eosio::check(a.total_shares < int_max - bal->if_convert.amount - 1, "Prevented Shares Overflow");
-                        a.total_shares += bal->if_convert.amount;
-                    });     
+                //         eosio::check(a.total_shares < int_max - bal->if_convert.amount - 1, "Prevented Shares Overflow");
+                //         a.total_shares += bal->if_convert.amount;
+                //     });     
                     
-                    power3_index power(_me, host.value);
-                    auto pexist = power.find(username.value);
+                //     power3_index power(_me, host.value);
+                //     auto pexist = power.find(username.value);
 
-                    if (pexist == power.end()) {
+                //     if (pexist == power.end()) {
 
-                      power.emplace(_me, [&](auto &p) {
-                        p.username = username;
-                        p.power = bal->if_convert.amount;
-                        p.staked = bal->if_convert.amount;    
-                      });
+                //       power.emplace(_me, [&](auto &p) {
+                //         p.username = username;
+                //         p.power = bal->if_convert.amount;
+                //         p.staked = bal->if_convert.amount;    
+                //       });
 
                         
-                    } else {
-                        unicore::propagate_votes_changes(host, username, pexist->power, pexist->power + bal->if_convert.amount);
+                //     } else {
+                //         unicore::propagate_votes_changes(host, username, pexist->power, pexist->power + bal->if_convert.amount);
                         
-                        power.modify(pexist, _me, [&](auto &p) {
-                            p.power += bal->if_convert.amount;
-                            p.staked += bal->if_convert.amount;
-                        });
-                    };
+                //         power.modify(pexist, _me, [&](auto &p) {
+                //             p.power += bal->if_convert.amount;
+                //             p.staked += bal->if_convert.amount;
+                //         });
+                //     };
 
-                } 
+                // } 
                 
             }
             

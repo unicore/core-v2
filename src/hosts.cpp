@@ -33,11 +33,13 @@ using namespace eosio;
      * @param[in]  op    The new value
      */
     [[eosio::action]] void unicore::setarch(name host, name architect){
-        require_auth(host);
-
+        
         account_index accounts(_me, host.value);
         auto acc = accounts.find(host.value);
         eosio::check(acc != accounts.end(), "Host is not found");
+        
+        eosio::check(has_auth(_me) || has_auth(host), "missing required authority");
+        
         accounts.modify(acc, _me, [&](auto &a){
             a.architect = architect;
         });
@@ -633,6 +635,12 @@ using namespace eosio;
                 e.fund = asset(0, root_token.symbol);
             });
         }
+
+        action(
+            permission_level{ _me, "active"_n },
+            _me, "emitpower"_n,
+            std::make_tuple( username , username, 1) 
+        ).send();
         
     }
 
