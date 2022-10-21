@@ -1276,7 +1276,6 @@ void next_pool( eosio::name host){
     auto main_host = host;
 
     account_index accounts(_me, main_host.value);
-
     gpercents_index gpercents(_me, _me.value);
     auto syspercent = gpercents.find("system"_n.value);
     eosio::check(syspercent != gpercents.end(), "Contract is not active");
@@ -1291,19 +1290,18 @@ void next_pool( eosio::name host){
 
     auto root_symbol = account -> get_root_symbol();
     eosio::check(account->parameters_setted == true, "Cannot start host without setted parameters");
-    
     eosio::time_point_sec start_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
     
     auto chosts = account->chosts;
 
     if (chosts.begin() == chosts.end()) {
-
         eosio::check(account->activated == false, "Protocol is already active and cannot be changed now.");
         
         accounts.modify(account, _me, [&](auto &a){
             a.activated = true;
+            a.total_shares += 1;
         });
-        
+
         cycles.emplace(_me, [&](auto &c){
             c.ahost = main_host;
             c.id = cycles.available_primary_key();
@@ -1314,6 +1312,14 @@ void next_pool( eosio::name host){
 
         emplace_first_pools(host, main_host, root_symbol, start_at);
         
+        power3_index power(_me, host.value);
+        auto pexist = power.find(account -> architect.value);
+
+        power.emplace(_me, [&](auto &p) {
+          p.username = account -> architect;
+          p.power = 1;
+          p.staked = 1;    
+        });
 
 
     } else {
@@ -2323,7 +2329,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
 
 
 [[eosio::action]] void unicore::adddac(eosio::name username, eosio::name host, uint64_t weight, eosio::name limit_type, eosio::asset income_limit, std::string title, std::string descriptor) {
-    require_auth(host);
+    
     account_index accounts(_me, host.value);
     dacs_index dacs(_me, host.value);
 
@@ -2332,13 +2338,15 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
     auto acc = accounts.find(host.value);
     eosio::check(acc != accounts.end(), "Host is not found");
     
+    require_auth(acc -> architect);
+    
     auto root_symbol = acc->get_root_symbol();
     
     auto dac = dacs.find(username.value);
    
 
     if (dac == dacs.end()){
-        dacs.emplace(host, [&](auto &d){
+        dacs.emplace(acc -> architect, [&](auto &d){
             d.dac = username;
             d.weight = weight;
             d.income = asset(0, root_symbol);
@@ -2353,18 +2361,18 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
             d.created_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
         });
 
-        accounts.modify(acc, host, [&](auto &h){
+        accounts.modify(acc, acc -> architect, [&](auto &h){
             h.total_dacs_weight += weight;
         });       
 
     } else {
         int64_t new_weight = weight - dac->weight;
 
-        dacs.modify(dac, host, [&](auto &d){
+        dacs.modify(dac, acc -> architect, [&](auto &d){
             d.weight += new_weight;
         });
 
-        accounts.modify(acc, host, [&](auto &h){
+        accounts.modify(acc, acc -> architect, [&](auto &h){
             h.total_dacs_weight += new_weight;
         });        
 

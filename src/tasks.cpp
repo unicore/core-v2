@@ -836,7 +836,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		bool need_check = username == host ? false : true;
 		uint64_t report_id;
 
-		if (user_report == users_with_id.end() || task -> is_regular == true){
+		// if (user_report == users_with_id.end() || task -> is_regular == true){
 			eosio::check(task -> priority >= 0, "task priority should be more then zero");
 
 			eosio::asset asset_per_hour2 = (task -> priority == 0 || task -> priority == 1) ? asset(10*10000, root_symbol) : (task -> priority == 2 ? asset(20*10000, root_symbol) : asset(40*10000, root_symbol));
@@ -869,22 +869,22 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 	      a.total_reports = acc -> total_reports + 1;
 	    });
 
-		} else {
-			report_id = user_report -> report_id;
+		// } else {
+		// 	report_id = user_report -> report_id;
 
-			eosio::check(task -> is_regular == true, "Task is not regular, but report is exist");
-			eosio::check(user_report -> need_check == false, "Previous report is not checked yet");
+		// 	eosio::check(task -> is_regular == true, "Task is not regular, but report is exist");
+		// 	eosio::check(user_report -> need_check == false, "Previous report is not checked yet");
 			
-			users_with_id.modify(user_report, username, [&](auto &r){
-				r.count += 1;
-				r.need_check = true;
-				r.approved = false;
-				r.duration_secs += duration_secs;
-				r.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + 30 * 86400);
-				r.created_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch());
-				r.asset_per_hour = asset_per_hour;
-			});
-		}
+		// 	users_with_id.modify(user_report, username, [&](auto &r){
+		// 		r.count += 1;
+		// 		r.need_check = true;
+		// 		r.approved = false;
+		// 		r.duration_secs += duration_secs;
+		// 		r.expired_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch() + 30 * 86400);
+		// 		r.created_at = eosio::time_point_sec (eosio::current_time_point().sec_since_epoch());
+		// 		r.asset_per_hour = asset_per_hour;
+		// 	});
+		// }
 
 		
 		goals.modify(goal, _me, [&](auto &g){

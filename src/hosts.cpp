@@ -636,11 +636,6 @@ using namespace eosio;
             });
         }
 
-        action(
-            permission_level{ _me, "active"_n },
-            _me, "emitpower"_n,
-            std::make_tuple( username , username, 1) 
-        ).send();
         
     }
 

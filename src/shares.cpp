@@ -85,10 +85,11 @@ using namespace eosio;
    */
   [[eosio::action]] void unicore::emitpower(eosio::name host, eosio::name username, uint64_t user_shares){
     eosio::check(has_auth("auction"_n) || has_auth(_me), "missing required authority");
-
+    print("on power emit: ", user_shares);
+    
     account_index account(_me, host.value);
     auto acc = account.find(host.value);
-    print("on power emit: ", user_shares);
+    
 
     // eosio::check(acc -> sale_mode == "auction"_n, "Wrong sale type");
     
