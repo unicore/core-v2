@@ -2370,6 +2370,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
 
         dacs.modify(dac, acc -> architect, [&](auto &d){
             d.weight += new_weight;
+            d.role = title;
         });
 
         accounts.modify(acc, acc -> architect, [&](auto &h){
