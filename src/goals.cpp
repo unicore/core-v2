@@ -32,6 +32,8 @@ using namespace eosio;
 		auto acc = accounts.find(host.value);
     auto root_symbol = (acc->root_token).symbol;
 
+    eosio::check(acc -> type != "fraction"_n, "Fraction host mode prohibit simple set goal method");
+    
     eosio::check(target.symbol == root_symbol, "Wrong symbol for this host");
     
     // eosio::check(target.amount > 0, "Target should be more then zero");

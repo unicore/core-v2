@@ -329,6 +329,12 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::exittail);
                     break;
                  }
+
+                 case "changemode"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::changemode);
+                    break;
+                 }
+
                 //GOALS
                  case "setgoal"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::setgoal);
