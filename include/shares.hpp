@@ -80,11 +80,14 @@
     eosio::asset total_remain;
     eosio::asset total_distributed;
 
+    eosio::asset total_partners_available;
+    eosio::asset total_partners_distributed; 
+       
     uint64_t primary_key() const {return id;}
     uint64_t byopen() const {return window_open_at.sec_since_epoch();}
         
 
-    EOSLIB_SERIALIZE(struct powerstat, (id)(window_open_at)(window_closed_at)(liquid_power)(total_available)(total_remain)(total_distributed))
+    EOSLIB_SERIALIZE(struct powerstat, (id)(window_open_at)(window_closed_at)(liquid_power)(total_available)(total_remain)(total_distributed)(total_partners_available)(total_partners_distributed))
   };
 
   typedef eosio::multi_index<"powerstat"_n, powerstat,
@@ -102,14 +105,15 @@
     eosio::name username;
     uint64_t window_id;
     uint64_t power;
+    bool updated = false;
     eosio::asset available;
-
+    eosio::asset distributed_to_partners;
 
     uint64_t primary_key() const {return id;}
     
     uint128_t userwindowid() const { return combine_ids(username.value, window_id); }
     
-    EOSLIB_SERIALIZE(struct powerlog, (id)(host)(username)(window_id)(power)(available))
+    EOSLIB_SERIALIZE(struct powerlog, (id)(host)(username)(window_id)(power)(updated)(available)(distributed_to_partners))
   };
 
   typedef eosio::multi_index<"powerlog"_n, powerlog,

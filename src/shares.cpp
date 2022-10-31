@@ -328,78 +328,149 @@ using namespace eosio;
 
 
   /**
+   * @brief      Метод вывода силового финансового потока
+   * withdraw power quant (withpowerun)
+   * Позволяет вывести часть финансового потока, направленного на держателя силы
+  */
+  [[eosio::action]] void unicore::withpbenefit(eosio::name username, eosio::name host, uint64_t log_id){
+      account_index accounts(_me, host.value);
+      auto acc = accounts.find(host.value);
+
+      powerstat_index powerstats(_me, host.value);
+      powerlog_index powerlogs(_me, host.value);
+ 
+      auto powerlog = powerlogs.find(log_id);
+      eosio::check(powerlog != powerlogs.end(), "Power log is not founded for current username");
+      eosio::check(powerlog -> updated == true, "Only updated balance can be withdrawed");
+      require_auth(powerlog -> username);
+
+      auto powerstat = powerstats.find(powerlog -> window_id);
+      
+      eosio::check(powerstat != powerstats.end(), "system error: window is not found");
+      eosio::check(powerlog -> username == username, "username on action and plog should equal");
+
+      eosio::check(powerstat -> window_closed_at.sec_since_epoch() < eosio::current_time_point().sec_since_epoch(), "Window is not closed yet.");
+      
+      
+
+      powerstats.modify(powerstat, powerlog -> username, [&](auto &ps){
+          ps.total_distributed = powerstat -> total_distributed + powerlog -> available;
+      });
+
+      if (powerlog -> available.amount > 0) {
+        action(
+            permission_level{ _me, "active"_n },
+            acc->root_token_contract, "transfer"_n,
+            std::make_tuple( _me, powerlog->username, powerlog -> available, std::string("power dividends")) 
+        ).send();
+      }
+      
+      powerlogs.erase(powerlog);
+
+    
+
+  }
+  
+
+
+
+
+  /**
    * @brief      Метод обновления силового финансового потока
    * 
    * Позволяет обновить доступную часть финансового потока, направленного на держателя силы, 
    * а так же собрать доступные реферальные балансы в один объект
   */
-  [[eosio::action]] void unicore::refreshpu(eosio::name username, eosio::name host){
-    account_index accounts(_me, host.value);
-      // auto acc = accounts.find(host.value);
+  [[eosio::action]] void unicore::refreshpu(eosio::name username, eosio::name host, uint64_t log_id) {
+      account_index accounts(_me, host.value);
+      auto acc = accounts.find(host.value);
 
-      // plog_index plogs(_me, username.value);
+      powerstat_index powerstats(_me, host.value);
+      powerlog_index powerlogs(_me, host.value);
  
-      // auto pool_idwithhost_idx = plogs.template get_index<"hostpoolid"_n>();
-      // auto log_ids = combine_ids(host.value, acc->current_pool_id);
       
-      // auto log = pool_idwithhost_idx.find(log_ids);
+      auto powerlog = powerlogs.find(log_id);
+      eosio::check(powerlog -> username == username, "username on action and plog should equal");
+
+      eosio::check(powerlog != powerlogs.end(), "Power log is not founded for current username");
+
+      require_auth(powerlog -> username);
+
+      if (powerlog -> window_id > 0) {
+        auto user_power_by_window_idx = powerlogs.template get_index<"userwindowid"_n>();
+        auto prev_log_ids = combine_ids(username.value, powerlog -> window_id);
+
+        auto prev_log = user_power_by_window_idx.begin();
+        
+        print("now_log: ", powerlog -> id);
+        print("prev_log: ", prev_log -> id);
+
+        if (prev_log -> username == username) {
+          eosio::check(prev_log -> id == powerlog -> id, "Cannot refresh object with previous objects. Refresh previous first.");
+        }
+        // user_power_by_window_idx.find(prev_log_ids);
+        // if (prev_log -> username == username && )
+        // eosio::check(prev_log == user_power_by_window_idx.end(), "Cannot refresh object with previous objects. Refresh previous first.");
+      };
 
 
-      // if (log == pool_idwithhost_idx.end()){
-      //   plogs.emplace(_me, [&](auto &l){
-      //     l.id = plogs.available_primary_key();
-      //     l.host = host;
-      //     l.pool_id = acc->current_pool_id;
-      //     l.power = new_power;
-      //     l.cycle_num = acc->current_cycle_num;
-      //     l.pool_num = acc->current_pool_num;
-      //   });
-
-      // } else {
-      //   pool_idwithhost_idx.modify(log, _me, [&](auto &l){
-      //     l.power = new_power;
-      //   });
-      // }
-
-      // sincome_index sincome(_me, host.value);
-      // auto sinc = sincome.find(acc->current_pool_id);
+      auto powerstat = powerstats.find(powerlog -> window_id);
       
-      // rate_index rates(_me, host.value);
-      // auto rate = rates.find(acc->current_pool_num - 1);
-      // eosio::name main_host = acc->get_ahost();
-      // auto root_symbol = acc->get_root_symbol();
+      eosio::check(powerstat != powerstats.end(), "system error: window is not found");
+      
+      eosio::check(powerstat -> window_closed_at.sec_since_epoch() < eosio::current_time_point().sec_since_epoch(), "Window is not closed yet.");
+      
 
-      // market_index market(_me, host.value);
-      // auto itr = market.find(0);
-      // auto liquid_power = acc->total_shares - itr->base.balance.amount;
+      if (powerlog -> updated == false){ //not updated
 
-      // if (sinc == sincome.end()){
-      //   sincome.emplace(_me, [&](auto &s){
-      //       s.max = rate -> system_income;
-      //       s.pool_id = acc->current_pool_id;
-      //       s.ahost = main_host;
-      //       s.cycle_num = acc->current_cycle_num;
-      //       s.pool_num = acc->current_pool_num;
-      //       s.liquid_power = liquid_power;
-      //       s.total = asset(0, root_symbol);
-      //       s.paid_to_sys = asset(0, root_symbol);
-      //       s.paid_to_dacs = asset(0, root_symbol);
-      //       s.paid_to_cfund = asset(0, root_symbol);
-      //       s.paid_to_hfund = asset(0, root_symbol);
-      //       s.paid_to_refs = asset(0, root_symbol);
-      //       s.hfund_in_segments = 0;
-      //       s.distributed_segments = 0;
-      //   }); 
+        double share = double(powerlog -> power) / double(powerstat -> liquid_power);
+        eosio::asset user_amount = asset(share * powerstat -> total_available.amount, powerstat -> total_available.symbol);
+        
+        eosio::asset ref_user_amount = asset(share * powerstat -> total_partners_available.amount, powerstat -> total_partners_available.symbol);
 
-      // } else {
+        eosio::check(powerstat -> total_remain >= user_amount, "system error: not enough funds on the window");
 
-      //   sincome.modify(sinc, _me, [&](auto &s){
-      //     s.liquid_power = liquid_power;
-      //   });
-      // } 
-      // auto idx = votes.template get_index<"host"_n>();
-      // auto i_bv = idx.lower_bound(host.value);
+        powerstats.modify(powerstat, powerlog -> username, [&](auto &ps){
+            ps.total_remain = powerstat -> total_remain - user_amount;
+            ps.total_partners_distributed += ref_user_amount;
+        });
 
+        if (ref_user_amount.amount > 0) {
+          unicore::spread_to_refs(host, powerlog -> username, ref_user_amount, powerstat -> total_partners_available, acc -> root_token_contract);  
+        };
+        
+
+        powerlogs.modify(powerlog, powerlog -> username, [&](auto &ps){
+            ps.available = user_amount;
+            ps.distributed_to_partners = ref_user_amount;
+            ps.updated = true;
+        });
+
+
+        //get next log and push new if not exist
+        powerstat++;
+        
+        eosio::check(powerstat != powerstats.end(), "Next window is not opened yet");
+
+        auto user_power_by_window_idx = powerlogs.template get_index<"userwindowid"_n>();
+        auto next_log_ids = combine_ids(username.value, powerstat -> id);
+        auto next_log = user_power_by_window_idx.find(next_log_ids);
+
+        if (next_log == user_power_by_window_idx.end()) {
+
+          powerlogs.emplace(powerlog -> username, [&](auto &pl){
+              pl.id = unicore::get_global_id("powerlog"_n);
+              pl.host = host;
+              pl.username = username;
+              pl.window_id = powerstat -> id;
+              pl.power = powerlog -> power;
+              pl.available = asset(0, powerlog -> available.symbol);
+              pl.distributed_to_partners = asset(0, powerlog -> available.symbol);
+              pl.updated = false;
+            });
+        };
+      };
+      
   }
 
 
@@ -439,15 +510,6 @@ using namespace eosio;
             auto log_ids = combine_ids(username.value, cycle);
             
             auto log = user_power_by_window_idx.find(log_ids);
-            
-            // power3_index powers(_me, host.value);
-            // auto exist_power_object = powers.find(username.value);
-            // uint64_t power = 0;
-            
-            // if (exist_power_object != powers.end()) {
-            //   power = exist_power_object -> power;  
-            // }
-            
             if (log == user_power_by_window_idx.end()){
               //emplace
               powerlogs.emplace(_me, [&](auto &pl){
@@ -457,6 +519,7 @@ using namespace eosio;
                 pl.window_id = cycle;
                 pl.power = new_power;
                 pl.available = asset(0, root_symbol);
+                pl.distributed_to_partners = asset(0, root_symbol);
               });
 
             } else {
@@ -478,6 +541,8 @@ using namespace eosio;
               ps.total_available = asset(0, root_symbol);
               ps.total_remain = asset(0, root_symbol);
               ps.total_distributed = asset(0, root_symbol);
+              ps.total_partners_distributed = asset(0, root_symbol);
+              ps.total_partners_available = asset(0, root_symbol);
           });
 
         }
@@ -824,19 +889,6 @@ using namespace eosio;
     // }    
   }
 
-
-
-
-  /**
-   * @brief      Метод вывода силового финансового потока
-   * withdraw power quant (withpowerun)
-   * Позволяет вывести часть финансового потока, направленного на держателя силы
-  */
-  [[eosio::action]] void unicore::withpbenefit(eosio::name username, eosio::name host){
-    
-
-  }
-  
 
 
 

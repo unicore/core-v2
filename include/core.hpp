@@ -184,7 +184,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
         static void spread_to_dacs(eosio::name host, eosio::asset amount, eosio::name contract);
 
-        static void spread_to_funds(eosio::name host, eosio::asset quantity, eosio::name referal);
+        static void spread_to_funds(eosio::name code, eosio::name host, eosio::asset quantity, std::string comment);
 
         static void spread_to_refs(eosio::name host, eosio::name username, eosio::asset spread_amount, eosio::asset from_amount, eosio::name token_contract);
 
@@ -223,8 +223,6 @@ class [[eosio::contract]] unicore : public eosio::contract {
         // [[eosio::action]] void setliqpower(eosio::name host, uint64_t liquid);
         // [[eosio::action]] void incrusersegm(eosio::name host, uint64_t pool_id, uint64_t user_segments);
         
-        [[eosio::action]] void withpbenefit(eosio::name username, eosio::name host);
-
         [[eosio::action]] void withrbalance(eosio::name username, eosio::name host);
         [[eosio::action]] void setwithdrwal(eosio::name username, eosio::name host, eosio::string wallet);
 
@@ -236,9 +234,9 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
         [[eosio::action]] void emitpower(eosio::name host, eosio::name username, uint64_t user_shares);
         [[eosio::action]] void emitpower2(eosio::name host, uint64_t goal_id, uint64_t shares);
-        
         [[eosio::action]] void withrbenefit(eosio::name username, eosio::name host, uint64_t id);
-        [[eosio::action]] void refreshpu(eosio::name username, eosio::name host);
+        [[eosio::action]] void withpbenefit(eosio::name username, eosio::name host, uint64_t log_id);
+        [[eosio::action]] void refreshpu(eosio::name username, eosio::name host, uint64_t log_id);
         [[eosio::action]] void refreshsh (eosio::name owner, uint64_t id);
         [[eosio::action]] void withdrawsh(eosio::name owner, uint64_t id);
         [[eosio::action]] void sellshares(eosio::name username, eosio::name host, uint64_t shares);
@@ -388,6 +386,27 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
 
 // }
+
+
+    
+
+    struct [[eosio::table, eosio::contract("unicore")]] spreads {
+        uint64_t id;
+        eosio::time_point_sec timestamp;
+        std::string comment;
+        eosio::asset total;
+        eosio::asset ref_amount;
+        eosio::asset dacs_amount;
+        eosio::asset hfund_amount;
+        eosio::asset cfund_amount;
+        eosio::asset sys_amount;
+
+        uint64_t primary_key() const {return id;}
+
+        EOSLIB_SERIALIZE(spreads, (id)(timestamp)(comment)(total)(ref_amount)(dacs_amount)(hfund_amount)(cfund_amount)(sys_amount))
+    };
+
+    typedef eosio::multi_index<"spreads"_n, spreads> spreads_index;
 
 
 /*!

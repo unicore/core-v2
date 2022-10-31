@@ -276,6 +276,35 @@ extern "C" {
 
                             break;
                         }
+                        case 112: {
+                            //SPREAD
+                            
+                            //
+                            require_auth(op.from);
+
+                            auto delimeter2 = parameter.find('-');
+                            
+                            eosio::name host;
+                            std::string message = "";
+                    
+                            if (delimeter2 != -1){
+                                auto host_string = op.memo.substr(4, delimeter2);
+                                
+                                host = name(host_string.c_str());
+                                
+                                message = parameter.substr(delimeter2+1, parameter.length());
+                        
+                            } else {
+                                auto host_string = op.memo.substr(4, parameter.length());
+                                host = name(host_string.c_str());
+                            }
+
+                            
+                            print("ON SPREAD");
+                            unicore::spread_to_funds(name(code), host, op.quantity, message);
+
+                            break;
+                        }
                         case 222: {
                             //SPREAD
                             
@@ -492,7 +521,6 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::withdrawsh);
                     break;
                 };
-
                 case "withpbenefit"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::withpbenefit);
                     break;
