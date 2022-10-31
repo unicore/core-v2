@@ -70,48 +70,51 @@
    \brief Структура статистики распределения безусловного потока жетонов хоста Двойной Спирали. 
 */
 
-  struct [[eosio::table, eosio::contract("unicore")]] pstats {
-    eosio::name host;
-    eosio::asset total_available_in_asset;
-    uint64_t pflow_last_withdrawed_pool_id;
-    uint128_t pflow_available_segments;
-    eosio::asset pflow_available_in_asset;
-    eosio::asset pflow_withdrawed;
+  struct [[eosio::table, eosio::contract("unicore")]] powerstat {
+    uint64_t id;
+    eosio::time_point_sec window_open_at;
+    eosio::time_point_sec window_closed_at;
+    uint64_t liquid_power;
 
-    eosio::asset ref_available_in_asset;
-    uint64_t ref_available_segments = 0;
-    eosio::asset ref_withdrawed;
-    uint64_t primary_key() const {return host.value;}
+    eosio::asset total_available;
+    eosio::asset total_remain;
+    eosio::asset total_distributed;
 
-    EOSLIB_SERIALIZE(struct pstats, (host)(total_available_in_asset)(pflow_last_withdrawed_pool_id)(pflow_available_segments)(pflow_available_in_asset)(pflow_withdrawed)(ref_available_in_asset)(ref_available_segments)(ref_withdrawed))
+    uint64_t primary_key() const {return id;}
+    uint64_t byopen() const {return window_open_at.sec_since_epoch();}
+        
+
+    EOSLIB_SERIALIZE(struct powerstat, (id)(window_open_at)(window_closed_at)(liquid_power)(total_available)(total_remain)(total_distributed))
   };
 
-  typedef eosio::multi_index<"pstats"_n, pstats> pstats_index;
+  typedef eosio::multi_index<"powerstat"_n, powerstat,
+    eosio::indexed_by<"byopen"_n, eosio::const_mem_fun<powerstat, uint64_t, &powerstat::byopen>>
+  > powerstat_index;
 
 
 /*!
    \brief Структура истории преобретения силы пользователем у хоста Двойной Спирали.
 */
 
-  struct [[eosio::table, eosio::contract("unicore")]] plog {
-    uint64_t id;
+  struct [[eosio::table, eosio::contract("unicore")]] powerlog {
+    uint64_t id; //auto by cycle
     eosio::name host;
-    uint64_t pool_id;
-    uint64_t cycle_num;
-    uint64_t pool_num;
+    eosio::name username;
+    uint64_t window_id;
     uint64_t power;
-    
+    eosio::asset available;
+
 
     uint64_t primary_key() const {return id;}
     
-    uint128_t hostpoolid() const { return combine_ids(host.value, pool_id); }
+    uint128_t userwindowid() const { return combine_ids(username.value, window_id); }
     
-    EOSLIB_SERIALIZE(struct plog, (id)(host)(pool_id)(cycle_num)(pool_num)(power))
+    EOSLIB_SERIALIZE(struct powerlog, (id)(host)(username)(window_id)(power)(available))
   };
 
-  typedef eosio::multi_index<"plog"_n, plog,
-    eosio::indexed_by<"hostpoolid"_n, eosio::const_mem_fun<plog, uint128_t, &plog::hostpoolid>>
-  > plog_index;
+  typedef eosio::multi_index<"powerlog"_n, powerlog,
+    eosio::indexed_by<"userwindowid"_n, eosio::const_mem_fun<powerlog, uint128_t, &powerlog::userwindowid>>
+  > powerlog_index;
 
 
 /*!

@@ -1424,6 +1424,20 @@ void next_pool( eosio::name host) {
           p.staked = 1;    
         });
 
+        powerstat_index powerstat(_me, host.value);
+        auto pstat = powerstat.find(0);
+        
+        powerstat.emplace(_me, [&](auto &ps){
+            ps.id = powerstat.available_primary_key();
+            ps.window_open_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+            ps.window_closed_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + _WINDOW_SECS);
+            ps.liquid_power = 1;
+            ps.total_available = asset(0, root_symbol);
+            ps.total_remain = asset(0, root_symbol);
+            ps.total_distributed = asset(0, root_symbol);
+        }); 
+        
+
 
     } else {
         
@@ -1732,6 +1746,7 @@ void unicore::refresh_state(eosio::name host){
 
     account_index accounts(_me, host.value);
     auto acc = accounts.find(host.value);
+    auto root_symbol = acc->get_root_symbol();
 
     eosio::check(acc != accounts.end(), "Host is not found");
     
@@ -1754,6 +1769,44 @@ void unicore::refresh_state(eosio::name host){
             next_pool(host);
             
         } 
+
+        powerstat_index powerstat(_me, host.value);
+        auto pstat = powerstat.find(0);
+
+        if (pstat != powerstat.end()) {
+            //calculate id for current distribution
+            uint64_t now_secs = eosio::current_time_point().sec_since_epoch();
+            uint64_t first_window_start_secs = pstat -> window_open_at.sec_since_epoch();
+            uint64_t cycle = (now_secs - first_window_start_secs) / _WINDOW_SECS;
+
+            auto current_pstat = powerstat.find(cycle);
+            
+            if (current_pstat == powerstat.end()) {
+
+                powerstat.emplace(_me, [&](auto &ps) {
+                    ps.id = cycle;
+                    ps.window_open_at = eosio::time_point_sec(first_window_start_secs + _WINDOW_SECS * cycle);
+                    ps.window_closed_at = eosio::time_point_sec(first_window_start_secs + _WINDOW_SECS * (cycle + 1));
+                    ps.liquid_power = acc -> total_shares;
+                    ps.total_available = asset(0, root_symbol);
+                    ps.total_remain = asset(0, root_symbol);
+                    ps.total_distributed = asset(0, root_symbol);
+                });
+
+            } 
+
+        } else {
+            //emplace first window
+            powerstat.emplace(_me, [&](auto &ps){
+                ps.id = 0;
+                ps.window_open_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+                ps.window_closed_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch() + _WINDOW_SECS);
+                ps.liquid_power = acc -> total_shares;
+                ps.total_available = asset(0, root_symbol);
+                ps.total_remain = asset(0, root_symbol);
+                ps.total_distributed = asset(0, root_symbol);
+            });
+        }
     }
     // else if (acc->current_pool_num < 3) {
     //     // Отдельно округляем остатки в случае, если приоритетным входом или целями воспользовались только частично
@@ -2782,33 +2835,43 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
 
                 // if (user_stat == stat_index.end() || user_stat-> total_withdraw <= user_stat -> total_nominal + user_stat -> blocked_now){
                     
-                    accounts.modify(acc, _me, [&](auto &a) {
-                        // int64_t int_max = 0;
-                        // int_max -= 1;
-                        // eosio::check(a.total_shares < int_max - bal->if_convert.amount - 1, "Prevented Shares Overflow");
-                        a.total_shares += bal->if_convert.amount;
-                    });     
+                    action(
+                        permission_level{ _me, "active"_n },
+                        _me, "emitpower"_n,
+                        std::make_tuple( host , username, bal->if_convert.amount) 
+                    ).send();
                     
-                    power3_index power(_me, host.value);
-                    auto pexist = power.find(username.value);
+                    // accounts.modify(acc, _me, [&](auto &a) {
+                    //     // int64_t int_max = 0;
+                    //     // int_max -= 1;
+                    //     // eosio::check(a.total_shares < int_max - bal->if_convert.amount - 1, "Prevented Shares Overflow");
+                    //     a.total_shares += bal->if_convert.amount;
+                    // });     
+                    
+                    // power3_index power(_me, host.value);
+                    // auto pexist = power.find(username.value);
 
-                    if (pexist == power.end()) {
+                    // if (pexist == power.end()) {
 
-                      power.emplace(_me, [&](auto &p) {
-                        p.username = username;
-                        p.power = bal->if_convert.amount;
-                        p.staked = bal->if_convert.amount;    
-                      });
+                    //   power.emplace(_me, [&](auto &p) {
+                    //     p.username = username;
+                    //     p.power = bal->if_convert.amount;
+                    //     p.staked = bal->if_convert.amount;    
+                    //   });
 
                         
-                    } else {
-                        // unicore::propagate_votes_changes(host, username, pexist->power, pexist->power + bal->if_convert.amount);
+                    // } else {
+                    //     // unicore::propagate_votes_changes(host, username, pexist->power, pexist->power + bal->if_convert.amount);
                         
-                        power.modify(pexist, _me, [&](auto &p) {
-                            p.power += bal->if_convert.amount;
-                            p.staked += bal->if_convert.amount;
-                        });
-                    };
+                    //     power.modify(pexist, _me, [&](auto &p) {
+                    //         p.power += bal->if_convert.amount;
+                    //         p.staked += bal->if_convert.amount;
+                    //     });
+                    // };
+
+
+                    //TODO add power to window and powerlog
+
 
                 // } 
                 

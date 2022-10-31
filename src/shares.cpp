@@ -91,20 +91,9 @@ using namespace eosio;
     auto acc = account.find(host.value);
     
 
-    // eosio::check(acc -> sale_mode == "auction"_n, "Wrong sale type");
-    
-    // action(
-    //     permission_level{ _saving, "active"_n },
-    //     acc->root_token_contract, "transfer"_n,
-    //     std::make_tuple( _saving, _me, asset(10000 * user_shares, acc -> quote_amount.symbol), std::string("")) 
-    // ).send();
-
-
-    // add_base_to_market("power"_n, host, asset(user_shares, _POWER));
-    // add_quote_to_market("power"_n, host, asset(10000 * user_shares, acc -> quote_amount.symbol));
-
     account.modify(acc, _me, [&](auto &a){
       a.total_shares += user_shares;
+      print("before set shares: ", a.total_shares);
       // a.quote_amount += asset(10000 * user_shares, acc -> quote_amount.symbol);
     });
 
@@ -119,9 +108,12 @@ using namespace eosio;
         p.staked = user_shares;    
       });
 
+       unicore::log_event_with_shares(username, host, user_shares);
         
     } else {
         unicore::propagate_votes_changes(host, username, pexist->power, pexist->power + user_shares);
+        
+        unicore::log_event_with_shares(username, host, pexist->power + user_shares);
         
         power.modify(pexist, _me, [&](auto &p) {
             p.power += user_shares;
@@ -181,58 +173,58 @@ using namespace eosio;
   [[eosio::action]] void unicore::sellshares(eosio::name username, eosio::name host, uint64_t shares){
     require_auth(username);
     
-    power3_index power(_me, host.value);
-    auto pexist = power.find(username.value);
+    // power3_index power(_me, host.value);
+    // auto pexist = power.find(username.value);
     
-    account_index account(_me, host.value);
-    auto acc = account.find(host.value);
+    // account_index account(_me, host.value);
+    // auto acc = account.find(host.value);
 
 
-    uint64_t max_power_on_sale = pexist -> staked; 
+    // uint64_t max_power_on_sale = pexist -> staked; 
 
-    eosio::check(max_power_on_sale >= shares, "Cannot back more power then you have");
+    // eosio::check(max_power_on_sale >= shares, "Cannot back more power then you have");
 
-    if (pexist != power.end() && pexist -> staked > 0) {
+    // if (pexist != power.end() && pexist -> staked > 0) {
       
       
-      // double available = (double)shares / (double)acc -> total_shares * (double)acc->quote_amount.amount;
-      // eosio::asset available_asset = asset((uint64_t)available, acc -> quote_amount.symbol);
+    //   // double available = (double)shares / (double)acc -> total_shares * (double)acc->quote_amount.amount;
+    //   // eosio::asset available_asset = asset((uint64_t)available, acc -> quote_amount.symbol);
 
-      market_index market(_me, host.value);
-      auto itr = market.find("power"_n.value);
-      auto tmp = *itr;
+    //   market_index market(_me, host.value);
+    //   auto itr = market.find("power"_n.value);
+    //   auto tmp = *itr;
 
-      eosio::asset tokens_out;
+    //   eosio::asset tokens_out;
 
-      market.modify( itr, _me, [&]( auto& es ) {
-         tokens_out = es.direct_convert( asset(shares,eosio::symbol(eosio::symbol_code("POWER"), 0)), acc -> quote_amount.symbol);
-      });
+    //   market.modify( itr, _me, [&]( auto& es ) {
+    //      tokens_out = es.direct_convert( asset(shares,eosio::symbol(eosio::symbol_code("POWER"), 0)), acc -> quote_amount.symbol);
+    //   });
 
 
-      print("on sell shares: ", shares);
+    //   print("on sell shares: ", shares);
       
-      power.modify(pexist, username, [&](auto &p){
-        p.power -= shares;
-        p.staked -= shares;
-      });
+    //   power.modify(pexist, username, [&](auto &p){
+    //     p.power -= shares;
+    //     p.staked -= shares;
+    //   });
 
 
-     if (tokens_out.amount > 0) {
-      //TODO precision?!
-        if (itr -> vesting_seconds == 0) {
+    //  if (tokens_out.amount > 0) {
+    //   //TODO precision?!
+    //     if (itr -> vesting_seconds == 0) {
 
-          action(
-              permission_level{ _me, "active"_n },
-              acc->root_token_contract, "transfer"_n,
-              std::make_tuple( _me, username, tokens_out, std::string("PWITHDRAW-" + (name{username}.to_string() + "-" + (name{host}).to_string()) ))
-          ).send();
+    //       action(
+    //           permission_level{ _me, "active"_n },
+    //           acc->root_token_contract, "transfer"_n,
+    //           std::make_tuple( _me, username, tokens_out, std::string("PWITHDRAW-" + (name{username}.to_string() + "-" + (name{host}).to_string()) ))
+    //       ).send();
 
-        } else make_vesting_action(username, host, acc -> quote_token_contract, tokens_out, itr -> vesting_seconds, "powersell"_n);
+    //     } else make_vesting_action(username, host, acc -> quote_token_contract, tokens_out, itr -> vesting_seconds, "powersell"_n);
       
-     } else eosio::check(false, "Token amount is too low");
+    //  } else eosio::check(false, "Token amount is too low");
 
 
-    }
+    // }
 
     //   account_index accounts(_me, host.value);
     //   auto exist = accounts.find(host.value);
@@ -342,7 +334,72 @@ using namespace eosio;
    * а так же собрать доступные реферальные балансы в один объект
   */
   [[eosio::action]] void unicore::refreshpu(eosio::name username, eosio::name host){
-    
+    account_index accounts(_me, host.value);
+      // auto acc = accounts.find(host.value);
+
+      // plog_index plogs(_me, username.value);
+ 
+      // auto pool_idwithhost_idx = plogs.template get_index<"hostpoolid"_n>();
+      // auto log_ids = combine_ids(host.value, acc->current_pool_id);
+      
+      // auto log = pool_idwithhost_idx.find(log_ids);
+
+
+      // if (log == pool_idwithhost_idx.end()){
+      //   plogs.emplace(_me, [&](auto &l){
+      //     l.id = plogs.available_primary_key();
+      //     l.host = host;
+      //     l.pool_id = acc->current_pool_id;
+      //     l.power = new_power;
+      //     l.cycle_num = acc->current_cycle_num;
+      //     l.pool_num = acc->current_pool_num;
+      //   });
+
+      // } else {
+      //   pool_idwithhost_idx.modify(log, _me, [&](auto &l){
+      //     l.power = new_power;
+      //   });
+      // }
+
+      // sincome_index sincome(_me, host.value);
+      // auto sinc = sincome.find(acc->current_pool_id);
+      
+      // rate_index rates(_me, host.value);
+      // auto rate = rates.find(acc->current_pool_num - 1);
+      // eosio::name main_host = acc->get_ahost();
+      // auto root_symbol = acc->get_root_symbol();
+
+      // market_index market(_me, host.value);
+      // auto itr = market.find(0);
+      // auto liquid_power = acc->total_shares - itr->base.balance.amount;
+
+      // if (sinc == sincome.end()){
+      //   sincome.emplace(_me, [&](auto &s){
+      //       s.max = rate -> system_income;
+      //       s.pool_id = acc->current_pool_id;
+      //       s.ahost = main_host;
+      //       s.cycle_num = acc->current_cycle_num;
+      //       s.pool_num = acc->current_pool_num;
+      //       s.liquid_power = liquid_power;
+      //       s.total = asset(0, root_symbol);
+      //       s.paid_to_sys = asset(0, root_symbol);
+      //       s.paid_to_dacs = asset(0, root_symbol);
+      //       s.paid_to_cfund = asset(0, root_symbol);
+      //       s.paid_to_hfund = asset(0, root_symbol);
+      //       s.paid_to_refs = asset(0, root_symbol);
+      //       s.hfund_in_segments = 0;
+      //       s.distributed_segments = 0;
+      //   }); 
+
+      // } else {
+
+      //   sincome.modify(sinc, _me, [&](auto &s){
+      //     s.liquid_power = liquid_power;
+      //   });
+      // } 
+      // auto idx = votes.template get_index<"host"_n>();
+      // auto i_bv = idx.lower_bound(host.value);
+
   }
 
 
@@ -351,8 +408,142 @@ using namespace eosio;
    * Используется для расчета доли владения в финансовом потоке cfund в рамках границы пула
    *
   */
-   void log_event_with_shares (eosio::name username, eosio::name host, int64_t new_power){
+   void unicore::log_event_with_shares (eosio::name username, eosio::name host, int64_t new_power){
      
+      account_index accounts(_me, host.value);
+      auto acc = accounts.find(host.value);
+
+      auto root_symbol = acc->get_root_symbol();
+
+      powerstat_index powerstats(_me, host.value);
+      powerlog_index powerlogs(_me, host.value);
+      
+
+      auto first_window = powerstats.find(0);
+      
+      if (first_window != powerstats.end()) {
+
+        uint64_t now_secs = eosio::current_time_point().sec_since_epoch();
+        uint64_t first_window_start_secs = first_window -> window_open_at.sec_since_epoch();
+        uint64_t cycle = (now_secs - first_window_start_secs) / _WINDOW_SECS;
+
+        auto current_window = powerstats.find(cycle);
+        
+        if (current_window != powerstats.end()) {
+            print("set shares: ", acc -> total_shares);
+            powerstats.modify(current_window, _me, [&](auto &ps) {
+                ps.liquid_power = acc -> total_shares;
+            });
+       
+            auto user_power_by_window_idx = powerlogs.template get_index<"userwindowid"_n>();
+            auto log_ids = combine_ids(username.value, cycle);
+            
+            auto log = user_power_by_window_idx.find(log_ids);
+            
+            // power3_index powers(_me, host.value);
+            // auto exist_power_object = powers.find(username.value);
+            // uint64_t power = 0;
+            
+            // if (exist_power_object != powers.end()) {
+            //   power = exist_power_object -> power;  
+            // }
+            
+            if (log == user_power_by_window_idx.end()){
+              //emplace
+              powerlogs.emplace(_me, [&](auto &pl){
+                pl.id = unicore::get_global_id("powerlog"_n);
+                pl.host = host;
+                pl.username = username;
+                pl.window_id = cycle;
+                pl.power = new_power;
+                pl.available = asset(0, root_symbol);
+              });
+
+            } else {
+              //modify
+              user_power_by_window_idx.modify(log, _me, [&](auto &pl){
+                pl.power += new_power;
+              });
+            }
+
+
+        } else {
+          //emplace window if something happen with auto-refresh state
+
+          powerstats.emplace(_me, [&](auto &ps) {
+              ps.id = cycle;
+              ps.window_open_at = eosio::time_point_sec(first_window_start_secs + _WINDOW_SECS * cycle);
+              ps.window_closed_at = eosio::time_point_sec(first_window_start_secs + _WINDOW_SECS * (cycle + 1));
+              ps.liquid_power = acc -> total_shares;
+              ps.total_available = asset(0, root_symbol);
+              ps.total_remain = asset(0, root_symbol);
+              ps.total_distributed = asset(0, root_symbol);
+          });
+
+        }
+
+
+        
+      }
+
+      
+
+      // if (log == pool_idwithhost_idx.end()) {
+
+      //   plogs.emplace(_me, [&](auto &l){
+      //     l.id = plogs.available_primary_key();
+      //     l.host = host;
+      //     l.pool_id = acc->current_pool_id;
+      //     l.power = new_power;
+      //     l.cycle_num = acc->current_cycle_num;
+      //     l.pool_num = acc->current_pool_num;
+      //   });
+
+      // } else {
+      //   pool_idwithhost_idx.modify(log, _me, [&](auto &l){
+      //     l.power = new_power;
+      //   });
+      // }
+
+      // sincome_index sincome(_me, host.value);
+      // auto sinc = sincome.find(acc->current_pool_id);
+      
+      // rate_index rates(_me, host.value);
+      // auto rate = rates.find(acc->current_pool_num - 1);
+      // eosio::name main_host = acc->get_ahost();
+      // auto root_symbol = acc->get_root_symbol();
+
+      // market_index market(_me, host.value);
+      // auto itr = market.find(0);
+      // auto liquid_power = acc->total_shares - itr->base.balance.amount;
+
+      // if (sinc == sincome.end()){
+      //   sincome.emplace(_me, [&](auto &s){
+      //       s.max = rate -> system_income;
+      //       s.pool_id = acc->current_pool_id;
+      //       s.ahost = main_host;
+      //       s.cycle_num = acc->current_cycle_num;
+      //       s.pool_num = acc->current_pool_num;
+      //       s.liquid_power = liquid_power;
+      //       s.total = asset(0, root_symbol);
+      //       s.paid_to_sys = asset(0, root_symbol);
+      //       s.paid_to_dacs = asset(0, root_symbol);
+      //       s.paid_to_cfund = asset(0, root_symbol);
+      //       s.paid_to_hfund = asset(0, root_symbol);
+      //       s.paid_to_refs = asset(0, root_symbol);
+      //       s.hfund_in_segments = 0;
+      //       s.distributed_segments = 0;
+      //   }); 
+
+      // } else {
+
+      //   sincome.modify(sinc, _me, [&](auto &s){
+      //     s.liquid_power = liquid_power;
+      //   });
+      // } 
+      // auto idx = votes.template get_index<"host"_n>();
+      // auto i_bv = idx.lower_bound(host.value);
+
 
    } 
 
@@ -366,29 +557,29 @@ using namespace eosio;
    */
 
   void unicore::back_shares_with_badge_action (eosio::name host, eosio::name from, uint64_t shares){
-    account_index accounts(_me, host.value);
-    auto acc = accounts.find(host.value);
-    eosio::check(acc != accounts.end(), "Host is not found");
+    // account_index accounts(_me, host.value);
+    // auto acc = accounts.find(host.value);
+    // eosio::check(acc != accounts.end(), "Host is not found");
     
-    power3_index power_to_idx (_me, host.value);
-    auto power_to = power_to_idx.find(from.value);
+    // power3_index power_to_idx (_me, host.value);
+    // auto power_to = power_to_idx.find(from.value);
       
-    //modify
-    unicore::propagate_votes_changes(host, from, power_to->power, power_to->power - shares);
+    // //modify
+    // unicore::propagate_votes_changes(host, from, power_to->power, power_to->power - shares);
 
-    // sub_base_from_market(host, asset(shares, _POWER));
+    // // sub_base_from_market(host, asset(shares, _POWER));
 
-    power_to_idx.modify(power_to, _me, [&](auto &pt){
-      pt.power -= shares;
-      pt.with_badges -= shares; 
-    });
+    // power_to_idx.modify(power_to, _me, [&](auto &pt){
+    //   pt.power -= shares;
+    //   pt.with_badges -= shares; 
+    // });
 
-    market_index market(_me, host.value);
-    auto itr = market.find(0);
+    // market_index market(_me, host.value);
+    // auto itr = market.find(0);
   
-    accounts.modify(acc, _me, [&](auto &a){
-      a.total_shares -= shares;
-    });  
+    // accounts.modify(acc, _me, [&](auto &a){
+    //   a.total_shares -= shares;
+    // });  
 
   }
 
@@ -401,43 +592,43 @@ using namespace eosio;
    */
 
   void unicore::give_shares_with_badge_action (eosio::name host, eosio::name reciever, uint64_t shares){
-    account_index accounts(_me, host.value);
-    auto acc = accounts.find(host.value);
-    eosio::check(acc != accounts.end(), "Host is not found");
+    // account_index accounts(_me, host.value);
+    // auto acc = accounts.find(host.value);
+    // eosio::check(acc != accounts.end(), "Host is not found");
     
-    power3_index power_to_idx (_me, host.value);
-    auto power_to = power_to_idx.find(reciever.value);
+    // power3_index power_to_idx (_me, host.value);
+    // auto power_to = power_to_idx.find(reciever.value);
     
-    market_index market(_me, host.value);
+    // market_index market(_me, host.value);
     
-    accounts.modify(acc, _me, [&](auto &a){
-        a.total_shares += shares;
-    }); 
+    // accounts.modify(acc, _me, [&](auto &a){
+    //     a.total_shares += shares;
+    // }); 
 
-    // add_base_to_market(host, asset(shares, _POWER));
+    // // add_base_to_market(host, asset(shares, _POWER));
       
 
-    //Emplace or modify power object of reciever and propagate votes changes;
-    if (power_to == power_to_idx.end()) {
+    // //Emplace or modify power object of reciever and propagate votes changes;
+    // if (power_to == power_to_idx.end()) {
 
-      power_to_idx.emplace(_me, [&](auto &pt){
-        pt.username = reciever;
-        pt.power = shares;
-        pt.delegated = 0;
-        pt.with_badges = shares;
-      });
+    //   power_to_idx.emplace(_me, [&](auto &pt){
+    //     pt.username = reciever;
+    //     pt.power = shares;
+    //     pt.delegated = 0;
+    //     pt.with_badges = shares;
+    //   });
     
-    } else {
+    // } else {
       
-      //modify
-      unicore::propagate_votes_changes(host, reciever, power_to->power, power_to->power + shares);
+    //   //modify
+    //   unicore::propagate_votes_changes(host, reciever, power_to->power, power_to->power + shares);
       
       
-      power_to_idx.modify(power_to, _me, [&](auto &pt){
-        pt.power += shares;
-        pt.with_badges += shares; 
-      });      
-    }   
+    //   power_to_idx.modify(power_to, _me, [&](auto &pt){
+    //     pt.power += shares;
+    //     pt.with_badges += shares; 
+    //   });      
+    // }   
   }
 
 
@@ -711,65 +902,67 @@ using namespace eosio;
    * @param[in]  amount  The amount
    */
   uint64_t unicore::buyshares_action ( eosio::name buyer, eosio::name host, eosio::asset amount, eosio::name code, bool is_frozen ){
-    account_index accounts(_me, host.value);
-    partners2_index users(_partners,_partners.value);
-    auto user = users.find(buyer.value);
+    // account_index accounts(_me, host.value);
+    // partners2_index users(_partners,_partners.value);
+    // auto user = users.find(buyer.value);
     
-    auto exist = accounts.find(host.value);
-    auto root_symbol = exist -> get_root_symbol();
+    // auto exist = accounts.find(host.value);
+    // auto root_symbol = exist -> get_root_symbol();
 
-    eosio::check(exist != accounts.end(), "Host is not founded");
-    eosio::check(exist -> quote_token_contract == code, "Wrong quote token contract");
-    eosio::check(exist -> quote_amount.symbol == amount.symbol, "Wrong quote token symbol");
-    eosio::check(exist -> power_market_id != ""_n, "Can buy shares only when power market is enabled");
+    // eosio::check(exist != accounts.end(), "Host is not founded");
+    // eosio::check(exist -> quote_token_contract == code, "Wrong quote token contract");
+    // eosio::check(exist -> quote_amount.symbol == amount.symbol, "Wrong quote token symbol");
+    // eosio::check(exist -> power_market_id != ""_n, "Can buy shares only when power market is enabled");
 
-    eosio::name main_host = exist->get_ahost();
+    // eosio::name main_host = exist->get_ahost();
 
-    spiral_index spiral(_me, main_host.value);
-    auto sp = spiral.find(0);
+    // spiral_index spiral(_me, main_host.value);
+    // auto sp = spiral.find(0);
 
-    uint64_t new_shares = amount.amount * (HUNDR_PERCENT - sp -> loss_percent) / HUNDR_PERCENT;
+    // uint64_t new_shares = amount.amount * (HUNDR_PERCENT - sp -> loss_percent) / HUNDR_PERCENT;
 
-    //TODO buy_shares check!
-    // market.modify( itr, _me, [&]( auto& es ) {
-    //        tokens_out = es.direct_convert( asset(shares,eosio::symbol(eosio::symbol_code("POWER"), 0)), exist -> quote_amount.symbol);
-     //    });
+    // //TODO buy_shares check!
+    // // market.modify( itr, _me, [&]( auto& es ) {
+    // //        tokens_out = es.direct_convert( asset(shares,eosio::symbol(eosio::symbol_code("POWER"), 0)), exist -> quote_amount.symbol);
+    //  //    });
 
 
-    print("new_shares: ", new_shares);
+    // print("new_shares: ", new_shares);
     
-    accounts.modify(exist, _me, [&](auto &a){
-      a.total_shares += new_shares;
-      a.quote_amount += amount;
-    });
+    // accounts.modify(exist, _me, [&](auto &a){
+    //   a.total_shares += new_shares;
+    //   a.quote_amount += amount;
+    // });
 
-    power3_index power(_me, host.value);
+    // power3_index power(_me, host.value);
 
-    auto pexist = power.find(buyer.value);
+    // auto pexist = power.find(buyer.value);
     
-    if (pexist == power.end()) {
+    // if (pexist == power.end()) {
 
-      power.emplace(_me, [&](auto &p){
-         p.username = buyer;
-         p.power = new_shares;
-         p.staked = new_shares; 
-      });
+    //   power.emplace(_me, [&](auto &p){
+    //      p.username = buyer;
+    //      p.power = new_shares;
+    //      p.staked = new_shares; 
+    //   });
       
+    //   log_event_with_shares(buyer, host, new_shares);
     
-    } else {
+    // } else {
       
-     unicore::propagate_votes_changes(host, buyer, pexist->power, pexist->power + new_shares);
-      
-      power.modify(pexist, _me, [&](auto &p){
-        p.power += new_shares;
-        p.staked += new_shares;
-        
-     });
-    };
+    //    unicore::propagate_votes_changes(host, buyer, pexist->power, pexist->power + new_shares);
+    //    log_event_with_shares(buyer, host, pexist->power + new_shares);
+
+    //    power.modify(pexist, _me, [&](auto &p){
+    //      p.power += new_shares;
+    //      p.staked += new_shares;
+    //    });
+ 
+    // };
 
     
-    return amount.amount;
-    
+    // return amount.amount;
+    return 0;
   };
 
 
