@@ -47,6 +47,9 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
         static void cut_tail(uint64_t current_pool_id, eosio::name host);
         
+        [[eosio::action]] void sellbalance(eosio::name host, eosio::name username, uint64_t balance_id);
+        static void buybalance(eosio::name username, eosio::name host, uint64_t balance_id, eosio::asset amount, eosio::name contract);
+
         [[eosio::action]] void pull(eosio::name host, eosio::name username, eosio::asset amount);
         [[eosio::action]] void exittail(eosio::name username, eosio::name host, uint64_t id);
 
@@ -232,7 +235,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void dispmarket(eosio::name host);
         [[eosio::action]] void enpmarket(eosio::name host);
 
-        [[eosio::action]] void emitpower(eosio::name host, eosio::name username, uint64_t user_shares);
+        [[eosio::action]] void emitpower(eosio::name host, eosio::name username, int64_t user_shares, bool is_change);
         [[eosio::action]] void emitpower2(eosio::name host, uint64_t goal_id, uint64_t shares);
         [[eosio::action]] void withrbenefit(eosio::name username, eosio::name host, uint64_t id);
         [[eosio::action]] void withpbenefit(eosio::name username, eosio::name host, uint64_t log_id);
@@ -432,6 +435,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         eosio::name owner;
         eosio::name host;
         eosio::name chost;
+        eosio::name status = "process"_n;
         uint64_t cycle_num;
         uint64_t pool_num;
         uint64_t global_pool_id;
@@ -448,6 +452,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         eosio::asset start_convert_amount;
         eosio::asset if_convert; 
         eosio::asset if_convert_to_power;
+        eosio::asset solded_for;
         bool withdrawed = false;
         std::vector<eosio::asset> forecasts;
         eosio::asset ref_amount; 
@@ -461,9 +466,10 @@ class [[eosio::contract]] unicore : public eosio::contract {
         uint64_t primary_key() const {return id;}
         uint64_t byowner() const {return owner.value;}
         uint64_t byavailable() const {return available.amount;}
+        uint64_t bystatus() const {return status.value;}
 
 
-        EOSLIB_SERIALIZE(balance4, (id)(owner)(host)(chost)(cycle_num)(pool_num)(global_pool_id)(quants_for_sale)(next_quants_for_sale)(last_recalculated_win_pool_id)(win)(root_percent)(convert_percent)(pool_color)(available)(purchase_amount)(compensator_amount)(start_convert_amount)(if_convert)(if_convert_to_power)(withdrawed)(forecasts)(ref_amount)(dac_amount)(cfund_amount)(hfund_amount)(sys_amount)(meta))
+        EOSLIB_SERIALIZE(balance4, (id)(owner)(host)(chost)(status)(cycle_num)(pool_num)(global_pool_id)(quants_for_sale)(next_quants_for_sale)(last_recalculated_win_pool_id)(win)(root_percent)(convert_percent)(pool_color)(available)(purchase_amount)(compensator_amount)(start_convert_amount)(if_convert)(if_convert_to_power)(solded_for)(withdrawed)(forecasts)(ref_amount)(dac_amount)(cfund_amount)(hfund_amount)(sys_amount)(meta))
     
         eosio::name get_ahost() const {
             if (host == chost)
@@ -475,7 +481,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
     typedef eosio::multi_index<"balance4"_n, balance4,
         eosio::indexed_by<"byowner"_n, eosio::const_mem_fun<balance4, uint64_t, &balance4::byowner>>,
-        eosio::indexed_by<"byavailable"_n, eosio::const_mem_fun<balance4, uint64_t, &balance4::byavailable>>
+        eosio::indexed_by<"byavailable"_n, eosio::const_mem_fun<balance4, uint64_t, &balance4::byavailable>>,
+        eosio::indexed_by<"bystatus"_n, eosio::const_mem_fun<balance4, uint64_t, &balance4::bystatus>>
     > balance_index;
 
 

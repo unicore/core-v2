@@ -578,7 +578,7 @@ using namespace eosio;
             a.asset_on_sale = asset(0, _POWER);
             a.asset_on_sale_precision = _POWER.precision();
             a.asset_on_sale_symbol = _POWER.code().to_string();
-            a.sale_shift = 1;
+            a.sale_shift = 0;
             a.voting_only_up = voting_only_up;
             
             a.root_token = root_token;

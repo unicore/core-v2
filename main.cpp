@@ -99,6 +99,20 @@ extern "C" {
                             break;
                         }
 
+                        case 150: {
+                            //check for code inside
+                            //Donation for goal
+                            auto delimeter2 = parameter.find('-');
+                            std::string parameter2 = parameter.substr(delimeter2+1, parameter.length());
+                            
+                            auto host = name(parameter2.c_str());
+                            uint64_t balance_id = atoll(parameter.c_str()); 
+                            require_auth(op.from);
+
+                            unicore::buybalance(op.from, host, balance_id, op.quantity, name(code));
+                            break;
+                        }
+
                         case 101: {
                             eosio::name host; 
                             std::string message = "";
@@ -358,7 +372,11 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::exittail);
                     break;
                  }
-
+                 case "sellbalance"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::sellbalance);
+                    break;
+                 }
+                 
                  case "changemode"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::changemode);
                     break;
