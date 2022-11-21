@@ -993,7 +993,9 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		auto task = tasks.find(report->task_id);
 		
 		eosio::check(task != tasks.end(), "Task is not found");
-		
+		spiral_index spiral(_me, host.value);
+		auto sp = spiral.find(0);
+
 		goals_index goals(_me, host.value);
 		auto goal = goals.find(task -> goal_id);
 		eosio::check(goal != goals.end(), "Goal is not found");
@@ -1010,7 +1012,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		
 		if (goal -> status == "process"_n || goal -> status == "validated"_n || goal -> status == "filled"_n || goal -> status == "reported"_n || goal -> status == "completed"_n){
 
-			double power_per_hour = (double)report -> asset_per_hour.amount / (double)acc -> sale_shift;
+			double power_per_hour = (double)report -> asset_per_hour.amount * sp -> quants_precision / (double)acc -> sale_shift;
 			
 			print("power_per_hour: ", power_per_hour);
 
