@@ -266,31 +266,42 @@ void unicore::sub_balance(eosio::name username, eosio::asset quantity, eosio::na
 
             };
 
-            // sincome_index sincome(_me, host.value);
+            sincome_index sincome(_me, host.value);
             
-            // auto sinc = sincome.find(acc->current_pool_id + 1);
+            auto sinc = sincome.find(acc->current_pool_id + 1);
             
             
             // market_index market(_me, host.value);
             // auto itr = market.find(0);
-            // auto liquid_power = acc->total_shares - itr->base.balance.amount;
+            
+            if (sinc == sincome.end()){
 
-            // sincome.emplace(_me, [&](auto &s){
-            //     s.max = max_income;
-            //     s.pool_id = acc->current_pool_id + 1;
-            //     s.ahost = main_host;
-            //     s.cycle_num = acc->current_cycle_num;
-            //     s.pool_num = acc->current_pool_num + 1;
-            //     s.liquid_power = liquid_power;
-            //     s.total = total_sys_asset + total_dac_asset + total_cfund_asset + total_hfund_asset;
-                
-            //     s.paid_to_sys = total_sys_asset;
-            //     s.paid_to_dacs = total_dac_asset;
-            //     s.paid_to_cfund = total_cfund_asset;
-            //     s.paid_to_hfund = total_hfund_asset;
 
-            //     s.paid_to_refs = asset(0, root_symbol);
-            // }); 
+                sincome.emplace(_me, [&](auto &s){
+                    s.max = max_income;
+                    s.pool_id = acc->current_pool_id + 1;
+                    s.ahost = main_host;
+                    s.cycle_num = acc->current_cycle_num;
+                    s.pool_num = acc->current_pool_num + 1;
+                    s.liquid_power = acc->total_shares;
+                    s.total = total_sys_asset + total_dac_asset + total_cfund_asset + total_hfund_asset;
+                    
+                    s.paid_to_sys = total_sys_asset;
+                    s.paid_to_dacs = total_dac_asset;
+                    s.paid_to_cfund = total_cfund_asset;
+                    s.paid_to_hfund = total_hfund_asset;
+
+                    s.paid_to_refs = asset(0, root_symbol);
+                }); 
+
+            } else {
+                sincome.modify(sinc, _me, [&](auto &s){
+                    s.paid_to_sys += total_sys_asset;
+                    s.paid_to_dacs += total_dac_asset;
+                    s.paid_to_cfund += total_cfund_asset;
+                    s.paid_to_hfund += total_hfund_asset;
+                });
+            }
 
         };
 
@@ -781,6 +792,21 @@ void emplace_first_pools(eosio::name parent_host, eosio::name main_host, eosio::
     });
     print("on emplace3");
     
+    sincome.emplace(_me, [&](auto &s){
+        s.max = rate -> system_income;
+        s.pool_id = available_id;
+        s.ahost = main_host;
+        s.cycle_num = acc->current_cycle_num;
+        s.pool_num = 1;
+        s.liquid_power = acc->total_shares;
+        s.total = asset(0, root_symbol);
+        s.paid_to_sys = asset(0, root_symbol);
+        s.paid_to_dacs = asset(0, root_symbol);
+        s.paid_to_cfund = asset(0, root_symbol);
+        s.paid_to_hfund = asset(0, root_symbol);
+        s.paid_to_refs = asset(0, root_symbol);
+    }); 
+
     unicore::cut_tail(available_id, parent_host);
     
     print("on emplace4");
@@ -808,6 +834,21 @@ void emplace_first_pools(eosio::name parent_host, eosio::name main_host, eosio::
         p.pool_expired_at = eosio::time_point_sec (-1);
         p.total_win_withdraw = asset(0, root_symbol);
         p.total_loss_withdraw = asset(0, root_symbol);
+    }); 
+
+    sincome.emplace(_me, [&](auto &s){
+        s.max = next_rate -> system_income;
+        s.pool_id = available_id + 1;
+        s.ahost = main_host;
+        s.cycle_num = acc->current_cycle_num;
+        s.pool_num = 2;
+        s.liquid_power = acc->total_shares;
+        s.total = asset(0, root_symbol);
+        s.paid_to_sys = asset(0, root_symbol);
+        s.paid_to_dacs = asset(0, root_symbol);
+        s.paid_to_cfund = asset(0, root_symbol);
+        s.paid_to_hfund = asset(0, root_symbol);
+        s.paid_to_refs = asset(0, root_symbol);
     }); 
     
     // if (acc -> type== "bw"_n){
@@ -1532,8 +1573,9 @@ void next_pool( eosio::name host) {
     eosio::check((base_rate >= 100) && (base_rate < 1000000000), "Base Rate must be greater or equal 100 and less then 1e9");
     eosio::check((size_of_pool >= 10) && (size_of_pool <= 1000000000000), "Size of Pool must be greater or equal 10 and less then 1e9");
     eosio::check((pool_limit >= 3) && (pool_limit < 1000), "Pool Count must be greater or equal 4 and less or equal 1000");
-    eosio::check((pool_timeout >= 1) && (pool_timeout < 315400000),"Pool Timeout must be greater or equal then 1 sec and less then 7884000 sec");
+    eosio::check((pool_timeout >= 1) && (pool_timeout <= 2000000000),"Pool Timeout must be greater or equal then 1 sec and less then 7884000 sec");
     eosio::check(compensator_percent <= loss_percent, "Compensator Percent must be greater then 0 (0%) and less or equal 10000 (100%)");
+    
     auto sp = spiral.find(0);
     auto rate = rates.find(0);
     
@@ -1895,7 +1937,7 @@ void unicore::refresh_state(eosio::name host){
  * @param[in]  host  The host
  */
 
-[[eosio::action]] void unicore::sellbalance(eosio::name username, eosio::name host, uint64_t balance_id){
+[[eosio::action]] void unicore::sellbalance(eosio::name host, eosio::name username, uint64_t balance_id){
     unicore::refresh_state(host);
 
     eosio::check(has_auth(username) || has_auth(_self), "missing required authority");
@@ -1927,7 +1969,7 @@ void unicore::refresh_state(eosio::name host){
     eosio::check(bal -> last_recalculated_win_pool_id == cycle->finish_at_global_pool_id, "Cannot sell not refreshed balance. Refresh Balance first and try again.");
     eosio::check(bal -> win == false, "This balance does not require a delayed sell");
     eosio::check(bal -> global_pool_id < bal -> last_recalculated_win_pool_id, "This balance does not require a delayed sell");
-    
+    eosio::check(bal -> pool_num > 2, "Only balances from pool_num > 2 can be solded");
     balance.modify(bal, _me, [&](auto &b){
         b.status = "onsell"_n;
     });
@@ -1936,6 +1978,57 @@ void unicore::refresh_state(eosio::name host){
     //  покупателю создаём новый баланс в том же пуле (частичное копирование)
     //2. Если покупка на весь баланс - всё равно копируем, оставляя количество фракций на нуле, а доступную сумму выводим отдельным методом
     //
+};
+
+
+
+/**
+ * @brief      Публичный метод продажи баланса
+ * 
+ * 
+ * 
+ *
+ * @param[in]  host  The host
+ */
+
+[[eosio::action]] void unicore::cancelsellba(eosio::name host, eosio::name username, uint64_t balance_id){
+    unicore::refresh_state(host);
+
+    eosio::check(has_auth(username) || has_auth(_self), "missing required authority");
+
+    account_index accounts(_me, host.value);
+    auto acc = accounts.find(host.value);
+    eosio::check(acc != accounts.end(), "host is not found");
+    // eosio::name main_host = acc->get_ahost();
+    
+    auto root_symbol = acc->get_root_symbol();
+    balance_index balance(_me, host.value);
+    
+    auto bal = balance.find(balance_id);
+    eosio::check(bal != balance.end(), "Balance is not found");
+    auto main_host = bal -> get_ahost();
+    
+    eosio::check(bal -> status != "process"_n, "Balance not in the sale");
+
+    if (bal -> solded_for.amount > 0) {
+        action(
+            permission_level{ _me, "active"_n },
+            acc->root_token_contract, "transfer"_n,
+            std::make_tuple( _me, username, bal -> solded_for, std::string("User Solded Withdraw")) 
+        ).send();
+    }
+
+    if (bal -> compensator_amount.amount > 0) {
+
+        balance.modify(bal, _me, [&](auto &b){
+            b.status = "process"_n;
+            // b.global_pool_id = bal -> last_recalculated_win_pool_id;
+            b.purchase_amount = bal -> compensator_amount;
+            b.solded_for = asset(0, root_symbol);
+        });
+
+    } else balance.erase(bal);
+    
 };
 
 
@@ -1969,18 +2062,18 @@ void unicore::buybalance(eosio::name buyer, eosio::name host, uint64_t balance_i
     auto pool = pools.find(bal -> last_recalculated_win_pool_id - 1);
     auto cycle = cycles.find(pool -> cycle_num - 1);
     
-    eosio::check(bal -> last_recalculated_win_pool_id == cycle->finish_at_global_pool_id, "Cannot buy not refreshed balance. Refresh Balance first and try again.");
+    // eosio::check(bal -> last_recalculated_win_pool_id == cycle->finish_at_global_pool_id, "Cannot buy not refreshed balance. Refresh Balance first and try again.");
 
     auto user_rate = rates.find(pool -> pool_num - 1);
     auto next_user_win_rate = rates.find(pool -> pool_num);
 
     auto current_rate = rates.find(pool -> pool_num);
 
-    // uint128_t buyer_quants = uint128_t(sp -> quants_precision * (uint128_t)amount.amount / (uint128_t)current_rate -> buy_rate);
+    // uint128_t buyer_quants = uint128_t(sp -> quants_precision * (uint128_t)amount.amount / (uint128_t)user_rate -> buy_rate);
     // uint64_t b_quants = uint64_t(buyer_quants);
 
     // eosio::asset seller_amount = asset(b_quants * user_rate -> sell_rate / sp -> quants_precision, root_symbol);
-    eosio::check(amount == bal -> compensator_amount, "Amount for sell should equal compensator amount");
+    eosio::check(amount <= bal -> compensator_amount, "Amount for sell should be less or equal compensator amount");
 
     // eosio::check(amount == seller_amount, "Amount for buy should equal amount in the balance");
     // eosio::check(b_quants <= bal -> quants_for_sale, "Not enough fractions on the sale");
@@ -1992,8 +2085,71 @@ void unicore::buybalance(eosio::name buyer, eosio::name host, uint64_t balance_i
     
     // eosio::asset diff_power_amount = asset(b_quants, _POWER);
     
+
+    //buyer_quants
+    //buyer_next_quants_for_sale
+    //buyer_available / purchase / compensator
+    //buyer_forecast
+    //buyer_if_convert
+    //buyer_convert_percent
+    
+    //seller_quants
+    //seller_next_quants_for_sale
+    //seller_available / purchase / compensator
+    //seller_solded_for
+    //seller_forecasts
+    //if end - solded
+    //seller_if_convert
+    //seller_convert_percent
+  
     
     
+    std::vector<eosio::asset> forecasts;
+    uint64_t buyer_quants = 0;
+    uint64_t buyer_next_quants = 0;
+    uint64_t buyer_if_convert = 0 ;
+
+     balance.modify(bal, _me, [&](auto &b) {
+        
+        buyer_quants = amount * bal -> quants_for_sale / bal -> compensator_amount;
+
+        b.quants_for_sale = bal -> quants_for_sale - buyer_quants;
+        
+        buyer_next_quants = amount * bal -> next_quants_for_sale / bal -> compensator_amount;
+
+        b.next_quants_for_sale = bal -> next_quants_for_sale - buyer_next_quants;
+        
+        b.compensator_amount = bal -> compensator_amount - amount;
+
+        b.status = b.compensator_amount.amount == 0 ? "solded"_n : "onsell"_n;
+        
+
+        b.solded_for = bal-> solded_for + amount;
+        b.forecasts = forecasts;
+
+        b.if_convert = asset(b.quants_for_sale, _POWER);
+        b.if_convert_to_power = b.if_convert;
+        b.start_convert_amount = asset(0, _POWER);
+
+
+        double convert_percent = (double)b.if_convert.amount / (double)sp->quants_precision / ((double)user_rate -> total_in_box.amount - (double)pool -> remain.amount) * (double)HUNDR_PERCENT;
+        b.convert_percent = uint64_t(ONE_PERCENT * convert_percent);
+
+
+        double root_percent = (double)b.compensator_amount.amount  / (double)b.purchase_amount.amount * (double)HUNDR_PERCENT - (double)HUNDR_PERCENT; 
+        b.root_percent = uint64_t(root_percent);
+
+
+
+        action(
+            permission_level{ _me, "active"_n },
+            _me, "emitpower"_n,
+            std::make_tuple( host , bal -> owner, - buyer_quants, true) 
+        ).send();
+    });
+
+
+
     balance.emplace(_me, [&](auto &b){
         b.id = get_global_id("balances"_n);
         b.owner = buyer;
@@ -2005,21 +2161,26 @@ void unicore::buybalance(eosio::name buyer, eosio::name host, uint64_t balance_i
         b.global_pool_id = bal -> global_pool_id; 
         
         b.pool_color = bal -> pool_color;
-        b.quants_for_sale = bal -> quants_for_sale;
-        b.next_quants_for_sale = bal -> next_quants_for_sale;
+        b.quants_for_sale = buyer_quants;
+        b.next_quants_for_sale = buyer_next_quants;
         
         b.purchase_amount = amount;
-        b.available = amount;
+        b.available = asset(0, root_symbol);
         b.compensator_amount = amount;
 
-        b.if_convert = bal -> if_convert;
-        b.if_convert_to_power = b.if_convert;
-        b.start_convert_amount = b.if_convert;
+        b.if_convert = asset(buyer_quants, _POWER);
+        b.if_convert_to_power = asset(buyer_quants, _POWER);
+        b.start_convert_amount = asset(buyer_quants, _POWER);
         
-        b.convert_percent = bal -> convert_percent;
-        b.root_percent = 0;
+        double convert_percent = (double)b.if_convert.amount / (double)sp->quants_precision / ((double)user_rate -> total_in_box.amount - (double)pool -> remain.amount) * (double)HUNDR_PERCENT;
+        b.convert_percent = uint64_t(ONE_PERCENT * convert_percent);
+
+
+        double root_percent = (double)b.compensator_amount.amount  / (double)b.purchase_amount.amount * (double)HUNDR_PERCENT - (double)HUNDR_PERCENT; 
+        b.root_percent = uint64_t(root_percent);
+
         b.last_recalculated_win_pool_id = bal -> last_recalculated_win_pool_id;
-        b.forecasts = bal -> forecasts;
+        b.forecasts = forecasts;
 
         b.ref_amount = asset(0, root_symbol);
         b.dac_amount = asset(0, root_symbol);
@@ -2031,33 +2192,12 @@ void unicore::buybalance(eosio::name buyer, eosio::name host, uint64_t balance_i
         action(
             permission_level{ _me, "active"_n },
             _me, "emitpower"_n,
-            std::make_tuple( host , buyer, bal -> if_convert.amount, true) 
+            std::make_tuple( host , buyer, b.if_convert.amount, true) 
         ).send();
 
+        print("BALANCE_ID: ", b.id, ";"); //DO NOT DELETE THIS
     });
 
-    action(
-        permission_level{ _me, "active"_n },
-        _me, "emitpower"_n,
-        std::make_tuple( host , bal -> owner, - bal -> if_convert.amount, true) 
-    ).send();
-    
-    std::vector<eosio::asset> forecasts;
-    
-
-     balance.modify(bal, _me, [&](auto &b) {
-        b.status = "solded"_n;
-        b.quants_for_sale = 0;
-        b.next_quants_for_sale = 0;
-        b.solded_for = bal -> compensator_amount;
-        b.forecasts = forecasts;
-        b.convert_percent = 0;
-        b.root_percent = 0;
-        b.if_convert = asset(0, _POWER);
-        b.if_convert_to_power = b.if_convert;
-        b.start_convert_amount = asset(0, _POWER);
-
-    });
 };
 
 /**
@@ -2311,9 +2451,7 @@ void unicore::fill_pool(eosio::name username, eosio::name host, uint64_t quants,
 
     print("here1");
 
-    eosio::check(bal -> status != "solded"_n, "This balance already solded and can be refreshed");
-
-    if (bal -> last_recalculated_win_pool_id <= cycle -> finish_at_global_pool_id)
+    if (bal -> status == "process"_n && bal -> last_recalculated_win_pool_id <= cycle -> finish_at_global_pool_id)
         for (auto i = bal -> last_recalculated_win_pool_id + 1;  i <= ceiling; i++){
             std::vector<eosio::asset> forecasts;
             
@@ -2482,6 +2620,13 @@ void unicore::fill_pool(eosio::name username, eosio::name host, uint64_t quants,
 
                         if ((asset_ref_amount).amount > 0) {
                             unicore::spread_to_refs(host, username, bal -> ref_amount + asset_ref_amount, available, acc -> root_token_contract);
+                            sincome_index sincome(_me, host.value);
+                            auto sinc = sincome.find(acc -> current_pool_id);
+
+                            sincome.modify(sinc, _me, [&](auto &s) {
+                                s.total += bal -> ref_amount + asset_ref_amount;
+                                s.paid_to_refs += bal -> ref_amount + asset_ref_amount;
+                            });
                         }
 
                         balance.modify(bal, payer, [&](auto &b){
@@ -2528,6 +2673,9 @@ void unicore::fill_pool(eosio::name username, eosio::name host, uint64_t quants,
                                 _me, "emitpower"_n,
                                 std::make_tuple( host , username, power_to_emit, false) 
                             ).send();
+
+
+                            
 
                         });
 
@@ -2969,6 +3117,71 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
 
 
 
+/**
+ * @brief      Публичный метод возврата баланса протоколу. 
+ * Вывод средств возможен только для полностью обновленных (актуальных) балансов. Производит обмен Юнитов на управляющий токен и выплачивает на аккаунт пользователя. 
+ * 
+ * Производит расчет реферальных вознаграждений, генерируемых выплатой, и отправляет их всем партнерам согласно установленной формы.
+ * 
+ * Производит финансовое распределение между управляющими компаниями и целевым фондом сообщества. 
+ * 
+ * Каждый последующий пул, который участник проходит в качестве победителя, генеририрует бизнес-доход, который расчитывается исходя из того, что в текущий момент, средств всех проигравших полностью достаточно наа выплаты всем победителям с остатком. Этот остаток, в прапорции Юнитов пользователя и общего количества Юнитов в раунде, позволяет расчитать моментальную выплату, которая может быть изъята из системы при сохранении абсолютного балланса. 
+ * 
+ * Изымаемая сумма из общего котла управляющих токенов, разделяется на три потока, определяемые двумя параметрами: 
+ * - Процент выплат на рефералов. Устанавливается в диапазоне от 0 до 100. Отсекает собой ровно ту часть пирога, которая уходит на выплаты по всем уровням реферальной структуры согласно ее формы. 
+ * - Процент выплат на корпоративных управляющих. Устанавливается в диапазоне от 0 до 100. 
+ * - Остаток от остатка распределяется в фонд целей сообщества.
+ * 
+ * Таким образом, коэффициенты позволяют распределять единый системный фонд по окружности с тремя секторами, где каждый сектор есть фонд со своим назначением.  
+
+ * Например, если общий доход от движения баланса пользователя по спирали составляет 100 USD, а коэфициенты распределения Рефералов и Корпоративных Управляющих равняются соответственно по 0.5 (50%), то все рефералы получат по 33$, все управляющие получат по 33$, и еще 33$ попадет в фонд целей сообщества. 1$ останется в качестве комиссии округления на делении у протокола. 
+ * 
+ * 
+ * @param[in]  op    The operation
+ */
+
+[[eosio::action]] void unicore::withdrawsold(eosio::name username, eosio::name host, uint64_t balance_id){
+    //TODO Контроль выплат всем
+    //TODO рефакторинг
+
+    //Если системный доход не используется - УДАЛИТЬ
+
+    // require_auth(username);
+    eosio::check(has_auth(username) || has_auth(_self), "missing required authority");
+    account_index accounts(_me, host.value);
+    auto acc = accounts.find(host.value);
+    eosio::check(acc != accounts.end(), "host is not found");
+    // eosio::name main_host = acc->get_ahost();
+    
+    auto root_symbol = acc->get_root_symbol();
+    balance_index balance(_me, host.value);
+    
+    auto bal = balance.find(balance_id);
+    eosio::check(bal != balance.end(), "Balance is not found");
+    auto main_host = bal -> get_ahost();
+    
+
+    unicore::refresh_state(host);
+    
+    eosio::check(bal -> status != "process"_n, "Balance is not on a sale");
+    eosio::check(bal -> solded_for.amount > 0, "Balance not have solded amount");
+
+    action(
+        permission_level{ _me, "active"_n },
+        acc->root_token_contract, "transfer"_n,
+        std::make_tuple( _me, username, bal -> solded_for, std::string("User Solded Withdraw")) 
+    ).send();
+
+    if (bal -> compensator_amount.amount > 0) {
+
+        balance.modify(bal, _me, [&](auto &b){
+            b.solded_for = asset(0, root_symbol);
+        });
+
+    } else {
+        balance.erase(bal);
+    }
+}
 
 
 /**
@@ -3051,8 +3264,8 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
     
     eosio::check(last_pool -> remain_quants <= pool->total_quants, "Prevented withdraw. Only BP can restore this balance");
     
-    eosio::check(bal -> status != "solded"_n, "This balance already solded and can be withdrawed by this method. Use withdrwsolde method");
-    eosio::check(sp -> loss_percent < HUNDR_PERCENT, "Cannot withdraw a zero balance. Please, write to help-center for resolve it");
+    eosio::check(bal -> status == "process"_n, "This balance stay on sale and can be withdrawed by this method. Use withdrawsold method");
+    eosio::check(bal -> available.amount > 0, "Cannot withdraw a zero balance. Please, write to help-center for resolve it");
 
 
     uint64_t pools_in_cycle = cycle -> finish_at_global_pool_id - cycle -> start_at_global_pool_id + 1;
@@ -3174,32 +3387,32 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
             auto itr = market.find(0);
             auto liquid_power = acc->total_shares - itr->base.balance.amount;
 
-            if (sinc == sincome.end()){
+            // if (sinc == sincome.end()){
                 
-                sincome.emplace(_me, [&](auto &s){
-                    s.max = rate -> system_income;
-                    s.pool_id = acc->current_pool_id;
-                    s.ahost = main_host;
-                    s.cycle_num = acc->current_cycle_num;
-                    s.pool_num = acc->current_pool_num;
-                    s.liquid_power = liquid_power;
-                    s.total = bal->ref_amount;
-                    s.paid_to_sys = asset(0, root_symbol);
-                    s.paid_to_dacs = asset(0, root_symbol);
-                    s.paid_to_cfund = asset(0, root_symbol);
-                    s.paid_to_hfund = asset(0, root_symbol);
-                    s.paid_to_refs = bal->ref_amount;
-                    s.hfund_in_segments = 0;
-                    s.distributed_segments = 0;
-                }); 
+            //     sincome.emplace(_me, [&](auto &s){
+            //         s.max = rate -> system_income;
+            //         s.pool_id = acc->current_pool_id;
+            //         s.ahost = main_host;
+            //         s.cycle_num = acc->current_cycle_num;
+            //         s.pool_num = acc->current_pool_num;
+            //         s.liquid_power = liquid_power;
+            //         s.total = bal->ref_amount;
+            //         s.paid_to_sys = asset(0, root_symbol);
+            //         s.paid_to_dacs = asset(0, root_symbol);
+            //         s.paid_to_cfund = asset(0, root_symbol);
+            //         s.paid_to_hfund = asset(0, root_symbol);
+            //         s.paid_to_refs = bal->ref_amount;
+            //         s.hfund_in_segments = 0;
+            //         s.distributed_segments = 0;
+            //     }); 
 
-            } else {
-                sincome.modify(sinc, _me, [&](auto &s){
-                    s.total += bal->ref_amount;
-                    s.paid_to_refs += bal->ref_amount;
-                });
+            // } else {
+            //     sincome.modify(sinc, _me, [&](auto &s){
+            //         s.total += bal->ref_amount;
+            //         s.paid_to_refs += bal->ref_amount;
+            //     });
                 
-            }
+            // }
 
             /**
              * Все кванты победителей должны быть возвращены в пулы. 
@@ -3296,7 +3509,7 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
         }
         
         
-        check_good_status(host, username, bal -> purchase_amount - bal -> available);
+        // check_good_status(host, username, bal -> purchase_amount - bal -> available);
 
         balance.erase(bal);
     
@@ -3501,8 +3714,9 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
         eosio::name referer;
         uint8_t count = 1;
             
-        if ((ref != refs.end()) && ((ref->referer).value != 0)){
+        if ((ref != refs.end()) && ((ref->referer).value != 0)) {
             referer = ref->referer;
+            eosio::name prev_ref = ""_n;
             eosio::asset paid = asset(0, spread_amount.symbol);
         
             /**
@@ -3539,13 +3753,17 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
                     });
                     paid += to_ref_amount;
                     
+                    prev_ref = referer;
                     ref = refs.find(referer.value);
+                    
                     referer = ref->referer;
                     
                     count++;
 
                 } else {
+
                     break;
+
                 }
             };
 
@@ -3555,26 +3773,35 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
              */
             eosio::asset back_to_host = spread_amount - paid;
             
-            if (back_to_host.amount > 0){
-                // refbalances_index refbalances2(_me, username.value);
+            if (back_to_host.amount > 0) {
+                // if (prev_ref != ""_n) {
+                    
+                //     refbalances_index refbalances2(_me, prev_ref.value);
+                    
+                //     uint128_t to_ref_segments = back_to_host.amount * TOTAL_SEGMENTS;
+
+                //     refbalances2.emplace(_me, [&](auto &rb){
+                //         rb.id = refbalances2.available_primary_key();
+                //         rb.timepoint_sec = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+                //         rb.host = host;
+                //         rb.refs_amount = back_to_host;
+                //         rb.win_amount = back_to_host;
+                //         rb.amount = back_to_host;
+                //         rb.from = username;
+                //         rb.level = count - 1;
+                //         rb.percent = 0;
+                //         rb.cashback = 0;
+                //         rb.segments = (double)to_ref_segments;
+                //     }); 
+
+                // } else {
+
+                    unicore::spread_to_dacs(host, back_to_host, acc -> root_token_contract);    
+
+                // };
                 
-                // uint128_t to_ref_segments = back_to_host.amount * TOTAL_SEGMENTS;
 
-                // refbalances2.emplace(_me, [&](auto &rb){
-                //     rb.id = refbalances2.available_primary_key();
-                //     rb.timepoint_sec = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
-                //     rb.host = host;
-                //     rb.refs_amount = back_to_host;
-                //     rb.win_amount = back_to_host;
-                //     rb.amount = back_to_host;
-                //     rb.from = username;
-                //     rb.level = 0;
-                //     rb.percent = 0;
-                //     rb.cashback = 0;
-                //     rb.segments = (double)to_ref_segments;
-                // });
-
-                unicore::spread_to_dacs(host, back_to_host, acc -> root_token_contract);
+                
             }
 
 
@@ -3670,30 +3897,30 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
 
    
      void unicore::add_ref_stat(eosio::name username, eosio::name contract, eosio::asset withdrawed){
-        // refstat_index refstats(_me, withdrawed.symbol.code().raw());
+        refstat_index refstats(_me, withdrawed.symbol.code().raw());
 
-        // auto stat_index = refstats.template get_index<"byconuser"_n>();
+        auto stat_index = refstats.template get_index<"byconuser"_n>();
 
-        // auto stat_ids = combine_ids(contract.value, username.value);
-        // auto user_stat = stat_index.find(stat_ids);
+        auto stat_ids = combine_ids(contract.value, username.value);
+        auto user_stat = stat_index.find(stat_ids);
 
-        // if (user_stat == stat_index.end()){
-        //     //emplace
-        //     refstats.emplace(_me, [&](auto &u){
-        //         u.id = refstats.available_primary_key();
-        //         u.username = username;
-        //         u.contract = contract;
-        //         u.symbol = withdrawed.symbol.code().to_string();
-        //         u.precision = withdrawed.symbol.precision();
-        //         u.withdrawed = withdrawed;
-        //     });
+        if (user_stat == stat_index.end()){
+            //emplace
+            refstats.emplace(_me, [&](auto &u){
+                u.id = refstats.available_primary_key();
+                u.username = username;
+                u.contract = contract;
+                u.symbol = withdrawed.symbol.code().to_string();
+                u.precision = withdrawed.symbol.precision();
+                u.withdrawed = withdrawed;
+            });
 
-        // } else {
+        } else {
             
-        //     stat_index.modify(user_stat, _me, [&](auto &u) {
-        //         u.withdrawed += withdrawed;                
-        //     });
-        // }
+            stat_index.modify(user_stat, _me, [&](auto &u) {
+                u.withdrawed += withdrawed;                
+            });
+        }
 
 
     }
@@ -4022,7 +4249,7 @@ void unicore::buy_account(eosio::name username, eosio::name host, eosio::asset q
  *
 */
 
-void unicore::burn_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code){
+void unicore::burn_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, eosio::name status){
     
     account_index accounts(_me, host.value);
     auto acc = accounts.find(host.value);
@@ -4048,11 +4275,17 @@ void unicore::burn_action(eosio::name username, eosio::name host, eosio::asset q
 
     auto quant_cost = pool -> quant_cost;
 
-    
     // eosio::check(quantity.amount >= quant_cost.amount, "Not enought quantity for buy 1 quant");
     // eosio::check(quantity.amount % quant_cost.amount == 0, "You can purchase only whole quant");
     
-    uint128_t dquants = (uint128_t)quantity.amount * (uint128_t)sp->quants_precision / (uint128_t)rate->buy_rate;
+    eosio::asset ref_amount = quantity * acc -> dacs_percent / HUNDR_PERCENT;
+    eosio::asset core_amount = quantity - ref_amount; 
+    
+    if (ref_amount.amount > 0) {
+        unicore::spread_to_refs(host, username, ref_amount, quantity, acc -> root_token_contract);
+    };
+
+    uint128_t dquants = (uint128_t)core_amount.amount * (uint128_t)sp->quants_precision / (uint128_t)rate->buy_rate;
     uint64_t quants = dquants;
    
 
@@ -4089,43 +4322,22 @@ void unicore::burn_action(eosio::name username, eosio::name host, eosio::asset q
     unicore::add_coredhistory(host, username, pool -> id, quantity, "burn", "");    
     unicore::change_bw_trade_graph(host, pool -> id, pool -> cycle_num, pool -> pool_num, rate -> buy_rate, next_rate -> buy_rate, pool -> total_quants, pool -> remain_quants, pool -> color);
     
-    unicore::check_good_status(host, username, quantity);
+    if (host == "core"_n)
+        unicore::check_status(host, username, quantity, status);
     
     if (remain_asset.amount > 0) {
         unicore::spread_to_dacs(host, remain_asset, acc -> root_token_contract);
     }
     
 
-    double power = (double)quantity.amount / (double)acc -> sale_shift * (double)sp->quants_precision;
-    int64_t user_power = int64_t(power);
+    // double power = (double)quantity.amount / (double)acc -> sale_shift * (double)sp->quants_precision;
+    // int64_t user_power = int64_t(power);
 
-    action(
-        permission_level{ _me, "active"_n },
-        _me, "emitpower"_n,
-        std::make_tuple( host , username, user_power, false) 
-    ).send();
-
-    // power3_index power(_me, host.value);
-    // auto pexist = power.find(username.value);
-    
-    // if (pexist == power.end()) {
-
-    //   power.emplace(_me, [&](auto &p) {
-    //     p.username = username;
-    //     p.power = quantity.amount;
-    //     p.staked = quantity.amount;    
-    //   });
-
-        
-    // } else {
-    //     unicore::propagate_votes_changes(host, username, pexist->power, pexist->power + quantity.amount);
-        
-    //     power.modify(pexist, _me, [&](auto &p) {
-    //         p.power += quantity.amount;
-    //         p.staked += quantity.amount;
-    //     });
-    // };
-
+    // action(
+    //     permission_level{ _me, "active"_n },
+    //     _me, "emitpower"_n,
+    //     std::make_tuple( host , username, user_power, false) 
+    // ).send();
 
     unicore::refresh_state(host);
 

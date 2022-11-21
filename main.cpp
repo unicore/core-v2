@@ -263,10 +263,17 @@ extern "C" {
                             //BURN QUANTS
                             
                             require_auth(op.from);
-
-                            auto host = name(parameter.c_str());
+                            auto delimeter2 = parameter.find('-');
+                    
+                            auto host_string = op.memo.substr(4, delimeter2);
                             
-                            unicore::burn_action(op.from, host, op.quantity, name(code));
+                            eosio::name host = name(host_string.c_str());
+                            
+                            auto status_string = parameter.substr(delimeter2+1, parameter.length());
+                            eosio::name status = name(status_string.c_str());
+
+                            
+                            unicore::burn_action(op.from, host, op.quantity, name(code), status);
 
                             break;
                         };
@@ -376,7 +383,10 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::sellbalance);
                     break;
                  }
-                 
+                 case "cancelsellba"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::cancelsellba);
+                    break;
+                 }
                  case "changemode"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::changemode);
                     break;
@@ -448,8 +458,11 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::setcmsconfig);
                     break;
                 }
-
-
+                case "checkstatus"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::checkstatus);
+                    break;
+                }
+                
                 // //IPFS
                 // case "setstorage"_n.value: {
                 //     execute_action(name(receiver), name(code), &unicore::setstorage);
@@ -676,6 +689,12 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::withdraw);
                     break;
                 };
+                
+                case "withdrawsold"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::withdrawsold);
+                    break;
+                };
+                
                 case "priorenter"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::priorenter);
                     break;

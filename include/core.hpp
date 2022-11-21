@@ -48,6 +48,8 @@ class [[eosio::contract]] unicore : public eosio::contract {
         static void cut_tail(uint64_t current_pool_id, eosio::name host);
         
         [[eosio::action]] void sellbalance(eosio::name host, eosio::name username, uint64_t balance_id);
+        [[eosio::action]] void cancelsellba(eosio::name host, eosio::name username, uint64_t balance_id);
+
         static void buybalance(eosio::name username, eosio::name host, uint64_t balance_id, eosio::asset amount, eosio::name contract);
 
         [[eosio::action]] void pull(eosio::name host, eosio::name username, eosio::asset amount);
@@ -66,10 +68,15 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
         [[eosio::action]] void start(eosio::name host, eosio::name chost); 
         [[eosio::action]] void withdraw(eosio::name username, eosio::name host, uint64_t balance_id);
+        [[eosio::action]] void withdrawsold(eosio::name username, eosio::name host, uint64_t balance_id);
+
         [[eosio::action]] void priorenter(eosio::name username, eosio::name host, uint64_t balance_id);
         [[eosio::action]] void refreshbal(eosio::name username, eosio::name host, uint64_t balance_id, uint64_t partrefresh);
         
         [[eosio::action]] void setstartdate(eosio::name host, eosio::time_point_sec start_at); 
+        [[eosio::action]] void checkstatus(eosio::name host, eosio::name username);
+
+        static bool get_status_expiration(eosio::name host, eosio::name username);
 
         static void pay_for_upgrade(eosio::name username, eosio::asset amount, eosio::name code);
         
@@ -129,10 +136,10 @@ class [[eosio::contract]] unicore : public eosio::contract {
 
         static void createfund(eosio::name token_contract, eosio::asset fund_asset, std::string descriptor);
         static eosio::asset buy_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, bool modify_pool, bool transfer, bool spread_to_funds, eosio::asset summ);
-
+        static uint64_t get_status_level(eosio::name host, eosio::name username);
         static void buy_account(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, eosio::name status);
     
-        static void burn_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code);
+        static void burn_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, eosio::name status);
 
         [[eosio::action]] void transfromgf(eosio::name to, eosio::name token_contract, eosio::asset quantity);
 
@@ -299,7 +306,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void setcondition(eosio::name host, eosio::string key, uint64_t value);
         [[eosio::action]] void rmcondition(eosio::name host, uint64_t key); 
         static void rmfromhostwl(eosio::name host, eosio::name username);
-        static void check_good_status(eosio::name host, eosio::name username, eosio::asset good_amount);
+        static void check_status(eosio::name host, eosio::name username, eosio::asset amount, eosio::name status);
 
         static void add_balance(eosio::name payer, eosio::asset quantity, eosio::name contract);   
         static void sub_balance(eosio::name username, eosio::asset quantity, eosio::name contract);

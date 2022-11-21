@@ -135,10 +135,16 @@ using namespace eosio;
     
     uint64_t level = refbalance -> level;
     
+    //TODO get status
+    //compare level and current status
+    //if not match - skip withdraw without error
+    uint64_t current_user_level = unicore::get_status_level("core"_n, username);
+    uint64_t is_expired = unicore::get_status_expiration("core"_n, username);
     
+    eosio::check(level <= current_user_level, "You cant withdraw refbalance with your status");
     
+    eosio::check(is_expired == false, "Your status is expired");
 
-    print("on_withdraw: ", on_withdraw);
     eosio::asset on_widthdraw_asset = asset(on_withdraw, refbalance->amount.symbol);
     
     uint64_t usdtwithdraw = unicore::getcondition(host, "usdtwithdraw");
@@ -151,15 +157,19 @@ using namespace eosio;
         refbalances2_index refbalances2(_me, username.value);
         auto rbalance2 = refbalances2.find(host.value);
         if (rbalance2 == refbalances2.end()) {
-          refbalances2.emplace(username, [&](auto &r2){
+
+          refbalances2.emplace(username, [&](auto &r2) {
             r2.host = host;
             r2.available = refbalance->amount;
             r2.withdrawed = asset(0, _USDT);
           });
+
         } else {
+          
           refbalances2.modify(rbalance2, username, [&](auto &r2){
             r2.available += refbalance->amount;
           });
+
         }
 
       } else if (refreezesecs > 0) {
@@ -179,37 +189,11 @@ using namespace eosio;
 
       }
 
-      //TODO
-      
-      //вывод из таблицы refbalances2 специальным методом с указанием реквизитов
-      //метод подтверждения вывода от аккаунта компании с указанием trx_id
-      //проверка условия минимальной суммы вывода
 
+    } 
 
+    unicore::add_ref_stat(username, acc -> root_token_contract, on_widthdraw_asset);
 
-      // rstat_index rstats(_me, username.value);
-
-      // auto rstat = rstats.find(host.value);
-
-      // if (rstat == rstats.end()) {
-      //   rstats.emplace(username, [&](auto &rs){
-      //     rs.host = host;
-      //     rs.withdrawed = on_widthdraw_asset;
-      //     rs.sediment = double(sediment);
-      //   });
-
-      // } else {
-      //   rstats.modify(rstat, username, [&](auto &rs){
-      //     rs.withdrawed += on_widthdraw_asset;
-      //     rs.sediment += sediment;
-      //   });
-      // }
-
-  } else {
-
-      
-  }
-
-  refbalances.erase(refbalance);
-
-  }
+    refbalances.erase(refbalance);
+  
+}

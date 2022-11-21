@@ -195,12 +195,14 @@
 
         uint64_t primary_key() const {return username.value;}
         uint64_t bygood() const {return total_good.amount;}
+        uint64_t byexpiration() const {return expiration.sec_since_epoch();}
 
         EOSLIB_SERIALIZE(corepartners, (username)(status)(total_good)(sediment)(join_at)(expiration))
     };
 
     typedef eosio::multi_index<"corepartners"_n, corepartners,
-      eosio::indexed_by<"bygood"_n, eosio::const_mem_fun<corepartners, uint64_t, &corepartners::bygood>>  
+      eosio::indexed_by<"bygood"_n, eosio::const_mem_fun<corepartners, uint64_t, &corepartners::bygood>>,
+      eosio::indexed_by<"byexpiration"_n, eosio::const_mem_fun<corepartners, uint64_t, &corepartners::byexpiration>>
     > corepartners_index;
 
 

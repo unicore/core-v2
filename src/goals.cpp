@@ -564,9 +564,9 @@ using namespace eosio;
       });
     };
 
-    if (cashback.amount > 0){
-      burn_action(username, host, cashback, acc -> root_token_contract);
-    };
+    // if (cashback.amount > 0){
+    //   burn_action(username, host, cashback, acc -> root_token_contract);
+    // };
 
 	};
 
