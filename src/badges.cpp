@@ -7,7 +7,6 @@
 		auto acc = accounts.find(host.value);
 		eosio::check(acc != accounts.end(), "Host is not found");
 		
-		
 		badge_index badges(_me, host.value);
 
 		auto badge = badges.find(id);

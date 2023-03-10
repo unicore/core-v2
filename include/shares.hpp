@@ -65,6 +65,23 @@
   > power3_index;
 
 
+/*!
+   \brief Обновленная структура силы пользователя у хоста Двойной Спирали.
+*/
+
+  struct [[eosio::table, eosio::contract("unicore")]] goldens {
+    eosio::name host;
+    uint64_t total_golden;
+    
+    uint64_t primary_key() const {return host.value;}
+
+    
+    EOSLIB_SERIALIZE(struct goldens, (host)(total_golden))
+  };
+
+  typedef eosio::multi_index<"goldens"_n, goldens> goldens_index;
+
+
 
 /*!
    \brief Структура статистики распределения безусловного потока жетонов хоста Двойной Спирали. 

@@ -764,11 +764,15 @@ using namespace eosio;
      */
 
     [[eosio::action]] void unicore::edithost(eosio::name architect, eosio::name host, eosio::name platform, eosio::string title, eosio::string purpose, eosio::string manifest, eosio::name power_market_id, eosio::string meta){
-        require_auth (architect);
-
         account_index accs(_me, host.value);
         auto acc = accs.find(host.value);
-        eosio::check(acc->architect == architect, "You are not architect of current commquanty");
+        
+        eosio::check(has_auth(host) || has_auth(acc -> architect), "missing required authority");
+
+        eosio::name payer = has_auth(host) ? host : acc -> architect;
+
+
+        // eosio::check(acc->architect == architect, "You are not architect of current commquanty");
 
         eosio::check(acc != accs.end(), "Host is not founded");
         
@@ -777,7 +781,7 @@ using namespace eosio;
         //eosio::check title lenght
         // eosio::check((title.length() < 1024) && (title.length() > 0) , "Title should be more then 10 symbols and less then 1024");
 
-        accs.modify(acc, architect, [&](auto &h){
+        accs.modify(acc, payer, [&](auto &h){
             h.purpose = purpose;
             h.meta = meta;
             h.title = title;
@@ -788,7 +792,7 @@ using namespace eosio;
         auto coreahost = coreahosts.find(host.value);
         eosio::check(coreahost != coreahosts.end(), "AHost is not found");
 
-        coreahosts.modify(coreahost, architect, [&](auto &a){
+        coreahosts.modify(coreahost, payer, [&](auto &a){
             a.title = title;
             a.purpose = purpose;
             a.manifest = manifest;
@@ -809,7 +813,7 @@ using namespace eosio;
                 a.is_host = coreahost -> is_host;
             });  
         } else {
-            platformahosts.modify(platformahost, architect, [&](auto &a){
+            platformahosts.modify(platformahost, payer, [&](auto &a){
                 a.title = coreahost -> title;
                 a.purpose = coreahost -> purpose;
                 a.manifest = coreahost -> manifest;
@@ -824,7 +828,7 @@ using namespace eosio;
         ahosts_index ahosts(_me, host.value);
         auto ahost = ahosts.find(host.value);
         if (ahost != ahosts.end()){
-            ahosts.modify(ahost, architect, [&](auto &a){
+            ahosts.modify(ahost, payer, [&](auto &a){
                 a.title = title;
                 a.purpose = purpose;
                 a.manifest = manifest;

@@ -1,4 +1,4 @@
-# UNICORE
+# CORE
 
 UNICORE - универсальный протокол создания цифровых экономических систем.
 
@@ -24,7 +24,7 @@ docker run --rm --name eosio.cdt_v1.7.0 --volume /ABSOLUTE_PATH_TO_CONTRACT:/pro
 ```
 cleos set contract CONTRACT_NAME /ABSOLUTE_PATH_TO_CONTRACT/core -p CONTRACT_NAME
 ```
-
+<!-- 
 ### Инициализация
 Для инициализации необходимо совершить транзакцию с системным процентом, изымаемым из оборота всех Двойных Спиралей. (1000000 = 100%). Максимальный процент: 30%.
 
@@ -33,7 +33,7 @@ cleos push action CONTRACT_NAME init [0] -p CONTRACT_NAME
 ```
 
 Изъятые из оборота средства распределяются среди делегатов сети. 
-
+ -->
 
 ### Порядок создания и запуска хоста
 1. Произвести апгрейд аккаунта методом upgrade.

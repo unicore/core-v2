@@ -840,8 +840,10 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 			eosio::check(task -> priority >= 0, "task priority should be more then zero");
 
 			eosio::asset asset_per_hour2 = (task -> priority == 0 || task -> priority == 1) ? asset(10*10000, root_symbol) : (task -> priority == 2 ? asset(20*10000, root_symbol) : asset(40*10000, root_symbol));
+			spiral_index spiral(_me, host.value);
+			auto sp = spiral.find(0);
 
-			double req = ((double)duration_secs * (double)asset_per_hour2.amount / 3600) / (double)acc -> sale_shift;
+			double req = ((double)sp-> quants_precision * (double)duration_secs * (double)asset_per_hour2.amount / 3600) / (double)acc -> sale_shift;
 
 			eosio::asset requested = task -> is_public == false ? task->requested : asset(req, _POWER);
 			eosio::symbol sym = task -> is_public == false ? root_symbol : _POWER;
@@ -979,13 +981,11 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 	 */
 	[[eosio::action]] void unicore::approver(eosio::name host, uint64_t report_id, eosio::string comment){
 		
-		
 		account_index accounts(_me, host.value);
 		
 		auto acc = accounts.find(host.value);
 		eosio::check(acc != accounts.end(), "Host is not found");
 
-		
 		reports_index reports(_me, host.value);
 		auto report = reports.find(report_id);
 		
@@ -995,16 +995,15 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		eosio::check(task != tasks.end(), "Task is not found");
 		spiral_index spiral(_me, host.value);
 		auto sp = spiral.find(0);
-
 		goals_index goals(_me, host.value);
 		auto goal = goals.find(task -> goal_id);
 		eosio::check(goal != goals.end(), "Goal is not found");
-
+		
 		//AUTH CHECK
 		eosio::check(has_auth(acc -> architect) || has_auth(goal -> benefactor), "missing required authority");
     auto payer = has_auth(acc -> architect) ? acc -> architect : goal -> benefactor;
 		
-		
+		print(4);
 		
 		if (report -> username != host)
 			eosio::check(report->approved == false, "Task is already approved");
@@ -1012,30 +1011,36 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 		
 		if (goal -> status == "process"_n || goal -> status == "validated"_n || goal -> status == "filled"_n || goal -> status == "reported"_n || goal -> status == "completed"_n){
 
-			double power_per_hour = (double)report -> asset_per_hour.amount * sp -> quants_precision / (double)acc -> sale_shift;
+			double asset_per_hour = (double)report -> asset_per_hour.amount * sp -> quants_precision * report -> duration_secs / 3600;
 			
-			print("power_per_hour: ", power_per_hour);
+			print("asset_per_hour: ", asset_per_hour);
 
-			uint64_t user_power = power_per_hour * report -> duration_secs / 3600;
+			uint64_t user_power = asset_per_hour / (double)acc -> sale_shift;
 
 			uint64_t bonus_power = user_power * 10 * ONE_PERCENT / HUNDR_PERCENT;
+			eosio::asset amount = asset(asset_per_hour / sp -> quants_precision, acc -> quote_amount.symbol);
 
 			print("user_power: ", user_power);
 			print("bonus_power: ", bonus_power);
+			print("amount for emit: ", amount);
 
 			action(
 	        permission_level{ _me, "active"_n },
 	        _me, "emitpower"_n,
-	        std::make_tuple( host , report->username, user_power) 
+	        std::make_tuple( host , report->username, user_power, false) 
 	    ).send();
 
+			//TODO ?
+			// action(
+	    //     permission_level{ _me, "active"_n },
+	    //     _me, "emittomarket"_n,
+	    //     std::make_tuple( host , report->username, user_power, amount) 
+	    // ).send();
 			
-
 			reports.modify(report, payer, [&](auto &r){
 				r.need_check = false;
 				r.comment = comment;
 				r.approved = true;
-				r.withdrawed = report->requested;
 				r.positive_votes += _START_VOTES;
 			});
 
@@ -1043,11 +1048,11 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 				g.second_circuit_votes += _START_VOTES + report -> positive_votes;
 				g.total_power_on_distribution += bonus_power; 
 				g.approved_reports += 1;
-				g.target1 += asset(user_power + bonus_power, acc -> asset_on_sale.symbol);
+				g.target1 += asset(user_power + bonus_power, _POWER);
 			});
 
 			accounts.modify(acc, payer, [&](auto &a){
-				a.approved_reports +=1;
+				a.approved_reports += 1;
 			});
 
 			intelown_index intelown(_me, host.value);
@@ -1267,7 +1272,7 @@ void unicore::check_and_gift_netted_badge(eosio::name username, eosio::name host
 			action(
 	        permission_level{ _me, "active"_n },
 	        _me, "emitpower"_n,
-	        std::make_tuple( host , username, report -> power_balance) 
+	        std::make_tuple( host , username, report -> power_balance, false) 
 	    ).send();
 
 

@@ -655,7 +655,7 @@ using namespace eosio;
         // g.withdrawed += refs_quantity;
 
         // g.filled = filled;
-        g.target1 += asset(user_power, acc -> asset_on_sale.symbol);
+        g.target1 += asset(user_power, _POWER);
         // g.target2= target2;
       });
 

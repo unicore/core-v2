@@ -278,8 +278,8 @@ using namespace eosio;
 				voters.erase(itr);
 
 				reports.modify(report, voter, [&](auto &r) {
-	       	vote -> power < 0 ? r.negative_votes = report->negative_votes + vote->power : r.positive_votes = report->positive_votes - vote->power;
-	       	r.voters = voters;
+			       	vote -> power < 0 ? r.negative_votes = report->negative_votes + vote->power : r.positive_votes = report->positive_votes - vote->power;
+			       	r.voters = voters;
 				}); 
 
 				// tasks.modify(task, voter, [&](auto &g) {

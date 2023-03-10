@@ -16,32 +16,6 @@
 using namespace eosio;
 
 
-/*! \mainpage UNICORE - универсальный протокол создания социально-экономических платформ
- *
- * Протокол UNICORE предлагает инновационный механизм перераспределения ценности в замкнутой цифровой
- * экономической системе на основе математического алгоритма точного финансового планирования "Двойная Спираль".
- 
- * - Исполняется в любой сетевой операционной системе типа EOS.
- *
- * - Генерирует теоретически неограниченную прибыль при фиксированных рисках и абсолютном финансовом балансе в любой момент.
- * 
- * - Предоставляет инновационную бизнес-модель, основанную на энергии внимания и добровольных пожертвованиях людей.
- * 
- * 
- * \section purpose_sec Назначение
- * Протокол предназначен для запуска и обслуживания цифровых экономических систем "Двойная Спираль" во множестве различных конфигураций с целью увеличения качества жизни участников и реализации новых масштабных коллективных проектов за счёт ускоренного движения финансовых потоков.
- * \section install_sec Клуб разработчиков
- *
- * https://unicode.club
- * \section club_sec Открытый код
- * https://github.com/dacom-core/unicore
- * \section licension_sec Лицензия
- *
- * MIT
-
- *
- */
-
 extern "C" {
 
    void apply( uint64_t receiver, uint64_t code, uint64_t action ) {
@@ -76,6 +50,7 @@ extern "C" {
                     //666 - direct fund commquanty fund balance for some purposes
                     
                     switch (subintcode){
+
                         case 100: {
                             eosio::name host; 
                             std::string message = "";
@@ -98,7 +73,7 @@ extern "C" {
                             unicore::deposit(op.from, host, op.quantity, name(code), message);
                             break;
                         }
-
+                        
                         case 150: {
                             //check for code inside
                             //Donation for goal
@@ -277,6 +252,46 @@ extern "C" {
 
                             break;
                         };
+                        case 801: {
+                            //BURN QUANTS
+                            //status 
+                            // adviser
+                            require_auth(op.from);
+                            auto delimeter2 = parameter.find('-');
+                    
+                            auto host_string = op.memo.substr(4, delimeter2);
+                            
+                            eosio::name host = name(host_string.c_str());
+                            
+                            auto username_string = parameter.substr(delimeter2+1, parameter.length());
+                            eosio::name username = name(username_string.c_str());
+
+                            
+                            unicore::subscribe_action(username, host, op.quantity, name(code), "adviser"_n);
+
+                            break;
+                        };
+
+                        case 802: {
+                            //BURN QUANTS
+                            //status 
+                            // assistant
+                            require_auth(op.from);
+                            auto delimeter2 = parameter.find('-');
+                    
+                            auto host_string = op.memo.substr(4, delimeter2);
+                            
+                            eosio::name host = name(host_string.c_str());
+                            
+                            auto username_string = parameter.substr(delimeter2+1, parameter.length());
+                            eosio::name username = name(username_string.c_str());
+
+                            
+                            unicore::subscribe_action(username, host, op.quantity, name(code), "assistant"_n);
+
+                            break;
+                        };
+
                         case 111: {
                             //SPREAD
                             
@@ -370,7 +385,7 @@ extern "C" {
                 
             }
         } else if (code == _me.value){
-            switch (action){
+            switch (action) {
                  case "init"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::init);
                     break;
@@ -632,6 +647,14 @@ extern "C" {
                     execute_action(name(receiver), name(code), &unicore::enpmarket);
                     break;
                 };
+                case "emittomarket"_n.value: {
+                    execute_action(name(receiver), name(code), &unicore::emittomarket);
+                    break;
+                };
+                case "emitquote"_n.value:{
+                    execute_action(name(receiver), name(code), &unicore::emitquote);
+                    break;
+                };    
                 case "emitpower"_n.value: {
                     execute_action(name(receiver), name(code), &unicore::emitpower);
                     break;

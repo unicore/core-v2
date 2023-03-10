@@ -139,11 +139,13 @@ using namespace eosio;
     //compare level and current status
     //if not match - skip withdraw without error
     uint64_t current_user_level = unicore::get_status_level("core"_n, username);
-    uint64_t is_expired = unicore::get_status_expiration("core"_n, username);
     
-    eosio::check(level <= current_user_level, "You cant withdraw refbalance with your status");
+    //TODO
+    // uint64_t is_expired = unicore::get_status_expiration("core"_n, username);
     
-    eosio::check(is_expired == false, "Your status is expired");
+    // eosio::check(level <= current_user_level, "You cant withdraw refbalance with your status");
+    
+    // eosio::check(is_expired == false, "Your status is expired");
 
     eosio::asset on_widthdraw_asset = asset(on_withdraw, refbalance->amount.symbol);
     

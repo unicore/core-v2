@@ -78,6 +78,56 @@ using namespace eosio;
   }
 
 
+  [[eosio::action]] void unicore::emitquote(eosio::name host, eosio::asset amount, eosio::name contract) {
+    
+    require_auth("eosio"_n);
+    account_index account(_me, host.value);
+    auto acc = account.find(host.value);
+    eosio::check(acc -> root_token_contract == contract, "Wrong token contract");
+    
+    add_quote_to_market("power"_n, host, amount);
+
+  };
+
+  void unicore::emittomarket(eosio::name host, eosio::name username, uint64_t user_shares, eosio::asset amount){
+    account_index account(_me, host.value);
+    auto acc = account.find(host.value);
+    
+    spiral_index spiral(_me, host.value);
+    auto sp = spiral.find(host.value);
+
+    if (user_shares > 0) {
+      market_index market(_me, host.value);
+      auto itr = market.find("power"_n.value);
+      
+      if (itr == market.end()) {
+        unicore::create_bancor_market("power"_n, host, 0, eosio::asset(0, amount.symbol), acc -> quote_token_contract, 0); 
+      }
+
+
+      //check balance
+      //check is it top-witness or not
+      //if not top-witness and system currency - skip
+      //or better not make simple transfer, make it by event from system contract
+      
+      action(
+          permission_level{ _me, "active"_n },
+          "eosio"_n, "takereserve"_n,
+          std::make_tuple( host, acc -> quote_token_contract, amount, std::string("emission for labor")) 
+      ).send();
+
+      // action(
+      //     permission_level{ _saving, "active"_n },
+      //     acc->root_token_contract, "transfer"_n,
+      //     std::make_tuple( _saving, _me, asset(user_shares, acc -> quote_amount.symbol), std::string("emission for labor")) 
+      // ).send();
+      
+      add_base_to_market("power"_n, host, asset(user_shares, _POWER));
+
+    };
+
+  }
+
   /**
    * @brief      Метод эмиссии силы с аукциона
    * 
@@ -99,12 +149,17 @@ using namespace eosio;
       account.modify(acc, _me, [&](auto &a){
         a.total_shares += user_shares;
         print(" after set shares: ", a.total_shares);
+        
+        //check for market exist
+        //if not exist - create
+
         // a.quote_amount += asset(10000 * user_shares, acc -> quote_amount.symbol);
       });
 
     power3_index power(_me, host.value);
     auto pexist = power.find(username.value);
     
+
     if (pexist == power.end()) {
 
       power.emplace(_me, [&](auto &p) {
@@ -140,32 +195,32 @@ using namespace eosio;
   [[eosio::action]] void unicore::emitpower2(eosio::name host, uint64_t goal_id, uint64_t shares) {
     eosio::check(has_auth("auction"_n) || has_auth(_me), "missing required authority");
 
-    account_index account(_me, host.value);
-    auto acc = account.find(host.value);
+    // account_index account(_me, host.value);
+    // auto acc = account.find(host.value);
     
-    // eosio::check(acc -> sale_mode == "auction"_n, "Wrong sale type");
+    // // eosio::check(acc -> sale_mode == "auction"_n, "Wrong sale type");
     
-    action(
-        permission_level{ _saving, "active"_n },
-        acc->root_token_contract, "transfer"_n,
-        std::make_tuple( _saving, _me, asset(10000 * shares, acc -> quote_amount.symbol), std::string("")) 
-    ).send();
+    // action(
+    //     permission_level{ _saving, "active"_n },
+    //     acc->root_token_contract, "transfer"_n,
+    //     std::make_tuple( _saving, _me, asset(shares, acc -> quote_amount.symbol), std::string("")) 
+    // ).send();
 
 
-    add_base_to_market("power"_n, host, asset(shares, _POWER));
-    add_quote_to_market("power"_n, host, asset(10000 * shares, acc -> quote_amount.symbol));
+    // add_base_to_market("power"_n, host, asset(shares, _POWER));
+    // add_quote_to_market("power"_n, host, asset(shares, acc -> quote_amount.symbol));
 
-    account.modify(acc, _me, [&](auto &a){
-      a.total_shares += shares;
-      a.quote_amount += asset(10000 * shares, acc -> quote_amount.symbol);
-    });
+    // account.modify(acc, _me, [&](auto &a){
+    //   a.total_shares += shares;
+    //   a.quote_amount += asset(shares, acc -> quote_amount.symbol);
+    // });
 
-    goals_index goals(_me, host.value);
-    auto goal = goals.find(goal_id);
-    goals.modify(goal, _me, [&](auto &g){
-      g.total_power_on_distribution += shares;
-      g.remain_power_on_distribution += shares;
-    });
+    // goals_index goals(_me, host.value);
+    // auto goal = goals.find(goal_id);
+    // goals.modify(goal, _me, [&](auto &g){
+    //   g.total_power_on_distribution += shares;
+    //   g.remain_power_on_distribution += shares;
+    // });
   }
 
 

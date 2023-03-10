@@ -28,14 +28,33 @@
 
 #include "consts.hpp"
 
-
-/*!
-    \brief Содержит все доступные действия, публичные и приватные методы протокола.
+/**
+\defgroup public_consts CONSTS
+\brief Константы контракта
 */
 
+/**
+\defgroup public_actions ACTIONS
+\brief Методы действий контракта
+*/
 
+/**
+\defgroup public_tables TABLES
+\brief Структуры таблиц контракта
+*/
+
+/**
+\defgroup public_subcodes SUBCODES
+\brief Субкоды входящих переводов
+*/
+
+/**
+\defgroup public_modules MODULES
+\brief Подмодули
+*/
 
 // namespace eosio {
+
 
 class [[eosio::contract]] unicore : public eosio::contract {
     public:
@@ -140,6 +159,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         static void buy_account(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, eosio::name status);
     
         static void burn_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, eosio::name status);
+        static void subscribe_action(eosio::name username, eosio::name host, eosio::asset quantity, eosio::name code, eosio::name status);
 
         [[eosio::action]] void transfromgf(eosio::name to, eosio::name token_contract, eosio::asset quantity);
 
@@ -154,7 +174,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         
 
         [[eosio::action]] void edithost(eosio::name architect, eosio::name host, eosio::name platform, eosio::string title, eosio::string purpose, eosio::string manifest, eosio::name power_market_id, eosio::string meta);
-        [[eosio::action]] void fixs(eosio::name host, uint64_t pool_num);
+        [[eosio::action]] void fixs(eosio::name host, eosio::name username);
         [[eosio::action]] void settype(eosio::name host, eosio::name type);
         [[eosio::action]] void setlevels(eosio::name host, std::vector<uint64_t> levels);
 
@@ -242,8 +262,10 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void dispmarket(eosio::name host);
         [[eosio::action]] void enpmarket(eosio::name host);
 
+        [[eosio::action]] void emitquote(eosio::name host, eosio::asset amount, eosio::name contract);
         [[eosio::action]] void emitpower(eosio::name host, eosio::name username, int64_t user_shares, bool is_change);
         [[eosio::action]] void emitpower2(eosio::name host, uint64_t goal_id, uint64_t shares);
+        [[eosio::action]] void emittomarket(eosio::name host, eosio::name username, uint64_t user_shares, eosio::asset amount);
         [[eosio::action]] void withrbenefit(eosio::name username, eosio::name host, uint64_t id);
         [[eosio::action]] void withpbenefit(eosio::name username, eosio::name host, uint64_t log_id);
         [[eosio::action]] void refreshpu(eosio::name username, eosio::name host, uint64_t log_id);
@@ -307,6 +329,7 @@ class [[eosio::contract]] unicore : public eosio::contract {
         [[eosio::action]] void rmcondition(eosio::name host, uint64_t key); 
         static void rmfromhostwl(eosio::name host, eosio::name username);
         static void check_status(eosio::name host, eosio::name username, eosio::asset amount, eosio::name status);
+        static void check_subscribe(eosio::name host, eosio::name username, eosio::asset amount, eosio::name status);
 
         static void add_balance(eosio::name payer, eosio::asset quantity, eosio::name contract);   
         static void sub_balance(eosio::name username, eosio::asset quantity, eosio::name contract);
@@ -491,6 +514,55 @@ class [[eosio::contract]] unicore : public eosio::contract {
         eosio::indexed_by<"byavailable"_n, eosio::const_mem_fun<balance4, uint64_t, &balance4::byavailable>>,
         eosio::indexed_by<"bystatus"_n, eosio::const_mem_fun<balance4, uint64_t, &balance4::bystatus>>
     > balance_index;
+
+
+
+    struct [[eosio::table, eosio::contract("unicore")]] balance{
+        uint64_t id;
+        eosio::name host;
+        eosio::name chost;
+        uint64_t cycle_num;
+        uint64_t pool_num;
+        uint64_t global_pool_id;
+        uint64_t quants_for_sale;
+        uint64_t next_quants_for_sale;
+        uint64_t last_recalculated_win_pool_id = 1;
+        bool win = false; //true if win, false if lose or nominal
+        int64_t root_percent;
+        int64_t convert_percent;
+        std::string pool_color;
+        eosio::asset available; 
+        eosio::asset purchase_amount;
+        eosio::asset compensator_amount;
+        eosio::asset start_convert_amount;
+        eosio::asset if_convert; 
+        eosio::asset if_convert_to_power;
+        bool withdrawed = false;
+        std::vector<eosio::asset> forecasts;
+        eosio::asset ref_amount; 
+        eosio::asset dac_amount;
+        eosio::asset cfund_amount;
+        eosio::asset hfund_amount;
+        eosio::asset sys_amount;
+
+        eosio::string meta; 
+
+        uint64_t primary_key() const {return id;}
+        uint64_t byhost() const {return host.value;}
+
+        EOSLIB_SERIALIZE(balance, (id)(host)(chost)(cycle_num)(pool_num)(global_pool_id)(quants_for_sale)(next_quants_for_sale)(last_recalculated_win_pool_id)(win)(root_percent)(convert_percent)(pool_color)(available)(purchase_amount)(compensator_amount)(start_convert_amount)(if_convert)(if_convert_to_power)(withdrawed)(forecasts)(ref_amount)(dac_amount)(cfund_amount)(hfund_amount)(sys_amount)(meta))
+    
+        eosio::name get_ahost() const {
+            if (host == chost)
+                return host;
+            else
+                return chost;
+        }
+    };
+
+    typedef eosio::multi_index<"balance"_n, balance,
+        eosio::indexed_by<"byhost"_n, eosio::const_mem_fun<balance, uint64_t, &balance::byhost>>
+    > balanceold_index;
 
 
 /*!
