@@ -548,8 +548,8 @@ using namespace eosio;
     // eosio::check(goal->type == "goal"_n, "Only goal type can be withdrawed by this method");
 
     
-    eosio::asset cashback = goal->available * 10 / 100;
-    eosio::asset on_withdraw = goal->available - cashback;
+    // eosio::asset cashback = goal->available * 10 / 100;
+    eosio::asset on_withdraw = goal->available; // - cashback;
 
     if (on_withdraw.amount > 0){
     	action(
@@ -626,55 +626,51 @@ using namespace eosio;
 
     eosio::check(goal != goals.end(), "Goal is not exist");
 
-    // bool filled = goal->available + goal->withdrawed + quantity >= goal->target;    
-
     auto root_symbol = acc->get_root_symbol();
 
-    // if (from != host) {
+    eosio::asset core_quantity = quantity;
+    eosio::asset refs_quantity = asset(0, root_symbol);
 
-      // eosio::asset core_quantity = quantity * (HUNDR_PERCENT - goal -> cashback) / HUNDR_PERCENT;
-
-      // eosio::asset refs_quantity = quantity - core_quantity;
-
-      // print(" quantity: ", quantity);
-      // print(" core_quantity: ", core_quantity);
-      // print(" refs_quantity: ", refs_quantity);
-
-      double power = (double)quantity.amount / (double)acc -> sale_shift;
-      uint64_t user_power = uint64_t(power);
-
-      action(
-          permission_level{ _me, "active"_n },
-          _me, "emitpower"_n,
-          std::make_tuple( host , from, user_power) 
-      ).send();
+    goals4_index goals4(_me, host.value);
+    
+    auto goal4 = goals4.find(goal_id);
+    
+    if (goal4 != goals4.end()) {
 
 
-      goals.modify(goal, _me, [&](auto &g){
-        g.available += quantity;
-        // g.withdrawed += refs_quantity;
+      core_quantity = quantity * (HUNDR_PERCENT - goal4 -> cashback) / HUNDR_PERCENT;
 
-        // g.filled = filled;
-        g.target1 += asset(user_power, _POWER);
-        // g.target2= target2;
+      refs_quantity = quantity - core_quantity;
+
+      goals4.modify(goal4, _me, [&](auto &g4){
+        g4.refs_amount += refs_quantity; 
       });
+    };
+
+    // print(" quantity: ", quantity);
+    // print(" core_quantity: ", core_quantity);
+    // print(" refs_quantity: ", refs_quantity);
+
+    double power = (double)quantity.amount / (double)acc -> sale_shift * (double)sp -> quants_precision;
+    uint64_t user_power = uint64_t(power);
+
+    action(
+        permission_level{ _me, "active"_n },
+        _me, "emitpower"_n,
+        std::make_tuple( host , from, user_power, false) 
+    ).send();
 
 
-      // if (refs_quantity.amount > 0) {
-      //   unicore::spread_to_refs(host, from, quantity, refs_quantity);
-      // }
+    goals.modify(goal, _me, [&](auto &g){
+      g.available += core_quantity;
+      g.withdrawed += refs_quantity;
+      g.target1 += asset(user_power, _POWER);
+    });
 
 
-    // } 
-    // else {
-
-
-    //     goals.modify(goal, _me, [&](auto &g){
-    //       g.available += quantity;
-    //       g.filled = filled;
-    //     });
-
-    // }
+    if (refs_quantity.amount > 0) {
+      unicore::spread_to_refs(host, from, quantity, refs_quantity, acc -> root_token_contract);
+    }
 
   }
 

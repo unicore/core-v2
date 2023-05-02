@@ -3139,8 +3139,6 @@ std::vector <eosio::asset> unicore::calculate_forecast(eosio::name username, eos
     
     auto sp = spiral.find(0);
     
-    
-    print("here1");
     eosio::check(bal != balance.end(), "Balance is not found");
     
     auto pool = pools.find(bal->global_pool_id);

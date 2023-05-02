@@ -133,6 +133,24 @@
 
 
 
+// /*!
+//    \brief Структура целей хоста Двойной Спирали.
+// */
+
+    struct [[eosio::table, eosio::contract("unicore")]]  goals4 {
+        uint64_t id;
+        uint64_t cashback;
+        eosio::asset refs_amount;
+
+        uint64_t primary_key()const { return id; }
+        
+        EOSLIB_SERIALIZE( goals4, (id)(cashback)(refs_amount))
+    };
+
+    typedef eosio::multi_index <"goals4"_n, goals4> goals4_index;
+
+
+
 /*!
    \brief Структура участников цели хоста Двойной Спирали
 */
