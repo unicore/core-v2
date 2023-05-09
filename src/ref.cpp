@@ -1,119 +1,102 @@
 using namespace eosio;
 
-  
-  [[eosio::action]] void unicore::setwithdrwal(eosio::name username, eosio::name host, eosio::string wallet){
-    require_auth(username);
 
+    void unicore2::spread_to_refs(eosio::name host, eosio::name username, eosio::asset spread_amount, eosio::asset from_amount, eosio::name token_contract){
+        partners2_index refs(_partners, _partners.value);
+        auto ref = refs.find(username.value);
 
-    refbalances2_index refbalances2(_me, username.value);
-    auto rbalance = refbalances2.find(host.value);
-    eosio::check(rbalance != refbalances2.end(), "Ref balance is not founded");
-    eosio::check(wallet.size() > 0, "Wallet for withdraw is not setted");
+        account_index accounts(_me, host.value);
+        auto acc = accounts.find(host.value);
+        
+        eosio::check(acc -> root_token_contract == token_contract, "Wrong token contract");
 
-    refbalances2.modify(rbalance, username, [&](auto &rb) {
-      rb.wallet = wallet;
-    });
-  }
+        eosio::name referer;
+        uint8_t count = 1;
+            
+        if ((ref != refs.end()) && ((ref->referer).value != 0)) {
+            referer = ref->referer;
+            eosio::name prev_ref = ""_n;
+            eosio::asset paid = asset(0, spread_amount.symbol);
+        
+            /**
+             * Вычисляем размер выплаты для каждого уровня партнеров и производим выплаты.
+             */
 
-
-
-  [[eosio::action]] void unicore::complrefwith(eosio::name host, uint64_t id, eosio::string comment){
-    require_auth(host);
-
-    usdtwithdraw_index usdt_widthdraws(_me, host.value);
+            for (auto level : acc->levels) {
+                
+                if ((ref != refs.end()) && ((ref->referer).value != 0)) { 
+                    uint64_t to_ref_segments = spread_amount.amount * level / 100 / ONE_PERCENT;
+                    eosio::asset to_ref_amount = asset(to_ref_segments, spread_amount.symbol);
                     
-    auto withdraw = usdt_widthdraws.find(id);
-    
-    eosio::check(withdraw != usdt_widthdraws.end(), "Object is not founded");
-    eosio::check(withdraw->host == host, "Hosts is not equal");
-    eosio::check(withdraw->status == "process"_n, "Only order on the process status can be completed");
-    
-    usdt_widthdraws.modify(withdraw, host, [&](auto &w){
-      w.status = "complete"_n;
-      w.comment = comment;
-    });
-  }
-
-
-  [[eosio::action]] void unicore::cancrefwithd(eosio::name host, uint64_t id, eosio::string comment){
-    require_auth(host);
-
-    usdtwithdraw_index usdt_widthdraws(_me, host.value);
+                    refbalances_index refbalances(_me, referer.value);
                     
-    auto withdraw = usdt_widthdraws.find(id);
-    
-    eosio::check(withdraw != usdt_widthdraws.end(), "Withdraw object is not founded");
-    eosio::check(withdraw->host == host, "Hosts is not equal");
-    eosio::check(withdraw->status == "process"_n, "Only order on the process status can be canceled");
+                    refbalances.emplace(_me, [&](auto &rb){
+                        rb.id = refbalances.available_primary_key();
+                        rb.timepoint_sec = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
+                        rb.host = host;
+                        rb.refs_amount = spread_amount;
+                        rb.win_amount = from_amount;
+                        rb.amount = to_ref_amount;
+                        rb.from = username;
+                        rb.level = count;
+                        rb.percent = level;
+                        rb.cashback = ref->cashback;
+                        rb.segments = (double)to_ref_segments * TOTAL_SEGMENTS;
+                    });
+                    paid += to_ref_amount;
+                    
+                    prev_ref = referer;
+                    ref = refs.find(referer.value);
+                    
+                    referer = ref->referer;
+                    
+                    count++;
 
-    usdt_widthdraws.modify(withdraw, host, [&](auto &w){
-      w.status = "cancel"_n;
-      w.comment = comment;
-    });
+                } else {
 
-    refbalances2_index refbalances2(_me, withdraw->username.value);
-    auto rbalance = refbalances2.find(host.value);
+                    break;
 
-    refbalances2.modify(rbalance, host, [&](auto &rb){
-      rb.withdrawed -= withdraw -> to_withdraw;
-      rb.available += withdraw -> to_withdraw; 
-    });
+                }
+            };
+
+            /**
+             * Все неиспользуемые вознаграждения с вышестояющих уровней отправляются на компании
+             */
+            eosio::asset back_to_host = spread_amount - paid;
+            
+            if (back_to_host.amount > 0) {
+                    unicore2::spread_to_dacs(host, back_to_host, acc -> root_token_contract);     
+            }
 
 
-  };
+            
+        } else {
+            /**
+             * Если рефералов у пользователя нет, то переводим все реферальные средства пользователю.
+             * * Если рефералов у пользователя нет, то переводим все реферальные средства компании.
+             */
+            if (spread_amount.amount > 0){
+                unicore2::spread_to_dacs(host, spread_amount, acc -> root_token_contract);
+            }
+       
+        }
+
+    };
 
 
-  /**
-   * @brief      Метод вывода остатка партнерского финансового потока
-   * withdraw power quant (withpowerun)
-  */
-  
-  [[eosio::action]] void unicore::withrbalance(eosio::name username, eosio::name host){
-    require_auth(username);
-  
-    refbalances2_index refbalances2(_me, username.value);
-    auto rbalance = refbalances2.find(host.value);
 
-    eosio::check(rbalance != refbalances2.end(), "Ref balance is not founded");
-
-    uint64_t min_amount = unicore::getcondition(host, "minusdtwithd");
-    eosio::check(rbalance->available.amount >= min_amount, "Amount for withdraw should be more or equal minimum withdraw amount");
-    eosio::check(rbalance->available.amount > 0, "Amount for withdraw should be more then zero");
-
-    eosio::check(rbalance -> wallet.size() > 0, "Wallet for withdraw is not setted");
-
-    usdtwithdraw_index usdt_widthdraws(_me, host.value);
-
-    usdt_widthdraws.emplace(username, [&](auto &u){
-      u.id = usdt_widthdraws.available_primary_key();
-      u.created_at = eosio::time_point_sec(eosio::current_time_point().sec_since_epoch());
-      u.host = host;
-      u.username = username;
-      u.status = "process"_n;
-      u.to_withdraw = rbalance -> available;
-      u.wallet = rbalance -> wallet;
-    });
-
-    refbalances2.modify(rbalance, username, [&](auto &rb){
-      rb.withdrawed += rbalance -> available;
-      rb.available -= rbalance -> available;      
-    });
-
-  
-
-  }
   /**
    * @brief      Метод вывода партнерского финансового потока
    * withdraw power quant (withpowerun)
   */
-  [[eosio::action]] void unicore::withrbenefit(eosio::name username, eosio::name host, uint64_t id){
+  [[eosio::action]] void unicore2::withrbenefit(eosio::name username, eosio::name host, uint64_t id){
     require_auth(username);
     account_index account(_me, host.value);
  
     auto acc = account.find(host.value);
     auto root_symbol = acc->get_root_symbol();
     
-    uint64_t refreezesecs = unicore::getcondition(host, "refreezesecs");
+    uint64_t refreezesecs = unicore2::getcondition(host, "refreezesecs");
 
     refbalances_index refbalances(_me, username.value);
     
@@ -121,8 +104,6 @@ using namespace eosio;
     uint64_t on_withdraw = 0;
     
     uint128_t sediment = 0;
-
-    // auto id = ids.begin();
 
     auto refbalance = refbalances.find(id);
     eosio::check(refbalance != refbalances.end(), "Ref balance is not found");
@@ -135,52 +116,10 @@ using namespace eosio;
     
     uint64_t level = refbalance -> level;
     
-    //TODO get status
-    //compare level and current status
-    //if not match - skip withdraw without error
-    uint64_t current_user_level = unicore::get_status_level("core"_n, username);
-    
-    //TODO
-    // uint64_t is_expired = unicore::get_status_expiration("core"_n, username);
-    
-    // eosio::check(level <= current_user_level, "You cant withdraw refbalance with your status");
-    
-    // eosio::check(is_expired == false, "Your status is expired");
-
     eosio::asset on_widthdraw_asset = asset(on_withdraw, refbalance->amount.symbol);
     
-    uint64_t usdtwithdraw = unicore::getcondition(host, "usdtwithdraw");
-    bool usdt_withdraw = refbalance->amount.symbol == _USDT && usdtwithdraw > 0;
 
     if (on_withdraw > 0) {
-      
-      if (usdt_withdraw) {
-        //если есть - зачисление в кошелек таблицы refbalances2
-        refbalances2_index refbalances2(_me, username.value);
-        auto rbalance2 = refbalances2.find(host.value);
-        if (rbalance2 == refbalances2.end()) {
-
-          refbalances2.emplace(username, [&](auto &r2) {
-            r2.host = host;
-            r2.available = refbalance->amount;
-            r2.withdrawed = asset(0, _USDT);
-          });
-
-        } else {
-          
-          refbalances2.modify(rbalance2, username, [&](auto &r2){
-            r2.available += refbalance->amount;
-          });
-
-        }
-
-      } else if (refreezesecs > 0) {
-          eosio::check(root_symbol == on_widthdraw_asset.symbol, "Cant make vesting action with non-root host symbol");
-
-          make_vesting_action(username, host, acc -> root_token_contract, on_widthdraw_asset, refreezesecs, "refwithdraw"_n);  
-        
-      
-      } else {
         eosio::check(root_symbol == on_widthdraw_asset.symbol, "Cant make transfer action with non-root host symbol");
           
         action(
@@ -189,12 +128,8 @@ using namespace eosio;
             std::make_tuple( _me, username, on_widthdraw_asset, std::string("RFLOW-" + (name{username}.to_string() + "-" + (name{host}).to_string()) ))
         ).send();
 
-      }
-
 
     } 
-
-    unicore::add_ref_stat(username, acc -> root_token_contract, on_widthdraw_asset);
 
     refbalances.erase(refbalance);
   

@@ -40,7 +40,7 @@
    \brief Структура полученных реферальных балансов от партнёров на партнёра.
 */
 
-    struct [[eosio::table, eosio::contract("unicore")]] refbalances{
+    struct [[eosio::table, eosio::contract("unicore2")]] refbalances{
         uint64_t id;
         eosio::name host;
         eosio::time_point_sec timepoint_sec;
@@ -65,7 +65,7 @@
    \brief Структура кошелька реферальных балансов для выплат в USDT
 */
 
-    struct [[eosio::table, eosio::contract("unicore")]] refbalances2{
+    struct [[eosio::table, eosio::contract("unicore2")]] refbalances2{
         eosio::name host;
         eosio::asset available;
         eosio::asset withdrawed;
@@ -83,7 +83,7 @@
    \brief Структура кошелька реферальных балансов для выплат в USDT
 */
 
-    struct [[eosio::table, eosio::contract("unicore")]] usdtwithdraw {
+    struct [[eosio::table, eosio::contract("unicore2")]] usdtwithdraw {
         uint64_t id;
         eosio::time_point_sec created_at;
         eosio::name host;
@@ -116,7 +116,7 @@
 /*!
    \brief Структура статистики реферальных балансов и осадок, доступный на получение по мере накопления.
 */
-    struct [[eosio::table, eosio::contract("unicore")]] rstat{
+    struct [[eosio::table, eosio::contract("unicore2")]] rstat{
         eosio::name host;
         eosio::asset withdrawed;
         double sediment;

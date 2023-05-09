@@ -1,0 +1,2049 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.1",
+    "types": [],
+    "structs": [
+        {
+            "name": "account",
+            "base": "",
+            "fields": [
+                {
+                    "name": "balance",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "adddac",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "weight",
+                    "type": "uint64"
+                },
+                {
+                    "name": "limit_type",
+                    "type": "name"
+                },
+                {
+                    "name": "income_limit",
+                    "type": "asset"
+                },
+                {
+                    "name": "title",
+                    "type": "string"
+                },
+                {
+                    "name": "descriptor",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "ahosts",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "website",
+                    "type": "string"
+                },
+                {
+                    "name": "hash",
+                    "type": "checksum256"
+                },
+                {
+                    "name": "is_host",
+                    "type": "bool"
+                },
+                {
+                    "name": "type",
+                    "type": "name"
+                },
+                {
+                    "name": "votes",
+                    "type": "uint64"
+                },
+                {
+                    "name": "title",
+                    "type": "string"
+                },
+                {
+                    "name": "purpose",
+                    "type": "string"
+                },
+                {
+                    "name": "manifest",
+                    "type": "string"
+                },
+                {
+                    "name": "comments_is_enabled",
+                    "type": "bool"
+                },
+                {
+                    "name": "meta",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "balance",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "owner",
+                    "type": "name"
+                },
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "chost",
+                    "type": "name"
+                },
+                {
+                    "name": "status",
+                    "type": "name"
+                },
+                {
+                    "name": "cycle_num",
+                    "type": "uint64"
+                },
+                {
+                    "name": "pool_num",
+                    "type": "uint64"
+                },
+                {
+                    "name": "global_pool_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "quants_for_sale",
+                    "type": "uint64"
+                },
+                {
+                    "name": "next_quants_for_sale",
+                    "type": "uint64"
+                },
+                {
+                    "name": "last_recalculated_win_pool_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "win",
+                    "type": "bool"
+                },
+                {
+                    "name": "root_percent",
+                    "type": "int64"
+                },
+                {
+                    "name": "convert_percent",
+                    "type": "int64"
+                },
+                {
+                    "name": "pool_color",
+                    "type": "string"
+                },
+                {
+                    "name": "available",
+                    "type": "asset"
+                },
+                {
+                    "name": "purchase_amount",
+                    "type": "asset"
+                },
+                {
+                    "name": "compensator_amount",
+                    "type": "asset"
+                },
+                {
+                    "name": "start_convert_amount",
+                    "type": "asset"
+                },
+                {
+                    "name": "if_convert",
+                    "type": "asset"
+                },
+                {
+                    "name": "if_convert_to_power",
+                    "type": "asset"
+                },
+                {
+                    "name": "ref_amount",
+                    "type": "asset"
+                },
+                {
+                    "name": "dac_amount",
+                    "type": "asset"
+                },
+                {
+                    "name": "cfund_amount",
+                    "type": "asset"
+                },
+                {
+                    "name": "hfund_amount",
+                    "type": "asset"
+                },
+                {
+                    "name": "sys_amount",
+                    "type": "asset"
+                },
+                {
+                    "name": "meta",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "cchildhost",
+            "base": "",
+            "fields": [
+                {
+                    "name": "parent_host",
+                    "type": "name"
+                },
+                {
+                    "name": "chost",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "changemode",
+            "base": "",
+            "fields": [
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "mode",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "conditions",
+            "base": "",
+            "fields": [
+                {
+                    "name": "key",
+                    "type": "uint64"
+                },
+                {
+                    "name": "key_string",
+                    "type": "string"
+                },
+                {
+                    "name": "value",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "counts",
+            "base": "",
+            "fields": [
+                {
+                    "name": "key",
+                    "type": "name"
+                },
+                {
+                    "name": "secondary_key",
+                    "type": "name"
+                },
+                {
+                    "name": "value",
+                    "type": "uint64"
+                },
+                {
+                    "name": "double_value",
+                    "type": "float64"
+                }
+            ]
+        },
+        {
+            "name": "currency_stats",
+            "base": "",
+            "fields": [
+                {
+                    "name": "supply",
+                    "type": "asset"
+                },
+                {
+                    "name": "max_supply",
+                    "type": "asset"
+                },
+                {
+                    "name": "issuer",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "cycle",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "ahost",
+                    "type": "name"
+                },
+                {
+                    "name": "start_at_global_pool_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "finish_at_global_pool_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "emitted",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "dacs",
+            "base": "",
+            "fields": [
+                {
+                    "name": "dac",
+                    "type": "name"
+                },
+                {
+                    "name": "limit_type",
+                    "type": "name"
+                },
+                {
+                    "name": "weight",
+                    "type": "uint64"
+                },
+                {
+                    "name": "income",
+                    "type": "asset"
+                },
+                {
+                    "name": "income_in_segments",
+                    "type": "uint128"
+                },
+                {
+                    "name": "withdrawed",
+                    "type": "asset"
+                },
+                {
+                    "name": "income_limit",
+                    "type": "asset"
+                },
+                {
+                    "name": "last_pay_at",
+                    "type": "time_point_sec"
+                },
+                {
+                    "name": "created_at",
+                    "type": "time_point_sec"
+                },
+                {
+                    "name": "role",
+                    "type": "string"
+                },
+                {
+                    "name": "description",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "edithost",
+            "base": "",
+            "fields": [
+                {
+                    "name": "architect",
+                    "type": "name"
+                },
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "platform",
+                    "type": "name"
+                },
+                {
+                    "name": "title",
+                    "type": "string"
+                },
+                {
+                    "name": "purpose",
+                    "type": "string"
+                },
+                {
+                    "name": "manifest",
+                    "type": "string"
+                },
+                {
+                    "name": "power_market_id",
+                    "type": "name"
+                },
+                {
+                    "name": "meta",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "emission",
+            "base": "",
+            "fields": [
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "percent",
+                    "type": "uint64"
+                },
+                {
+                    "name": "gtop",
+                    "type": "uint64"
+                },
+                {
+                    "name": "fund",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "funds",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "issuer",
+                    "type": "name"
+                },
+                {
+                    "name": "token_contract",
+                    "type": "name"
+                },
+                {
+                    "name": "fund",
+                    "type": "asset"
+                },
+                {
+                    "name": "descriptor",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "gpercents",
+            "base": "",
+            "fields": [
+                {
+                    "name": "key",
+                    "type": "name"
+                },
+                {
+                    "name": "value",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "hosts",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "registered_at",
+                    "type": "time_point_sec"
+                },
+                {
+                    "name": "architect",
+                    "type": "name"
+                },
+                {
+                    "name": "hoperator",
+                    "type": "name"
+                },
+                {
+                    "name": "type",
+                    "type": "name"
+                },
+                {
+                    "name": "chat_mode",
+                    "type": "name"
+                },
+                {
+                    "name": "consensus_percent",
+                    "type": "uint64"
+                },
+                {
+                    "name": "referral_percent",
+                    "type": "uint64"
+                },
+                {
+                    "name": "dacs_percent",
+                    "type": "uint64"
+                },
+                {
+                    "name": "cfund_percent",
+                    "type": "uint64"
+                },
+                {
+                    "name": "hfund_percent",
+                    "type": "uint64"
+                },
+                {
+                    "name": "sys_percent",
+                    "type": "uint64"
+                },
+                {
+                    "name": "levels",
+                    "type": "uint64[]"
+                },
+                {
+                    "name": "gsponsor_model",
+                    "type": "name[]"
+                },
+                {
+                    "name": "direct_goal_withdraw",
+                    "type": "bool"
+                },
+                {
+                    "name": "dac_mode",
+                    "type": "uint64"
+                },
+                {
+                    "name": "total_dacs_weight",
+                    "type": "uint64"
+                },
+                {
+                    "name": "ahost",
+                    "type": "name"
+                },
+                {
+                    "name": "chosts",
+                    "type": "name[]"
+                },
+                {
+                    "name": "sale_is_enabled",
+                    "type": "bool"
+                },
+                {
+                    "name": "sale_mode",
+                    "type": "name"
+                },
+                {
+                    "name": "sale_token_contract",
+                    "type": "name"
+                },
+                {
+                    "name": "asset_on_sale",
+                    "type": "asset"
+                },
+                {
+                    "name": "asset_on_sale_precision",
+                    "type": "uint64"
+                },
+                {
+                    "name": "asset_on_sale_symbol",
+                    "type": "string"
+                },
+                {
+                    "name": "sale_shift",
+                    "type": "int64"
+                },
+                {
+                    "name": "non_active_chost",
+                    "type": "bool"
+                },
+                {
+                    "name": "need_switch",
+                    "type": "bool"
+                },
+                {
+                    "name": "fhosts_mode",
+                    "type": "uint64"
+                },
+                {
+                    "name": "fhosts",
+                    "type": "name[]"
+                },
+                {
+                    "name": "title",
+                    "type": "string"
+                },
+                {
+                    "name": "purpose",
+                    "type": "string"
+                },
+                {
+                    "name": "voting_only_up",
+                    "type": "bool"
+                },
+                {
+                    "name": "power_market_id",
+                    "type": "name"
+                },
+                {
+                    "name": "total_shares",
+                    "type": "uint64"
+                },
+                {
+                    "name": "quote_amount",
+                    "type": "asset"
+                },
+                {
+                    "name": "quote_token_contract",
+                    "type": "name"
+                },
+                {
+                    "name": "quote_symbol",
+                    "type": "string"
+                },
+                {
+                    "name": "quote_precision",
+                    "type": "uint64"
+                },
+                {
+                    "name": "root_token_contract",
+                    "type": "name"
+                },
+                {
+                    "name": "root_token",
+                    "type": "asset"
+                },
+                {
+                    "name": "symbol",
+                    "type": "string"
+                },
+                {
+                    "name": "precision",
+                    "type": "uint64"
+                },
+                {
+                    "name": "to_pay",
+                    "type": "asset"
+                },
+                {
+                    "name": "payed",
+                    "type": "bool"
+                },
+                {
+                    "name": "cycle_start_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "current_pool_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "current_cycle_num",
+                    "type": "uint64"
+                },
+                {
+                    "name": "current_pool_num",
+                    "type": "uint64"
+                },
+                {
+                    "name": "parameters_setted",
+                    "type": "bool"
+                },
+                {
+                    "name": "activated",
+                    "type": "bool"
+                },
+                {
+                    "name": "priority_flag",
+                    "type": "bool"
+                },
+                {
+                    "name": "total_goals",
+                    "type": "uint64"
+                },
+                {
+                    "name": "achieved_goals",
+                    "type": "uint64"
+                },
+                {
+                    "name": "total_tasks",
+                    "type": "uint64"
+                },
+                {
+                    "name": "completed_tasks",
+                    "type": "uint64"
+                },
+                {
+                    "name": "total_reports",
+                    "type": "uint64"
+                },
+                {
+                    "name": "approved_reports",
+                    "type": "uint64"
+                },
+                {
+                    "name": "meta",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "hosts2",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "sale_price_updated_at",
+                    "type": "time_point_sec"
+                },
+                {
+                    "name": "sale_price",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "hosts3",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "platform",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "hostsonfunds",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "fund_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "host",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "init",
+            "base": "",
+            "fields": [
+                {
+                    "name": "system_income",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "masterbal",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "amount",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "masterpool",
+            "base": "",
+            "fields": [
+                {
+                    "name": "cycle_num",
+                    "type": "uint64"
+                },
+                {
+                    "name": "current_pool_num",
+                    "type": "uint64"
+                },
+                {
+                    "name": "filled_balance",
+                    "type": "asset"
+                },
+                {
+                    "name": "remain_balance",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "pool",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "ahost",
+                    "type": "name"
+                },
+                {
+                    "name": "cycle_num",
+                    "type": "uint64"
+                },
+                {
+                    "name": "pool_num",
+                    "type": "uint64"
+                },
+                {
+                    "name": "color",
+                    "type": "string"
+                },
+                {
+                    "name": "total_quants",
+                    "type": "uint64"
+                },
+                {
+                    "name": "remain_quants",
+                    "type": "uint64"
+                },
+                {
+                    "name": "creserved_quants",
+                    "type": "uint64"
+                },
+                {
+                    "name": "filled",
+                    "type": "asset"
+                },
+                {
+                    "name": "remain",
+                    "type": "asset"
+                },
+                {
+                    "name": "filled_percent",
+                    "type": "uint64"
+                },
+                {
+                    "name": "pool_cost",
+                    "type": "asset"
+                },
+                {
+                    "name": "quant_cost",
+                    "type": "asset"
+                },
+                {
+                    "name": "pool_started_at",
+                    "type": "time_point_sec"
+                },
+                {
+                    "name": "priority_until",
+                    "type": "time_point_sec"
+                },
+                {
+                    "name": "pool_expired_at",
+                    "type": "time_point_sec"
+                },
+                {
+                    "name": "meta",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "priorenter",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "balance_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "rate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "pool_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "buy_rate",
+                    "type": "uint64"
+                },
+                {
+                    "name": "sell_rate",
+                    "type": "uint64"
+                },
+                {
+                    "name": "convert_rate",
+                    "type": "uint64"
+                },
+                {
+                    "name": "quant_buy_rate",
+                    "type": "asset"
+                },
+                {
+                    "name": "quant_sell_rate",
+                    "type": "asset"
+                },
+                {
+                    "name": "quant_convert_rate",
+                    "type": "asset"
+                },
+                {
+                    "name": "client_income",
+                    "type": "asset"
+                },
+                {
+                    "name": "delta",
+                    "type": "asset"
+                },
+                {
+                    "name": "pool_cost",
+                    "type": "asset"
+                },
+                {
+                    "name": "total_in_box",
+                    "type": "asset"
+                },
+                {
+                    "name": "payment_to_wins",
+                    "type": "asset"
+                },
+                {
+                    "name": "payment_to_loss",
+                    "type": "asset"
+                },
+                {
+                    "name": "system_income",
+                    "type": "asset"
+                },
+                {
+                    "name": "live_balance_for_sale",
+                    "type": "asset"
+                },
+                {
+                    "name": "live_quants_for_sale",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "refbalances",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "timepoint_sec",
+                    "type": "time_point_sec"
+                },
+                {
+                    "name": "refs_amount",
+                    "type": "asset"
+                },
+                {
+                    "name": "win_amount",
+                    "type": "asset"
+                },
+                {
+                    "name": "amount",
+                    "type": "asset"
+                },
+                {
+                    "name": "from",
+                    "type": "name"
+                },
+                {
+                    "name": "cashback",
+                    "type": "uint64"
+                },
+                {
+                    "name": "level",
+                    "type": "uint8"
+                },
+                {
+                    "name": "percent",
+                    "type": "uint64"
+                },
+                {
+                    "name": "segments",
+                    "type": "float64"
+                }
+            ]
+        },
+        {
+            "name": "refbalances2",
+            "base": "",
+            "fields": [
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "available",
+                    "type": "asset"
+                },
+                {
+                    "name": "withdrawed",
+                    "type": "asset"
+                },
+                {
+                    "name": "wallet",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "refreshbal",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "balance_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "partrefresh",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "refreshst",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "host",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "rmcondition",
+            "base": "",
+            "fields": [
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "key",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "rmdac",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "host",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "roles",
+            "base": "",
+            "fields": [
+                {
+                    "name": "role_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "model",
+                    "type": "name"
+                },
+                {
+                    "name": "lang",
+                    "type": "name"
+                },
+                {
+                    "name": "title",
+                    "type": "string"
+                },
+                {
+                    "name": "descriptor",
+                    "type": "string"
+                },
+                {
+                    "name": "suggester",
+                    "type": "name"
+                },
+                {
+                    "name": "approved",
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "rstat",
+            "base": "",
+            "fields": [
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "withdrawed",
+                    "type": "asset"
+                },
+                {
+                    "name": "sediment",
+                    "type": "float64"
+                }
+            ]
+        },
+        {
+            "name": "setarch",
+            "base": "",
+            "fields": [
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "architect",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "setcondition",
+            "base": "",
+            "fields": [
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "key",
+                    "type": "string"
+                },
+                {
+                    "name": "value",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "setflows",
+            "base": "",
+            "fields": [
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "ref_percent",
+                    "type": "uint64"
+                },
+                {
+                    "name": "dacs_percent",
+                    "type": "uint64"
+                },
+                {
+                    "name": "cfund_percent",
+                    "type": "uint64"
+                },
+                {
+                    "name": "hfund_percent",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "setlevels",
+            "base": "",
+            "fields": [
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "levels",
+                    "type": "uint64[]"
+                }
+            ]
+        },
+        {
+            "name": "setparams",
+            "base": "",
+            "fields": [
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "chost",
+                    "type": "name"
+                },
+                {
+                    "name": "size_of_pool",
+                    "type": "uint64"
+                },
+                {
+                    "name": "quants_precision",
+                    "type": "uint64"
+                },
+                {
+                    "name": "overlap",
+                    "type": "uint64"
+                },
+                {
+                    "name": "profit_growth",
+                    "type": "uint64"
+                },
+                {
+                    "name": "base_rate",
+                    "type": "uint64"
+                },
+                {
+                    "name": "loss_percent",
+                    "type": "uint64"
+                },
+                {
+                    "name": "compensator_percent",
+                    "type": "uint64"
+                },
+                {
+                    "name": "pool_limit",
+                    "type": "uint64"
+                },
+                {
+                    "name": "pool_timeout",
+                    "type": "uint64"
+                },
+                {
+                    "name": "priority_seconds",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "setstartdate",
+            "base": "",
+            "fields": [
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "start_at",
+                    "type": "time_point_sec"
+                }
+            ]
+        },
+        {
+            "name": "settiming",
+            "base": "",
+            "fields": [
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "pool_timeout",
+                    "type": "uint64"
+                },
+                {
+                    "name": "priority_seconds",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "spiral",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "size_of_pool",
+                    "type": "uint64"
+                },
+                {
+                    "name": "quants_precision",
+                    "type": "uint64"
+                },
+                {
+                    "name": "overlap",
+                    "type": "uint64"
+                },
+                {
+                    "name": "profit_growth",
+                    "type": "uint64"
+                },
+                {
+                    "name": "base_rate",
+                    "type": "uint64"
+                },
+                {
+                    "name": "loss_percent",
+                    "type": "uint64"
+                },
+                {
+                    "name": "pool_limit",
+                    "type": "uint64"
+                },
+                {
+                    "name": "pool_timeout",
+                    "type": "uint64"
+                },
+                {
+                    "name": "priority_seconds",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "spiral2",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "compensator_percent",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "spreads",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "timestamp",
+                    "type": "time_point_sec"
+                },
+                {
+                    "name": "comment",
+                    "type": "string"
+                },
+                {
+                    "name": "total",
+                    "type": "asset"
+                },
+                {
+                    "name": "ref_amount",
+                    "type": "asset"
+                },
+                {
+                    "name": "dacs_amount",
+                    "type": "asset"
+                },
+                {
+                    "name": "hfund_amount",
+                    "type": "asset"
+                },
+                {
+                    "name": "cfund_amount",
+                    "type": "asset"
+                },
+                {
+                    "name": "sys_amount",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "start",
+            "base": "",
+            "fields": [
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "chost",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "ubalance",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "contract",
+                    "type": "name"
+                },
+                {
+                    "name": "quantity",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "upgrade",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "platform",
+                    "type": "name"
+                },
+                {
+                    "name": "title",
+                    "type": "string"
+                },
+                {
+                    "name": "purpose",
+                    "type": "string"
+                },
+                {
+                    "name": "total_shares",
+                    "type": "uint64"
+                },
+                {
+                    "name": "quote_amount",
+                    "type": "asset"
+                },
+                {
+                    "name": "quote_token_contract",
+                    "type": "name"
+                },
+                {
+                    "name": "root_token",
+                    "type": "asset"
+                },
+                {
+                    "name": "root_token_contract",
+                    "type": "name"
+                },
+                {
+                    "name": "voting_only_up",
+                    "type": "bool"
+                },
+                {
+                    "name": "consensus_percent",
+                    "type": "uint64"
+                },
+                {
+                    "name": "referral_percent",
+                    "type": "uint64"
+                },
+                {
+                    "name": "dacs_percent",
+                    "type": "uint64"
+                },
+                {
+                    "name": "cfund_percent",
+                    "type": "uint64"
+                },
+                {
+                    "name": "hfund_percent",
+                    "type": "uint64"
+                },
+                {
+                    "name": "levels",
+                    "type": "uint64[]"
+                },
+                {
+                    "name": "emission_percent",
+                    "type": "uint64"
+                },
+                {
+                    "name": "gtop",
+                    "type": "uint64"
+                },
+                {
+                    "name": "meta",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "usdtwithdraw",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "created_at",
+                    "type": "time_point_sec"
+                },
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "status",
+                    "type": "name"
+                },
+                {
+                    "name": "to_withdraw",
+                    "type": "asset"
+                },
+                {
+                    "name": "wallet",
+                    "type": "string"
+                },
+                {
+                    "name": "comment",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "vacs",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "creator",
+                    "type": "name"
+                },
+                {
+                    "name": "approved",
+                    "type": "bool"
+                },
+                {
+                    "name": "closed",
+                    "type": "bool"
+                },
+                {
+                    "name": "limit_type",
+                    "type": "name"
+                },
+                {
+                    "name": "income_limit",
+                    "type": "asset"
+                },
+                {
+                    "name": "proposals",
+                    "type": "uint64"
+                },
+                {
+                    "name": "weight",
+                    "type": "uint64"
+                },
+                {
+                    "name": "role",
+                    "type": "string"
+                },
+                {
+                    "name": "description",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "vproposal",
+            "base": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "vac_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "creator",
+                    "type": "name"
+                },
+                {
+                    "name": "limit_type",
+                    "type": "name"
+                },
+                {
+                    "name": "income_limit",
+                    "type": "name"
+                },
+                {
+                    "name": "weight",
+                    "type": "uint64"
+                },
+                {
+                    "name": "closed",
+                    "type": "bool"
+                },
+                {
+                    "name": "why_me",
+                    "type": "string"
+                },
+                {
+                    "name": "contacts",
+                    "type": "string"
+                },
+                {
+                    "name": "votes",
+                    "type": "int64"
+                }
+            ]
+        },
+        {
+            "name": "withdraw",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "balance_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "withdrdacinc",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "host",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "withrbenefit",
+            "base": "",
+            "fields": [
+                {
+                    "name": "username",
+                    "type": "name"
+                },
+                {
+                    "name": "host",
+                    "type": "name"
+                },
+                {
+                    "name": "id",
+                    "type": "uint64"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "adddac",
+            "type": "adddac",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "cchildhost",
+            "type": "cchildhost",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "changemode",
+            "type": "changemode",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "edithost",
+            "type": "edithost",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "init",
+            "type": "init",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "priorenter",
+            "type": "priorenter",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "refreshbal",
+            "type": "refreshbal",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "refreshst",
+            "type": "refreshst",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "rmcondition",
+            "type": "rmcondition",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "rmdac",
+            "type": "rmdac",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setarch",
+            "type": "setarch",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setcondition",
+            "type": "setcondition",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setflows",
+            "type": "setflows",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setlevels",
+            "type": "setlevels",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setparams",
+            "type": "setparams",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setstartdate",
+            "type": "setstartdate",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "settiming",
+            "type": "settiming",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "start",
+            "type": "start",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "upgrade",
+            "type": "upgrade",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "withdraw",
+            "type": "withdraw",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "withdrdacinc",
+            "type": "withdrdacinc",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "withrbenefit",
+            "type": "withrbenefit",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [
+        {
+            "name": "accounts",
+            "type": "account",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "ahosts",
+            "type": "ahosts",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "balance",
+            "type": "balance",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "conditions",
+            "type": "conditions",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "counts",
+            "type": "counts",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "cycle",
+            "type": "cycle",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "dacs",
+            "type": "dacs",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "emission",
+            "type": "emission",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "funds",
+            "type": "funds",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "gpercents",
+            "type": "gpercents",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "hosts",
+            "type": "hosts",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "hosts2",
+            "type": "hosts2",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "hosts3",
+            "type": "hosts3",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "hostsonfunds",
+            "type": "hostsonfunds",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "masterbal",
+            "type": "masterbal",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "masterpool",
+            "type": "masterpool",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "pool",
+            "type": "pool",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "rate",
+            "type": "rate",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "refbalances",
+            "type": "refbalances",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "refbalances2",
+            "type": "refbalances2",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "roles",
+            "type": "roles",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "rstat",
+            "type": "rstat",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "spiral",
+            "type": "spiral",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "spiral2",
+            "type": "spiral2",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "spreads",
+            "type": "spreads",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "stat",
+            "type": "currency_stats",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "ubalance",
+            "type": "ubalance",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "usdtwithdraw",
+            "type": "usdtwithdraw",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "vacs",
+            "type": "vacs",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "vproposal",
+            "type": "vproposal",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        }
+    ],
+    "ricardian_clauses": [],
+    "variants": []
+}

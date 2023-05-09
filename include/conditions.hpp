@@ -1,7 +1,7 @@
 /*!
     \brief Структура хранилища универсального набора условий, относящихся к хосту, платформе или протоколу.
 */
-    struct  [[eosio::table, eosio::contract("unicore")]] conditions {
+    struct  [[eosio::table, eosio::contract("unicore2")]] conditions {
         uint64_t key;
         eosio::string key_string;
         uint64_t value;

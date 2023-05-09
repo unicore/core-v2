@@ -1,8 +1,3 @@
-
-// #include <eosio/transaction.hpp> 
-// #include <eosio.system/native.hpp>
-#include "exchange_state.hpp"
-#include "../src/exchange_state.cpp"
 #include <eosio/crypto.hpp>
 
 
@@ -14,7 +9,7 @@
 /*!
    \brief Структура основных параметров конфигурации Двойной Спирали.
 */
-   struct [[eosio::table, eosio::contract("unicore")]] spiral{
+   struct [[eosio::table, eosio::contract("unicore2")]] spiral{
         uint64_t id;
         uint64_t size_of_pool;
         uint64_t quants_precision = 0;
@@ -37,7 +32,7 @@
 /*!
    \brief Структура компенсационных параметров конфигурации Двойной Спирали.
 */
-   struct [[eosio::table, eosio::contract("unicore")]] spiral2 {
+   struct [[eosio::table, eosio::contract("unicore2")]] spiral2 {
         uint64_t id;
         uint64_t compensator_percent;
         
@@ -52,7 +47,7 @@
 /*!
    \brief Структура курсов реализации внутренней конвертационной единицы и их возврата Протоколу.
 */
-    struct [[eosio::table, eosio::contract("unicore")]] rate {
+    struct [[eosio::table, eosio::contract("unicore2")]] rate {
         uint64_t pool_id;
         uint64_t buy_rate=0;
         uint64_t sell_rate=0;
@@ -69,12 +64,11 @@
         eosio::asset payment_to_loss;
         eosio::asset system_income;
         eosio::asset live_balance_for_sale;
-        eosio::asset live_balance_for_convert;
-        
+        uint64_t live_quants_for_sale;
         
         uint64_t primary_key() const{return pool_id;}
 
-        EOSLIB_SERIALIZE(rate, (pool_id)(buy_rate)(sell_rate)(convert_rate)(quant_buy_rate)(quant_sell_rate)(quant_convert_rate)(client_income)(delta)(pool_cost)(total_in_box)(payment_to_wins)(payment_to_loss)(system_income)(live_balance_for_sale)(live_balance_for_convert))
+        EOSLIB_SERIALIZE(rate, (pool_id)(buy_rate)(sell_rate)(convert_rate)(quant_buy_rate)(quant_sell_rate)(quant_convert_rate)(client_income)(delta)(pool_cost)(total_in_box)(payment_to_wins)(payment_to_loss)(system_income)(live_balance_for_sale)(live_quants_for_sale))
     };
     typedef eosio::multi_index<"rate"_n, rate> rate_index;
 
@@ -83,7 +77,7 @@
    \brief Структура хоста Двойной Спирали.
 */
 
-    struct [[eosio::table, eosio::contract("unicore")]] hosts{
+    struct [[eosio::table, eosio::contract("unicore2")]] hosts{
         eosio::name username;
         eosio::time_point_sec registered_at;
         eosio::name architect;
@@ -209,7 +203,7 @@
    \brief Расширение структуры хоста Двойной Спирали.
 */
 
-    struct [[eosio::table, eosio::contract("unicore")]] hosts2 {
+    struct [[eosio::table, eosio::contract("unicore2")]] hosts2 {
         eosio::name username;
         eosio::time_point_sec sale_price_updated_at;
         uint64_t sale_price;
@@ -227,7 +221,7 @@
    \brief Расширение структуры хоста Двойной Спирали.
 */
 
-    struct [[eosio::table, eosio::contract("unicore")]] hosts3 {
+    struct [[eosio::table, eosio::contract("unicore2")]] hosts3 {
         eosio::name username;
         eosio::name platform;
         
@@ -244,7 +238,7 @@
    \brief Структура командных ролей протокола.
 */
 
-    struct [[eosio::table, eosio::contract("unicore")]] roles {
+    struct [[eosio::table, eosio::contract("unicore2")]] roles {
         uint64_t role_id;
         eosio::name model;
         eosio::name lang;
@@ -265,7 +259,7 @@
 /*!
    \brief Структура вакансии хоста Двойной Спирали.
 */
-    struct [[eosio::table, eosio::contract("unicore")]] vacs {
+    struct [[eosio::table, eosio::contract("unicore2")]] vacs {
         uint64_t id;
         eosio::name creator;
         bool approved;
@@ -295,7 +289,7 @@
 /*!
    \brief Структура заявки на вакансию хоста Двойной Спирали.
 */
-    struct [[eosio::table, eosio::contract("unicore")]] vproposal {
+    struct [[eosio::table, eosio::contract("unicore2")]] vproposal {
         uint64_t id;
         uint64_t vac_id;
         eosio::name creator;
@@ -329,7 +323,7 @@
 /*!
    \brief Структура команды хоста Двойной Спирали.
 */
-    struct [[eosio::table, eosio::contract("unicore")]] dacs {
+    struct [[eosio::table, eosio::contract("unicore2")]] dacs {
         eosio::name dac;
         eosio::name limit_type;
         
@@ -356,7 +350,7 @@
 /*!
    \brief Структура параметров эмиссии целевого фонда хоста Двойной Спирали
 */
-    struct [[eosio::table, eosio::contract("unicore")]] emission { 
+    struct [[eosio::table, eosio::contract("unicore2")]] emission { 
         eosio::name host;
         uint64_t percent;
         uint64_t gtop;
@@ -373,7 +367,7 @@
 /*!
    \brief Структура глобальных фондов владельцев жетонов, помещенных на распределение. 
 */
-    struct [[eosio::table, eosio::contract("unicore")]] funds{
+    struct [[eosio::table, eosio::contract("unicore2")]] funds{
         uint64_t id;
         eosio::name issuer;
         eosio::name token_contract;
@@ -397,22 +391,10 @@
     > funds_index;
 
 
-    // struct [[eosio::table, eosio::contract("unicore")]] histoffund{
-    //     uint64_t id;
-    //     uint64_t fund_id;
-    //     eosio::name type;
-    //     eosio::asset quantity;
-    //     std::string memo;
-
-    //     uint64_t primary_key()const { return id; }
-
-    //     EOSLIB_SERIALIZE(histoffund, (id)(fund_id)(type)(quantity)(memo))
-
-    // }
 /*!
    \brief Структура хостов Двойной Спирали, подключенных к глобальным фондам распределения.
 */
-    struct [[eosio::table, eosio::contract("unicore")]] hostsonfunds{
+    struct [[eosio::table, eosio::contract("unicore2")]] hostsonfunds{
         uint64_t id;
         uint64_t fund_id;
         eosio::name host;
